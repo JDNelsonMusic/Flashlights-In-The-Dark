@@ -9,7 +9,6 @@ import Foundation
 import NIOCore
 import NIOPosix
 import OSCKit          // OSCMessage, OSCAddressPattern
-import OSCKitCore      // OSCPacket
 
 /// Broadcasts OSC messages over UDP to the local-network broadcast address
 /// (`255.255.255.255`).  Designed for lightweight one-way cues.
@@ -48,16 +47,20 @@ public actor OscBroadcaster {
     // --------------------------------------------------------------------
     /// Broadcast a single OSC message to 255.255.255.255:9000
     public func send(_ osc: OSCMessage) async throws {
-        // --- Encode OSCMessage ➜ ByteBuffer -----------------------------
-        let buf = try OSCPacket(osc).byteBuffer(channel: channel)
+        // --- Encode OSCMessage ➜ Data -----------------------------------
+        let data = try osc.rawData()
+
+        // --- Copy into SwiftNIO ByteBuffer ------------------------------
+        var buffer = channel.allocator.buffer(capacity: data.count)
+        buffer.writeBytes(data)
 
         // --- Build broadcast envelope -----------------------------------
-        let addr = try SocketAddress(ipAddress: "255.255.255.255", port: port)
-        let env  = AddressedEnvelope(remoteAddress: addr, data: buf)
+        let addr     = try SocketAddress(ipAddress: "255.255.255.255", port: port)
+        let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
 
         // --- Send --------------------------------------------------------
-        try await channel.writeAndFlush(env)
-        print("→ \(osc.addressPattern)")
+        try await channel.writeAndFlush(envelope)
+        print("→ \(osc.addressPattern.stringValue)")
     }
 
     // --------------------------------------------------------------------
