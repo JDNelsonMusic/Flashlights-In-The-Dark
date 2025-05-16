@@ -1,0 +1,17 @@
+name: flashlights_client
+description: A Flutter client for Flashlights-in-the-Dark
+publish_to: "none"
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  osc: ^0.2.3              # Dart OSC
+  torch_light: ^1.1.0      # Flash control
+  just_audio: ^0.9.37      # Audio playback
+  mic_stream: ^0.3.1       # Raw mic samples/recording
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true

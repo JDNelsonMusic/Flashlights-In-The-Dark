@@ -1,1 +1,13 @@
 .env
+
+# ---- Flutter client outputs ----
+flashlights_client/.dart_tool/
+flashlights_client/.idea/
+flashlights_client/build/
+flashlights_client/ios/Flutter/Flutter.framework
+flashlights_client/ios/Pods/
+flashlights_client/ios/.symlinks/
+flashlights_client/ios/Runner.xcworkspace/
+flashlights_client/android/.gradle/
+flashlights_client/android/.idea/
+flashlights_client/pubspec.lock
