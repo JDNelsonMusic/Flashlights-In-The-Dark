@@ -5,6 +5,8 @@ import Combine
 public final class ConsoleState: ObservableObject, Sendable {
     @Published public private(set) var devices = ChoirDevice.demo
 
+    @Published public var isBroadcasting: Bool = false
+
     @discardableResult
     public func toggleTorch(id: Int) -> [ChoirDevice] {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
