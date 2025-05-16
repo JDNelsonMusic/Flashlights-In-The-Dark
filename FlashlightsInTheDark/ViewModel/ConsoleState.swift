@@ -7,6 +7,21 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let broadcasterTask = Task<OscBroadcaster, Error> {
         try await OscBroadcaster()
     }
+    private var clockSync: ClockSyncService?
+
+    public init() {
+        // start clock-sync service once broadcaster is ready
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                self.clockSync = ClockSyncService(broadcaster: broadcaster)
+            } catch {
+                // ignore errors (e.g. preview/sandbox)
+                return
+            }
+        }
+    }
 
     @Published public private(set) var devices = ChoirDevice.demo
 
