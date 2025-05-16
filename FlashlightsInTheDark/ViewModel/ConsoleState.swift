@@ -61,3 +61,24 @@ public final class ConsoleState: ObservableObject, Sendable {
         return devices
     }
 }
+
+// MARK: - Lifecycle helpers
+
+extension ConsoleState {
+    /// Idempotent network bootstrap for `.task {}` in ContentView.
+    @MainActor
+    public func startNetwork() async {
+        guard !isBroadcasting else { return }   // already up
+        isBroadcasting = true
+        print("[ConsoleState] Network stack started ✅")
+    }
+
+    /// Gracefully cancel background tasks when the app resigns active.
+    @MainActor
+    public func shutdown() {
+        isBroadcasting = false
+        // ClockSyncService de-initialises itself when its Task is cancelled.
+        // Add additional cleanup here (file handles, etc.) as the project grows.
+        print("[ConsoleState] Network stack suspended 💤")
+    }
+}

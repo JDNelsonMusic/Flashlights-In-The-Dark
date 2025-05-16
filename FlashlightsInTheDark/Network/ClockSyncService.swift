@@ -27,7 +27,7 @@ public final class ClockSyncService {
                         UInt64(Date().timeIntervalSince1970 * 1_000_000_000)
                     )
                     try await self.broadcaster.send(
-                        SyncMessage(timestamp: ts).encode()
+                        SyncMessage(timestamp: ts)
                     )
                     print("✔︎ /sync @ \(ts)")                // String-Convertible
                 } catch {

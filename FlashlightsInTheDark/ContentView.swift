@@ -2,11 +2,15 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var state = ConsoleState()
+    @Environment(\.scenePhase) private var phase
 
     var body: some View {
         ComposerConsoleView()
             .environmentObject(state)
-            .frame(minWidth: 820, minHeight: 550)   // roomy default window
+            .task { await state.startNetwork() }           // bootstrap NIO + clock
+            .onChange(of: phase) { _, newPhase in
+                if newPhase != .active { state.shutdown() }
+            }
     }
 }
 
