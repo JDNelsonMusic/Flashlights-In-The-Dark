@@ -45,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- ─────────────────────── Added for Flashlights-in-the-Dark ─────────────────────── -->
+
+	<!-- Camera permission (controls the torch) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Allows Flashlights-in-the-Dark to control the device torch during the performance.</string>
+
+	<!-- Microphone permission (syncs devices via audio beacons) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Needed so Flashlights-in-the-Dark can listen for sync cues and keep the choir in time.</string>
+
+	<!-- Keep audio session alive while app is in the background -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+
 </dict>
 </plist>

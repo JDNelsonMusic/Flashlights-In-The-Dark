@@ -6,12 +6,9 @@ void main() => runApp(const FlashlightsApp());
 
 class FlashlightsApp extends StatelessWidget {
   const FlashlightsApp({super.key});
-
   @override
-  Widget build(BuildContext context) => const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Bootstrap(),
-  );
+  Widget build(BuildContext context) =>
+      const MaterialApp(debugShowCheckedModeBanner: false, home: Bootstrap());
 }
 
 class Bootstrap extends StatefulWidget {
@@ -35,12 +32,12 @@ class _BootstrapState extends State<Bootstrap> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Center(
-      child: Text(
-        'Singer #${client.myIndex}\nWaiting for cues…',
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 20),
-      ),
-    ),
-  );
+        body: Center(
+          child: Text(
+            'Singer #\${client.myIndex}\nWaiting for cues…',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+      );
 }
