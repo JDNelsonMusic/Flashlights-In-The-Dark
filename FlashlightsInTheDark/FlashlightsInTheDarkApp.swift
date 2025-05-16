@@ -15,3 +15,6 @@ struct FlashlightsInTheDarkApp: App {
         }
     }
 }
+// Define a no-op stub to satisfy XCTest force-load symbol when built with -enable-testing
+@_cdecl("__swift_FORCE_LOAD_$_XCTestSwiftSupport")
+public func __swift_FORCE_LOAD_$_XCTestSwiftSupport() {}
