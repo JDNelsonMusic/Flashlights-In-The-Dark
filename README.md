@@ -1,8 +1,14 @@
-Flashlights In the Dark
+=============================
+
+Flashlights In the Dark:
 
 =============================
 
-May 16 2025 Journal Entry:
+"Commissioned by the Philharmonic Chorus of Madison, Flashlights-In-The-Dark is Creative MacOS system capable of serving to a dozens of assorted client smartphones on a low-latency closed network. The key purpose is to enable MIDI-triggered 32chan control over a system of 32 smartphones' flashlights, speakers, and microphones. Ideal for live electroacoustic integration with contemporary-classical performing ensembles. 
+
+=============================
+
+May 16 2025 Journal Entry (May 19th Tech-Rehearsal Prep):
 
 =============================
 
@@ -55,6 +61,8 @@ Potential language to include in email to singers with Android:  Subject: In
     0.    When the download finishes, tap the file → Install.
     0.    Launch the app, tap Allow for Camera (controls flashlight) and Microphone (future feature).
     0.    You can turn Allow from this source back off afterwards.
+
+=============================
 
 
 

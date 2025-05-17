@@ -6,8 +6,8 @@ flutter config --enable-ios
 flutter config --enable-android
 
 IOS_PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
-IOS_OLD="com.example.flashlightsClient"
-IOS_NEW="com.keex.FlashlightsClient"
+IOS_OLD="com.keex.FlashlightsClient"
+IOS_NEW="com.keex.Flashlights-ITD-Client"
 
 if grep -q "${IOS_NEW}" "${IOS_PBXPROJ}"; then
   echo "✅ iOS bundle identifier already set"
