@@ -9,11 +9,13 @@ import 'model/client_state.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
-  // 1. Ask for runtime permissions (camera + microphone).
-  await [
-    Permission.camera,
-    Permission.microphone,
-  ].request();
+  if (Platform.isIOS || Platform.isAndroid) {
+    // 1. Ask for runtime permissions (camera + microphone).
+    await [
+      Permission.camera,
+      Permission.microphone,
+    ].request();
+  }
 
   // 2. On Android, spin up the foreground service so we survive backgrounding.
   if (Platform.isAndroid) {
@@ -54,7 +56,7 @@ class Bootstrap extends StatefulWidget {
 }
 
 class _BootstrapState extends State<Bootstrap> {
-  bool _connected = false;
+  final bool _connected = false;
 
   @override
   void initState() {

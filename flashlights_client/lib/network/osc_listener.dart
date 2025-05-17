@@ -20,7 +20,7 @@ class OscListener {
     if (_running) return;
     _running = true;
 
-    _socket = OSCSocket.new(
+    _socket = OSCSocket(
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
     );

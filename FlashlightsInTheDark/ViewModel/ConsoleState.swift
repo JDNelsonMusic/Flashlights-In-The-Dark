@@ -24,6 +24,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
 
     @Published public private(set) var devices = ChoirDevice.demo
+    @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
     @Published public var isBroadcasting: Bool = false
 
@@ -33,10 +34,12 @@ public final class ConsoleState: ObservableObject, Sendable {
         devices[idx].torchOn.toggle()
         Task {
             let osc = try await broadcasterTask.value
-            if devices[id].torchOn {
-                try await osc.send(FlashOn(index: Int32(id), intensity: 1))
+            if devices[idx].torchOn {
+                try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
+                await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
             } else {
-                try await osc.send(FlashOff(index: Int32(id)))
+                try await osc.send(FlashOff(index: Int32(id + 1)))
+                await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
             }
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
@@ -47,6 +50,10 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func playAll() -> [ChoirDevice] {
         for idx in devices.indices {
             devices[idx].torchOn = true
+            Task {
+                let osc = try await broadcasterTask.value
+                try await osc.send(FlashOn(index: Int32(idx + 1), intensity: 1))
+            }
         }
         print("[ConsoleState] All torches turned on")
         return devices
@@ -56,6 +63,10 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func blackoutAll() -> [ChoirDevice] {
         for idx in devices.indices {
             devices[idx].torchOn = false
+            Task {
+                let osc = try await broadcasterTask.value
+                try await osc.send(FlashOff(index: Int32(idx + 1)))
+            }
         }
         print("[ConsoleState] All torches turned off")
         return devices
@@ -68,8 +79,9 @@ extension ConsoleState {
     /// Idempotent network bootstrap for `.task {}` in ContentView.
     @MainActor
     public func startNetwork() async {
-        guard !isBroadcasting else { return }   // already up
+        guard !isBroadcasting else { return }
         isBroadcasting = true
+        lastLog = "🛰  Broadcasting on 255.255.255.255:9000"
         print("[ConsoleState] Network stack started ✅")
     }
 

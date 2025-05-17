@@ -15,7 +15,7 @@ enum OscAddress {
 
 abstract class OscCodable {
   OscAddress get address;
-  OscMessage toOsc();
+  OSCMessage toOsc();
 }
 
 /// /flash/on - index:Int32, intensity:Float32
@@ -29,11 +29,11 @@ class FlashOn implements OscCodable {
   OscAddress get address => OscAddress.flashOn;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [index, intensity]);
   }
 
-  static FlashOn? fromOsc(OscMessage message) {
+  static FlashOn? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.flashOn.value ||
         message.arguments.length != 2) {
       return null;
@@ -57,11 +57,11 @@ class FlashOff implements OscCodable {
   OscAddress get address => OscAddress.flashOff;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [index]);
   }
 
-  static FlashOff? fromOsc(OscMessage message) {
+  static FlashOff? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.flashOff.value ||
         message.arguments.length != 1) {
       return null;
@@ -86,11 +86,11 @@ class AudioPlay implements OscCodable {
   OscAddress get address => OscAddress.audioPlay;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [index, file, gain]);
   }
 
-  static AudioPlay? fromOsc(OscMessage message) {
+  static AudioPlay? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.audioPlay.value ||
         message.arguments.length != 3) {
       return null;
@@ -115,11 +115,11 @@ class AudioStop implements OscCodable {
   OscAddress get address => OscAddress.audioStop;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [index]);
   }
 
-  static AudioStop? fromOsc(OscMessage message) {
+  static AudioStop? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.audioStop.value ||
         message.arguments.length != 1) {
       return null;
@@ -143,11 +143,11 @@ class MicRecord implements OscCodable {
   OscAddress get address => OscAddress.micRecord;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [index, maxDuration]);
   }
 
-  static MicRecord? fromOsc(OscMessage message) {
+  static MicRecord? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.micRecord.value ||
         message.arguments.length != 2) {
       return null;
@@ -171,11 +171,11 @@ class SyncMessage implements OscCodable {
   OscAddress get address => OscAddress.sync;
 
   @override
-  OscMessage toOsc() {
+  OSCMessage toOsc() {
     return OSCMessage(address.value, [timestamp]);
   }
 
-  static SyncMessage? fromOsc(OscMessage message) {
+  static SyncMessage? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.sync.value ||
         message.arguments.length != 1) {
       return null;
