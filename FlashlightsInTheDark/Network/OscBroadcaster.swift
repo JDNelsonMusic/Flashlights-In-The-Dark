@@ -12,22 +12,47 @@ import OSCKit          // OSCMessage, OSCAddressPattern
 
 /// Broadcasts OSC messages over UDP to the local-network broadcast address
 /// (`255.255.255.255`).  Designed for lightweight one-way cues.
+// Slot mapping info for each device slot
+struct SlotInfo: Codable {
+    let ip: String
+    let udid: String
+    let name: String
+}
+
 public actor OscBroadcaster {
+    // MARK: - Slot mapping (IP, UDID, singer name)  –––––––––––––––––––––––––––––
+    let slotInfos: [Int: SlotInfo]
 
     // --------------------------------------------------------------------
     // MARK: - Stored properties
     // --------------------------------------------------------------------
-    private let channel: Channel
-    private let port: Int
+    let channel: Channel
+    let port: Int
 
     // --------------------------------------------------------------------
     // MARK: - Initialisation
     // --------------------------------------------------------------------
     public init(
         port: Int = 9000,
+        routingFile: URL = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json")!,
         eventLoopGroup: MultiThreadedEventLoopGroup = .init(numberOfThreads: 1)
     ) async throws {
         self.port = port
+        // load slot mapping once at launch
+        if
+            let data = try? Data(contentsOf: routingFile),
+            let dict = try? JSONDecoder().decode([String: SlotInfo].self, from: data)
+        {
+            self.slotInfos = Dictionary(uniqueKeysWithValues:
+                dict.compactMap { key, info in
+                    guard let slot = Int(key) else { return nil }
+                    return (slot, info)
+                }
+            )
+        } else {
+            self.slotInfos = [:]
+            print("⚠️  No flash_ip+udid_map.json found – falling back to pure broadcast.")
+        }
 
         // Datagram bootstrap with broadcast privileges.
         let bootstrap = DatagramBootstrap(group: eventLoopGroup)

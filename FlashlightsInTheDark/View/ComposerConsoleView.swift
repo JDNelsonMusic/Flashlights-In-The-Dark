@@ -8,6 +8,21 @@ struct ComposerConsoleView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
+                Button("Build All") {
+                    state.buildAll()
+                }
+                .buttonStyle(.bordered)
+                .tint(.green)
+                .disabled(!state.isBroadcasting)
+
+                Button("Run All") {
+                    state.runAll()
+                }
+                .buttonStyle(.bordered)
+                .tint(.mint)
+                .disabled(!state.isBroadcasting)
+
+                Spacer(minLength: 20)
                 Button("Blackout") {
                     state.blackoutAll()
                 }
@@ -35,6 +50,25 @@ struct ComposerConsoleView: View {
                         Text("#\(device.id + 1)")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                        // Singer name
+                        Text(device.name)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        // Status
+                        let st = state.statuses[device.id] ?? .clean
+                        Text(st.rawValue)
+                            .font(.caption2)
+                            .foregroundStyle(st.color)
+                        
+                        // 🆕 Build & Run button
+                        Button {
+                            state.buildAndRun(device: device)
+                        } label: {
+                            Image(systemName: "bolt.fill")
+                                .foregroundStyle(.mint)
+                                .help("Build & run on \(device.udid.prefix(6))…")
+                        }
+                        .buttonStyle(.plain)
                     }
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())
