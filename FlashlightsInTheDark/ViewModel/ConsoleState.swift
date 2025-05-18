@@ -55,10 +55,10 @@ public final class ConsoleState: ObservableObject, Sendable {
         // Load device UDIDs, names, and initialize statuses
         if let url = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json"),
            let data = try? Data(contentsOf: url),
-           let dict = try? JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
+           let dict: [String: ConsoleSlotInfo] = try? JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
         {
-            let mapped: [ChoirDevice] = dict.compactMap { key, info in
-                guard let slot = Int(key) else { return nil as ChoirDevice? }
+            let mapped: [ChoirDevice] = dict.compactMap { (key, info) -> ChoirDevice? in
+                guard let slot = Int(key) else { return nil }
                 // slot is 1-based, convert to zero-based id
                 return ChoirDevice(id: slot - 1, udid: info.udid, name: info.name)
             }
@@ -123,6 +123,20 @@ public final class ConsoleState: ObservableObject, Sendable {
             if let data = try? handle.readToEnd(),
                let out  = String(data: data, encoding: .utf8) {
                 print("[Build&Run] \(out.prefix(300))…")      // truncate
+            }
+        }
+    }
+    
+    /// Trigger playback of a preloaded audio file on a specific device
+    public func triggerSound(device: ChoirDevice) {
+        Task {
+            let oscBroadcaster = try await broadcasterTask.value
+            let slot = Int32(device.id + 1)
+            let file = "sfx.ghost.mp3"
+            let gain: Float32 = 1.0
+            try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
+            await MainActor.run {
+                self.lastLog = "/audio/play [\(device.id + 1), \(file), \(gain)]"
             }
         }
     }

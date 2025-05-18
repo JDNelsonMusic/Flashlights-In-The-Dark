@@ -69,6 +69,14 @@ struct ComposerConsoleView: View {
                                 .help("Build & run on \(device.udid.prefix(6))…")
                         }
                         .buttonStyle(.plain)
+                        Button {
+                            state.triggerSound(device: device)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .foregroundStyle(.cyan)
+                                .help("Trigger sound on \(device.name)…")
+                        }
+                        .buttonStyle(.plain)
                     }
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())

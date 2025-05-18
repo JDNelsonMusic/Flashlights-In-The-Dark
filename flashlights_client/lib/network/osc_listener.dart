@@ -44,9 +44,15 @@ class OscListener {
 
       case '/audio/play':
         if (m.arguments[0] as int == myIndex) {
-          final url  = m.arguments[1] as String;
+          final fileName = m.arguments[1] as String;
           final gain = (m.arguments[2] as num).toDouble();
-          await _player.setUrl(url);
+          final assetPath = 'available-sounds/$fileName';
+          try {
+            await _player.setAsset(assetPath);
+          } catch (e) {
+            print('[OSC] Failed to load asset $assetPath: $e');
+            await _player.setUrl(fileName);
+          }
           await _player.setVolume(gain.clamp(0, 1));
           await _player.play();
         }
