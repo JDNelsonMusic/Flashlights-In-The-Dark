@@ -11,3 +11,7 @@ flashlights_client/ios/Runner.xcworkspace/
 flashlights_client/android/.gradle/
 flashlights_client/android/.idea/
 flashlights_client/pubspec.lock
+/fastlane/report*.json
+*.ipa
+*.apk
+fastlane/build_logs/

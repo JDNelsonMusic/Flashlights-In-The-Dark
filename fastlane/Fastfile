@@ -1,0 +1,26 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Add device to Apple Developer portal"
+  lane :register_device do |opts|
+    register_device(
+      udid: opts[:udid],
+      name: opts[:name] || opts[:udid]
+    )
+  end
+
+  desc "Sync ad-hoc code-signing & profiles"
+  lane :sync_code_signing do
+    sync_code_signing(type: "adhoc", readonly: false)
+  end
+
+  desc "Re-export existing archive to IPA"
+  lane :reexport do |opts|
+    xcodebuild(
+      archive_path: opts[:archive_path] || "FlashlightsInTheDark.xcarchive",
+      export_options: "ExportOptions.plist",
+      export_path: opts[:ipa_path] || "FlashlightsInTheDark.ipa",
+      skip_build: true
+    )
+  end
+end

@@ -63,6 +63,33 @@ Potential language to include in email to singers with Android:  Subject: In
     0.    You can turn Allow from this source back off afterwards.
 
 =============================
+Singer Phone Onboarding
+=============================
+
+We provide a script to streamline registration and provisioning of singers' devices.
+
+Requirements:
+- Python 3
+- libimobiledevice (for `idevice_id`)
+- Fastlane configured (see `fastlane/Fastfile`)
+
+Usage:
+```bash
+python3 scripts/choir_onboard.py --name "Singer Name"
+```
+
+Options:
+- --name, -n: Singer's name (required)
+- --udid, -u: Device UDID (optional; auto-detected via USB if omitted)
+- --ip, -i: Device IP address (optional; auto-detected on macOS via `iPhone USB` interface if omitted)
+
+After running the script, remember to commit the updated map file:
+```bash
+git add FlashlightsInTheDark/flash_ip+udid_map.json
+git commit -m "Onboard device SingerName UDID to slot"
+```
+
+=============================
 
 
 
@@ -70,3 +97,9 @@ Potential language to include in email to singers with Android:  Subject: In
 
 
 
+
+## ⚡ One-command Singer On-Boarding
+```bash
+brew bundle --file=./scripts/Brewfile      # cfgutil, fastlane, jq, adb
+scripts/choir_onboard.sh                   # plug phones first, then run
+```

@@ -70,6 +70,10 @@ public actor OscBroadcaster {
     // --------------------------------------------------------------------
     // MARK: - Public API
     // --------------------------------------------------------------------
+    /// Announce self to the network upon startup
+    public func start() async throws {
+        try await announceSelf()
+    }
     /// Broadcast a single OSC message to 255.255.255.255:9000
     public func send(_ osc: OSCMessage) async throws {
         // --- Encode OSCMessage ➜ Data -----------------------------------
@@ -94,5 +98,16 @@ public actor OscBroadcaster {
     deinit {
         let ch = channel   // capture the channel (avoid capturing `self`)
         Task { try? await ch.close() }
+    }
+}
+
+extension OscBroadcaster {
+    private func announceSelf() async throws {
+        let slotValue = Int32(UserDefaults.standard.integer(forKey: "slot"))
+        let msg = OSCMessage(
+            OSCAddressPattern("/hello"),
+            values: [ProcessInfo.processInfo.hostName, slotValue]
+        )
+        try await send(msg)
     }
 }
