@@ -91,6 +91,25 @@ public actor OscBroadcaster {
         try await channel.writeAndFlush(envelope)
         print("→ \(osc.addressPattern.stringValue)")
     }
+    
+    /// Send an OSC message directly to a specific device slot (unicast) using its IP.
+    /// - Parameters:
+    ///   - osc: The OSC message to send
+    ///   - slot: The 1-based slot number identifying the target device
+    public func sendUnicast(_ osc: OSCMessage, toSlot slot: Int) async throws {
+        let data = try osc.rawData()
+        var buffer = channel.allocator.buffer(capacity: data.count)
+        buffer.writeBytes(data)
+        if let info = slotInfos[slot] {
+            let addr = try SocketAddress(ipAddress: info.ip, port: port)
+            let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
+            try await channel.writeAndFlush(envelope)
+            print("→ \(osc.addressPattern.stringValue) to \(info.ip):\(port)")
+        } else {
+            // Fallback to broadcast if mapping not found
+            try await send(osc)
+        }
+    }
 
     // --------------------------------------------------------------------
     // MARK: - De-initialisation

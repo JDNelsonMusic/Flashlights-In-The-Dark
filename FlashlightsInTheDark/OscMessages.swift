@@ -8,6 +8,8 @@ public enum OscAddress: String {
     case audioStop = "/audio/stop"
     case micRecord = "/mic/record"
     case sync      = "/sync"
+    /// Dynamically assign the listening slot on a client
+    case setSlot   = "/set-slot"
 }
 
 public protocol OscCodable {
@@ -171,3 +173,28 @@ public struct SyncMessage: OscCodable {
 }
 
 // TODO: wire these messages into the SwiftNIO broadcaster.
+// MARK: – SetSlot ------------------------------------------------------------
+/// Instruct a client to change its listening slot at runtime
+public struct SetSlot: OscCodable {
+    public static let address: OscAddress = .setSlot
+    /// The new slot index (1-based) the client should listen for
+    public let slot: Int32
+
+    public init(slot: Int32) {
+        self.slot = slot
+    }
+
+    public init?(from message: OSCMessage) {
+        guard message.addressPattern == OSCAddressPattern(Self.address.rawValue),
+              let s = message.values.int32(at: 0)
+        else { return nil }
+        self.init(slot: s)
+    }
+
+    public func encode() -> OSCMessage {
+        OSCMessage(
+            OSCAddressPattern(Self.address.rawValue),
+            values: [ slot ]
+        )
+    }
+}

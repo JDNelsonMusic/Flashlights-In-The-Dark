@@ -4,7 +4,7 @@ Flashlights In the Dark:
 
 =============================
 
-Commissioned by the Philharmonic Chorus of Madison, Flashlights-In-The-Dark is Creative MacOS system capable of serving to a dozens of assorted client smartphones on a low-latency closed network. The key purpose is to enable MIDI-triggered 32chan control over a system of 32 smartphones' flashlights, speakers, and microphones. Ideal for live electroacoustic integration with contemporary-classical performing ensembles. 
+Commissioned by the Philharmonic Chorus of Madison, Flashlights-In-The-Dark is a Creative MacOS system capable of serving to a dozens of assorted client smartphones on a low-latency closed network. The key purpose is to enable MIDI-triggered 32chan control over a system of 32 smartphones' flashlights, speakers, and microphones. The systems is ideal for live electroacoustic integration with contemporary-classical performing ensembles. 
 
 =============================
 
@@ -22,45 +22,18 @@ Try playing a pre-written track of triggered tones after each singer connects to
 
 Try sounding specific microtonal sonorities as “ToneGlows” and see how well the chorus can sing them back. (first give an efficient quick lesson on acoustically-informed microtonality)
 
-Test how loud the phone system can get.
+Test how loud the phone system can get. - PLAY LOUD SOUNDS
 
 Test the flashlight features in the dark. Check to see how similar everyone’s flashlight colors and brightness levels are. 
 
 Try some slow swells in brightness to see how smoothly they can be executed. 
 
-Trying singing some Filidei-style “Brass Impacts” with space in between while sparkly sounds are dancing around the chorus just to see how it feels. 
+Trying singing some Filidei-style “Brass Impacts” with space in between while sparkly sounds are dancing around the chorus just to see how it feels. FOCUS ON THE SOUDNS.
 
 Try using a “Tick-Tock” clock ticking sound just to see how precisely everything lines up. 
 
 =============================
 
-
-Potential language to include in email to singers with iPhones: 
-Ready-to-paste mini-guide (Configurator method)
-How to grab your UDID directly on your phone (takes <1 min)
-    1.    Open Safari or Chrome on your iPhone.
-    2.    Go to: https://get.udid.io
-    3.    Tap “Tap to find UDID”
-    4.    Tap Allow when prompted to install the configuration profile.
-    5.    Go to Settings > Profile Downloaded
-    6.    Tap Install, then Install again.
-    7.    Once installed, you’ll be redirected to a page showing your device’s:
-        •    UDID
-        •    Device name
-        •    Model and iOS version
-    8.    You can copy these values, including the UDID, or simply screenshot it and send the screenshot to jdnelsonmusic@gmail.com
-
-That’s all—thank you!
-
-=============================
-
-
-Potential language to include in email to singers with Android:  Subject: Installing the Flashlights app on Android
-    0.    Open Settings → Security & privacy → Install unknown apps. Tap the app you use to download files (Chrome, Gmail, Drive). Turn on Allow from this source.
-    0.    Download FlashlightsClient.apk from this link: <your-link>.
-    0.    When the download finishes, tap the file → Install.
-    0.    Launch the app, tap Allow for Camera (controls flashlight) and Microphone (future feature).
-    0.    You can turn Allow from this source back off afterwards.
 
 =============================
 Singer Phone Onboarding

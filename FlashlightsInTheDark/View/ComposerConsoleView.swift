@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
+    @State private var showRouting: Bool = false
 
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
 
@@ -35,6 +36,14 @@ struct ComposerConsoleView: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(Color.indigo.opacity(0.6))
+                .disabled(!state.isBroadcasting)
+                
+                // Open routing control panel
+                Button("Routing") {
+                    showRouting = true
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
                 .disabled(!state.isBroadcasting)
             }
 
@@ -94,6 +103,11 @@ struct ComposerConsoleView: View {
         }
         .padding()
         .background(Color.deepPurple.ignoresSafeArea())
+        // Routing sheet
+        .sheet(isPresented: $showRouting) {
+            RoutingView()
+                .environmentObject(state)
+        }
     }
 }
 

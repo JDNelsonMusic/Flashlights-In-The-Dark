@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
+// Import client state to update slot dynamically
+import '../model/client_state.dart';
 import 'package:torch_light/torch_light.dart';
 
 /// Singleton OSC listener for flash/audio/mic/sync cues.
@@ -60,6 +62,15 @@ class OscListener {
 
       case '/audio/stop':
         if (m.arguments[0] as int == myIndex) await _player.stop();
+        break;
+      
+      // Dynamic slot assignment
+      case '/set-slot':
+        final newSlot = m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
+        if (newSlot != client.myIndex) {
+          client.myIndex = newSlot;
+          print('[OSC] Updated listening slot to $newSlot');
+        }
         break;
 
       // TODO: implement /mic/record and /sync handling.

@@ -59,8 +59,12 @@ public final class ConsoleState: ObservableObject, Sendable {
         {
             let mapped: [ChoirDevice] = dict.compactMap { (key, info) -> ChoirDevice? in
                 guard let slot = Int(key) else { return nil }
-                // slot is 1-based, convert to zero-based id
-                return ChoirDevice(id: slot - 1, udid: info.udid, name: info.name)
+                // slot is 1-based, convert to zero-based id, and capture IP and initial listening slot
+                return ChoirDevice(id: slot - 1,
+                                  udid: info.udid,
+                                  name: info.name,
+                                  ip: info.ip,
+                                  listeningSlot: slot)
             }
             // Sort by id
             self.devices = mapped.sorted(by: { $0.id < $1.id })
@@ -239,6 +243,24 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
         print("[ConsoleState] All torches turned off")
         return devices
+    }
+    
+    /// Assign a new listening slot to a specific device at runtime.
+    /// Updates the local model and sends a unicast OSC message to notify the client.
+    public func assignSlot(device: ChoirDevice, slot: Int) {
+        guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
+        devices[idx].listeningSlot = slot
+        Task {
+            let osc = try await broadcasterTask.value
+            // Send a SetSlot message to the target device only
+            let msg = SetSlot(slot: Int32(slot))
+            do {
+                try await osc.sendUnicast(msg.encode(), toSlot: device.id + 1)
+                await MainActor.run { self.lastLog = "/set-slot [\(device.id + 1), \(slot)]" }
+            } catch {
+                await MainActor.run { self.lastLog = "⚠️ Failed to send set-slot to device #\(device.id + 1)" }
+            }
+        }
     }
 }
 
