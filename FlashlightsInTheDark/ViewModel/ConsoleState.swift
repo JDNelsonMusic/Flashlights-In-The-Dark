@@ -87,6 +87,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     @discardableResult
     public func toggleTorch(id: Int) -> [ChoirDevice] {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
+        objectWillChange.send()
         devices[idx].torchOn.toggle()
         Task {
             let osc = try await broadcasterTask.value
@@ -105,6 +106,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Directly flash on a specific lamp slot (no toggle) and update state.
     public func flashOn(id: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        objectWillChange.send()
         devices[idx].torchOn = true
         Task {
             let osc = try await broadcasterTask.value
@@ -115,6 +117,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Directly flash off a specific lamp slot and update state.
     public func flashOff(id: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        objectWillChange.send()
         devices[idx].torchOn = false
         Task {
             let osc = try await broadcasterTask.value
@@ -169,6 +172,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                 try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
                 await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
             }
+        }
+    }
+    /// Play audio on all devices slots based on current activeToneSets
+    public func playAllTones() {
+        for device in devices {
+            triggerSound(device: device)
         }
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
