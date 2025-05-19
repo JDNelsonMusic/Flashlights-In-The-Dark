@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'network/osc_listener.dart';
+import 'dart:io';
+import 'dart:convert';
 import 'model/client_state.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
@@ -61,7 +63,25 @@ class _BootstrapState extends State<Bootstrap> {
   @override
   void initState() {
     super.initState();
-    OscListener.instance.start(client.myIndex);
+    OscListener.instance.start();
+    _broadcastDiscovery();
+  }
+  
+  /// Broadcast presence (slot and optional name) for auto-discovery.
+  Future<void> _broadcastDiscovery() async {
+    try {
+      final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+      socket.broadcastEnabled = true;
+      final msg = {
+        'slot': client.myIndex.value,
+        'name': '', // optional: provide user-defined name if desired
+      };
+      final data = utf8.encode(jsonEncode(msg));
+      socket.send(data, InternetAddress('255.255.255.255'), 9001);
+      socket.close();
+    } catch (e) {
+      debugPrint('[Discovery] Failed to broadcast: $e');
+    }
   }
 
   @override
@@ -75,10 +95,15 @@ class _BootstrapState extends State<Bootstrap> {
     final status = _connected ? 'Waiting for cues…' : 'Connecting…';
     return Scaffold(
       body: Center(
-        child: Text(
-          'Singer #${client.myIndex}\n$status',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 20),
+        child: ValueListenableBuilder<int>(
+          valueListenable: client.myIndex,
+          builder: (context, myIndex, _) {
+            return Text(
+              'Singer #$myIndex\n$status',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20),
+            );
+          },
         ),
       ),
     );

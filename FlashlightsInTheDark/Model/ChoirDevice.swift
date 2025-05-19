@@ -1,16 +1,16 @@
 import Foundation
 
 public struct ChoirDevice: Identifiable, Sendable {
-    public let id: Int
+    public var id: Int
     public var torchOn: Bool
     public var audioPlaying: Bool
     public var micActive: Bool
     /// The iOS device UDID used by `flutter run -d <UDID>`.
-    public let udid: String
+    public var udid: String
     /// Singer's name, from slot mapping JSON.
-    public let name: String
+    public var name: String
     /// Device IP address, from slot mapping JSON.
-    public let ip: String
+    public var ip: String
     /// Current slot assignment the client should listen for (1-based).
     public var listeningSlot: Int
 

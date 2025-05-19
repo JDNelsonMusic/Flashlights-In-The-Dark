@@ -110,6 +110,20 @@ public actor OscBroadcaster {
             try await send(osc)
         }
     }
+    
+    /// Send an OSC message directly to a specific IP address.
+    /// - Parameters:
+    ///   - osc: The OSC message to send
+    ///   - ip: The target device's IP address
+    public func sendUnicast(_ osc: OSCMessage, toIP ip: String) async throws {
+        let data = try osc.rawData()
+        var buffer = channel.allocator.buffer(capacity: data.count)
+        buffer.writeBytes(data)
+        let addr = try SocketAddress(ipAddress: ip, port: port)
+        let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
+        try await channel.writeAndFlush(envelope)
+        print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
+    }
 
     // --------------------------------------------------------------------
     // MARK: - De-initialisation

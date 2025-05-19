@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import Network
 
 /// Possible device statuses for build/run lifecycle
 public enum DeviceStatus: String, Sendable {
@@ -33,6 +34,8 @@ private struct ConsoleSlotInfo: Codable {
 
 @MainActor
 public final class ConsoleState: ObservableObject, Sendable {
+    // UDP listener for auto-discovery
+    private var discoveryListener: NWListener?
     private let broadcasterTask = Task<OscBroadcaster, Error> {
         try await OscBroadcaster()
     }
@@ -52,30 +55,14 @@ public final class ConsoleState: ObservableObject, Sendable {
                 return
             }
         }
-        // Load device UDIDs, names, and initialize statuses
-        if let url = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json"),
-           let data = try? Data(contentsOf: url),
-           let dict: [String: ConsoleSlotInfo] = try? JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
-        {
-            let mapped: [ChoirDevice] = dict.compactMap { (key, info) -> ChoirDevice? in
-                guard let slot = Int(key) else { return nil }
-                // slot is 1-based, convert to zero-based id, and capture IP and initial listening slot
-                return ChoirDevice(id: slot - 1,
-                                  udid: info.udid,
-                                  name: info.name,
-                                  ip: info.ip,
-                                  listeningSlot: slot)
-            }
-            // Sort by id
-            self.devices = mapped.sorted(by: { $0.id < $1.id })
-            // Initialize statuses to .clean
-            self.statuses = Dictionary(uniqueKeysWithValues:
-                self.devices.map { ($0.id, DeviceStatus.clean) }
-            )
-        }
+        // Initialize with all 32 slots (demo placeholders)
+        self.devices = ChoirDevice.demo
+        self.statuses = Dictionary(uniqueKeysWithValues:
+            devices.map { ($0.id, DeviceStatus.clean) }
+        )
     }
 
-    @Published public private(set) var devices = ChoirDevice.demo
+    @Published public private(set) var devices: [ChoirDevice] = []
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
@@ -245,6 +232,36 @@ public final class ConsoleState: ObservableObject, Sendable {
         return devices
     }
     
+    // MARK: – Dynamic device management  📱
+    /// Add a new device at runtime. Assigns next available zero-based id and initializes status.
+    public func addDevice(name: String, ip: String, udid: String) {
+        let newId = devices.count
+        let device = ChoirDevice(id: newId,
+                                 udid: udid,
+                                 name: name,
+                                 ip: ip,
+                                 listeningSlot: newId + 1)
+        devices.append(device)
+        statuses[newId] = .clean
+    }
+    
+    /// Remove a device by its id, reindexes remaining devices.
+    public func removeDevice(id: Int) {
+        guard let index = devices.firstIndex(where: { $0.id == id }) else { return }
+        devices.remove(at: index)
+        statuses.removeValue(forKey: id)
+        // Reassign ids and statuses for subsequent devices
+        for idx in index..<devices.count {
+            devices[idx].listeningSlot = idx + 1
+            let oldId = devices[idx].id
+            devices[idx].id = idx
+            if let status = statuses[oldId] {
+                statuses[idx] = status
+                statuses.removeValue(forKey: oldId)
+            }
+        }
+    }
+    
     /// Assign a new listening slot to a specific device at runtime.
     /// Updates the local model and sends a unicast OSC message to notify the client.
     public func assignSlot(device: ChoirDevice, slot: Int) {
@@ -252,13 +269,12 @@ public final class ConsoleState: ObservableObject, Sendable {
         devices[idx].listeningSlot = slot
         Task {
             let osc = try await broadcasterTask.value
-            // Send a SetSlot message to the target device only
             let msg = SetSlot(slot: Int32(slot))
             do {
-                try await osc.sendUnicast(msg.encode(), toSlot: device.id + 1)
-                await MainActor.run { self.lastLog = "/set-slot [\(device.id + 1), \(slot)]" }
+                try await osc.sendUnicast(msg.encode(), toIP: device.ip)
+                await MainActor.run { self.lastLog = "/set-slot [\(device.ip), \(slot)]" }
             } catch {
-                await MainActor.run { self.lastLog = "⚠️ Failed to send set-slot to device #\(device.id + 1)" }
+                await MainActor.run { self.lastLog = "⚠️ Failed to send set-slot to device at \(device.ip)" }
             }
         }
     }
@@ -274,6 +290,50 @@ extension ConsoleState {
         isBroadcasting = true
         lastLog = "🛰  Broadcasting on 255.255.255.255:9000"
         print("[ConsoleState] Network stack started ✅")
+        // Start UDP listener for discovery on port 9001
+        do {
+            let params = NWParameters.udp
+            let listener = try NWListener(using: params, on: 9001)
+            self.discoveryListener = listener
+            listener.newConnectionHandler = { connection in
+                connection.stateUpdateHandler = { state in
+                    if case .ready = state {
+                        connection.receiveMessage { [weak self] data, context, _, error in
+                            guard let self = self, let data = data else { return }
+                            // Parse JSON {"slot":Int, "name":String, ["udid":String]}
+                            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                               let slot = json["slot"] as? Int,
+                               let name = json["name"] as? String {
+                                let udid = json["udid"] as? String
+                                // Extract remote IP from connection endpoint
+                                var ip = ""
+                                let endpoint = connection.endpoint
+                                if case let .hostPort(host: host, port: _) = endpoint {
+                                    ip = host.debugDescription
+                                }
+                                Task { @MainActor in
+                                    // Update placeholder device for slot (1-based) => index = slot-1
+                                    let idx = slot - 1
+                                    guard self.devices.indices.contains(idx) else { return }
+                                    self.devices[idx].ip = ip
+                                    self.devices[idx].name = name
+                                    if let udid = udid {
+                                        self.devices[idx].udid = udid
+                                    }
+                                    self.statuses[idx] = .live
+                                }
+                            }
+                            connection.cancel()
+                        }
+                        connection.start(queue: .main)
+                    }
+                }
+                connection.start(queue: .main)
+            }
+            listener.start(queue: .main)
+        } catch {
+            print("⚠️ Discovery listener failed: \(error)")
+        }
     }
 
     /// Gracefully cancel background tasks when the app resigns active.

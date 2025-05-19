@@ -1,10 +1,17 @@
+import 'package:flutter/foundation.dart';
+
+/// Global client state, holds the dynamic slot and clock offset.
 class ClientState {
-  ClientState();
-  /// Singer slot (1-32). Injected at build time:
-  ///     flutter run --dart-define=SLOT=<N>
-  /// Falls back to 1 so the app still runs on simulators.
-  int myIndex = const int.fromEnvironment('SLOT', defaultValue: 1);
-  double clockOffsetMs = 0.0;  // rolling average from /sync
+  ClientState()
+      : myIndex = ValueNotifier<int>(
+            const int.fromEnvironment('SLOT', defaultValue: 1)),
+        clockOffsetMs = 0.0;
+
+  /// Singer slot (1-32). Notifier so UI can react to changes at runtime.
+  final ValueNotifier<int> myIndex;
+  /// Rolling average clock offset from /sync (ms).
+  double clockOffsetMs;
 }
 
+/// Singleton client state
 final client = ClientState();

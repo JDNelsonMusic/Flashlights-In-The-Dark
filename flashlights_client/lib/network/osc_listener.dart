@@ -18,7 +18,7 @@ class OscListener {
   StreamSubscription<OSCMessage>? _sub;
 
   /// Starts listening on UDP port 9000 (idempotent).
-  Future<void> start(int myIndex) async {
+  Future<void> start() async {
     if (_running) return;
     _running = true;
 
@@ -26,12 +26,15 @@ class OscListener {
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
     );
-    await _socket!.listen((msg) => _dispatch(msg, myIndex));
+    // Listen and dispatch using the current slot from client state
+    await _socket!.listen((msg) => _dispatch(msg));
 
     print('[OSC] Listening on 0.0.0.0:9000');
   }
 
-  Future<void> _dispatch(OSCMessage m, int myIndex) async {
+  Future<void> _dispatch(OSCMessage m) async {
+    // Always use the latest listening slot
+    final myIndex = client.myIndex.value;
     print('OSC ↳ ${m.address} ${m.arguments}');
     switch (m.address) {
       case '/flash/on':
@@ -67,8 +70,8 @@ class OscListener {
       // Dynamic slot assignment
       case '/set-slot':
         final newSlot = m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
-        if (newSlot != client.myIndex) {
-          client.myIndex = newSlot;
+        if (newSlot != client.myIndex.value) {
+          client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');
         }
         break;

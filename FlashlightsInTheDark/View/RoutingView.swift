@@ -4,12 +4,19 @@ import SwiftUI
 struct RoutingView: View {
     @EnvironmentObject var state: ConsoleState
     @Environment(\.dismiss) private var dismiss
+    @State private var showAddDevice: Bool = false
 
     var body: some View {
         NavigationView {
             List {
                 ForEach(state.devices) { device in
-                    HStack(alignment: .top) {
+                    HStack(alignment: .top, spacing: 12) {
+                        // Connectivity indicator: green if live, gray otherwise
+                        let stat = state.statuses[device.id] ?? .clean
+                        Circle()
+                            .fill(stat == .live ? Color.green : Color.gray)
+                            .frame(width: 10, height: 10)
+                            .padding(.top, 6)
                         VStack(alignment: .leading, spacing: 4) {
                             // Device identifier and name
                             Text("#\(device.id + 1)  \(device.name)")
@@ -42,9 +49,20 @@ struct RoutingView: View {
             }
             .navigationTitle("Device Routing")
             .toolbar {
+                // Use automatic placement for macOS toolbars
+                ToolbarItem(placement: .automatic) {
+                    Button(action: { showAddDevice = true }) {
+                        Image(systemName: "plus")
+                    }
+                    .help("Add a new device")
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showAddDevice) {
+                AddDeviceView()
+                    .environmentObject(state)
             }
         }
     }
