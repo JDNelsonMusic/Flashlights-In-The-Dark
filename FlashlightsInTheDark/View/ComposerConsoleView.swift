@@ -183,10 +183,18 @@ struct ComposerConsoleView: View {
                                 .buttonStyle(.plain)
                             }
                             .frame(maxWidth: .infinity, minHeight: 44)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                state.toggleTorch(id: device.id)
-                            }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        switch state.keyboardTriggerMode {
+                        case .torch:
+                            state.toggleTorch(id: device.id)
+                        case .sound:
+                            state.triggerSound(device: device)
+                        case .both:
+                            state.toggleTorch(id: device.id)
+                            state.triggerSound(device: device)
+                        }
+                    }
                         }
                     }
                     Spacer(minLength: 8)
@@ -311,7 +319,7 @@ struct ComposerConsoleView: View {
             if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
                 onKeyDown?(c)
             }
-            // keep focus for continued key capture
+            // keep focus
             _ = window?.makeFirstResponder(self)
         }
         
@@ -319,8 +327,10 @@ struct ComposerConsoleView: View {
             if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
                 onKeyUp?(c)
             }
-            // keep focus for continued key capture
+            // keep focus
             _ = window?.makeFirstResponder(self)
         }
+        // Do not intercept mouse events: allow clicks through
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
