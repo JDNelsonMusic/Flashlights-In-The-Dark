@@ -15,7 +15,6 @@ class OscListener {
   OSCSocket? _socket;
   late final AudioPlayer _player = AudioPlayer();
   bool _running = false;
-  StreamSubscription<OSCMessage>? _sub;
 
   /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
@@ -26,8 +25,8 @@ class OscListener {
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
     );
-    // Listen and dispatch using the current slot from client state
-    await _socket!.listen((msg) => _dispatch(msg));
+    // Listen and dispatch using the current slot
+    await _socket!.listen((OSCMessage msg) => _dispatch(msg));
 
     print('[OSC] Listening on 0.0.0.0:9000');
   }
@@ -82,8 +81,6 @@ class OscListener {
 
   /// Stops listening and cleans up resources.
   Future<void> stop() async {
-    await _sub?.cancel();
-    _sub = null;
     _socket?.close();
     _socket = null;
     await _player.dispose();

@@ -8,7 +8,35 @@ struct ComposerConsoleView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        HStack(alignment: .top, spacing: 16) {
+            // Tone-set toggles
+            VStack(spacing: 12) {
+                ForEach(["A", "B", "C", "D"], id: \.self) { set in
+                    Button(action: {
+                        if state.activeToneSets.contains(set) {
+                            state.activeToneSets.remove(set)
+                        } else {
+                            state.activeToneSets.insert(set)
+                        }
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(state.activeToneSets.contains(set)
+                                      ? Color.blue
+                                      : Color.gray.opacity(0.3))
+                                .frame(width: 40, height: 40)
+                            Text(set)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .help("Toggle tone set \(set)")
+                }
+                Spacer()
+            }
+            // Main console content
+            VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Button("Build All") {
                     state.buildAll()
@@ -95,15 +123,16 @@ struct ComposerConsoleView: View {
                     }
                 }
             }
-            Spacer(minLength: 8)
-            // Status bar
-            Text(state.lastLog)
-                .font(.caption2)
-                .foregroundStyle(Color.mintGlow)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 8)
+                // Status bar
+                Text(state.lastLog)
+                    .font(.caption2)
+                    .foregroundStyle(Color.mintGlow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding()
+            .background(Color.deepPurple.ignoresSafeArea())
         }
-        .padding()
-        .background(Color.deepPurple.ignoresSafeArea())
         // Routing sheet
         .sheet(isPresented: $showRouting) {
             RoutingView()

@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'network/osc_listener.dart';
-import 'dart:io';
-import 'dart:convert';
+// import 'dart:io';
+// import 'dart:convert';
+// removed discovery code
 import 'model/client_state.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
@@ -64,25 +65,8 @@ class _BootstrapState extends State<Bootstrap> {
   void initState() {
     super.initState();
     OscListener.instance.start();
-    _broadcastDiscovery();
   }
   
-  /// Broadcast presence (slot and optional name) for auto-discovery.
-  Future<void> _broadcastDiscovery() async {
-    try {
-      final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
-      socket.broadcastEnabled = true;
-      final msg = {
-        'slot': client.myIndex.value,
-        'name': '', // optional: provide user-defined name if desired
-      };
-      final data = utf8.encode(jsonEncode(msg));
-      socket.send(data, InternetAddress('255.255.255.255'), 9001);
-      socket.close();
-    } catch (e) {
-      debugPrint('[Discovery] Failed to broadcast: $e');
-    }
-  }
 
   @override
   void dispose() {
@@ -92,18 +76,42 @@ class _BootstrapState extends State<Bootstrap> {
 
   @override
   Widget build(BuildContext context) {
-    final status = _connected ? 'Waiting for cues…' : 'Connecting…';
+    final status = 'Listening…';
     return Scaffold(
       body: Center(
-        child: ValueListenableBuilder<int>(
-          valueListenable: client.myIndex,
-          builder: (context, myIndex, _) {
-            return Text(
-              'Singer #$myIndex\n$status',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20),
-            );
-          },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ValueListenableBuilder<int>(
+              valueListenable: client.myIndex,
+              builder: (context, myIndex, _) {
+                return Text(
+                  'Singer #$myIndex\n$status',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 20),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            // Override slot dropdown
+            ValueListenableBuilder<int>(
+              valueListenable: client.myIndex,
+              builder: (context, myIndex, _) {
+                return DropdownButton<int>(
+                  value: myIndex,
+                  items: List.generate(32, (i) => DropdownMenuItem(
+                    value: i + 1,
+                    child: Text('Slot ${i + 1}'),
+                  )),
+                  onChanged: (newSlot) {
+                    if (newSlot != null) {
+                      client.myIndex.value = newSlot;
+                    }
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

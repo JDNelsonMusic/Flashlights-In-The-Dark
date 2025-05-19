@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
-import Network
+//import Network   // auto-discovery removed
 
 /// Possible device statuses for build/run lifecycle
 public enum DeviceStatus: String, Sendable {
@@ -34,8 +34,6 @@ private struct ConsoleSlotInfo: Codable {
 
 @MainActor
 public final class ConsoleState: ObservableObject, Sendable {
-    // UDP listener for auto-discovery
-    private var discoveryListener: NWListener?
     private let broadcasterTask = Task<OscBroadcaster, Error> {
         try await OscBroadcaster()
     }
@@ -67,6 +65,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
     @Published public var isBroadcasting: Bool = false
+    /// Active audio tone sets ("A","B","C","D").
+    @Published public var activeToneSets: Set<String> = []
+    
 
     @discardableResult
     public func toggleTorch(id: Int) -> [ChoirDevice] {
@@ -123,11 +124,14 @@ public final class ConsoleState: ObservableObject, Sendable {
         Task {
             let oscBroadcaster = try await broadcasterTask.value
             let slot = Int32(device.id + 1)
-            let file = "sfx.ghost.mp3"
             let gain: Float32 = 1.0
-            try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
-            await MainActor.run {
-                self.lastLog = "/audio/play [\(device.id + 1), \(file), \(gain)]"
+            // Determine tone sets to send: default to ["A"] if none selected
+            let sets = activeToneSets.isEmpty ? ["A"] : activeToneSets.sorted()
+            for set in sets {
+                let prefix = set.lowercased()
+                let file = "\(prefix)\(slot).mp3"
+                try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
+                await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
             }
         }
     }
@@ -290,50 +294,7 @@ extension ConsoleState {
         isBroadcasting = true
         lastLog = "🛰  Broadcasting on 255.255.255.255:9000"
         print("[ConsoleState] Network stack started ✅")
-        // Start UDP listener for discovery on port 9001
-        do {
-            let params = NWParameters.udp
-            let listener = try NWListener(using: params, on: 9001)
-            self.discoveryListener = listener
-            listener.newConnectionHandler = { connection in
-                connection.stateUpdateHandler = { state in
-                    if case .ready = state {
-                        connection.receiveMessage { [weak self] data, context, _, error in
-                            guard let self = self, let data = data else { return }
-                            // Parse JSON {"slot":Int, "name":String, ["udid":String]}
-                            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                               let slot = json["slot"] as? Int,
-                               let name = json["name"] as? String {
-                                let udid = json["udid"] as? String
-                                // Extract remote IP from connection endpoint
-                                var ip = ""
-                                let endpoint = connection.endpoint
-                                if case let .hostPort(host: host, port: _) = endpoint {
-                                    ip = host.debugDescription
-                                }
-                                Task { @MainActor in
-                                    // Update placeholder device for slot (1-based) => index = slot-1
-                                    let idx = slot - 1
-                                    guard self.devices.indices.contains(idx) else { return }
-                                    self.devices[idx].ip = ip
-                                    self.devices[idx].name = name
-                                    if let udid = udid {
-                                        self.devices[idx].udid = udid
-                                    }
-                                    self.statuses[idx] = .live
-                                }
-                            }
-                            connection.cancel()
-                        }
-                        connection.start(queue: .main)
-                    }
-                }
-                connection.start(queue: .main)
-            }
-            listener.start(queue: .main)
-        } catch {
-            print("⚠️ Discovery listener failed: \(error)")
-        }
+        // Start UDP group listener for discovery on port 9001
     }
 
     /// Gracefully cancel background tasks when the app resigns active.
