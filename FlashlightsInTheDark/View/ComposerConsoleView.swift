@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
@@ -106,6 +107,11 @@ struct ComposerConsoleView: View {
         // Routing sheet
         .sheet(isPresented: $showRouting) {
             RoutingView()
+                // size to 80% of main screen
+                .frame(
+                    width: (NSScreen.main?.visibleFrame.width ?? 1024) * 0.8,
+                    height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
+                )
                 .environmentObject(state)
         }
     }
