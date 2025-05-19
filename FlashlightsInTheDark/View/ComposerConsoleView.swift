@@ -6,11 +6,30 @@ struct ComposerConsoleView: View {
     @State private var showRouting: Bool = false
 
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
+    // Keyboard mapping rows for 32 keys
+    private let keyRows = ["12345678", "qwertyui", "asdfghjk", "zxcvbnm,"]
+    private var keyLabels: [String] {
+        keyRows.flatMap { row in row.map { String($0) } }
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
-            // Tone-set toggles
-            VStack(spacing: 12) {
+            // Envelope & tone-set controls
+            VStack(alignment: .leading, spacing: 12) {
+                Group {
+                    Stepper("Attack: \(state.attackMs) ms", value: $state.attackMs, in: 0...2000, step: 50)
+                    Stepper("Decay: \(state.decayMs) ms", value: $state.decayMs, in: 0...2000, step: 50)
+                    Stepper("Sustain: \(state.sustainPct)%", value: $state.sustainPct, in: 0...100, step: 10)
+                    Stepper("Release: \(state.releaseMs) ms", value: $state.releaseMs, in: 0...2000, step: 50)
+                }
+                HStack {
+                    Button("0 Envelope") { state.startEnvelopeAll() }
+                        .buttonStyle(.borderedProminent)
+                    Button("Release Envelope") { state.releaseEnvelopeAll() }
+                        .buttonStyle(.bordered)
+                }
+                Divider()
+                Text("Tone Sets:") .font(.headline)
                 ForEach(["A", "B", "C", "D"], id: \.self) { set in
                     Button(action: {
                         if state.activeToneSets.contains(set) {
@@ -32,6 +51,39 @@ struct ComposerConsoleView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Toggle tone set \(set)")
+                }
+                // Typing keyboard trigger mode selection
+                Divider()
+                Text("Typing Keyboard Mode:")
+                    .font(.headline)
+                HStack(spacing: 12) {
+                    ForEach(ConsoleState.KeyboardTriggerMode.allCases, id: \.self) { mode in
+                        Button(action: { state.keyboardTriggerMode = mode }) {
+                            ZStack {
+                                Circle()
+                                    .fill(state.keyboardTriggerMode == mode
+                                          ? Color.blue
+                                          : Color.gray.opacity(0.3))
+                                    .frame(width: 40, height: 40)
+                                // Icon for mode
+                                Group {
+                                    if mode == .torch {
+                                        Image(systemName: "flashlight.on.fill")
+                                    } else if mode == .sound {
+                                        Image(systemName: "speaker.wave.2.fill")
+                                    } else {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "flashlight.on.fill")
+                                            Image(systemName: "speaker.wave.2.fill")
+                                        }
+                                    }
+                                }
+                                .foregroundColor(.white)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .help("Keyboard: \(mode.rawValue)")
+                    }
                 }
                 Spacer()
             }
@@ -79,6 +131,12 @@ struct ComposerConsoleView: View {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(state.devices) { device in
                     VStack(spacing: 4) {
+                        // Keyboard key label
+                        if keyLabels.indices.contains(device.id) {
+                            Text(keyLabels[device.id])
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                         Image(systemName: "flashlight.on.fill")
                             .font(.system(size: 28))
                             .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)

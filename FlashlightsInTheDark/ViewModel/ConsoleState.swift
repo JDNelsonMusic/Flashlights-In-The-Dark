@@ -67,6 +67,21 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var isBroadcasting: Bool = false
     /// Active audio tone sets ("A","B","C","D").
     @Published public var activeToneSets: Set<String> = []
+    // Envelope parameters (ms, %)
+    @Published public var attackMs: Int = 200
+    @Published public var decayMs: Int = 200
+    @Published public var sustainPct: Int = 50
+    @Published public var releaseMs: Int = 200
+    /// How typing keyboard triggers devices: torch only, sound only, or both
+    public enum KeyboardTriggerMode: String, CaseIterable {
+        case torch = "Torch"
+        case sound = "Sound"
+        case both  = "Torch+Sound"
+    }
+    /// Current typing keyboard trigger mode
+    @Published public var keyboardTriggerMode: KeyboardTriggerMode = .torch
+    // Envelope task to allow cancellation
+    private var envelopeTask: Task<Void, Never>?
     
 
     @discardableResult
@@ -85,6 +100,27 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
         return devices
+    }
+    
+    /// Directly flash on a specific lamp slot (no toggle) and update state.
+    public func flashOn(id: Int) {
+        guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        devices[idx].torchOn = true
+        Task {
+            let osc = try await broadcasterTask.value
+            try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
+            await MainActor.run { lastLog = "/flash/on [\(id + 1), 1]" }
+        }
+    }
+    /// Directly flash off a specific lamp slot and update state.
+    public func flashOff(id: Int) {
+        guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        devices[idx].torchOn = false
+        Task {
+            let osc = try await broadcasterTask.value
+            try await osc.send(FlashOff(index: Int32(id + 1)))
+            await MainActor.run { lastLog = "/flash/off [\(id + 1)]" }
+        }
     }
     
     // MARK: – One-click build & run  🚀
@@ -132,6 +168,73 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let file = "\(prefix)\(slot).mp3"
                 try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
                 await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
+            }
+        }
+    }
+    /// Stop playback of sound on a specific device slot (send audio/stop)
+    public func stopSound(device: ChoirDevice) {
+        guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
+        Task {
+            let osc = try await broadcasterTask.value
+            let slot = Int32(device.id + 1)
+            try await osc.send(AudioStop(index: slot))
+            await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
+        }
+    }
+    
+    /// Start a global ADSR envelope across all lamps
+    public func startEnvelopeAll() {
+        envelopeTask?.cancel()
+        envelopeTask = Task {
+            do {
+                let osc = try await broadcasterTask.value
+                let steps = 10
+                // Attack phase
+                for i in 0...steps {
+                    let intensity = Float32(i) / Float32(steps)
+                    for d in devices {
+                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                    }
+                    try await Task.sleep(nanoseconds: UInt64(attackMs) * 1_000_000 / UInt64(steps))
+                }
+                // Decay to sustain
+                let sustainLevel = Float32(sustainPct) / 100
+                for i in 0...steps {
+                    let t = Float32(i) / Float32(steps)
+                    let intensity = (1 - t) + t * sustainLevel
+                    for d in devices {
+                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                    }
+                    try await Task.sleep(nanoseconds: UInt64(decayMs) * 1_000_000 / UInt64(steps))
+                }
+                // Hold sustain until release called
+            } catch {
+                print("⚠️ startEnvelopeAll error: \(error)")
+            }
+        }
+    }
+    
+    /// Release the envelope: fade out and send flash-off
+    public func releaseEnvelopeAll() {
+        envelopeTask?.cancel()
+        envelopeTask = Task {
+            do {
+                let osc = try await broadcasterTask.value
+                let steps = 10
+                let sustainLevel = Float32(sustainPct) / 100
+                for i in 0...steps {
+                    let intensity = sustainLevel * (1 - Float32(i) / Float32(steps))
+                    for d in devices {
+                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                    }
+                    try await Task.sleep(nanoseconds: UInt64(releaseMs) * 1_000_000 / UInt64(steps))
+                }
+                for d in devices {
+                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                }
+                await MainActor.run { lastLog = "/envelope release" }
+            } catch {
+                print("⚠️ releaseEnvelopeAll error: \(error)")
             }
         }
     }

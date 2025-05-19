@@ -6,12 +6,26 @@
 //
 
 import SwiftUI
+import AppKit
 
 @main
 struct FlashlightsInTheDarkApp: App {
+    @StateObject private var state = ConsoleState()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+    init() {
+        // Provide state reference to AppDelegate for keyboard handling
+        appDelegate.state = state
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(state)
+                .onAppear {
+                    // Immediately bootstrap network
+                    Task { await state.startNetwork() }
+                }
         }
     }
 }
