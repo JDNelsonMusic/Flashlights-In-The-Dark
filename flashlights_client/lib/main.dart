@@ -45,7 +45,7 @@ class FlashlightsApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(
         useMaterial3: true,
-      ).copyWith(scaffoldBackgroundColor: const Color(0xFF160016)),
+      ).copyWith(scaffoldBackgroundColor: const Color(0xFF120012)),
       home: const Bootstrap(),
     );
   }
