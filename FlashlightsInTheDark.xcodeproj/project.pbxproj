@@ -48,11 +48,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		203C52E12DD67F2E00597453 /* FlashlightsInTheDark */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = FlashlightsInTheDark;
-			sourceTree = "<group>";
-		};
+       203C52E12DD67F2E00597453 /* FlashlightsInTheDark_MacOS */ = {
+           isa = PBXFileSystemSynchronizedRootGroup;
+           path = FlashlightsInTheDark_MacOS;
+           sourceTree = "<group>";
+       };
 		203C52F02DD67F2F00597453 /* FlashlightsInTheDarkTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = FlashlightsInTheDarkTests;
@@ -141,7 +141,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				203C52E12DD67F2E00597453 /* FlashlightsInTheDark */,
+				203C52E12DD67F2E00597453 /* FlashlightsInTheDark_MacOS */,
 			);
 			name = FlashlightsInTheDark;
 			packageProductDependencies = (
@@ -446,7 +446,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FlashlightsInTheDark/FlashlightsInTheDark.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FlashlightsInTheDark_MacOS/FlashlightsInTheDark.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -473,7 +473,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FlashlightsInTheDark/FlashlightsInTheDark.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FlashlightsInTheDark_MacOS/FlashlightsInTheDark.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

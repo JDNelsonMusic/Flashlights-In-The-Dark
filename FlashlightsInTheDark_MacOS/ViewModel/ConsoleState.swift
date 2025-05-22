@@ -180,6 +180,28 @@ public final class ConsoleState: ObservableObject, Sendable {
             triggerSound(device: device)
         }
     }
+    /// Refresh device information from the slot mapping JSON resource
+    public func refreshDevices() {
+        Task { @MainActor in
+            guard let url = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json") else { return }
+            do {
+                let data = try Data(contentsOf: url)
+                let dict = try JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
+                // Update devices by slot index (1-based keys)
+                for (key, info) in dict {
+                    if let slot = Int(key), slot > 0, slot <= devices.count {
+                        let idx = slot - 1
+                        devices[idx].ip = info.ip
+                        devices[idx].udid = info.udid
+                        devices[idx].name = info.name
+                    }
+                }
+                lastLog = "🔄 Refreshed device list"
+            } catch {
+                lastLog = "⚠️ Refresh failed: \(error)"
+            }
+        }
+    }
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }

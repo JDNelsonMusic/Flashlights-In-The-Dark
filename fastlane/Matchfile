@@ -1,0 +1,15 @@
+git_url("git@github.com:JDNelsonMusic/flashlights-certs.git")
+git_branch("main")
+storage_mode("git")
+
+type("adhoc")
+app_identifier(["com.keex.Flashlights-ITD-Client"])
+                                                 
+
+username("jdnelsonmusic@gmail.com")
+team_id("64X2982QY7")
+
+readonly(false)
+shallow_clone(true)
+git_basic_authorization("")
+force_for_new_devices(true)

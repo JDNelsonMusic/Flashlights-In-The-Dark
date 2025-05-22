@@ -1,52 +1,90 @@
-#!/usr/bin/env bash
+#!/opt/homebrew/bin/bash
 set -euo pipefail
 
-ARCHIVE="FlashlightsInTheDark.xcarchive"
-IPA="FlashlightsInTheDark.ipa"
+###############################################################################
+#  Flashlights in the Dark – choir_onboard.sh                                 #
+#  • registers every plugged-in iPhone with the Apple Dev Portal              #
+#  • refreshes the ad-hoc profile, installs the ready-made IPA                #
+#  • builds / installs the Android APK on all connected Android handsets      #
+#  • keeps a MAC-IP⇄UDID map for easy Wi-Fi discovery later                   #
+###############################################################################
+
+# ——— Fastlane bug-work-around ———
+export FASTLANE_DISABLE_COLORS=1      # coloured2 recursion bug on Ruby 3.4
+
+# ——— Paths ———
+ARCHIVE="FlashlightsInTheDark.xcarchive"        # only used if you re-export
+IPA="/Users/JDNelson/AI_Dev/Flashlights-ITD_Client_2025-05-19 13-37-19/flashlights_client.ipa"
 APK="flashlights_client/build/app/outputs/flutter-apk/app-release.apk"
 MAP="FlashlightsInTheDark/flash_ip+udid_map.json"
 
-# ---------------- iOS ----------------
-echo "🔍  Scanning iOS devices..."
-mapfile -t IOS_UDIDS < <(cfgutil list --format JSON | jq -r '.Output[].UDID? // empty')
+###############################################################################
+#                               iOS section                                   #
+###############################################################################
+echo "🔍  Scanning iOS devices…"
+
+# Strip ANSI codes  → extract every “UDID: <value>”
+mapfile -t IOS_UDIDS < <(
+  cfgutil list         |
+  sed $'s/\x1B\\[[0-9;]*[a-zA-Z]//g' |
+  grep -oE 'UDID: [A-Za-z0-9-]+'     |
+  awk '{print $2}'
+)
+
+echo "📋  Found ${#IOS_UDIDS[@]} device(s): ${IOS_UDIDS[*]:-(none)}"
+
 for UDID in "${IOS_UDIDS[@]}"; do
-  NAME=$(cfgutil --raw --ecid "$UDID" get DeviceName)
-  echo "📱  $NAME ($UDID) – registering"
-  fastlane ios register_device udid:"$UDID" name:"$NAME" --quiet
+  # `cfgutil -u <UDID> get DeviceName` → friendlier than the ECID variant
+  NAME=$(cfgutil -u "$UDID" --raw get DeviceName 2>/dev/null || echo "$UDID")
+  echo "📱  $NAME ($UDID) – registering…"
+  fastlane ios register_device udid:"$UDID" name:"$NAME"
 done
 
 if (( ${#IOS_UDIDS[@]} )); then
-  echo "🔑  Refreshing ad-hoc profile & exporting IPA"
-  fastlane ios sync_code_signing --quiet
-  fastlane ios reexport archive_path:"$ARCHIVE" ipa_path:"$IPA" --quiet
-  echo "🚚  Installing IPA to all iOS devices"
+  echo "🔑  Refreshing ad-hoc profile & installing IPA…"
+  fastlane ios sync_code_signing
+  # Install the pre-built IPA on every connected iPhone
   cfgutil --foreach install-app "$IPA"
 fi
 
-# ---------------- Android ----------------
-echo "🔍  Scanning Android devices..."
+###############################################################################
+#                             Android section                                 #
+###############################################################################
+echo "🔍  Scanning Android devices…"
 mapfile -t ANDROID_SERIALS < <(adb devices | awk 'NR>1 && $2=="device"{print $1}')
+
 if (( ${#ANDROID_SERIALS[@]} )); then
-  echo "⚙️   Assembling Flutter APK"
+  echo "⚙️   Building Flutter APK (release)…"
   (cd flashlights_client && flutter build apk --release -q)
+
   for S in "${ANDROID_SERIALS[@]}"; do
-    echo "🤖  installing on $S"
-    adb -s "$S" install -r "$APK"
+    echo "🤖  Installing on $S…"
+    adb -s "$S" install -r "$APK" >/dev/null
   done
 fi
 
-# ---------------- mapping file ----------------
-echo "🗺   Updating IP/UDID map"
-python - <<'PY'
-import json, subprocess, os, sys, re, ipaddress
-MAP = "FlashlightsInTheDark/flash_ip+udid_map.json"
-try:
-    data = json.load(open(MAP))
-except: data = {}
-hosts = subprocess.check_output(["arp","-a"]).decode()
-for line in hosts.splitlines():
-    m=re.search(r'\(([\d\.]+)\).* ([0-9a-f:]{17})', line, re.I)
-    if m: data[m.group(2)] = {"ip": m.group(1)}
-json.dump(data, open(MAP,'w'), indent=2)
+###############################################################################
+#                       update  (MAC-IP) ⇆ (UDID) map                         #
+###############################################################################
+echo "🗺   Updating IP ⇄ UDID map…"
+python3 - <<'PY'
+import json, subprocess, re, pathlib, ipaddress
+MAP = pathlib.Path("FlashlightsInTheDark/flash_ip+udid_map.json")
+data = json.load(MAP.open()) if MAP.exists() else {}
+
+arp = subprocess.check_output(["arp", "-a"]).decode()
+for line in arp.splitlines():
+    m = re.search(r'\(([\d.]+)\).*? ([0-9a-f:]{17})', line, re.I)
+    if not m:
+        continue
+    ip, mac = m.group(1), m.group(2).lower()
+    try:
+        ipaddress.ip_address(ip)          # skip malformed / IPv6 / link-local
+    except ValueError:
+        continue
+    data[mac] = {"ip": ip}
+
+MAP.write_text(json.dumps(data, indent=2) + "\n")
 PY
+
 echo "✅  All done – singers can unplug."

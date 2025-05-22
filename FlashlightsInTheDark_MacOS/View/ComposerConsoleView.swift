@@ -12,9 +12,10 @@ struct ComposerConsoleView: View {
         keyRows.flatMap { row in row.map { String($0) } }
     }
     
+    @State private var leftPanelWidth: CGFloat = 300
     var body: some View {
         ZStack {
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: 0) {
                 // Envelope & tone-set controls
                 VStack(alignment: .leading, spacing: 12) {
                     Group {
@@ -88,21 +89,28 @@ struct ComposerConsoleView: View {
                     }
                     Spacer()
                 }
+                .frame(width: leftPanelWidth)
+                .padding()
+                // Draggable divider
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 4)
+                    .gesture(
+                        DragGesture(minimumDistance: 2)
+                            .onChanged { value in
+                                let newWidth = value.location.x
+                                leftPanelWidth = max(150, min(newWidth, 600))
+                            }
+                    )
                 // Main console content
                 VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Button("Build All") {
-                            state.buildAll()
+                    HStack(spacing: 12) {
+                        // Refresh device list
+                        Button("Refresh") {
+                            state.refreshDevices()
                         }
                         .buttonStyle(.bordered)
-                        .tint(.green)
-                        .disabled(!state.isBroadcasting)
-                        
-                        Button("Run All") {
-                            state.runAll()
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.mint)
+                        .tint(.blue)
                         .disabled(!state.isBroadcasting)
                         
                         Spacer(minLength: 20)
@@ -164,15 +172,6 @@ struct ComposerConsoleView: View {
                                     .font(.caption2)
                                     .foregroundStyle(st.color)
                                 
-                                // 🆕 Build & Run button
-                                Button {
-                                    state.buildAndRun(device: device)
-                                } label: {
-                                    Image(systemName: "bolt.fill")
-                                        .foregroundStyle(.mint)
-                                        .help("Build & run on \(device.udid.prefix(6))…")
-                                }
-                                .buttonStyle(.plain)
                                 Button {
                                     state.triggerSound(device: device)
                                 } label: {
