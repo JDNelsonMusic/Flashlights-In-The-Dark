@@ -39,11 +39,17 @@ class OscListener {
       case '/flash/on':
         final id = m.arguments[0] as int;
         // Intensity argument is ignored – torch_light has no such API.
-        if (id == myIndex) await TorchLight.enableTorch();
+        if (id == myIndex) {
+          client.flashOn.value = true;
+          await TorchLight.enableTorch();
+        }
         break;
 
       case '/flash/off':
-        if (m.arguments[0] as int == myIndex) await TorchLight.disableTorch();
+        if (m.arguments[0] as int == myIndex) {
+          client.flashOn.value = false;
+          await TorchLight.disableTorch();
+        }
         break;
 
       case '/audio/play':
@@ -59,16 +65,21 @@ class OscListener {
           }
           await _player.setVolume(gain.clamp(0, 1));
           await _player.play();
+          client.audioPlaying.value = true;
         }
         break;
 
       case '/audio/stop':
-        if (m.arguments[0] as int == myIndex) await _player.stop();
+        if (m.arguments[0] as int == myIndex) {
+          await _player.stop();
+          client.audioPlaying.value = false;
+        }
         break;
-      
+
       // Dynamic slot assignment
       case '/set-slot':
-        final newSlot = m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
+        final newSlot =
+            m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
         if (newSlot != client.myIndex.value) {
           client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');

@@ -14,10 +14,7 @@ import 'model/client_state.dart';
 Future<void> _bootstrapNative() async {
   if (Platform.isIOS || Platform.isAndroid) {
     // 1. Ask for runtime permissions (camera + microphone).
-    await [
-      Permission.camera,
-      Permission.microphone,
-    ].request();
+    await [Permission.camera, Permission.microphone].request();
   }
 
   // 2. On Android, spin up the foreground service so we survive backgrounding.
@@ -45,7 +42,9 @@ class FlashlightsApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flashlights Client',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(useMaterial3: true),
+      theme: ThemeData.dark(
+        useMaterial3: true,
+      ).copyWith(scaffoldBackgroundColor: const Color(0xFF160016)),
       home: const Bootstrap(),
     );
   }
@@ -66,7 +65,6 @@ class _BootstrapState extends State<Bootstrap> {
     super.initState();
     OscListener.instance.start();
   }
-  
 
   @override
   void dispose() {
@@ -99,15 +97,40 @@ class _BootstrapState extends State<Bootstrap> {
               builder: (context, myIndex, _) {
                 return DropdownButton<int>(
                   value: myIndex,
-                  items: List.generate(32, (i) => DropdownMenuItem(
-                    value: i + 1,
-                    child: Text('Slot ${i + 1}'),
-                  )),
+                  items: List.generate(
+                    32,
+                    (i) => DropdownMenuItem(
+                      value: i + 1,
+                      child: Text('Slot ${i + 1}'),
+                    ),
+                  ),
                   onChanged: (newSlot) {
                     if (newSlot != null) {
                       client.myIndex.value = newSlot;
                     }
                   },
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            ValueListenableBuilder<bool>(
+              valueListenable: client.flashOn,
+              builder: (context, flashOn, _) {
+                return Icon(
+                  flashOn ? Icons.flash_on : Icons.flash_off,
+                  color: flashOn ? Colors.yellow : Colors.grey,
+                  size: 48,
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<bool>(
+              valueListenable: client.audioPlaying,
+              builder: (context, playing, _) {
+                return Icon(
+                  playing ? Icons.music_note : Icons.music_off,
+                  color: playing ? Colors.green : Colors.grey,
+                  size: 48,
                 );
               },
             ),
