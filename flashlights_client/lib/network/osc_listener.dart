@@ -102,6 +102,7 @@ class OscListener {
     }
   }
 
+  /// Broadcast a hello so servers can discover us
   void _sendHello() {
     if (_socket == null) return;
     final msg = OSCMessage('/hello', [client.myIndex.value]);
