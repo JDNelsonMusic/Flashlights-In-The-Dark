@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' as async;
 import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
@@ -13,10 +13,10 @@ class OscListener {
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
-  Timer? _helloTimer;
+  async.Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
   bool _running = false;
-  Timer? _disconnectTimer;
+  async.Timer? _disconnectTimer;
 
   /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
@@ -31,8 +31,10 @@ class OscListener {
     await _socket!.listen((OSCMessage msg) => _dispatch(msg));
 
     // Periodically announce our presence so the server can discover us.
-    _helloTimer =
-        Timer.periodic(const Duration(seconds: 2), (_) => _sendHello());
+    _helloTimer = async.Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => _sendHello(),
+    );
     _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
@@ -112,9 +114,12 @@ class OscListener {
   void _markConnected() {
     client.connected.value = true;
     _disconnectTimer?.cancel();
-    _disconnectTimer = Timer(const Duration(seconds: 2), () {
-      client.connected.value = false;
-    });
+    _disconnectTimer = async.Timer(
+      const Duration(seconds: 2),
+      () {
+        client.connected.value = false;
+      },
+    );
   }
 
   /// Stops listening and cleans up resources.
