@@ -197,6 +197,10 @@ public final class ConsoleState: ObservableObject, Sendable {
                     }
                 }
                 lastLog = "🔄 Refreshed device list"
+                // Re-broadcast hello so clients can reconnect
+                if let osc = try? await broadcasterTask.value {
+                    try? await osc.start()
+                }
             } catch {
                 lastLog = "⚠️ Refresh failed: \(error)"
             }
@@ -427,8 +431,14 @@ extension ConsoleState {
         guard !isBroadcasting else { return }
         isBroadcasting = true
         lastLog = "🛰  Broadcasting on 255.255.255.255:9000"
-        print("[ConsoleState] Network stack started ✅")
-        // Start UDP group listener for discovery on port 9001
+        do {
+            let broadcaster = try await broadcasterTask.value
+            try await broadcaster.start()
+            print("[ConsoleState] Network stack started ✅")
+        } catch {
+            lastLog = "⚠️ Network start failed: \(error)"
+            print("⚠️ startNetwork error: \(error)")
+        }
     }
 
     /// Gracefully cancel background tasks when the app resigns active.

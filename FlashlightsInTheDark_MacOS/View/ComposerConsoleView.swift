@@ -105,13 +105,13 @@ struct ComposerConsoleView: View {
                 // Main console content
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 12) {
-                        // Refresh device list
+                        // Refresh device list and resend hello packets
                         Button("Refresh") {
                             state.refreshDevices()
+                            Task { await state.startNetwork() }
                         }
                         .buttonStyle(.bordered)
                         .tint(.blue)
-                        .disabled(!state.isBroadcasting)
                         
                         Spacer(minLength: 20)
                         Button("Blackout") {

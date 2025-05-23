@@ -31,8 +31,10 @@ class OscListener {
     await _socket!.listen((OSCMessage msg) => _dispatch(msg));
 
     // Periodically announce our presence so the server can discover us.
-    _helloTimer =
-        async.Timer.periodic(const Duration(seconds: 2), (_) => _sendHello());
+    _helloTimer = async.Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => _sendHello(),
+    );
     _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
@@ -112,9 +114,12 @@ class OscListener {
   void _markConnected() {
     client.connected.value = true;
     _disconnectTimer?.cancel();
-    _disconnectTimer = async.Timer(const Duration(seconds: 2), () {
-      client.connected.value = false;
-    });
+    _disconnectTimer = async.Timer(
+      const Duration(seconds: 2),
+      () {
+        client.connected.value = false;
+      },
+    );
   }
 
   /// Stops listening and cleans up resources.
