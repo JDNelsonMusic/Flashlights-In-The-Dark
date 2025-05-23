@@ -21,6 +21,9 @@ class ClientState {
 
   /// Whether audio is currently playing.
   final ValueNotifier<bool> audioPlaying;
+
+  /// Whether the client is connected to the server.
+  final ValueNotifier<bool> connected = ValueNotifier<bool>(false);
 }
 
 /// Singleton client state

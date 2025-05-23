@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' as async;
 import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
@@ -15,6 +15,7 @@ class OscListener {
   OSCSocket? _socket;
   late final AudioPlayer _player = AudioPlayer();
   bool _running = false;
+  async.Timer? _disconnectTimer;
 
   /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
@@ -86,8 +87,21 @@ class OscListener {
         }
         break;
 
+      case '/sync':
+      case '/hello':
+        _markConnected();
+        break;
+
       // TODO: implement /mic/record and /sync handling.
     }
+  }
+
+  void _markConnected() {
+    client.connected.value = true;
+    _disconnectTimer?.cancel();
+    _disconnectTimer = async.Timer(const Duration(seconds: 2), () {
+      client.connected.value = false;
+    });
   }
 
   /// Stops listening and cleans up resources.
@@ -96,6 +110,8 @@ class OscListener {
     _socket = null;
     await _player.dispose();
     _running = false;
+    _disconnectTimer?.cancel();
+    client.connected.value = false;
     print('[OSC] Listener stopped');
   }
 }
