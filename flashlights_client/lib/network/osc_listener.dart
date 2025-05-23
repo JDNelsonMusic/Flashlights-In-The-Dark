@@ -13,6 +13,7 @@ class OscListener {
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
+  Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
   bool _running = false;
   Timer? _disconnectTimer;
@@ -28,6 +29,11 @@ class OscListener {
     );
     // Listen and dispatch using the current slot
     await _socket!.listen((OSCMessage msg) => _dispatch(msg));
+
+    // Periodically announce our presence so the server can discover us.
+    _helloTimer =
+        Timer.periodic(const Duration(seconds: 2), (_) => _sendHello());
+    _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
   }
@@ -96,6 +102,13 @@ class OscListener {
     }
   }
 
+  /// Broadcast a hello so servers can discover us
+  void _sendHello() {
+    if (_socket == null) return;
+    final msg = OSCMessage('/hello', [client.myIndex.value]);
+    _socket!.send(msg, InternetAddress('255.255.255.255'), 9000);
+  }
+
   void _markConnected() {
     client.connected.value = true;
     _disconnectTimer?.cancel();
@@ -111,6 +124,7 @@ class OscListener {
     await _player.dispose();
     _running = false;
     _disconnectTimer?.cancel();
+    _helloTimer?.cancel();
     client.connected.value = false;
     print('[OSC] Listener stopped');
   }
