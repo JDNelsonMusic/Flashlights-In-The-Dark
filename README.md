@@ -76,3 +76,18 @@ git commit -m "Onboard device SingerName UDID to slot"
 brew bundle --file=./scripts/Brewfile      # cfgutil, fastlane, jq, adb
 scripts/choir_onboard.sh                   # plug phones first, then run
 ```
+
+## iOS Client Setup
+After renaming the iOS application from `Runner` to `Flashlights-ITD-Client`,
+the CocoaPods configuration must be regenerated. Run the following commands
+from the `flashlights_client` directory before opening the Xcode workspace:
+
+```bash
+flutter pub get
+cd ios
+pod install
+```
+
+This will create `Flashlights-ITD-Client.xcworkspace` with the updated
+`Pods-Flashlights-ITD-Client` support files so Xcode can build without the
+missing `xcfilelist` errors.
