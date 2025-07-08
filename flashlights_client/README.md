@@ -14,3 +14,16 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+### iOS clean build checklist
+```bash
+flutter clean
+flutter pub get
+cd ios
+rm -rf Pods Podfile.lock
+pod install
+open Flashlights-ITD-Client.xcworkspace   # \u2190 NOT the .xcodeproj
+```
+
+Building the *Flashlights-ITD-Client* scheme for any simulator or
+device should now succeed.

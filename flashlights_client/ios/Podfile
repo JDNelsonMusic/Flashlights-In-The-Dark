@@ -4,6 +4,8 @@
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+require_relative '../flutter_export_environment'
+
 project 'Flashlights-ITD-Client', {
   'Debug' => :debug,
   'Profile' => :release,
@@ -54,4 +56,5 @@ post_install do |installer|
     end
     app_proj.save
   end
+  flutter_post_install(installer)
 end
