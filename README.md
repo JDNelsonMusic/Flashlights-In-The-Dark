@@ -91,3 +91,11 @@ pod install
 This will create `Flashlights-ITD-Client.xcworkspace` with the updated
 `Pods-Flashlights-ITD-Client` support files so Xcode can build without the
 missing `xcfilelist` errors.
+
+### Troubleshooting
+Opening the workspace in Xcode before running these commands can lead to build
+errors such as a failed precompiled header or "`GeneratedPluginRegistrant.h`
+file not found". These errors mean the Flutter-generated files were not yet
+created. Running the steps above (`flutter pub get` and `pod install`) will
+generate the required files. After that, open
+`Flashlights-ITD-Client.xcworkspace` and the project should build normally.
