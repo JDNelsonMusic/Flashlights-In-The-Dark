@@ -10,12 +10,12 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* Flashlights-ITD-ClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* Flashlights-ITD-ClientTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		57E883A02748A71CB9F9924A /* Pods_Flashlights_ITD_ClientTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F372E2DAA314DD0E779072D /* Pods_Flashlights_ITD_ClientTests.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		C6D3323E0868C8460C42A3C8 /* Pods_Flashlights-ITD-ClientTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F47919144E85AD044385084 /* Pods_Flashlights-ITD-ClientTests.framework */; };
-		CFEDE3831F14A5AE67AAF6DA /* Pods_Flashlights-ITD-Client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3806ABACEFA11F1015F53099 /* Pods_Flashlights-ITD-Client.framework */; };
+		B22B59452CBEBD5B72B6A2A1 /* Pods_Flashlights_ITD_Client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96905F6439561A7FBA0CB8CD /* Pods_Flashlights_ITD_Client.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +24,7 @@
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
-			remoteInfo = Flashlights-ITD-Client;
+			remoteInfo = "Flashlights-ITD-Client";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -47,23 +47,23 @@
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		1AD8821EFC4C6E5B8F24497C /* Pods-Flashlights-ITD-Client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flashlights-ITD-Client.release.xcconfig"; path = "Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client.release.xcconfig"; sourceTree = "<group>"; };
 		1DC8D40B793495EB94C5124C /* Pods-Flashlights-ITD-ClientTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flashlights-ITD-ClientTests.debug.xcconfig"; path = "Target Support Files/Pods-Flashlights-ITD-ClientTests/Pods-Flashlights-ITD-ClientTests.debug.xcconfig"; sourceTree = "<group>"; };
-		331C807B294A618700263BE5 /* Flashlights-ITD-ClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flashlights-ITD-ClientTests.swift; sourceTree = "<group>"; };
-		331C8081294A63A400263BE5 /* Flashlights-ITD-ClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Flashlights-ITD-ClientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3806ABACEFA11F1015F53099 /* Pods_Flashlights-ITD-Client.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Flashlights-ITD-Client.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		331C807B294A618700263BE5 /* Flashlights-ITD-ClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Flashlights-ITD-ClientTests.swift"; sourceTree = "<group>"; };
+		331C8081294A63A400263BE5 /* Flashlights-ITD-ClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flashlights-ITD-ClientTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		454B7E8F6931969A3E5FECF4 /* Pods-Flashlights-ITD-ClientTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flashlights-ITD-ClientTests.profile.xcconfig"; path = "Target Support Files/Pods-Flashlights-ITD-ClientTests/Pods-Flashlights-ITD-ClientTests.profile.xcconfig"; sourceTree = "<group>"; };
 		454D9DC42FAFE41E4FDDC66D /* Pods-Flashlights-ITD-Client.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flashlights-ITD-Client.profile.xcconfig"; path = "Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client.profile.xcconfig"; sourceTree = "<group>"; };
-		5F47919144E85AD044385084 /* Pods_Flashlights-ITD-ClientTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Flashlights-ITD-ClientTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Flashlights-ITD-Client-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Flashlights-ITD-Client-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		96905F6439561A7FBA0CB8CD /* Pods_Flashlights_ITD_Client.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Flashlights_ITD_Client.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
-		97C146EE1CF9000F007C117D /* Flashlights-ITD-Client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flashlights-ITD-Client.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97C146EE1CF9000F007C117D /* Flashlights-ITD-Client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flashlights-ITD-Client.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9F372E2DAA314DD0E779072D /* Pods_Flashlights_ITD_ClientTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Flashlights_ITD_ClientTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8F57669E033990F6C8E5202 /* Pods-Flashlights-ITD-Client.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Flashlights-ITD-Client.debug.xcconfig"; path = "Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -72,7 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C6D3323E0868C8460C42A3C8 /* Pods_Flashlights-ITD-ClientTests.framework in Frameworks */,
+				57E883A02748A71CB9F9924A /* Pods_Flashlights_ITD_ClientTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,7 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CFEDE3831F14A5AE67AAF6DA /* Pods_Flashlights-ITD-Client.framework in Frameworks */,
+				B22B59452CBEBD5B72B6A2A1 /* Pods_Flashlights_ITD_Client.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,14 +105,14 @@
 			children = (
 				331C807B294A618700263BE5 /* Flashlights-ITD-ClientTests.swift */,
 			);
-			path = Flashlights-ITD-ClientTests;
+			path = "Flashlights-ITD-ClientTests";
 			sourceTree = "<group>";
 		};
 		61DA7F64D2762833653154EB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3806ABACEFA11F1015F53099 /* Pods_Flashlights-ITD-Client.framework */,
-				5F47919144E85AD044385084 /* Pods_Flashlights-ITD-ClientTests.framework */,
+				96905F6439561A7FBA0CB8CD /* Pods_Flashlights_ITD_Client.framework */,
+				9F372E2DAA314DD0E779072D /* Pods_Flashlights_ITD_ClientTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -161,7 +161,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Flashlights-ITD-Client-Bridging-Header.h */,
 			);
-			path = Flashlights-ITD-Client;
+			path = "Flashlights-ITD-Client";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -181,8 +181,8 @@
 			dependencies = (
 				331C8086294A63A400263BE5 /* PBXTargetDependency */,
 			);
-			name = Flashlights-ITD-ClientTests;
-			productName = Flashlights-ITD-ClientTests;
+			name = "Flashlights-ITD-ClientTests";
+			productName = "Flashlights-ITD-ClientTests";
 			productReference = 331C8081294A63A400263BE5 /* Flashlights-ITD-ClientTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -204,8 +204,8 @@
 			);
 			dependencies = (
 			);
-			name = Flashlights-ITD-Client;
-			productName = Flashlights-ITD-Client;
+			name = "Flashlights-ITD-Client";
+			productName = "Flashlights-ITD-Client";
 			productReference = 97C146EE1CF9000F007C117D /* Flashlights-ITD-Client.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -353,9 +353,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -370,9 +374,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -492,7 +500,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
 				EXPANDED_CODE_SIGN_IDENTITY = "-";
-				INFOPLIST_FILE = Flashlights-ITD-Client/Info.plist;
+				INFOPLIST_FILE = "Flashlights-ITD-Client/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -682,7 +690,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
 				EXPANDED_CODE_SIGN_IDENTITY = "-";
-				INFOPLIST_FILE = Flashlights-ITD-Client/Info.plist;
+				INFOPLIST_FILE = "Flashlights-ITD-Client/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -705,7 +713,7 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
 				EXPANDED_CODE_SIGN_IDENTITY = "-";
-				INFOPLIST_FILE = Flashlights-ITD-Client/Info.plist;
+				INFOPLIST_FILE = "Flashlights-ITD-Client/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
