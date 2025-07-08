@@ -1,1 +1,1 @@
-#import "../Flashlights-ITD-Client/GeneratedPluginRegistrant.h"
+#import <GeneratedPluginRegistrant.h>
