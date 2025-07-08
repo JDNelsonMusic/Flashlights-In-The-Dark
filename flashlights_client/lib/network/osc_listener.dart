@@ -108,7 +108,7 @@ class OscListener {
   void _sendHello() {
     if (_socket == null) return;
     final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
-    _socket!.send(msg, InternetAddress('255.255.255.255'), 9000);
+    _socket!.send(msg);
   }
 
   void _markConnected() {
@@ -132,5 +132,4 @@ class OscListener {
     _helloTimer?.cancel();
     client.connected.value = false;
     print('[OSC] Listener stopped');
-  }
-}
+  }}
