@@ -4,7 +4,7 @@
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-project 'Runner', {
+project 'Flashlights-ITD-Client', {
   'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
@@ -42,7 +42,7 @@ post_install do |installer|
   end
   # Ensure embedded frameworks are ad-hoc signed (avoid invalid identity errors)
   require 'xcodeproj'
-  app_proj_path = File.join(__dir__, 'Runner.xcodeproj')
+  app_proj_path = File.join(__dir__, 'Flashlights-ITD-Client.xcodeproj')
   if File.exist?(app_proj_path)
     app_proj = Xcodeproj::Project.open(app_proj_path)
     app_proj.targets.each do |target|
