@@ -107,7 +107,7 @@ class OscListener {
   /// Broadcast a hello so servers can discover us
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
+    final msg = OSCMessage('/hello', [client.myIndex.value]);
     _socket!.send(msg);
   }
 
@@ -131,5 +131,4 @@ class OscListener {
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
     client.connected.value = false;
-    print('[OSC] Listener stopped');
-  }}
+    print('[OSC] Listener stopped');  }}
