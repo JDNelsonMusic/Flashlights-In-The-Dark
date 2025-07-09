@@ -8,7 +8,8 @@ class ClientState {
       ),
       clockOffsetMs = 0.0,
       flashOn = ValueNotifier<bool>(false),
-      audioPlaying = ValueNotifier<bool>(false);
+      audioPlaying = ValueNotifier<bool>(false),
+      recording = ValueNotifier<bool>(false);
 
   /// Singer slot (1-32). Notifier so UI can react to changes at runtime.
   final ValueNotifier<int> myIndex;
@@ -21,6 +22,9 @@ class ClientState {
 
   /// Whether audio is currently playing.
   final ValueNotifier<bool> audioPlaying;
+
+  /// Whether the microphone is currently recording.
+  final ValueNotifier<bool> recording;
 
   /// Whether the client is connected to the server.
   final ValueNotifier<bool> connected = ValueNotifier<bool>(false);
