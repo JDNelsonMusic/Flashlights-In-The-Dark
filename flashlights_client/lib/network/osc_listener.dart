@@ -6,6 +6,7 @@ import 'package:osc/osc.dart';
 // Import client state to update slot dynamically
 import '../model/client_state.dart';
 import 'package:torch_light/torch_light.dart';
+import 'package:mic_stream/mic_stream.dart';
 
 /// Singleton OSC listener for flash/audio/mic/sync cues.
 class OscListener {
@@ -15,6 +16,7 @@ class OscListener {
   OSCSocket? _socket;
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
+  async.StreamSubscription<List<int>>? _micSubscription;
   bool _running = false;
   Timer? _disconnectTimer;
 
@@ -131,7 +133,32 @@ class OscListener {
         _markConnected();
         break;
 
-      // TODO: implement /mic/record handling.
+      case '/mic/record':
+        final id = m.arguments[0] as int;
+        final durationSec = (m.arguments[1] as num).toDouble();
+        if (id == myIndex) {
+          print('[OSC] Starting mic recording for $durationSec s');
+          await MicStream.shouldRequestPermission(true);
+          final audioStream = MicStream.microphone(
+            audioSource: AudioSource.DEFAULT,
+            sampleRate: 44100,
+            channelConfig: ChannelConfig.CHANNEL_IN_MONO,
+            audioFormat: AudioFormat.ENCODING_PCM_16BIT,
+          );
+          _micSubscription?.cancel();
+          _micSubscription = audioStream.listen((_) {});
+          client.recording.value = true;
+          async.Timer(
+            Duration(milliseconds: (durationSec * 1000).toInt()),
+            () async {
+              await _micSubscription?.cancel();
+              _micSubscription = null;
+              client.recording.value = false;
+              print('[OSC] Mic recording of $durationSec s completed');
+            },
+          );
+        }
+        break;
     }
   }
 
@@ -158,10 +185,12 @@ class OscListener {
   Future<void> stop() async {
     _socket?.close();
     _socket = null;
+    await _micSubscription?.cancel();
+    _micSubscription = null;
+    client.recording.value = false;
     await _player.dispose();
     _running = false;
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
     client.connected.value = false;
-    print('[OSC] Listener stopped');
-  }}
+    print('[OSC] Listener stopped');  }}
