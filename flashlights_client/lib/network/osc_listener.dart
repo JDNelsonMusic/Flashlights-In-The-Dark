@@ -37,7 +37,9 @@ class OscListener {
       // Best effort; not all implementations expose the inner socket.
     }
     // Listen and dispatch using the current slot
-    await _socket!.listen((OSCMessage msg) => _dispatch(msg));
+    await _socket!.listen((OSCMessage msg) async {
+      await _dispatch(msg);
+    });
 
     // Periodically announce our presence so the server can discover us.
     _helloTimer = async.Timer.periodic(
