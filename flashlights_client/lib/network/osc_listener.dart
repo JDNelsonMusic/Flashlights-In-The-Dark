@@ -8,6 +8,28 @@ import '../model/client_state.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:mic_stream/mic_stream.dart';
 
+/// Helper that enables UDP broadcast on an [OSCSocket].
+OSCSocket _createBroadcastSocket({
+  required InternetAddress serverAddress,
+  required int serverPort,
+  required InternetAddress destination,
+  required int destinationPort,
+}) {
+  final socket = OSCSocket(
+    serverAddress: serverAddress,
+    serverPort: serverPort,
+    destination: destination,
+    destinationPort: destinationPort,
+  );
+  try {
+    // ignore: invalid_use_of_visible_for_testing_member
+    socket._socket?.broadcastEnabled = true;
+  } catch (_) {
+    // Best effort; not all implementations expose the inner socket.
+  }
+  return socket;
+}
+
 /// Singleton OSC listener for flash/audio/mic/sync cues.
 class OscListener {
   OscListener._();
@@ -25,19 +47,12 @@ class OscListener {
     if (_running) return;
     _running = true;
 
-    _socket = OSCSocket(
+    _socket = _createBroadcastSocket(
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
       destination: InternetAddress('255.255.255.255'),
       destinationPort: 9000,
     );
-    // Enable UDP broadcast if supported by the underlying socket
-    try {
-      // ignore: invalid_use_of_visible_for_testing_member
-      _socket!._socket?.broadcastEnabled = true;
-    } catch (_) {
-      // Best effort; not all implementations expose the inner socket.
-    }
     // Listen and dispatch using the current slot
     await _socket!.listen((OSCMessage msg) async {
       await _dispatch(msg);
