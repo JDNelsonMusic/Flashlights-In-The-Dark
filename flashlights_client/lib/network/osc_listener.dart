@@ -26,7 +26,16 @@ class OscListener {
     _socket = OSCSocket(
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
+      destination: InternetAddress('255.255.255.255'),
+      destinationPort: 9000,
     );
+    // Enable UDP broadcast if supported by the underlying socket
+    try {
+      // ignore: invalid_use_of_visible_for_testing_member
+      _socket!._socket?.broadcastEnabled = true;
+    } catch (_) {
+      // Best effort; not all implementations expose the inner socket.
+    }
     // Listen and dispatch using the current slot
     await _socket!.listen((OSCMessage msg) => _dispatch(msg));
 
@@ -106,7 +115,11 @@ class OscListener {
   void _sendHello() {
     if (_socket == null) return;
     final msg = OSCMessage('/hello', [client.myIndex.value]);
-    _socket!.send(msg, InternetAddress('255.255.255.255'), 9000);
+    _socket!.send(
+      msg,
+      address: InternetAddress('255.255.255.255'),
+      port: 9000,
+    );
   }
 
   void _markConnected() {
@@ -127,5 +140,4 @@ class OscListener {
     _helloTimer?.cancel();
     client.connected.value = false;
     print('[OSC] Listener stopped');
-  }
-}
+  }}
