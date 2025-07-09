@@ -191,7 +191,10 @@ class OscListener {
   /// Broadcast a hello so servers can discover us
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage('/hello', [client.myIndex.value]);
+    final msg = OSCMessage(
+      '/hello',
+      arguments: [client.myIndex.value],
+    );
     _socket!.send(
       msg,
       address: InternetAddress('255.255.255.255'),
