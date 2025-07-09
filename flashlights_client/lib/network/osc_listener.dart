@@ -119,6 +119,20 @@ class OscListener {
     _socket!.send(msg);
   }
 
+  /// Send a `/flash` message with the given intensity.
+  ///
+  /// The `package:osc` library changed its [OSCMessage] constructor to accept
+  /// only the address positionally.  We now pass the payload via the named
+  /// `arguments` parameter to avoid the "Too many positional arguments" error.
+  void _sendFlash(double intensity) {
+    if (_socket == null) return;
+    final message = OSCMessage(
+      '/flash',
+      arguments: [intensity],
+    );
+    _socket!.send(message);
+  }
+
   void _markConnected() {
     client.connected.value = true;
     _disconnectTimer?.cancel();
@@ -138,5 +152,4 @@ class OscListener {
     _running = false;
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
-    client.connected.value = false;
-    print('[OSC] Listener stopped');  }}
+    client.connected.value = false;    print('[OSC] Listener stopped');  }}
