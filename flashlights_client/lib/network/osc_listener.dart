@@ -192,5 +192,6 @@ class OscListener {
     _running = false;
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
-    client.connected.value = false;
-    print('[OSC] Listener stopped');  }}
+    client.connected.value = false;    print('[OSC] Listener stopped');
+  }
+}
