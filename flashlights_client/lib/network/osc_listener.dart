@@ -23,11 +23,15 @@ class OscListener {
     if (_running) return;
     _running = true;
 
+    // Listen on 0.0.0.0:9000 **and** set a default broadcast destination.
     _socket = OSCSocket(
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
+      destination: InternetAddress('255.255.255.255'),
+      destinationPort: 9000,
     );
-    // Listen and dispatch using the current slot
+
+    // Dispatch every incoming message.
     await _socket!.listen((OSCMessage msg) => _dispatch(msg));
 
     // Periodically announce our presence so the server can discover us.
@@ -41,7 +45,7 @@ class OscListener {
   }
 
   Future<void> _dispatch(OSCMessage m) async {
-    // Always use the latest listening slot
+    // Always use the latest listening slot.
     final myIndex = client.myIndex.value;
     print('OSC ↳ ${m.address} ${m.arguments}');
     switch (m.address) {
@@ -104,10 +108,14 @@ class OscListener {
     }
   }
 
-  /// Broadcast a hello so servers can discover us
+  /// Broadcast a hello so servers can discover us.
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage('/hello', [client.myIndex.value]);
+    final msg = OSCMessage(
+      '/hello',
+      arguments: [client.myIndex.value],
+    );
+    // send() now takes only the message; address/port were set in the ctor.
     _socket!.send(msg);
   }
 
