@@ -75,15 +75,25 @@ class OscListener {
         final id = m.arguments[0] as int;
         // Intensity argument is ignored – torch_light has no such API.
         if (id == myIndex) {
-          client.flashOn.value = true;
-          await TorchLight.enableTorch();
+          try {
+            await TorchLight.enableTorch();
+            client.flashOn.value = true;
+          } catch (e) {
+            print('[OSC] Torch error: $e');
+            client.flashOn.value = false;
+          }
         }
         break;
 
       case '/flash/off':
         if (m.arguments[0] as int == myIndex) {
-          client.flashOn.value = false;
-          await TorchLight.disableTorch();
+          try {
+            await TorchLight.disableTorch();
+            client.flashOn.value = false;
+          } catch (e) {
+            print('[OSC] Torch error: $e');
+            client.flashOn.value = true;
+          }
         }
         break;
 
