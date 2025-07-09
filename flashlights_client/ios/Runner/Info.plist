@@ -55,6 +55,8 @@
 	<!-- Microphone permission (syncs devices via audio beacons) -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Needed so Flashlights-in-the-Dark can listen for sync cues and keep the choir in time.</string>
+        <key>NSLocalNetworkUsageDescription</key>
+        <string>Allows Flashlights Client to discover the server over the local network.</string>
 
 	<!-- Keep audio session alive while app is in the background -->
 	<key>UIBackgroundModes</key>
