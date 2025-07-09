@@ -38,7 +38,7 @@ class OscListener {
   OSCSocket? _socket;
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
-  async.StreamSubscription<List<int>>? _micSubscription;
+  StreamSubscription<List<int>>? _micSubscription;
   bool _running = false;
   Timer? _disconnectTimer;
 
@@ -173,7 +173,7 @@ class OscListener {
           _micSubscription?.cancel();
           _micSubscription = audioStream.listen((_) {});
           client.recording.value = true;
-          async.Timer(
+          Timer(
             Duration(milliseconds: (durationSec * 1000).toInt()),
             () async {
               await _micSubscription?.cancel();
