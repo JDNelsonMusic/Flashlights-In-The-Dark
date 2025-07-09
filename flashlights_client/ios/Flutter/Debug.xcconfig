@@ -1,2 +1,2 @@
-#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
+#include? "Pods/Target Support Files/Pods-Flashlights-ITD-Client/Pods-Flashlights-ITD-Client.debug.xcconfig"
 #include "Generated.xcconfig"
