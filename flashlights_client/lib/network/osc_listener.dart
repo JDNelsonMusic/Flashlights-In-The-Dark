@@ -105,11 +105,33 @@ class OscListener {
         break;
 
       case '/sync':
+        _markConnected();
+        if (m.arguments.isNotEmpty) {
+          final ts = m.arguments[0];
+          BigInt? ntp;
+          if (ts is BigInt) {
+            ntp = ts;
+          } else if (ts is int) {
+            ntp = BigInt.from(ts);
+          }
+          if (ntp != null) {
+            const eraOffset = 2208988800; // Seconds between 1900 and 1970
+            final serverSecs = ntp - BigInt.from(eraOffset);
+            final serverMs = serverSecs.toInt() * 1000;
+            final localMs = DateTime.now().millisecondsSinceEpoch;
+            final offset = serverMs - localMs;
+            client.clockOffsetMs =
+                (client.clockOffsetMs + offset) / 2; // simple smoothing
+            print('[OSC] Clock offset updated to ${client.clockOffsetMs} ms');
+          }
+        }
+        break;
+
       case '/hello':
         _markConnected();
         break;
 
-      // TODO: implement /mic/record and /sync handling.
+      // TODO: implement /mic/record handling.
     }
   }
 
