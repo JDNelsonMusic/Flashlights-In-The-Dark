@@ -21,11 +21,12 @@ OSCSocket _createBroadcastSocket({
     destination: destination,
     destinationPort: destinationPort,
   );
+  // Enable UDP broadcast if the underlying OSCSocket exposes the raw socket.
   try {
-    // ignore: invalid_use_of_visible_for_testing_member
-    socket._socket?.broadcastEnabled = true;
+    // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
+    (socket as dynamic).socket?.broadcastEnabled = true;
   } catch (_) {
-    // Best effort; not all implementations expose the inner socket.
+    // Best effort: the `osc` package may not provide access to the inner socket.
   }
   return socket;
 }
@@ -38,7 +39,7 @@ class OscListener {
   OSCSocket? _socket;
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
-  async.StreamSubscription<List<int>>? _micSubscription;
+  StreamSubscription<List<int>>? _micSubscription;
   bool _running = false;
   Timer? _disconnectTimer;
 
@@ -173,7 +174,7 @@ class OscListener {
           _micSubscription?.cancel();
           _micSubscription = audioStream.listen((_) {});
           client.recording.value = true;
-          async.Timer(
+          Timer(
             Duration(milliseconds: (durationSec * 1000).toInt()),
             () async {
               await _micSubscription?.cancel();
