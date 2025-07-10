@@ -197,8 +197,8 @@ class OscListener {
     );
     _socket!.send(
       msg,
-      address: InternetAddress('255.255.255.255'),
-      port: 9000,
+      InternetAddress('255.255.255.255'),
+      9000,
     );
   }
 
