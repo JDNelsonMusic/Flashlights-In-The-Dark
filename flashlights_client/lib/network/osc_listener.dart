@@ -194,6 +194,7 @@ class OscListener {
     final msg = OSCMessage(
       '/hello',
       arguments: [client.myIndex.value],
+
     );
     // OSCSocket is already configured for broadcast. Send the message using the
     // socket's default destination.
