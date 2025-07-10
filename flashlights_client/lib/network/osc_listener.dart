@@ -6,7 +6,7 @@ import 'package:osc/osc.dart';
 // Import client state to update slot dynamically
 import '../model/client_state.dart';
 import 'package:torch_light/torch_light.dart';
-import 'package:mic_stream/mic_stream.dart';
+import 'package:mic_stream/mic_stream.dart' as mic;
 
 /// Helper that enables UDP broadcast on an [OSCSocket].
 OSCSocket _createBroadcastSocket({
@@ -21,11 +21,12 @@ OSCSocket _createBroadcastSocket({
     destination: destination,
     destinationPort: destinationPort,
   );
+  // Enable UDP broadcast if the underlying OSCSocket exposes the raw socket.
   try {
-    // ignore: invalid_use_of_visible_for_testing_member
-    socket._socket?.broadcastEnabled = true;
+    // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
+    (socket as dynamic).socket?.broadcastEnabled = true;
   } catch (_) {
-    // Best effort; not all implementations expose the inner socket.
+    // Best effort: the `osc` package may not provide access to the inner socket.
   }
   return socket;
 }
@@ -38,7 +39,7 @@ class OscListener {
   OSCSocket? _socket;
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
-  async.StreamSubscription<List<int>>? _micSubscription;
+  StreamSubscription<List<int>>? _micSubscription;
   bool _running = false;
   Timer? _disconnectTimer;
 
@@ -163,17 +164,17 @@ class OscListener {
         final durationSec = (m.arguments[1] as num).toDouble();
         if (id == myIndex) {
           print('[OSC] Starting mic recording for $durationSec s');
-          await MicStream.shouldRequestPermission(true);
-          final audioStream = MicStream.microphone(
-            audioSource: AudioSource.DEFAULT,
+          await mic.MicStream.shouldRequestPermission(true);
+          final audioStream = mic.MicStream.microphone(
+            audioSource: mic.AudioSource.DEFAULT,
             sampleRate: 44100,
-            channelConfig: ChannelConfig.CHANNEL_IN_MONO,
-            audioFormat: AudioFormat.ENCODING_PCM_16BIT,
+            channelConfig: mic.ChannelConfig.CHANNEL_IN_MONO,
+            audioFormat: mic.AudioFormat.ENCODING_PCM_16BIT,
           );
           _micSubscription?.cancel();
           _micSubscription = audioStream.listen((_) {});
           client.recording.value = true;
-          async.Timer(
+          Timer(
             Duration(milliseconds: (durationSec * 1000).toInt()),
             () async {
               await _micSubscription?.cancel();
@@ -190,12 +191,13 @@ class OscListener {
   /// Broadcast a hello so servers can discover us
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage('/hello', [client.myIndex.value]);
-    _socket!.send(
-      msg,
-      address: InternetAddress('255.255.255.255'),
-      port: 9000,
+    final msg = OSCMessage(
+      '/hello',
+      arguments: [client.myIndex.value],
     );
+    // OSCSocket is already configured for broadcast. Send the message using the
+    // socket's default destination.
+    _socket!.send(msg);
   }
 
   void _markConnected() {
