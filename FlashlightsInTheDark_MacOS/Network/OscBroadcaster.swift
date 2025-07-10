@@ -31,6 +31,7 @@ public actor OscBroadcaster {
     let channel: Channel
     let port: Int
     let broadcastAddrs: [SocketAddress]
+    private var helloHandler: ((Int, String) -> Void)?
 
     // --------------------------------------------------------------------
     // MARK: - Initialisation
@@ -66,6 +67,9 @@ public actor OscBroadcaster {
         self.channel = try await bootstrap
             .bind(host: "0.0.0.0", port: port)
             .get()
+
+        // Listen for client /hello announcements
+        try await self.channel.pipeline.addHandler(HelloDatagramHandler(owner: self))
 
         self.broadcastAddrs = OscBroadcaster.gatherBroadcastAddrs(port: port)
 
@@ -124,12 +128,21 @@ public actor OscBroadcaster {
         print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
     }
 
+    /// Register a callback for incoming /hello announcements
+    public func registerHelloHandler(_ handler: @escaping (Int, String) -> Void) {
+        helloHandler = handler
+    }
+
     // --------------------------------------------------------------------
     // MARK: - De-initialisation
     // --------------------------------------------------------------------
     deinit {
         let ch = channel   // capture the channel (avoid capturing `self`)
         Task { try? await ch.close() }
+    }
+
+    func emitHello(slot: Int, ip: String) {
+        helloHandler?(slot, ip)
     }
 }
 
@@ -141,6 +154,47 @@ extension OscBroadcaster {
             values: [ProcessInfo.processInfo.hostName, slotValue]
         )
         try await send(msg)
+    }
+}
+
+// MARK: - Incoming Hello Handling
+extension OscBroadcaster {
+    /// Basic OSC parser to detect `/hello` with Int32 argument
+    fileprivate func parseHelloSlot(_ bytes: [UInt8]) -> Int? {
+        guard let addrEnd = bytes.firstIndex(of: 0),
+              let addr = String(bytes: bytes[0..<addrEnd], encoding: .utf8),
+              addr == "/hello" else { return nil }
+
+        var index = (addrEnd + 4) & ~3
+        guard index < bytes.count,
+              bytes[index] == UInt8(ascii: ",") else { return nil }
+        guard let tagEnd = bytes[index...].firstIndex(of: 0) else { return nil }
+        let tags = String(bytes: bytes[index..<tagEnd], encoding: .utf8) ?? ""
+        guard tags.contains("i") else { return nil }
+        index = (tagEnd + 4) & ~3
+        guard index + 3 < bytes.count else { return nil }
+        var value: Int32 = 0
+        for b in bytes[index..<(index+4)] { value = (value << 8) | Int32(b) }
+        return Int(value)
+    }
+}
+
+final class HelloDatagramHandler: ChannelInboundHandler {
+    typealias InboundIn = AddressedEnvelope<ByteBuffer>
+    unowned let owner: OscBroadcaster
+
+    init(owner: OscBroadcaster) { self.owner = owner }
+
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        let env = self.unwrapInboundIn(data)
+        var buffer = env.data
+        guard let bytes = buffer.readBytes(length: buffer.readableBytes),
+              let slot = owner.parseHelloSlot(bytes) else {
+            return
+        }
+        if let ip = env.remoteAddress.ipAddress {
+            Task { await owner.emitHello(slot: slot, ip: ip) }
+        }
     }
 }
 

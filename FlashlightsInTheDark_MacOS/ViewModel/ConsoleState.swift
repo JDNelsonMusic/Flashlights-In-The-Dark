@@ -476,6 +476,16 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
+
+    /// Update device info when a /hello is received from a client
+    @MainActor
+    func deviceDiscovered(slot: Int, ip: String) {
+        guard slot > 0 && slot <= devices.count else { return }
+        let idx = slot - 1
+        devices[idx].ip = ip
+        statuses[idx] = .live
+        lastLog = "📳 Device \(slot) announced at \(ip)"
+    }
 }
 
 // MARK: - Lifecycle helpers
@@ -490,6 +500,9 @@ extension ConsoleState {
         do {
             let broadcaster = try await broadcasterTask.value
             try await broadcaster.start()
+            await broadcaster.registerHelloHandler { [weak self] slot, ip in
+                await self?.deviceDiscovered(slot: slot, ip: ip)
+            }
             print("[ConsoleState] Network stack started ✅")
         } catch {
             lastLog = "⚠️ Network start failed: \(error)"
