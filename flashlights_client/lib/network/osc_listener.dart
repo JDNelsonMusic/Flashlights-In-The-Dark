@@ -21,12 +21,19 @@ OSCSocket _createBroadcastSocket({
     destination: destination,
     destinationPort: destinationPort,
   );
-  // Enable UDP broadcast if the underlying OSCSocket exposes the raw socket.
+  // Enable UDP broadcast if the underlying OSCSocket exposes a raw socket.
   try {
+    // The `osc` package API changed over time; attempt both properties
+    // and ignore failures if neither exists.
     // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
-    (socket as dynamic).socket?.broadcastEnabled = true;
+    (socket as dynamic).rawSocket?.broadcastEnabled = true;
   } catch (_) {
-    // Best effort: the `osc` package may not provide access to the inner socket.
+    try {
+      // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
+      (socket as dynamic).socket?.broadcastEnabled = true;
+    } catch (_) {
+      // Best effort: the `osc` package may not expose the inner socket.
+    }
   }
   return socket;
 }
