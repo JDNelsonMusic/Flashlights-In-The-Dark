@@ -56,7 +56,11 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Needed so Flashlights-in-the-Dark can listen for sync cues and keep the choir in time.</string>
         <key>NSLocalNetworkUsageDescription</key>
-        <string>Allows Flashlights Client to discover the server over the local network.</string>
+        <string>This app needs access to the local network to connect with the chorus controller and synchronize lights/audio.</string>
+        <key>NSBonjourServices</key>
+        <array>
+                <string>_osc._udp</string>
+        </array>
 
 	<!-- Keep audio session alive while app is in the background -->
 	<key>UIBackgroundModes</key>
