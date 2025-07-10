@@ -60,7 +60,9 @@ final class MIDIManager {
         guard let refCon = refCon else { return }
         let manager = Unmanaged<MIDIManager>.fromOpaque(refCon).takeUnretainedValue()
         let list = packetList.pointee
-        var packet: UnsafePointer<MIDIPacket> = withUnsafePointer(to: list.packet) { $0 }
+        // Use a *mutable* pointer so we can advance it with MIDIPacketNext.
+        var packet: UnsafeMutablePointer<MIDIPacket> =
+            withUnsafeMutablePointer(to: &list.pointee.packet) { $0 }
         for _ in 0..<list.numPackets {
             let status = packet.pointee.data.0
             let data1  = packet.pointee.data.1
