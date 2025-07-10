@@ -9,9 +9,11 @@ import Foundation
 import NIOCore
 import NIOPosix
 import OSCKit          // OSCMessage, OSCAddressPattern
+import SystemConfiguration
+import Darwin
 
-/// Broadcasts OSC messages over UDP to the local-network broadcast address
-/// (`255.255.255.255`).  Designed for lightweight one-way cues.
+/// Broadcasts OSC messages over UDP to all detected local-network broadcast
+/// addresses. Designed for lightweight one-way cues.
 // Slot mapping info for each device slot
 struct SlotInfo: Codable {
     let ip: String
@@ -28,6 +30,7 @@ public actor OscBroadcaster {
     // --------------------------------------------------------------------
     let channel: Channel
     let port: Int
+    let broadcastAddrs: [SocketAddress]
 
     // --------------------------------------------------------------------
     // MARK: - Initialisation
@@ -64,6 +67,8 @@ public actor OscBroadcaster {
             .bind(host: "0.0.0.0", port: port)
             .get()
 
+        self.broadcastAddrs = OscBroadcaster.gatherBroadcastAddrs(port: port)
+
         print("UDP broadcaster ready on 0.0.0.0:\(port) ✅")
     }
 
@@ -74,21 +79,15 @@ public actor OscBroadcaster {
     public func start() async throws {
         try await announceSelf()
     }
-    /// Broadcast a single OSC message to 255.255.255.255:9000
+    /// Broadcast a single OSC message to all detected broadcast addresses.
     public func send(_ osc: OSCMessage) async throws {
-        // --- Encode OSCMessage ➜ Data -----------------------------------
         let data = try osc.rawData()
-
-        // --- Copy into SwiftNIO ByteBuffer ------------------------------
-        var buffer = channel.allocator.buffer(capacity: data.count)
-        buffer.writeBytes(data)
-
-        // --- Build broadcast envelope -----------------------------------
-        let addr     = try SocketAddress(ipAddress: "255.255.255.255", port: port)
-        let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
-
-        // --- Send --------------------------------------------------------
-        try await channel.writeAndFlush(envelope)
+        for addr in broadcastAddrs {
+            var buffer = channel.allocator.buffer(capacity: data.count)
+            buffer.writeBytes(data)
+            let env = AddressedEnvelope(remoteAddress: addr, data: buffer)
+            try await channel.writeAndFlush(env)
+        }
         print("→ \(osc.addressPattern.stringValue)")
     }
     
@@ -142,5 +141,45 @@ extension OscBroadcaster {
             values: [ProcessInfo.processInfo.hostName, slotValue]
         )
         try await send(msg)
+    }
+}
+
+// MARK: - Broadcast Address Discovery
+extension OscBroadcaster {
+    /// Gather broadcast addresses for all active IPv4 interfaces.
+    static func gatherBroadcastAddrs(port: Int) -> [SocketAddress] {
+        var addrs: [SocketAddress] = []
+        var ifaddrPtr: UnsafeMutablePointer<ifaddrs>? = nil
+        guard getifaddrs(&ifaddrPtr) == 0, let first = ifaddrPtr else {
+            return [try! SocketAddress(ipAddress: "255.255.255.255", port: port)]
+        }
+        defer { freeifaddrs(first) }
+
+        var ptr = first
+        while true {
+            let ifa = ptr.pointee
+            let flags = Int32(ifa.ifa_flags)
+            if flags & IFF_UP != 0 && flags & IFF_LOOPBACK == 0,
+               let addr = ifa.ifa_addr,
+               addr.pointee.sa_family == sa_family_t(AF_INET),
+               let netmask = ifa.ifa_netmask {
+                var ip = UnsafeRawPointer(addr).assumingMemoryBound(to: sockaddr_in.self).pointee
+                let mask = UnsafeRawPointer(netmask).assumingMemoryBound(to: sockaddr_in.self).pointee
+                let bcast = in_addr(s_addr: ip.sin_addr.s_addr | ~mask.sin_addr.s_addr)
+                ip.sin_addr = bcast
+                var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                inet_ntop(AF_INET, &ip.sin_addr, &buffer, socklen_t(INET_ADDRSTRLEN))
+                let ipStr = String(cString: buffer)
+                if let sa = try? SocketAddress(ipAddress: ipStr, port: port) {
+                    addrs.append(sa)
+                }
+            }
+            if ptr.pointee.ifa_next == nil { break }
+            ptr = ptr.pointee.ifa_next!
+        }
+        if addrs.isEmpty {
+            addrs.append(try! SocketAddress(ipAddress: "255.255.255.255", port: port))
+        }
+        return addrs
     }
 }
