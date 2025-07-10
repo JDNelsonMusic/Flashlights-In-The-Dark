@@ -40,6 +40,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var clockSync: ClockSyncService?
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
+    private let midi = MIDIManager()
 
     public init() {
         // start clock-sync service once broadcaster is ready
@@ -58,6 +59,16 @@ public final class ConsoleState: ObservableObject, Sendable {
         self.statuses = Dictionary(uniqueKeysWithValues:
             devices.map { ($0.id, DeviceStatus.clean) }
         )
+        // MIDI callbacks for incoming messages
+        midi.noteOnHandler = { [weak self] note, vel in
+            self?.handleNoteOn(note: note, velocity: vel)
+        }
+        midi.noteOffHandler = { [weak self] note in
+            self?.handleNoteOff(note: note)
+        }
+        midi.controlChangeHandler = { [weak self] cc, value in
+            self?.handleControlChange(cc: cc, value: value)
+        }
     }
 
     @Published public private(set) var devices: [ChoirDevice] = []
@@ -94,9 +105,11 @@ public final class ConsoleState: ObservableObject, Sendable {
             if devices[idx].torchOn {
                 try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
                 await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
+                midi.sendControlChange(UInt8(id + 1), value: 127)
             } else {
                 try await osc.send(FlashOff(index: Int32(id + 1)))
                 await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
+                midi.sendControlChange(UInt8(id + 1), value: 0)
             }
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
@@ -112,6 +125,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             let osc = try await broadcasterTask.value
             try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
             await MainActor.run { lastLog = "/flash/on [\(id + 1), 1]" }
+            midi.sendControlChange(UInt8(id + 1), value: 127)
         }
     }
     /// Directly flash off a specific lamp slot and update state.
@@ -123,6 +137,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             let osc = try await broadcasterTask.value
             try await osc.send(FlashOff(index: Int32(id + 1)))
             await MainActor.run { lastLog = "/flash/off [\(id + 1)]" }
+            midi.sendControlChange(UInt8(id + 1), value: 0)
         }
     }
     
@@ -171,6 +186,15 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let file = "\(prefix)\(slot).mp3"
                 try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
                 await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
+                let noteBase = device.id * 4
+                let noteOffset: Int
+                switch set.lowercased() {
+                case "a": noteOffset = 0
+                case "b": noteOffset = 1
+                case "c": noteOffset = 2
+                default:  noteOffset = 3
+                }
+                midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
             }
         }
     }
@@ -214,6 +238,10 @@ public final class ConsoleState: ObservableObject, Sendable {
             let slot = Int32(device.id + 1)
             try await osc.send(AudioStop(index: slot))
             await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
+            let base = device.id * 4
+            for offset in 0..<4 {
+                midi.sendNoteOff(UInt8(base + offset))
+            }
         }
     }
     
@@ -448,5 +476,49 @@ extension ConsoleState {
         // ClockSyncService de-initialises itself when its Task is cancelled.
         // Add additional cleanup here (file handles, etc.) as the project grows.
         print("[ConsoleState] Network stack suspended 💤")
+    }
+}
+
+// MARK: - MIDI Handling
+extension ConsoleState {
+    fileprivate func handleNoteOn(note: UInt8, velocity: UInt8) {
+        let deviceNum = Int(note) / 4 + 1
+        let setIndex  = Int(note) % 4
+        let sets = ["a", "b", "c", "d"]
+        guard deviceNum >= 1 && deviceNum <= devices.count, setIndex < sets.count else { return }
+        let prefix = sets[setIndex]
+        let file = "\(prefix)\(deviceNum).mp3"
+        let gain = Float32(velocity) / 127.0
+        Task {
+            let osc = try await broadcasterTask.value
+            try await osc.send(AudioPlay(index: Int32(deviceNum), file: file, gain: gain))
+            await MainActor.run { self.lastLog = "/audio/play [\(deviceNum), \(file), \(gain)]" }
+        }
+    }
+
+    fileprivate func handleNoteOff(note: UInt8) {
+        let deviceNum = Int(note) / 4 + 1
+        guard deviceNum >= 1 && deviceNum <= devices.count else { return }
+        Task {
+            let osc = try await broadcasterTask.value
+            try await osc.send(AudioStop(index: Int32(deviceNum)))
+            await MainActor.run { self.lastLog = "/audio/stop [\(deviceNum)]" }
+        }
+    }
+
+    fileprivate func handleControlChange(cc: UInt8, value: UInt8) {
+        let deviceNum = Int(cc)
+        guard deviceNum >= 1 && deviceNum <= devices.count else { return }
+        let intensity = Float32(value) / 127.0
+        Task {
+            let osc = try await broadcasterTask.value
+            if intensity > 0 {
+                try await osc.send(FlashOn(index: Int32(deviceNum), intensity: intensity))
+                await MainActor.run { self.lastLog = "/flash/on [\(deviceNum), \(intensity)]" }
+            } else {
+                try await osc.send(FlashOff(index: Int32(deviceNum)))
+                await MainActor.run { self.lastLog = "/flash/off [\(deviceNum)]" }
+            }
+        }
     }
 }
