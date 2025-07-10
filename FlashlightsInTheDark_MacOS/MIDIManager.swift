@@ -1,21 +1,36 @@
 import Foundation
 import CoreMIDI
 
-/// Simple MIDI manager for sending note on/off and controls
+/// MIDI manager creating a virtual bridge for ProTools communication.
 final class MIDIManager {
     private var client = MIDIClientRef()
     private var outPort = MIDIPortRef()
-    private var destination = MIDIEndpointRef()
+    private var inPort  = MIDIPortRef()
+    private var virtualSrc = MIDIEndpointRef()
+    private var virtualDst = MIDIEndpointRef()
+
+    /// Handlers for incoming MIDI messages.
+    var noteOnHandler: ((UInt8, UInt8) -> Void)?
+    var noteOffHandler: ((UInt8) -> Void)?
+    var controlChangeHandler: ((UInt8, UInt8) -> Void)?
 
     init() {
         MIDIClientCreate("FlashlightsMIDIClient" as CFString, nil, nil, &client)
         MIDIOutputPortCreate(client, "OutPort" as CFString, &outPort)
-        let count = MIDIGetNumberOfDestinations()
-        if count > 0 {
-            destination = MIDIGetDestination(0)
-        }
+        MIDIInputPortCreate(client,
+                           "InPort" as CFString,
+                           MIDIManager.readProc,
+                           UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()),
+                           &inPort)
+        MIDISourceCreate(client, "Flashlights Bridge" as CFString, &virtualSrc)
+        MIDIDestinationCreate(client,
+                              "Flashlights Bridge In" as CFString,
+                              MIDIManager.readProc,
+                              UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()),
+                              &virtualDst)
     }
 
+    // MARK: - Sending
     func sendNoteOn(_ note: UInt8, velocity: UInt8 = 127, channel: UInt8 = 0) {
         send(status: 0x90 | channel, data1: note, data2: velocity)
     }
@@ -36,6 +51,36 @@ final class MIDIManager {
         packet.data.1 = data1
         packet.data.2 = data2
         var list = MIDIPacketList(numPackets: 1, packet: packet)
-        MIDISend(outPort, destination, &list)
+        // Send to our virtual source so DAWs can receive it.
+        MIDIReceived(virtualSrc, &list)
+    }
+
+    // MARK: - Receiving
+    private static let readProc: MIDIReadProc = { packetList, refCon, _ in
+        guard let refCon = refCon else { return }
+        let manager = Unmanaged<MIDIManager>.fromOpaque(refCon).takeUnretainedValue()
+        let list = packetList.pointee
+        var packet: UnsafePointer<MIDIPacket> = withUnsafePointer(to: list.packet) { $0 }
+        for _ in 0..<list.numPackets {
+            let status = packet.pointee.data.0
+            let data1  = packet.pointee.data.1
+            let data2  = packet.pointee.data.2
+            let type = status & 0xF0
+            switch type {
+            case 0x90:
+                if data2 > 0 {
+                    manager.noteOnHandler?(data1, data2)
+                } else {
+                    manager.noteOffHandler?(data1)
+                }
+            case 0x80:
+                manager.noteOffHandler?(data1)
+            case 0xB0:
+                manager.controlChangeHandler?(data1, data2)
+            default:
+                break
+            }
+            packet = MIDIPacketNext(packet)
+        }
     }
 }
