@@ -194,12 +194,11 @@ class OscListener {
     final msg = OSCMessage(
       '/hello',
       arguments: [client.myIndex.value],
+
     );
-    _socket!.send(
-      msg,
-      InternetAddress('255.255.255.255'),
-      9000,
-    );
+    // OSCSocket is already configured for broadcast. Send the message using the
+    // socket's default destination.
+    _socket!.send(msg);
   }
 
   void _markConnected() {
