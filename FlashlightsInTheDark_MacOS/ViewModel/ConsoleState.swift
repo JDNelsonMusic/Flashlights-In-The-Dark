@@ -210,14 +210,31 @@ public final class ConsoleState: ObservableObject, Sendable {
             guard let url = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json") else { return }
             do {
                 let data = try Data(contentsOf: url)
-                let dict = try JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
-                // Update devices by slot index (1-based keys)
-                for (key, info) in dict {
-                    if let slot = Int(key), slot > 0, slot <= devices.count {
-                        let idx = slot - 1
-                        devices[idx].ip = info.ip
-                        devices[idx].udid = info.udid
-                        devices[idx].name = info.name
+                do {
+                    // Preferred format is keyed by slot numbers
+                    let dict = try JSONDecoder().decode([String: ConsoleSlotInfo].self, from: data)
+                    updateDevices(from: dict)
+                } catch {
+                    // Fallback: attempt to parse and log helpful error
+                    print("[ConsoleState] mapping decode failed: \(error). Attempting fallback…")
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                        var parsed: [String: ConsoleSlotInfo] = [:]
+                        for (key, value) in json {
+                            if let slot = Int(key),
+                               let info = value as? [String: Any],
+                               let ip = info["ip"] as? String,
+                               let udid = info["udid"] as? String,
+                               let name = info["name"] as? String {
+                                parsed[String(slot)] = ConsoleSlotInfo(ip: ip, udid: udid, name: name)
+                            }
+                        }
+                        if !parsed.isEmpty {
+                            updateDevices(from: parsed)
+                        } else {
+                            print("[ConsoleState] mapping JSON not in expected format. Keys should be slot numbers (\"1\", \"2\" …) with ip, udid and name fields")
+                            lastLog = "⚠️ Refresh failed: invalid mapping format"
+                            return
+                        }
                     }
                 }
                 lastLog = "🔄 Refreshed device list"
@@ -227,6 +244,17 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
             } catch {
                 lastLog = "⚠️ Refresh failed: \(error)"
+            }
+        }
+    }
+
+    private func updateDevices(from dict: [String: ConsoleSlotInfo]) {
+        for (key, info) in dict {
+            if let slot = Int(key), slot > 0, slot <= devices.count {
+                let idx = slot - 1
+                devices[idx].ip = info.ip
+                devices[idx].udid = info.udid
+                devices[idx].name = info.name
             }
         }
     }
