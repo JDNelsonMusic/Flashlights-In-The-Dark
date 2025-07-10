@@ -59,10 +59,10 @@ final class MIDIManager {
     private static let readProc: MIDIReadProc = { packetList, refCon, _ in
         guard let refCon = refCon else { return }
         let manager = Unmanaged<MIDIManager>.fromOpaque(refCon).takeUnretainedValue()
-        let list = packetList.pointee
+        var list = packetList.pointee
         // Use a *mutable* pointer so we can advance it with MIDIPacketNext.
         var packet: UnsafeMutablePointer<MIDIPacket> =
-            withUnsafeMutablePointer(to: &list.pointee.packet) { $0 }
+            withUnsafeMutablePointer(to: &list.packet) { $0 }
         for _ in 0..<list.numPackets {
             let status = packet.pointee.data.0
             let data1  = packet.pointee.data.1
