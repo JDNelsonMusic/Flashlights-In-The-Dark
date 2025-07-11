@@ -1,3 +1,4 @@
+# Environment
 .env
 
 # ---- Flutter client outputs ----
@@ -11,7 +12,20 @@ flashlights_client/ios/Runner.xcworkspace/
 flashlights_client/android/.gradle/
 flashlights_client/android/.idea/
 flashlights_client/pubspec.lock
+
+# fastlane
 /fastlane/report*.json
+fastlane/build_logs/
+
+# Mobile binaries
 *.ipa
 *.apk
-fastlane/build_logs/
+
+# --- Xcode user data (ignore all user-specific state) ---
+**/*.xcuserdata/
+**/*.xcuserdatad/
+**/*.xcuserstate
+**/xcschemes/*.plist
+
+# (Optionally: ignore workspace-level user data too)
+*.xcworkspace/xcuserdata/
