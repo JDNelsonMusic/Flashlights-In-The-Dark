@@ -68,10 +68,15 @@ public actor OscBroadcaster {
             .bind(host: "0.0.0.0", port: port)
             .get()
 
-        // Listen for client /hello announcements
-        try await self.channel.pipeline.addHandler(HelloDatagramHandler(owner: self))
-
+        // Initialise **all** stored properties *before* we capture `self`
+        // inside any pipeline handler, otherwise Swift’s definite-initialisation
+        // rules complain that “self is used before all stored properties
+        // are initialised”.
         self.broadcastAddrs = OscBroadcaster.gatherBroadcastAddrs(port: port)
+
+        // Now that every property is set, it’s safe to reference `self`.
+        try await self.channel.pipeline
+            .addHandler(HelloDatagramHandler(owner: self))
 
         print("UDP broadcaster ready on 0.0.0.0:\(port) ✅")
     }
