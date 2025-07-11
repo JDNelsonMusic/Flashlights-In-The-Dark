@@ -36,6 +36,8 @@ public actor OscBroadcaster {
     let port: Int
     let broadcastAddrs: [SocketAddress]
     private var helloHandler: ((Int, String) -> Void)?
+    /// Runtime IPs learned from /hello announcements (slot -> ip)
+    var dynamicIPs: [Int: String] = [:]
 
     // --------------------------------------------------------------------
     // MARK: - Initialisation
@@ -113,11 +115,11 @@ public actor OscBroadcaster {
         let data = try osc.rawData()
         var buffer = channel.allocator.buffer(capacity: data.count)
         buffer.writeBytes(data)
-        if let info = slotInfos[slot] {
-            let addr = try SocketAddress(ipAddress: info.ip, port: port)
+        if let ip = dynamicIPs[slot] ?? slotInfos[slot]?.ip {
+            let addr = try SocketAddress(ipAddress: ip, port: port)
             let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
             try await channel.writeAndFlush(envelope)
-            print("→ \(osc.addressPattern.stringValue) to \(info.ip):\(port)")
+            print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
         } else {
             // Fallback to broadcast if mapping not found
             try await send(osc)
@@ -152,6 +154,7 @@ public actor OscBroadcaster {
     }
 
     func emitHello(slot: Int, ip: String) {
+        dynamicIPs[slot] = ip
         helloHandler?(slot, ip)
     }
 }
