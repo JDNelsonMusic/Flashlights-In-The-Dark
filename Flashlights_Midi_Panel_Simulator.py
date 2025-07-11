@@ -41,7 +41,7 @@ QueueItem = Union[Tuple[int, bool], str, Tuple[str, str]]
 class Config:
     rows: int = 4
     cols: int = 8
-    key_rows: Tuple[str, ...] = ("12345678", "qwertyui", "asdfghjk", "zxcvbnm,")
+    key_rows: Tuple[str, ...] = ()  # unused
     note_offsets: Tuple[int, ...] = (0, 1, 3, 4, 7, 8, 10, 11)
     base_note: int = 36
     all_note: int = 84
@@ -66,9 +66,12 @@ class Config:
              for r in range(self.rows) for c, off in enumerate(self.note_offsets)})
         object.__setattr__(self, "slot_to_note",
             {v: k for k, v in self.note_to_slot.items()})
-        object.__setattr__(self, "key_to_slot",
-            {ch: r*self.cols + c for r, row in enumerate(self.key_rows)
-             for c, ch in enumerate(row)})
+        object.__setattr__(self, "key_to_slot", {
+            "2": 1, "3": 3, "4": 4, "5": 5, "u": 7, "7": 9, "9": 12,
+            "q": 14, "w": 15, "d": 16, "e": 18, "r": 19, "k": 20, "i": 21,
+            "8": 23, "o": 24, "p": 25, "a": 27, "s": 29, "j": 34, "l": 38,
+            ";": 40, "x": 41, "c": 42, "v": 44, "m": 51, ",": 53, ".": 54
+        })
 
 CFG = Config()
 
@@ -423,7 +426,7 @@ class App(tk.Tk):
         spin(self.release_var, 5000).grid(row=0, column=7, padx=2)
 
         tk.Label(self,
-                 text="Typing rows: " + " ".join(CFG.key_rows) +
+                 text="Typing keys: " + " ".join(sorted(CFG.key_to_slot.keys())) +
                       "   (SPACE = sustain, 0 = ALL w/ADSR)",
                  fg="#bbbbbb", bg=CFG.bg).pack()
 

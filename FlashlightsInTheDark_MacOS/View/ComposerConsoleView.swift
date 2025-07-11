@@ -28,8 +28,8 @@ struct ComposerConsoleView: View {
 
     private let slotOutlineColors: [Int: Color] = [
         27: .royalBlue, 41: .royalBlue, 42: .royalBlue,
-        1: .brightRed, 15: .brightRed, 16: .brightRed,
-        29: .slotGreen, 44: .slotGreen,
+        1: .brightRed, 14: .brightRed, 15: .brightRed,
+        16: .slotGreen, 29: .slotGreen, 44: .slotGreen,
         3: .slotPurple, 4: .slotPurple, 18: .slotPurple,
         7: .slotYellow, 19: .slotYellow, 34: .slotYellow,
         9: .lightRose, 20: .lightRose, 21: .lightRose,
@@ -337,8 +337,8 @@ struct ComposerConsoleView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.clear, lineWidth: 0)
-                            .shadow(color: isTriggered ? Color.white.opacity(0.95) : .clear,
-                                    radius: isTriggered ? 36 : 0)
+                            .shadow(color: (isTriggered || device.torchOn) ? Color.white.opacity(0.95) : .clear,
+                                    radius: (isTriggered || device.torchOn) ? 36 : 0)
                     )
                 }
             }
