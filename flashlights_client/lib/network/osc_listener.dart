@@ -141,7 +141,9 @@ class OscListener {
           return null; // unsupported
       }
     }
-    return OSCMessage(address, arguments: args);
+    // Explicitly cast the dynamic list to the non-nullable
+    // type expected by the OSCMessage constructor.
+    return OSCMessage(address, arguments: List<Object>.from(args));
   }
 
   /* -------------------------------------------------------------------- */
