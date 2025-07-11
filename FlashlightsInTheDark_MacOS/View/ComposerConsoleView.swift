@@ -338,8 +338,8 @@ self) { row in
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.clear, lineWidth: 0)
-                            .shadow(color: isTriggered ? Color.white.opacity(0.95) : .clear,
-                                    radius: isTriggered ? 36 : 0)
+                            .shadow(color: (isTriggered || device.torchOn) ? Color.white.opacity(0.95) : .clear,
+                                    radius: (isTriggered || device.torchOn) ? 36 : 0)
                     )
                 }
             }
