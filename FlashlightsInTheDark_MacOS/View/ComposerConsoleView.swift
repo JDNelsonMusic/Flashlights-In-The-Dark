@@ -11,6 +11,12 @@ struct ComposerConsoleView: View {
     private var keyLabels: [String] {
         keyRows.flatMap { row in row.map { String($0) } }
     }
+    private let slotRows: [[Int]] = [
+        Array(1...12),
+        Array(13...26),
+        Array(27...40),
+        Array(41...54)
+    ]
     
     @State private var leftPanelWidth: CGFloat = 300
     var body: some View {
@@ -144,56 +150,17 @@ struct ComposerConsoleView: View {
                         .disabled(!state.isBroadcasting)
                     }
                     
-                    LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(state.devices) { device in
-                            VStack(spacing: 4) {
-                                // Keyboard key label
-                                if keyLabels.indices.contains(device.id) {
-                                    Text(keyLabels[device.id])
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                    VStack(spacing: 24) {
+                        ForEach(slotRows.indices, id: \.
+self) { row in
+                            HStack(spacing: 24) {
+                                ForEach(slotRows[row], id: \.self) { slot in
+                                    let device = state.devices[slot - 1]
+                                    SlotCell(device: device,
+                                             keyLabel: keyLabels.indices.contains(device.id) ? keyLabels[device.id] : nil)
                                 }
-                                Image(systemName: "flashlight.on.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
-                                    .shadow(color: device.torchOn ? Color.mintGlow.opacity(0.9) : .clear,
-                                            radius: device.torchOn ? 12 : 0)
-                                
-                                Text("#\(device.id + 1)")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                // Singer name
-                                Text(device.name)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                // Status
-                                let st = state.statuses[device.id] ?? .clean
-                                Text(st.rawValue)
-                                    .font(.caption2)
-                                    .foregroundStyle(st.color)
-                                
-                                Button {
-                                    state.triggerSound(device: device)
-                                } label: {
-                                    Image(systemName: "speaker.wave.2.fill")
-                                        .foregroundStyle(.cyan)
-                                        .help("Trigger sound on \(device.name)…")
-                                }
-                                .buttonStyle(.plain)
                             }
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        switch state.keyboardTriggerMode {
-                        case .torch:
-                            state.toggleTorch(id: device.id)
-                        case .sound:
-                            state.triggerSound(device: device)
-                        case .both:
-                            state.toggleTorch(id: device.id)
-                            state.triggerSound(device: device)
-                        }
-                    }
+                            .frame(maxWidth: .infinity)
                         }
                     }
                     Spacer(minLength: 8)
@@ -287,6 +254,69 @@ struct ComposerConsoleView: View {
         }
     }
 #endif
+
+    // MARK: - Slot Cell View
+    struct SlotCell: View {
+        @EnvironmentObject var state: ConsoleState
+        let device: ChoirDevice
+        let keyLabel: String?
+
+        var body: some View {
+            Group {
+                if device.isPlaceholder {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 28, height: 28)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                } else {
+                    VStack(spacing: 4) {
+                        if let keyLabel = keyLabel {
+                            Text(keyLabel)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "flashlight.on.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
+                            .shadow(color: device.torchOn ? Color.mintGlow.opacity(0.9) : .clear,
+                                    radius: device.torchOn ? 12 : 0)
+                        Text("#\(device.id + 1)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(device.name)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        let st = state.statuses[device.id] ?? .clean
+                        Text(st.rawValue)
+                            .font(.caption2)
+                            .foregroundStyle(st.color)
+                        Button {
+                            state.triggerSound(device: device)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .foregroundStyle(.cyan)
+                                .help("Trigger sound on \(device.name)…")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        switch state.keyboardTriggerMode {
+                        case .torch:
+                            state.toggleTorch(id: device.id)
+                        case .sound:
+                            state.triggerSound(device: device)
+                        case .both:
+                            state.toggleTorch(id: device.id)
+                            state.triggerSound(device: device)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Keyboard event capture for typing-trigger
     fileprivate struct KeyCaptureView: NSViewRepresentable {
         var onKeyDown: (Character) -> Void

@@ -11,7 +11,7 @@ class ClientState {
       audioPlaying = ValueNotifier<bool>(false),
       recording = ValueNotifier<bool>(false);
 
-  /// Singer slot (1-32). Notifier so UI can react to changes at runtime.
+  /// Singer slot (1-28). Notifier so UI can react to changes at runtime.
   final ValueNotifier<int> myIndex;
 
   /// Rolling average clock offset from /sync (ms).
