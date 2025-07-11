@@ -151,8 +151,7 @@ struct ComposerConsoleView: View {
                     }
                     
                     VStack(spacing: 24) {
-                        ForEach(slotRows.indices, id: \.
-self) { row in
+                        ForEach(slotRows.indices, id: \.self) { row in
                             HStack(spacing: 24) {
                                 ForEach(slotRows[row], id: \.self) { slot in
                                     let device = state.devices[slot - 1]
