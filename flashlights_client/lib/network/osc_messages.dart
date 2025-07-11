@@ -31,7 +31,7 @@ class FlashOn implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [index, intensity]);
+    return OSCMessage(address.value, arguments: [index, intensity]);
   }
 
   static FlashOn? fromOsc(OSCMessage message) {
@@ -59,7 +59,7 @@ class FlashOff implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [index]);
+    return OSCMessage(address.value, arguments: [index]);
   }
 
   static FlashOff? fromOsc(OSCMessage message) {
@@ -88,7 +88,7 @@ class AudioPlay implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [index, file, gain]);
+    return OSCMessage(address.value, arguments: [index, file, gain]);
   }
 
   static AudioPlay? fromOsc(OSCMessage message) {
@@ -117,7 +117,7 @@ class AudioStop implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [index]);
+    return OSCMessage(address.value, arguments: [index]);
   }
 
   static AudioStop? fromOsc(OSCMessage message) {
@@ -145,7 +145,7 @@ class MicRecord implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [index, maxDuration]);
+    return OSCMessage(address.value, arguments: [index, maxDuration]);
   }
 
   static MicRecord? fromOsc(OSCMessage message) {
@@ -173,7 +173,7 @@ class SyncMessage implements OscCodable {
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, [timestamp]);
+    return OSCMessage(address.value, arguments: [timestamp]);
   }
 
   static SyncMessage? fromOsc(OSCMessage message) {
