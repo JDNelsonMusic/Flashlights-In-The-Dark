@@ -51,10 +51,10 @@ class OscListener {
     if (_running) return;
     _running = true;
 
-    _socket = _createBroadcastSocket(
-      serverAddress: InternetAddress.anyIPv4,
-      serverPort: 9000,
-    );
+  _socket = _createBroadcastSocket(
+    serverAddress: InternetAddress.anyIPv4,
+    serverPort: 9000,
+  );
     // Listen and dispatch using the current slot
     await _socket!.listen((OSCMessage msg) async {
       await _dispatch(msg);
@@ -196,7 +196,7 @@ class OscListener {
     // Always send via the default broadcast address
     _socket!.send(
       msg,
-      destination: InternetAddress('255.255.255.255'),
+      address: InternetAddress('255.255.255.255'),
       port: 9000,
     );
 
