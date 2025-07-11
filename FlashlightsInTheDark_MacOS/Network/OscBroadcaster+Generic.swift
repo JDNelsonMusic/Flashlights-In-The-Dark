@@ -17,8 +17,8 @@ public extension OscBroadcaster {
     }
     // Helper – send to a single phone if we have its IP
     private func directed(_ slot: Int32, osc: OSCMessage) async throws {
-        guard let info = slotInfos[Int(slot)] else { return }
-        let ip = info.ip
+        let s = Int(slot)
+        guard let ip = dynamicIPs[s] ?? slotInfos[s]?.ip else { return }
         var buf = channel.allocator.buffer(capacity: try osc.rawData().count)
         buf.writeBytes(try osc.rawData())
         let addr = try SocketAddress(ipAddress: ip, port: port)
