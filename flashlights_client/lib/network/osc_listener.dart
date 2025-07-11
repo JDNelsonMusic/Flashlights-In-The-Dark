@@ -211,7 +211,11 @@ class OscListener {
             parts[3] = '255';
             final bcast = InternetAddress(parts.join('.'));
             try {
-              _socket!.send(msg, destination: bcast, port: 9000);
+              _socket!.send(
+                msg,
+                address: bcast,
+                port: 9000,
+              );
             } catch (_) {
               // ignore failures
             }
