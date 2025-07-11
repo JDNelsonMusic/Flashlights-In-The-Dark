@@ -188,12 +188,15 @@ final class HelloDatagramHandler: ChannelInboundHandler {
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let env = self.unwrapInboundIn(data)
         var buffer = env.data
-        guard let bytes = buffer.readBytes(length: buffer.readableBytes),
-              let slot = owner.parseHelloSlot(bytes) else {
+        guard let bytes = buffer.readBytes(length: buffer.readableBytes) else {
             return
         }
-        if let ip = env.remoteAddress.ipAddress {
-            Task { await owner.emitHello(slot: slot, ip: ip) }
+        // only emit if we have an IP to send to
+        if let ip = env.remoteAddress?.ipAddress {
+            Task {
+                let slot = await owner.parseHelloSlot(bytes)
+                await owner.emitHello(slot: slot, ip: ip)
+            }
         }
     }
 }
