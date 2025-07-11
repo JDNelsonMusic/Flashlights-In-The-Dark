@@ -26,7 +26,11 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+        <key>NSPrincipalClass</key>
+        <string>NSApplication</string>
+
+        <!-- Declare that this app does not use non-exempt encryption -->
+        <key>ITSAppUsesNonExemptEncryption</key>
+        <false/>
 </dict>
 </plist>
