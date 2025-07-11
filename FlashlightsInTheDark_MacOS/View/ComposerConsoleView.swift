@@ -28,8 +28,8 @@ struct ComposerConsoleView: View {
 
     private let slotOutlineColors: [Int: Color] = [
         27: .royalBlue, 41: .royalBlue, 42: .royalBlue,
-        1: .brightRed, 15: .brightRed, 16: .brightRed,
-        29: .slotGreen, 44: .slotGreen,
+        1: .brightRed, 14: .brightRed, 15: .brightRed,
+        16: .slotGreen, 29: .slotGreen, 44: .slotGreen,
         3: .slotPurple, 4: .slotPurple, 18: .slotPurple,
         7: .slotYellow, 19: .slotYellow, 34: .slotYellow,
         9: .lightRose, 20: .lightRose, 21: .lightRose,
