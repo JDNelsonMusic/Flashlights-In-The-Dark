@@ -8,6 +8,8 @@ final class MIDIManager {
     private var inPort  = MIDIPortRef()
     private var virtualSrc = MIDIEndpointRef()
     private var virtualDst = MIDIEndpointRef()
+    private var selectedOutput = MIDIEndpointRef()
+    private var selectedInput  = MIDIEndpointRef()
 
     /// Handlers for incoming MIDI messages.
     var noteOnHandler: ((UInt8, UInt8) -> Void)?
@@ -28,6 +30,54 @@ final class MIDIManager {
                               MIDIManager.readProc,
                               UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()),
                               &virtualDst)
+        selectedOutput = 0
+        selectedInput = 0
+    }
+
+    // MARK: - Device Enumeration
+    var inputNames: [String] {
+        (0..<MIDIGetNumberOfSources()).map { idx in
+            endpointName(MIDIGetSource(idx))
+        }
+    }
+
+    var outputNames: [String] {
+        (0..<MIDIGetNumberOfDestinations()).map { idx in
+            endpointName(MIDIGetDestination(idx))
+        }
+    }
+
+    private func endpointName(_ ep: MIDIEndpointRef) -> String {
+        var name: Unmanaged<CFString>?
+        if MIDIObjectGetStringProperty(ep, kMIDIPropertyName, &name) == noErr,
+           let str = name?.takeRetainedValue() {
+            return str as String
+        }
+        return "Unknown"
+    }
+
+    func connectInput(named name: String) {
+        if selectedInput != 0 { MIDIPortDisconnectSource(inPort, selectedInput) }
+        selectedInput = 0
+        for i in 0..<MIDIGetNumberOfSources() {
+            let src = MIDIGetSource(i)
+            if endpointName(src) == name {
+                MIDIPortConnectSource(inPort, src, nil)
+                selectedInput = src
+                break
+            }
+        }
+    }
+
+    func connectOutput(named name: String) {
+        selectedOutput = 0
+        for i in 0..<MIDIGetNumberOfDestinations() {
+            let dst = MIDIGetDestination(i)
+            if endpointName(dst) == name {
+                selectedOutput = dst
+                break
+            }
+        }
     }
 
     // MARK: - Sending
@@ -53,6 +103,9 @@ final class MIDIManager {
         var list = MIDIPacketList(numPackets: 1, packet: packet)
         // Send to our virtual source so DAWs can receive it.
         MIDIReceived(virtualSrc, &list)
+        if selectedOutput != 0 {
+            MIDISend(outPort, selectedOutput, &list)
+        }
     }
 
     // MARK: - Receiving

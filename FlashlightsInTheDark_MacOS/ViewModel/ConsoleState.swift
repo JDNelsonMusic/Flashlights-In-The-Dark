@@ -42,6 +42,31 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
 
+    // MIDI device lists and selections
+    @Published public var midiInputNames: [String] = []
+    @Published public var midiOutputNames: [String] = []
+    @Published public var selectedMidiInput: String = "" {
+        didSet { midi.connectInput(named: selectedMidiInput) }
+    }
+    @Published public var selectedMidiOutput: String = "" {
+        didSet { midi.connectOutput(named: selectedMidiOutput) }
+    }
+
+    // Slots currently glowing for UI feedback
+    @Published public var glowingSlots: Set<Int> = []
+
+    private let tripleTriggers: [Int: [Int]] = [
+        1: [27, 41, 42],
+        2: [1, 14, 15],
+        3: [16, 29, 44],
+        4: [3, 4, 18],
+        5: [7, 19, 34],
+        6: [9, 20, 21],
+        7: [23, 38, 51],
+        8: [12, 24, 25],
+        9: [40, 53, 54]
+    ]
+
     public init() {
         // start clock-sync service once broadcaster is ready
         Task { [weak self] in
@@ -69,6 +94,8 @@ public final class ConsoleState: ObservableObject, Sendable {
         midi.controlChangeHandler = { [weak self] cc, value in
             self?.handleControlChange(cc: cc, value: value)
         }
+
+        refreshMidiDevices()
     }
 
     @Published public private(set) var devices: [ChoirDevice] = []
@@ -93,6 +120,15 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var keyboardTriggerMode: KeyboardTriggerMode = .torch
     // Envelope task to allow cancellation
     private var envelopeTask: Task<Void, Never>?
+
+    /// Make a slot glow in the UI for a short duration
+    public func glow(slot: Int, duration: Double = 0.3) {
+        Task { @MainActor in
+            glowingSlots.insert(slot)
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            glowingSlots.remove(slot)
+        }
+    }
     
 
     @discardableResult
@@ -107,6 +143,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
                 await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
                 midi.sendControlChange(UInt8(id + 1), value: 127)
+                glow(slot: id + 1)
             } else {
                 try await osc.send(FlashOff(index: Int32(id + 1)))
                 await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
@@ -128,6 +165,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
             await MainActor.run { lastLog = "/flash/on [\(id + 1), 1]" }
             midi.sendControlChange(UInt8(id + 1), value: 127)
+            glow(slot: id + 1)
         }
     }
     /// Directly flash off a specific lamp slot and update state.
@@ -141,6 +179,26 @@ public final class ConsoleState: ObservableObject, Sendable {
             try await osc.send(FlashOff(index: Int32(id + 1)))
             await MainActor.run { lastLog = "/flash/off [\(id + 1)]" }
             midi.sendControlChange(UInt8(id + 1), value: 0)
+        }
+    }
+
+    /// Trigger a list of real slots according to the current keyboardTriggerMode.
+    public func triggerSlots(realSlots: [Int]) {
+        for real in realSlots {
+            let idx = real - 1
+            switch keyboardTriggerMode {
+            case .torch:
+                _ = toggleTorch(id: idx)
+            case .sound:
+                guard idx < devices.count else { continue }
+                let device = devices[idx]
+                triggerSound(device: device)
+            case .both:
+                _ = toggleTorch(id: idx)
+                guard idx < devices.count else { continue }
+                let device = devices[idx]
+                triggerSound(device: device)
+            }
         }
     }
     
@@ -200,12 +258,29 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
                 midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
             }
+            glow(slot: device.id + 1)
         }
     }
     /// Play audio on all devices slots based on current activeToneSets
     public func playAllTones() {
         for device in devices where !device.isPlaceholder {
             triggerSound(device: device)
+        }
+    }
+
+    /// Refresh available MIDI devices and reconnect selections
+    public func refreshMidiDevices() {
+        midiInputNames = midi.inputNames
+        midiOutputNames = midi.outputNames
+        if selectedMidiInput.isEmpty, let first = midiInputNames.first {
+            selectedMidiInput = first
+        } else if !midiInputNames.contains(selectedMidiInput) {
+            selectedMidiInput = midiInputNames.first ?? ""
+        }
+        if selectedMidiOutput.isEmpty, let firstOut = midiOutputNames.first {
+            selectedMidiOutput = firstOut
+        } else if !midiOutputNames.contains(selectedMidiOutput) {
+            selectedMidiOutput = midiOutputNames.first ?? ""
         }
     }
     /// Refresh device information from the slot mapping JSON resource
@@ -535,27 +610,43 @@ extension ConsoleState {
 // MARK: - MIDI Handling
 extension ConsoleState {
     fileprivate func handleNoteOn(note: UInt8, velocity: UInt8) {
-        let deviceNum = Int(note) / 4 + 1
-        let setIndex  = Int(note) % 4
-        let sets = ["a", "b", "c", "d"]
-        guard deviceNum >= 1 && deviceNum <= devices.count, setIndex < sets.count else { return }
-        let prefix = sets[setIndex]
-        let file = "\(prefix)\(deviceNum).mp3"
-        let gain = Float32(velocity) / 127.0
-        Task {
-            let osc = try await broadcasterTask.value
-            try await osc.send(AudioPlay(index: Int32(deviceNum), file: file, gain: gain))
-            await MainActor.run { self.lastLog = "/audio/play [\(deviceNum), \(file), \(gain)]" }
+        let val = Int(note)
+        if val >= 1 && val <= devices.count {
+            let idx = val - 1
+            switch keyboardTriggerMode {
+            case .torch:
+                flashOn(id: idx)
+            case .sound:
+                let device = devices[idx]
+                triggerSound(device: device)
+            case .both:
+                flashOn(id: idx)
+                let device = devices[idx]
+                triggerSound(device: device)
+            }
+        } else if val >= 61 && val <= 69 {
+            let group = val - 60
+            if let slots = tripleTriggers[group] {
+                triggerSlots(realSlots: slots)
+            }
         }
     }
 
     fileprivate func handleNoteOff(note: UInt8) {
-        let deviceNum = Int(note) / 4 + 1
-        guard deviceNum >= 1 && deviceNum <= devices.count else { return }
-        Task {
-            let osc = try await broadcasterTask.value
-            try await osc.send(AudioStop(index: Int32(deviceNum)))
-            await MainActor.run { self.lastLog = "/audio/stop [\(deviceNum)]" }
+        let val = Int(note)
+        if val >= 1 && val <= devices.count {
+            let idx = val - 1
+            switch keyboardTriggerMode {
+            case .torch:
+                flashOff(id: idx)
+            case .sound:
+                let device = devices[idx]
+                stopSound(device: device)
+            case .both:
+                flashOff(id: idx)
+                let device = devices[idx]
+                stopSound(device: device)
+            }
         }
     }
 
