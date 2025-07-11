@@ -196,7 +196,7 @@ class OscListener {
     // Always send via the default broadcast address
     _socket!.send(
       msg,
-      address: InternetAddress('255.255.255.255'),
+      destination: InternetAddress('255.255.255.255'),
       port: 9000,
     );
 
@@ -211,11 +211,7 @@ class OscListener {
             parts[3] = '255';
             final bcast = InternetAddress(parts.join('.'));
             try {
-              _socket!.send(
-                msg,
-                destination: bcast,
-                destinationPort: 9000,
-              );
+              _socket!.send(msg, destination: bcast, port: 9000);
             } catch (_) {
               // ignore failures
             }
