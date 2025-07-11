@@ -6,11 +6,23 @@ struct ComposerConsoleView: View {
     @State private var showRouting: Bool = false
     
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
-    // Keyboard mapping rows for 32 keys
-    private let keyRows = ["12345678", "qwertyui", "asdfghjk", "zxcvbnm,"]
-    private var keyLabels: [String] {
-        keyRows.flatMap { row in row.map { String($0) } }
+    // Mapping from keyboard key to real slot number
+    private let keyToSlot: [Character: Int] = [
+        "2": 1, "3": 3, "4": 4, "5": 5, "u": 7, "7": 9, "9": 12,
+        "q": 14, "w": 15, "d": 16, "e": 18, "r": 19, "k": 20, "i": 21,
+        "8": 23, "o": 24, "p": 25, "a": 27, "s": 29, "j": 34, "l": 38,
+        ";": 40, "x": 41, "c": 42, "v": 44, "m": 51, ",": 53, ".": 54
+    ]
+    // Reverse lookup so each slot can display its bound key
+    private var keyLabels: [Int: String] {
+        Dictionary(uniqueKeysWithValues: keyToSlot.map { ($0.value, String($0.key)) })
     }
+    private let slotRows: [[Int]] = [
+        Array(1...12),
+        Array(13...26),
+        Array(27...40),
+        Array(41...54)
+    ]
     
     @State private var leftPanelWidth: CGFloat = 300
     var body: some View {
@@ -144,56 +156,17 @@ struct ComposerConsoleView: View {
                         .disabled(!state.isBroadcasting)
                     }
                     
-                    LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(state.devices) { device in
-                            VStack(spacing: 4) {
-                                // Keyboard key label
-                                if keyLabels.indices.contains(device.id) {
-                                    Text(keyLabels[device.id])
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                    VStack(spacing: 24) {
+                        ForEach(slotRows.indices, id: \.
+self) { row in
+                            HStack(spacing: 24) {
+                                ForEach(slotRows[row], id: \.self) { slot in
+                                    let device = state.devices[slot - 1]
+                                    SlotCell(device: device,
+                                             keyLabel: keyLabels[slot])
                                 }
-                                Image(systemName: "flashlight.on.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
-                                    .shadow(color: device.torchOn ? Color.mintGlow.opacity(0.9) : .clear,
-                                            radius: device.torchOn ? 12 : 0)
-                                
-                                Text("#\(device.id + 1)")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                // Singer name
-                                Text(device.name)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                // Status
-                                let st = state.statuses[device.id] ?? .clean
-                                Text(st.rawValue)
-                                    .font(.caption2)
-                                    .foregroundStyle(st.color)
-                                
-                                Button {
-                                    state.triggerSound(device: device)
-                                } label: {
-                                    Image(systemName: "speaker.wave.2.fill")
-                                        .foregroundStyle(.cyan)
-                                        .help("Trigger sound on \(device.name)…")
-                                }
-                                .buttonStyle(.plain)
                             }
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        switch state.keyboardTriggerMode {
-                        case .torch:
-                            state.toggleTorch(id: device.id)
-                        case .sound:
-                            state.triggerSound(device: device)
-                        case .both:
-                            state.toggleTorch(id: device.id)
-                            state.triggerSound(device: device)
-                        }
-                    }
+                            .frame(maxWidth: .infinity)
                         }
                     }
                     Spacer(minLength: 8)
@@ -214,25 +187,20 @@ struct ComposerConsoleView: View {
                             state.startEnvelopeAll()
                             return
                         }
-                        // Find slot for key
-                        for (r, row) in keyRows.enumerated() {
-                            if let idx = row.firstIndex(of: char) {
-                                let col = row.distance(from: row.startIndex, to: idx)
-                                let slot = r * 8 + col
-                                // Torch and/or sound per mode
-                                switch state.keyboardTriggerMode {
-                                case .torch:
-                                    state.flashOn(id: slot)
-                                case .sound:
-                                    let device = state.devices[slot]
-                                    state.triggerSound(device: device)
-                                case .both:
-                                    state.flashOn(id: slot)
-                                    let deviceBoth = state.devices[slot]
-                                    state.triggerSound(device: deviceBoth)
-                                }
-                                return
+                        if let slot = keyToSlot[char] {
+                            let idx = slot - 1
+                            switch state.keyboardTriggerMode {
+                            case .torch:
+                                state.flashOn(id: idx)
+                            case .sound:
+                                let device = state.devices[idx]
+                                state.triggerSound(device: device)
+                            case .both:
+                                state.flashOn(id: idx)
+                                let deviceBoth = state.devices[idx]
+                                state.triggerSound(device: deviceBoth)
                             }
+                            return
                         }
                     },
                     onKeyUp: { char in
@@ -241,25 +209,20 @@ struct ComposerConsoleView: View {
                             state.releaseEnvelopeAll()
                             return
                         }
-                        // Find slot for key
-                        for (r, row) in keyRows.enumerated() {
-                            if let idx = row.firstIndex(of: char) {
-                                let col = row.distance(from: row.startIndex, to: idx)
-                                let slot = r * 8 + col
-                                // Torch and/or sound release per mode
-                                switch state.keyboardTriggerMode {
-                                case .torch:
-                                    state.flashOff(id: slot)
-                                case .sound:
-                                    let device = state.devices[slot]
-                                    state.stopSound(device: device)
-                                case .both:
-                                    state.flashOff(id: slot)
-                                    let deviceBoth = state.devices[slot]
-                                    state.stopSound(device: deviceBoth)
-                                }
-                                return
+                        if let slot = keyToSlot[char] {
+                            let idx = slot - 1
+                            switch state.keyboardTriggerMode {
+                            case .torch:
+                                state.flashOff(id: idx)
+                            case .sound:
+                                let device = state.devices[idx]
+                                state.stopSound(device: device)
+                            case .both:
+                                state.flashOff(id: idx)
+                                let deviceBoth = state.devices[idx]
+                                state.stopSound(device: deviceBoth)
                             }
+                            return
                         }
                     }
                 )
@@ -287,6 +250,69 @@ struct ComposerConsoleView: View {
         }
     }
 #endif
+
+    // MARK: - Slot Cell View
+    struct SlotCell: View {
+        @EnvironmentObject var state: ConsoleState
+        let device: ChoirDevice
+        let keyLabel: String?
+
+        var body: some View {
+            Group {
+                if device.isPlaceholder {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 28, height: 28)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                } else {
+                    VStack(spacing: 4) {
+                        if let keyLabel = keyLabel {
+                            Text(keyLabel)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "flashlight.on.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
+                            .shadow(color: device.torchOn ? Color.mintGlow.opacity(0.9) : .clear,
+                                    radius: device.torchOn ? 12 : 0)
+                        Text("#\(device.id + 1)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(device.name)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        let st = state.statuses[device.id] ?? .clean
+                        Text(st.rawValue)
+                            .font(.caption2)
+                            .foregroundStyle(st.color)
+                        Button {
+                            state.triggerSound(device: device)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.fill")
+                                .foregroundStyle(.cyan)
+                                .help("Trigger sound on \(device.name)…")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        switch state.keyboardTriggerMode {
+                        case .torch:
+                            state.toggleTorch(id: device.id)
+                        case .sound:
+                            state.triggerSound(device: device)
+                        case .both:
+                            state.toggleTorch(id: device.id)
+                            state.triggerSound(device: device)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Keyboard event capture for typing-trigger
     fileprivate struct KeyCaptureView: NSViewRepresentable {
         var onKeyDown: (Character) -> Void
