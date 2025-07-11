@@ -105,7 +105,7 @@ class OscListener {
     if (tagEnd == -1) return null;
     final tags = utf8.decode(data.sublist(idx + 1, tagEnd));
     idx = (tagEnd + 4) & ~3;
-    final args = <dynamic>[];
+    final args = <Object>[];
     final bd = ByteData.sublistView(data);
     for (final t in tags.split('')) {
       switch (t) {
