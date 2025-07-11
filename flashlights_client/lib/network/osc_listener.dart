@@ -1,26 +1,33 @@
+// Copyright © 2025.  MIT‑licensed.
+// Improved version generated 2025‑07‑11.
+// This file supersedes the former merge‑conflicted osc_listener.dart.
+
 import 'dart:async';
 import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
-// Import client state to update slot dynamically
-import '../model/client_state.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:mic_stream/mic_stream.dart' as mic;
 
-/// Helper that enables UDP broadcast on an [OSCSocket].
+import '../model/client_state.dart';
+
+/// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
   required int serverPort,
 }) {
+  // Pre‑define the broadcast target so [OSCSocket.send] can be called with
+  // *only* the OSC message (send(msg)).
   final socket = OSCSocket(
     serverAddress: serverAddress,
     serverPort: serverPort,
+    destination: InternetAddress('255.255.255.255'),
+    destinationPort: serverPort,
   );
-  // Enable UDP broadcast if the underlying OSCSocket exposes a raw socket.
+
+  // Best‑effort: ask the wrapped RawDatagramSocket to allow broadcasting.
   try {
-    // The `osc` package API changed over time; attempt both properties
-    // and ignore failures if neither exists.
     // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
     (socket as dynamic).rawSocket?.broadcastEnabled = true;
   } catch (_) {
@@ -28,13 +35,13 @@ OSCSocket _createBroadcastSocket({
       // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
       (socket as dynamic).socket?.broadcastEnabled = true;
     } catch (_) {
-      // Best effort: the `osc` package may not expose the inner socket.
+      // Some builds of the osc package don’t expose the inner socket.
     }
   }
   return socket;
 }
 
-/// Singleton OSC listener for flash/audio/mic/sync cues.
+/// Singleton OSC listener handling flash / audio / mic / sync cues.
 class OscListener {
   OscListener._();
   static final OscListener instance = OscListener._();
@@ -46,21 +53,22 @@ class OscListener {
   bool _running = false;
   Timer? _disconnectTimer;
 
-  /// Starts listening on UDP port 9000 (idempotent).
+  /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
     if (_running) return;
     _running = true;
 
-  _socket = _createBroadcastSocket(
-    serverAddress: InternetAddress.anyIPv4,
-    serverPort: 9000,
-  );
-    // Listen and dispatch using the current slot
+    _socket = _createBroadcastSocket(
+      serverAddress: InternetAddress.anyIPv4,
+      serverPort: 9000,
+    );
+
+    // Listen and dispatch using the current slot.
     await _socket!.listen((OSCMessage msg) async {
       await _dispatch(msg);
     });
 
-    // Periodically announce our presence so the server can discover us.
+    // Periodically announce our presence so servers can discover us.
     _helloTimer =
         Timer.periodic(const Duration(seconds: 2), (_) => _sendHello());
     _sendHello();
@@ -68,14 +76,17 @@ class OscListener {
     print('[OSC] Listening on 0.0.0.0:9000');
   }
 
+  /* -------------------------------------------------------------------- */
+  /*                               Dispatcher                             */
+  /* -------------------------------------------------------------------- */
+
   Future<void> _dispatch(OSCMessage m) async {
-    // Always use the latest listening slot
     final myIndex = client.myIndex.value;
     print('OSC ↳ ${m.address} ${m.arguments}');
+
     switch (m.address) {
       case '/flash/on':
         final id = m.arguments[0] as int;
-        // Intensity argument is ignored – torch_light has no such API.
         if (id == myIndex) {
           try {
             await TorchLight.enableTorch();
@@ -123,7 +134,7 @@ class OscListener {
         }
         break;
 
-      // Dynamic slot assignment
+      // Dynamic slot assignment.
       case '/set-slot':
         final newSlot =
             m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
@@ -144,14 +155,14 @@ class OscListener {
             ntp = BigInt.from(ts);
           }
           if (ntp != null) {
-            const eraOffset = 2208988800; // Seconds between 1900 and 1970
+            const eraOffset = 2208988800; // Seconds between 1900 and 1970.
             final serverSecs = ntp - BigInt.from(eraOffset);
             final serverMs = serverSecs.toInt() * 1000;
             final localMs = DateTime.now().millisecondsSinceEpoch;
             final offset = serverMs - localMs;
             client.clockOffsetMs =
-                (client.clockOffsetMs + offset) / 2; // simple smoothing
-            print('[OSC] Clock offset updated to ${client.clockOffsetMs} ms');
+                (client.clockOffsetMs + offset) / 2; // Simple smoothing.
+            print('[OSC] Clock offset updated to ${client.clockOffsetMs} ms');
           }
         }
         break;
@@ -164,7 +175,7 @@ class OscListener {
         final id = m.arguments[0] as int;
         final durationSec = (m.arguments[1] as num).toDouble();
         if (id == myIndex) {
-          print('[OSC] Starting mic recording for $durationSec s');
+          print('[OSC] Starting mic recording for $durationSec s');
           await mic.MicStream.shouldRequestPermission(true);
           final audioStream = mic.MicStream.microphone(
             audioSource: mic.AudioSource.DEFAULT,
@@ -181,7 +192,7 @@ class OscListener {
               await _micSubscription?.cancel();
               _micSubscription = null;
               client.recording.value = false;
-              print('[OSC] Mic recording of $durationSec s completed');
+              print('[OSC] Mic recording of $durationSec s completed');
             },
           );
         }
@@ -189,36 +200,43 @@ class OscListener {
     }
   }
 
-  /// Broadcast a hello so servers can discover us
+  /* -------------------------------------------------------------------- */
+  /*                         Discovery / Heart‑beat                        */
+  /* -------------------------------------------------------------------- */
+
+  /// Broadcast a `/hello` so servers can discover this client.
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
-    // Always send via the default broadcast address
-    _socket!.send(
-      msg,
-      address: InternetAddress('255.255.255.255'),
-      port: 9000,
-    );
 
-    // Additionally attempt per-interface broadcasts for networks where
-    // 255.255.255.255 is filtered.  Best effort only; errors are ignored.
-    NetworkInterface.list( type: InternetAddressType.IPv4, includeLoopback: false)
-        .then((interfaces) {
+    final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
+
+    // Primary broadcast via the socket’s predefined destination.
+    try {
+      _socket!.send(msg);
+    } catch (e) {
+      // Log but do not crash; we fall back to per‑interface broadcasts below.
+      print('[OSC] Primary broadcast failed: $e');
+    }
+
+    // Secondary: per‑interface subnet broadcast for routers that
+    // ignore 255.255.255.255. Best‑effort only – errors intentionally ignored.
+    NetworkInterface.list(
+      type: InternetAddressType.IPv4,
+      includeLoopback: false,
+    ).then((interfaces) {
       for (final iface in interfaces) {
         for (final addr in iface.addresses) {
           final parts = addr.address.split('.');
           if (parts.length == 4) {
             parts[3] = '255';
             final bcast = InternetAddress(parts.join('.'));
-            try {
-              _socket!.send(
-                msg,
-                address: bcast,
-                port: 9000,
-              );
-            } catch (_) {
-              // ignore failures
-            }
+
+            RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
+                .then((raw) {
+              raw.broadcastEnabled = true;
+              raw.send(msg.toBytes(), bcast, 9000);
+              raw.close();
+            }).catchError((_) {/* ignore */});
           }
         }
       }
@@ -233,17 +251,26 @@ class OscListener {
     });
   }
 
+  /* -------------------------------------------------------------------- */
+  /*                               Teardown                                */
+  /* -------------------------------------------------------------------- */
+
   /// Stops listening and cleans up resources.
   Future<void> stop() async {
     _socket?.close();
     _socket = null;
+
     await _micSubscription?.cancel();
     _micSubscription = null;
     client.recording.value = false;
+
     await _player.dispose();
     _running = false;
+
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
-    client.connected.value = false;    print('[OSC] Listener stopped');
+    client.connected.value = false;
+
+    print('[OSC] Listener stopped');
   }
 }
