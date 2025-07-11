@@ -4,7 +4,9 @@ import AppKit
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
     @State private var showRouting: Bool = false
-    
+
+    @State private var triggeredSlots: Set<Int> = []
+
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
     private let keyToSlot: [Character: Int] = [
@@ -22,6 +24,19 @@ struct ComposerConsoleView: View {
         Array(13...26),
         Array(27...40),
         Array(41...54)
+    ]
+
+    private let slotOutlineColors: [Int: Color] = [
+        27: .royalBlue, 41: .royalBlue, 42: .royalBlue,
+        1: .brightRed, 15: .brightRed, 16: .brightRed,
+        29: .slotGreen, 44: .slotGreen,
+        3: .slotPurple, 4: .slotPurple, 18: .slotPurple,
+        7: .slotYellow, 19: .slotYellow, 34: .slotYellow,
+        9: .lightRose, 20: .lightRose, 21: .lightRose,
+        23: .slotOrange, 38: .slotOrange, 51: .slotOrange,
+        12: .hotMagenta, 24: .hotMagenta, 25: .hotMagenta,
+        40: .skyBlue, 53: .skyBlue, 54: .skyBlue,
+        5: .white
     ]
     
     @State private var leftPanelWidth: CGFloat = 300
@@ -163,7 +178,9 @@ self) { row in
                                 ForEach(slotRows[row], id: \.self) { slot in
                                     let device = state.devices[slot - 1]
                                     SlotCell(device: device,
-                                             keyLabel: keyLabels[slot])
+                                             keyLabel: keyLabels[slot],
+                                             outline: slotOutlineColors[slot],
+                                             isTriggered: triggeredSlots.contains(slot))
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -189,6 +206,7 @@ self) { row in
                         }
                         if let slot = keyToSlot[char] {
                             let idx = slot - 1
+                            triggeredSlots.insert(slot)
                             switch state.keyboardTriggerMode {
                             case .torch:
                                 state.flashOn(id: idx)
@@ -211,6 +229,7 @@ self) { row in
                         }
                         if let slot = keyToSlot[char] {
                             let idx = slot - 1
+                            triggeredSlots.remove(slot)
                             switch state.keyboardTriggerMode {
                             case .torch:
                                 state.flashOff(id: idx)
@@ -256,6 +275,8 @@ self) { row in
         @EnvironmentObject var state: ConsoleState
         let device: ChoirDevice
         let keyLabel: String?
+        let outline: Color?
+        let isTriggered: Bool
 
         var body: some View {
             Group {
@@ -308,6 +329,13 @@ self) { row in
                             state.triggerSound(device: device)
                         }
                     }
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(outline ?? .clear, lineWidth: 3)
+                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 6)
+                    )
+                    .shadow(color: isTriggered ? Color.white.opacity(0.9) : .clear,
+                            radius: isTriggered ? 18 : 0)
                 }
             }
         }
