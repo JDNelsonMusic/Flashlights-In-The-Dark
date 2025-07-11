@@ -191,10 +191,11 @@ final class HelloDatagramHandler: ChannelInboundHandler {
         guard let bytes = buffer.readBytes(length: buffer.readableBytes) else {
             return
         }
-        // only emit if we have an IP to send to
-        if let ip = env.remoteAddress?.ipAddress {
-            Task {
-                let slot = await owner.parseHelloSlot(bytes)
+        // Only emit if both an IP address and a valid slot are found
+        guard let ip = env.remoteAddress.ipAddress else { return }
+
+        Task {
+            if let slot = await owner.parseHelloSlot(bytes) {
                 await owner.emitHello(slot: slot, ip: ip)
             }
         }
