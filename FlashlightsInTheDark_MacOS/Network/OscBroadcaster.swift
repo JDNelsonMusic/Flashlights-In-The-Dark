@@ -164,7 +164,10 @@ extension OscBroadcaster {
 
 // MARK: - Incoming Hello Handling
 extension OscBroadcaster {
-    /// Basic OSC parser to detect `/hello` with Int32 argument
+    /// Basic OSC parser to detect `/hello` with a numeric slot argument.
+    ///
+    /// Earlier prototypes only sent an Int32, but some client libraries may
+    /// emit Int64 values.  Accept either format for robustness.
     fileprivate func parseHelloSlot(_ bytes: [UInt8]) -> Int? {
         guard let addrEnd = bytes.firstIndex(of: 0),
               let addr = String(bytes: bytes[0..<addrEnd], encoding: .utf8),
@@ -175,12 +178,29 @@ extension OscBroadcaster {
               bytes[index] == UInt8(ascii: ",") else { return nil }
         guard let tagEnd = bytes[index...].firstIndex(of: 0) else { return nil }
         let tags = String(bytes: bytes[index..<tagEnd], encoding: .utf8) ?? ""
-        guard tags.contains("i") else { return nil }
         index = (tagEnd + 4) & ~3
-        guard index + 3 < bytes.count else { return nil }
-        var value: Int32 = 0
-        for b in bytes[index..<(index+4)] { value = (value << 8) | Int32(b) }
-        return Int(value)
+
+        func readInt32(at idx: Int) -> Int? {
+            guard idx + 3 < bytes.count else { return nil }
+            var v: Int32 = 0
+            for b in bytes[idx..<(idx+4)] { v = (v << 8) | Int32(b) }
+            return Int(v)
+        }
+
+        func readInt64(at idx: Int) -> Int? {
+            guard idx + 7 < bytes.count else { return nil }
+            var v: Int64 = 0
+            for b in bytes[idx..<(idx+8)] { v = (v << 8) | Int64(b) }
+            return Int(v)
+        }
+
+        if tags.contains("i") {                // Int32
+            return readInt32(at: index)
+        } else if tags.contains("h") {         // Int64
+            return readInt64(at: index)
+        } else {
+            return nil
+        }
     }
 }
 
