@@ -1,51 +1,61 @@
 {
   "images" : [
     {
+      "filename" : "FlashlightsInTheDark-Icon-16.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-32.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-32 1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-64.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-128.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-256.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-256 1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-Dark-512.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-Dark-512 1.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
+      "filename" : "FlashlightsInTheDark-Icon-Dark-1024.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
