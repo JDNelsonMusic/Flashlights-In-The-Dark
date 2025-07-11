@@ -54,7 +54,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 return
             }
         }
-        // Initialize with all 32 slots (demo placeholders)
+        // Initialize with all 54 slots (real + placeholder)
         self.devices = ChoirDevice.demo
         self.statuses = Dictionary(uniqueKeysWithValues:
             devices.map { ($0.id, DeviceStatus.clean) }
@@ -98,6 +98,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     @discardableResult
     public func toggleTorch(id: Int) -> [ChoirDevice] {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
+        guard !devices[idx].isPlaceholder else { return devices }
         objectWillChange.send()
         devices[idx].torchOn.toggle()
         Task {
@@ -119,6 +120,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Directly flash on a specific lamp slot (no toggle) and update state.
     public func flashOn(id: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
         devices[idx].torchOn = true
         Task {
@@ -131,6 +133,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Directly flash off a specific lamp slot and update state.
     public func flashOff(id: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
+        guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
         devices[idx].torchOn = false
         Task {
@@ -175,6 +178,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     
     /// Trigger playback of a preloaded audio file on a specific device
     public func triggerSound(device: ChoirDevice) {
+        guard !device.isPlaceholder else { return }
         Task {
             let oscBroadcaster = try await broadcasterTask.value
             let slot = Int32(device.id + 1)
@@ -200,7 +204,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     /// Play audio on all devices slots based on current activeToneSets
     public func playAllTones() {
-        for device in devices {
+        for device in devices where !device.isPlaceholder {
             triggerSound(device: device)
         }
     }
@@ -261,6 +265,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
+        guard !devices[idx].isPlaceholder else { return }
         Task {
             let osc = try await broadcasterTask.value
             let slot = Int32(device.id + 1)
@@ -283,7 +288,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 // Attack phase
                 for i in 0...steps {
                     let intensity = Float32(i) / Float32(steps)
-                    for d in devices {
+                    for d in devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(attackMs) * 1_000_000 / UInt64(steps))
@@ -293,7 +298,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 for i in 0...steps {
                     let t = Float32(i) / Float32(steps)
                     let intensity = (1 - t) + t * sustainLevel
-                    for d in devices {
+                    for d in devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(decayMs) * 1_000_000 / UInt64(steps))
@@ -315,12 +320,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let sustainLevel = Float32(sustainPct) / 100
                 for i in 0...steps {
                     let intensity = sustainLevel * (1 - Float32(i) / Float32(steps))
-                    for d in devices {
+                    for d in devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(releaseMs) * 1_000_000 / UInt64(steps))
                 }
-                for d in devices {
+                for d in devices where !d.isPlaceholder {
                     do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
                 }
                 await MainActor.run { lastLog = "/envelope release" }
@@ -354,7 +359,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Build all devices in parallel.
     public func buildAll() {
-        for device in devices {
+        for device in devices where !device.isPlaceholder {
             build(device: device)
         }
     }
@@ -399,14 +404,14 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Run all devices that are build-ready.
     public func runAll() {
-        for device in devices where statuses[device.id] == .buildReady {
+        for device in devices where !device.isPlaceholder && statuses[device.id] == .buildReady {
             run(device: device)
         }
     }
 
     @discardableResult
     public func playAll() -> [ChoirDevice] {
-        for idx in devices.indices {
+        for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = true
             Task {
                 let osc = try await broadcasterTask.value
@@ -419,7 +424,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     @discardableResult
     public func blackoutAll() -> [ChoirDevice] {
-        for idx in devices.indices {
+        for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = false
             Task {
                 let osc = try await broadcasterTask.value

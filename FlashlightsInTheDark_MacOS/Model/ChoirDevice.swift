@@ -5,6 +5,8 @@ public struct ChoirDevice: Identifiable, Sendable {
     public var torchOn: Bool
     public var audioPlaying: Bool
     public var micActive: Bool
+    /// Whether this slot represents a real device or a placeholder
+    public var isPlaceholder: Bool
     /// The iOS device UDID used by `flutter run -d <UDID>`.
     public var udid: String
     /// Singer's name, from slot mapping JSON.
@@ -22,7 +24,8 @@ public struct ChoirDevice: Identifiable, Sendable {
         torchOn: Bool = false,
         audioPlaying: Bool = false,
         micActive: Bool = false,
-        listeningSlot: Int? = nil
+        listeningSlot: Int? = nil,
+        isPlaceholder: Bool = false
     ) {
         self.id = id
         self.udid = udid
@@ -31,6 +34,7 @@ public struct ChoirDevice: Identifiable, Sendable {
         self.torchOn = torchOn
         self.audioPlaying = audioPlaying
         self.micActive = micActive
+        self.isPlaceholder = isPlaceholder
         // Default to own slot (1-based) if not provided
         self.listeningSlot = listeningSlot ?? (id + 1)
     }
@@ -38,6 +42,19 @@ public struct ChoirDevice: Identifiable, Sendable {
 
 extension ChoirDevice {
     public static var demo: [ChoirDevice] {
-        (0..<32).map { ChoirDevice(id: $0, udid: "", name: "") }
+        let realSlots: Set<Int> = [
+            1, 3, 4, 5, 7, 9, 12,
+            14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
+            27, 29, 34, 38, 40,
+            41, 42, 44, 51, 53, 54
+        ]
+        return (1...54).map { i in
+            ChoirDevice(
+                id: i - 1,
+                udid: "",
+                name: "",
+                isPlaceholder: !realSlots.contains(i)
+            )
+        }
     }
 }

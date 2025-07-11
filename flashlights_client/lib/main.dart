@@ -129,7 +129,7 @@ class _BootstrapState extends State<Bootstrap> {
                         return DropdownButton<int>(
                           value: myIndex,
                           items: List.generate(
-                            32,
+                            28,
                             (i) => DropdownMenuItem(
                               value: i + 1,
                               child: Text('Slot ${i + 1}'),
