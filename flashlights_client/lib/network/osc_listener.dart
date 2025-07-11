@@ -198,13 +198,29 @@ class OscListener {
   /// Broadcast a hello so servers can discover us
   void _sendHello() {
     if (_socket == null) return;
-    final msg = OSCMessage(
-      '/hello',
-      arguments: [client.myIndex.value],
-    );
-    // OSCSocket is already configured for broadcast. Send the message using the
-    // socket's default destination.
+    final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
+    // Always send via the default broadcast address
     _socket!.send(msg);
+
+    // Additionally attempt per-interface broadcasts for networks where
+    // 255.255.255.255 is filtered.  Best effort only; errors are ignored.
+    NetworkInterface.list( type: InternetAddressType.IPv4, includeLoopback: false)
+        .then((interfaces) {
+      for (final iface in interfaces) {
+        for (final addr in iface.addresses) {
+          final parts = addr.address.split('.');
+          if (parts.length == 4) {
+            parts[3] = '255';
+            final bcast = InternetAddress(parts.join('.'));
+            try {
+              _socket!.send(msg, destination: bcast, port: 9000);
+            } catch (_) {
+              // ignore failures
+            }
+          }
+        }
+      }
+    });
   }
 
   void _markConnected() {
