@@ -329,13 +329,18 @@ self) { row in
                             state.triggerSound(device: device)
                         }
                     }
+                    .padding(8)
                     .background(
-                        RoundedRectangle(cornerRadius: 6)
+                        RoundedRectangle(cornerRadius: 12)
                             .stroke(outline ?? .clear, lineWidth: 3)
-                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 6)
+                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
                     )
-                    .shadow(color: isTriggered ? Color.white.opacity(0.9) : .clear,
-                            radius: isTriggered ? 18 : 0)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.clear, lineWidth: 0)
+                            .shadow(color: isTriggered ? Color.white.opacity(0.95) : .clear,
+                                    radius: isTriggered ? 36 : 0)
+                    )
                 }
             }
         }
