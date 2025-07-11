@@ -500,8 +500,15 @@ extension ConsoleState {
         do {
             let broadcaster = try await broadcasterTask.value
             try await broadcaster.start()
+
+            // `registerHelloHandler` expects a **synchronous** closure, but we still
+            // need to call the async `deviceDiscovered(slot:ip:)` that lives on the
+            // MainActor.  Wrap the call in a detached Task so the compiler gets the
+            // synchronous signature it expects.
             await broadcaster.registerHelloHandler { [weak self] slot, ip in
-                await self?.deviceDiscovered(slot: slot, ip: ip)
+                Task { @MainActor in
+                    await self?.deviceDiscovered(slot: slot, ip: ip)
+                }
             }
             print("[ConsoleState] Network stack started ✅")
         } catch {
