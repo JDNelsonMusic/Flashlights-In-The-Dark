@@ -7,10 +7,14 @@
 
 import Foundation
 import NIOCore
+#if os(Linux) || os(Android)
+import Glibc
+#else
+import Darwin
+#endif
 import NIOPosix
 import OSCKit          // OSCMessage, OSCAddressPattern
 import SystemConfiguration
-import Darwin
 
 /// Broadcasts OSC messages over UDP to all detected local-network broadcast
 /// addresses. Designed for lightweight one-way cues.
@@ -61,7 +65,7 @@ public actor OscBroadcaster {
         // Datagram bootstrap with broadcast privileges.
         let bootstrap = DatagramBootstrap(group: eventLoopGroup)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .channelOption(ChannelOptions.socketOption(.so_reuseport), value: 1)
+            .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEPORT), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_broadcast), value: 1)
 
         // Bind to *all* interfaces on the chosen port.
