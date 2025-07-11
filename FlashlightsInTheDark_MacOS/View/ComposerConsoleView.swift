@@ -138,6 +138,20 @@ struct ComposerConsoleView: View {
                             .help("Keyboard: \(mode.rawValue)")
                         }
                     }
+                    Divider()
+                    Text("MIDI Controls:")
+                        .font(.headline)
+                    Picker("MIDI Input", selection: $state.selectedMidiInput) {
+                        ForEach(state.midiInputNames, id: \.self) { name in
+                            Text(name)
+                        }
+                    }
+                    Picker("MIDI Output", selection: $state.selectedMidiOutput) {
+                        ForEach(state.midiOutputNames, id: \.self) { name in
+                            Text(name)
+                        }
+                    }
+                    .onAppear { state.refreshMidiDevices() }
                     Spacer()
                 }
                 .frame(width: leftPanelWidth)
@@ -196,8 +210,7 @@ struct ComposerConsoleView: View {
                     }
                     
                     VStack(spacing: 24) {
-                        ForEach(slotRows.indices, id: \.
-self) { row in
+                        ForEach(slotRows.indices, id: \.self) { row in
                             HStack(spacing: 24) {
                                 ForEach(slotRows[row], id: \.self) { slot in
                                     let device = state.devices[slot - 1]
@@ -211,8 +224,7 @@ self) { row in
                         }
                     }
                     HStack(spacing: 12) {
-                        ForEach(1...9, id: \.
-self) { idx in
+                        ForEach(1...9, id: \.self) { idx in
                             Button("C3-\(idx)") {
                                 if let slots = tripleTriggers[idx] {
                                     state.triggerSlots(realSlots: slots)
@@ -375,8 +387,8 @@ self) { idx in
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.clear, lineWidth: 0)
-                            .shadow(color: (isTriggered || device.torchOn) ? Color.white.opacity(0.95) : .clear,
-                                    radius: (isTriggered || device.torchOn) ? 36 : 0)
+                            .shadow(color: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? Color.white.opacity(0.95) : .clear,
+                                    radius: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 36 : 0)
                     )
                 }
             }
