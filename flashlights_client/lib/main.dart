@@ -126,15 +126,20 @@ class _BootstrapState extends State<Bootstrap> {
                     ValueListenableBuilder<int>(
                       valueListenable: client.myIndex,
                       builder: (context, myIndex, _) {
+                        const realSlots = [
+                          1, 3, 4, 5, 7, 9, 12,
+                          14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
+                          27, 29, 34, 38, 40,
+                          41, 42, 44, 51, 53, 54
+                        ];
                         return DropdownButton<int>(
                           value: myIndex,
-                          items: List.generate(
-                            28,
-                            (i) => DropdownMenuItem(
-                              value: i + 1,
-                              child: Text('Slot ${i + 1}'),
-                            ),
-                          ),
+                          items: realSlots
+                              .map((slot) => DropdownMenuItem(
+                                    value: slot,
+                                    child: Text('Slot $slot'),
+                                  ))
+                              .toList(),
                           onChanged: (newSlot) {
                             if (newSlot != null) {
                               client.myIndex.value = newSlot;
