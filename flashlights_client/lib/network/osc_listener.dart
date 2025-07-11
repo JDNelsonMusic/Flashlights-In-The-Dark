@@ -4,6 +4,8 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
@@ -47,6 +49,7 @@ class OscListener {
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
+  RawDatagramSocket? _recvSocket;
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
   StreamSubscription<List<int>>? _micSubscription;
@@ -63,9 +66,23 @@ class OscListener {
       serverPort: 9000,
     );
 
-    // Listen and dispatch using the current slot.
-    await _socket!.listen((OSCMessage msg) async {
-      await _dispatch(msg);
+    _recvSocket = await RawDatagramSocket.bind(
+      InternetAddress.anyIPv4,
+      9000,
+      reuseAddress: true,
+      reusePort: true,
+    );
+    _recvSocket!.broadcastEnabled = true;
+  _recvSocket!.listen((event) {
+      if (event == RawSocketEvent.read) {
+        final dg = _recvSocket!.receive();
+        if (dg != null) {
+          final msg = _parseMessage(dg.data);
+          if (msg != null) {
+            _dispatch(msg);
+          }
+        }
+      }
     });
 
     // Periodically announce our presence so servers can discover us.
@@ -74,6 +91,57 @@ class OscListener {
     _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
+  }
+
+  /// Minimal OSC parser for the small subset of messages we use.
+  OSCMessage? _parseMessage(Uint8List data) {
+    int idx = 0;
+    final zero = data.indexOf(0, idx);
+    if (zero == -1) return null;
+    final address = utf8.decode(data.sublist(0, zero));
+    idx = (zero + 4) & ~3;
+    if (idx >= data.length || data[idx] != 44) return null; // ','
+    final tagEnd = data.indexOf(0, idx);
+    if (tagEnd == -1) return null;
+    final tags = utf8.decode(data.sublist(idx + 1, tagEnd));
+    idx = (tagEnd + 4) & ~3;
+    final args = <Object>[];
+    final bd = ByteData.sublistView(data);
+    for (final t in tags.split('')) {
+      switch (t) {
+        case 'i':
+          if (idx + 4 > data.length) return null;
+          args.add(bd.getInt32(idx, Endian.big));
+          idx += 4;
+          break;
+        case 'h':
+          if (idx + 8 > data.length) return null;
+          args.add(bd.getInt64(idx, Endian.big));
+          idx += 8;
+          break;
+        case 'f':
+          if (idx + 4 > data.length) return null;
+          args.add(bd.getFloat32(idx, Endian.big));
+          idx += 4;
+          break;
+        case 's':
+          final end = data.indexOf(0, idx);
+          if (end == -1) return null;
+          args.add(utf8.decode(data.sublist(idx, end)));
+          idx = (end + 4) & ~3;
+          break;
+        case 't':
+          if (idx + 8 > data.length) return null;
+          final hi = bd.getUint32(idx, Endian.big);
+          final lo = bd.getUint32(idx + 4, Endian.big);
+          args.add((BigInt.from(hi) << 32) | BigInt.from(lo));
+          idx += 8;
+          break;
+        default:
+          return null; // unsupported
+      }
+    }
+    return OSCMessage(address, arguments: args);
   }
 
   /* -------------------------------------------------------------------- */
@@ -259,6 +327,8 @@ class OscListener {
   Future<void> stop() async {
     _socket?.close();
     _socket = null;
+    _recvSocket?.close();
+    _recvSocket = null;
 
     await _micSubscription?.cancel();
     _micSubscription = null;
