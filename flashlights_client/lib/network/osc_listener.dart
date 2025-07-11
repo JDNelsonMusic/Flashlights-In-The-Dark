@@ -141,7 +141,7 @@ class OscListener {
           return null; // unsupported
       }
     }
-    return OSCMessage(address, args);
+    return OSCMessage(address, arguments: args);
   }
 
   /* -------------------------------------------------------------------- */
