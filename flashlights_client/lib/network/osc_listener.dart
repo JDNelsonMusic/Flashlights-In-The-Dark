@@ -12,14 +12,10 @@ import 'package:mic_stream/mic_stream.dart' as mic;
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
   required int serverPort,
-  required InternetAddress destination,
-  required int destinationPort,
 }) {
   final socket = OSCSocket(
     serverAddress: serverAddress,
     serverPort: serverPort,
-    destination: destination,
-    destinationPort: destinationPort,
   );
   // Enable UDP broadcast if the underlying OSCSocket exposes a raw socket.
   try {
@@ -58,8 +54,6 @@ class OscListener {
     _socket = _createBroadcastSocket(
       serverAddress: InternetAddress.anyIPv4,
       serverPort: 9000,
-      destination: InternetAddress('255.255.255.255'),
-      destinationPort: 9000,
     );
     // Listen and dispatch using the current slot
     await _socket!.listen((OSCMessage msg) async {
@@ -200,7 +194,11 @@ class OscListener {
     if (_socket == null) return;
     final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
     // Always send via the default broadcast address
-    _socket!.send(msg);
+    _socket!.send(
+      msg,
+      destination: InternetAddress('255.255.255.255'),
+      port: 9000,
+    );
 
     // Additionally attempt per-interface broadcasts for networks where
     // 255.255.255.255 is filtered.  Best effort only; errors are ignored.
