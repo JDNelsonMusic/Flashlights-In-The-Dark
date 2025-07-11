@@ -143,6 +143,26 @@ public final class ConsoleState: ObservableObject, Sendable {
             midi.sendControlChange(UInt8(id + 1), value: 0)
         }
     }
+
+    /// Trigger a list of real slots according to the current keyboardTriggerMode.
+    public func triggerSlots(realSlots: [Int]) {
+        for real in realSlots {
+            let idx = real - 1
+            switch keyboardTriggerMode {
+            case .torch:
+                _ = toggleTorch(id: idx)
+            case .sound:
+                guard idx < devices.count else { continue }
+                let device = devices[idx]
+                triggerSound(device: device)
+            case .both:
+                _ = toggleTorch(id: idx)
+                guard idx < devices.count else { continue }
+                let device = devices[idx]
+                triggerSound(device: device)
+            }
+        }
+    }
     
     // MARK: – One-click build & run  🚀
     public func buildAndRun(device: ChoirDevice) {

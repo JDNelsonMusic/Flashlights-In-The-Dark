@@ -38,6 +38,30 @@ struct ComposerConsoleView: View {
         40: .skyBlue, 53: .skyBlue, 54: .skyBlue,
         5: .white
     ]
+
+    private let tripleTriggers: [Int: [Int]] = [
+        1: [27, 41, 42],
+        2: [1, 14, 15],
+        3: [16, 29, 44],
+        4: [3, 4, 18],
+        5: [7, 19, 34],
+        6: [9, 20, 21],
+        7: [23, 38, 51],
+        8: [12, 24, 25],
+        9: [40, 53, 54]
+    ]
+
+    private let tripleColors: [Int: Color] = [
+        1: .royalBlue,
+        2: .brightRed,
+        3: .slotGreen,
+        4: .slotPurple,
+        5: .slotYellow,
+        6: .lightRose,
+        7: .slotOrange,
+        8: .hotMagenta,
+        9: .skyBlue
+    ]
     
     @State private var leftPanelWidth: CGFloat = 300
     var body: some View {
@@ -186,6 +210,19 @@ self) { row in
                             .frame(maxWidth: .infinity)
                         }
                     }
+                    HStack(spacing: 12) {
+                        ForEach(1...9, id: \.
+self) { idx in
+                            Button("C3-\(idx)") {
+                                if let slots = tripleTriggers[idx] {
+                                    state.triggerSlots(realSlots: slots)
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(tripleColors[idx] ?? .white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                     Spacer(minLength: 8)
                     // Status bar
                     Text(state.lastLog)
