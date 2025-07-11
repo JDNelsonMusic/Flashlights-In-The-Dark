@@ -48,11 +48,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-       203C52E12DD67F2E00597453 /* FlashlightsInTheDark_MacOS */ = {
-           isa = PBXFileSystemSynchronizedRootGroup;
-           path = FlashlightsInTheDark_MacOS;
-           sourceTree = "<group>";
-       };
+		203C52E12DD67F2E00597453 /* FlashlightsInTheDark_MacOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashlightsInTheDark_MacOS;
+			sourceTree = "<group>";
+		};
 		203C52F02DD67F2F00597453 /* FlashlightsInTheDarkTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = FlashlightsInTheDarkTests;
@@ -108,7 +108,7 @@
 		203C52D62DD67F2E00597453 = {
 			isa = PBXGroup;
 			children = (
-				203C52E12DD67F2E00597453 /* FlashlightsInTheDark */,
+				203C52E12DD67F2E00597453 /* FlashlightsInTheDark_MacOS */,
 				203C52F02DD67F2F00597453 /* FlashlightsInTheDarkTests */,
 				203C52FA2DD67F2F00597453 /* FlashlightsInTheDarkUITests */,
 				203C52E02DD67F2E00597453 /* Products */,
@@ -453,10 +453,10 @@
 				DEVELOPMENT_TEAM = 64X2982QY7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-                               GENERATE_INFOPLIST_FILE = YES;
-                               INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-                               INFOPLIST_KEY_NSHumanReadableCopyright = "";
-                               INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -465,8 +465,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = KEEx.AI.FlashlightsInTheDark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Debug;
 		};
@@ -482,10 +485,10 @@
 				DEVELOPMENT_TEAM = 64X2982QY7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-                               GENERATE_INFOPLIST_FILE = YES;
-                               INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-                               INFOPLIST_KEY_NSHumanReadableCopyright = "";
-                               INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -494,8 +497,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = KEEx.AI.FlashlightsInTheDark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Release;
 		};
