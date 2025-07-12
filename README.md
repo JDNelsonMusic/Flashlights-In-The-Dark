@@ -144,6 +144,8 @@ Sound & Light Checks
 
 ⌘+Shift+A (All Audio Test) — set phone volumes to 100 %.
 
+Press `\` (backslash) to toggle all flashlights on/off.
+
 During the Piece
 
 Follow score or DAW timeline.
