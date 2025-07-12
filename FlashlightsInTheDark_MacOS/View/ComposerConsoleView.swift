@@ -5,7 +5,6 @@ struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
     @State private var showRouting: Bool = false
 
-    @State private var triggeredSlots: Set<Int> = []
     // Strobe effect state
     @State private var strobeActive: Bool = false
     @State private var strobeOn: Bool = false
@@ -256,7 +255,7 @@ struct ComposerConsoleView: View {
                                     SlotCell(device: device,
                                              keyLabel: keyLabels[slot],
                                              outline: slotOutlineColors[slot],
-                                             isTriggered: triggeredSlots.contains(slot))
+                                             isTriggered: state.triggeredSlots.contains(slot))
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -314,7 +313,7 @@ struct ComposerConsoleView: View {
                             return
                         }
                         if let note = typingMapper.note(for: char) {
-                            triggeredSlots.insert(Int(note))
+                            state.addTriggeredSlot(Int(note))
                             state.typingNoteOn(note)
                             return
                         }
@@ -326,7 +325,7 @@ struct ComposerConsoleView: View {
                             return
                         }
                         if let note = typingMapper.note(for: char) {
-                            triggeredSlots.remove(Int(note))
+                            state.removeTriggeredSlot(Int(note))
                             state.typingNoteOff(note)
                             return
                         }
