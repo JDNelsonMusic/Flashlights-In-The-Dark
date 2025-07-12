@@ -10,6 +10,7 @@ final class MIDIManager {
     private var virtualDst = MIDIEndpointRef()
     private var selectedOutput = MIDIEndpointRef()
     private var selectedInput  = MIDIEndpointRef()
+    private var channel: UInt8 = 0 // MIDI channel 1
 
     /// Handlers for incoming MIDI messages.
     var noteOnHandler: ((UInt8, UInt8) -> Void)?
@@ -32,6 +33,7 @@ final class MIDIManager {
                               &virtualDst)
         selectedOutput = 0
         selectedInput = 0
+        channel = 0
     }
 
     // MARK: - Device Enumeration
@@ -45,6 +47,10 @@ final class MIDIManager {
         (0..<MIDIGetNumberOfDestinations()).map { idx in
             endpointName(MIDIGetDestination(idx))
         }
+    }
+
+    func setChannel(_ chan: Int) {
+        channel = UInt8(min(max(chan - 1, 0), 15))
     }
 
     private func endpointName(_ ep: MIDIEndpointRef) -> String {
@@ -81,15 +87,15 @@ final class MIDIManager {
     }
 
     // MARK: - Sending
-    func sendNoteOn(_ note: UInt8, velocity: UInt8 = 127, channel: UInt8 = 0) {
+    func sendNoteOn(_ note: UInt8, velocity: UInt8 = 127) {
         send(status: 0x90 | channel, data1: note, data2: velocity)
     }
 
-    func sendNoteOff(_ note: UInt8, velocity: UInt8 = 0, channel: UInt8 = 0) {
+    func sendNoteOff(_ note: UInt8, velocity: UInt8 = 0) {
         send(status: 0x80 | channel, data1: note, data2: velocity)
     }
 
-    func sendControlChange(_ control: UInt8, value: UInt8, channel: UInt8 = 0) {
+    func sendControlChange(_ control: UInt8, value: UInt8) {
         send(status: 0xB0 | channel, data1: control, data2: value)
     }
 

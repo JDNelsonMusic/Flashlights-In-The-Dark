@@ -51,6 +51,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var selectedMidiOutput: String = "" {
         didSet { midi.connectOutput(named: selectedMidiOutput) }
     }
+    @Published public var outputChannel: Int = 1 {
+        didSet { midi.setChannel(outputChannel) }
+    }
 
     // Slots currently glowing for UI feedback
     @Published public var glowingSlots: Set<Int> = []
@@ -94,6 +97,8 @@ public final class ConsoleState: ObservableObject, Sendable {
         midi.controlChangeHandler = { [weak self] cc, value in
             self?.handleControlChange(cc: cc, value: value)
         }
+
+        midi.setChannel(outputChannel)
 
         refreshMidiDevices()
     }
@@ -272,7 +277,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func refreshMidiDevices() {
         midiInputNames = midi.inputNames
         midiOutputNames = midi.outputNames
-        if selectedMidiInput.isEmpty, let first = midiInputNames.first {
+        if let scarlett = midiInputNames.first(where: { $0.contains("Scarlett 18i20 USB") }) {
+            selectedMidiInput = scarlett
+        } else if selectedMidiInput.isEmpty, let first = midiInputNames.first {
             selectedMidiInput = first
         } else if !midiInputNames.contains(selectedMidiInput) {
             selectedMidiInput = midiInputNames.first ?? ""
