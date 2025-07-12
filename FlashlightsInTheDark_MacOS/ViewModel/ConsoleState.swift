@@ -54,6 +54,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var outputChannel: Int = 1 {
         didSet { midi.setChannel(outputChannel) }
     }
+    /// Recent MIDI messages for debugging
+    @Published public var midiLog: [String] = []
 
     // Slots currently glowing for UI feedback
     @Published public var glowingSlots: Set<Int> = []
@@ -141,6 +143,14 @@ public final class ConsoleState: ObservableObject, Sendable {
             glowingSlots.insert(slot)
             try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             glowingSlots.remove(slot)
+        }
+    }
+
+    /// Append a MIDI message string to the log, trimming to last 20 entries.
+    public func logMidi(_ message: String) {
+        midiLog.append(message)
+        if midiLog.count > 20 {
+            midiLog.removeFirst(midiLog.count - 20)
         }
     }
     
@@ -716,6 +726,7 @@ extension ConsoleState {
                 triggerSlots(realSlots: slots)
             }
         }
+        logMidi("NoteOn \(note) vel \(velocity)")
     }
 
     fileprivate func handleNoteOff(note: UInt8) {
@@ -736,6 +747,7 @@ extension ConsoleState {
                 stopSound(device: device)
             }
         }
+        logMidi("NoteOff \(note)")
     }
 
     fileprivate func handleControlChange(cc: UInt8, value: UInt8) {
@@ -757,5 +769,6 @@ extension ConsoleState {
                 print("Error handling CC for device \(deviceNum): \(error)")
             }
         }
+        logMidi("CC \(cc) val \(value)")
     }
 }

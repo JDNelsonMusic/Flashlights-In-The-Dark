@@ -146,12 +146,31 @@ struct ComposerConsoleView: View {
                             Text(name)
                         }
                     }
+                    Picker("MIDI Output", selection: $state.selectedMidiOutput) {
+                        ForEach(state.midiOutputNames, id: \.self) { name in
+                            Text(name)
+                        }
+                    }
                     Picker("Output Channel", selection: $state.outputChannel) {
                         ForEach(1...16, id: \.self) { ch in
                             Text("\(ch)")
                         }
                     }
                     .onAppear { state.refreshMidiDevices() }
+                    Divider()
+                    Text("MIDI Log:")
+                        .font(.headline)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(state.midiLog.indices, id: \.self) { idx in
+                                Text(state.midiLog[idx])
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .frame(height: 100)
+                    .border(Color.gray.opacity(0.3))
                     Spacer()
                 }
                 .frame(width: leftPanelWidth)
