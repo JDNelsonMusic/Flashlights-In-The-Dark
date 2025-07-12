@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
 import 'package:torch_light/torch_light.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 import 'package:mic_stream/mic_stream.dart' as mic;
 
 import '../model/client_state.dart';
@@ -157,10 +158,21 @@ class OscListener {
     switch (m.address) {
       case '/flash/on':
         final id = m.arguments[0] as int;
+        final intensity = m.arguments.length > 1
+            ? (m.arguments[1] as num).toDouble()
+            : 1.0;
         if (id == myIndex) {
           try {
-            await TorchLight.enableTorch();
-            client.flashOn.value = true;
+            client.brightness.value = intensity;
+            await ScreenBrightness.instance
+                .setScreenBrightness(intensity.clamp(0, 1));
+            if (intensity > 0.05) {
+              await TorchLight.enableTorch();
+              client.flashOn.value = true;
+            } else {
+              await TorchLight.disableTorch();
+              client.flashOn.value = false;
+            }
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = false;
@@ -173,6 +185,8 @@ class OscListener {
           try {
             await TorchLight.disableTorch();
             client.flashOn.value = false;
+            client.brightness.value = 0;
+            await ScreenBrightness.instance.setScreenBrightness(0);
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = true;
@@ -338,6 +352,11 @@ class OscListener {
 
     await _player.dispose();
     _running = false;
+
+    try {
+      await ScreenBrightness.instance.resetScreenBrightness();
+      client.brightness.value = 0;
+    } catch (_) {}
 
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();

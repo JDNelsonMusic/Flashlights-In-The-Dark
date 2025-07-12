@@ -9,7 +9,8 @@ class ClientState {
       clockOffsetMs = 0.0,
       flashOn = ValueNotifier<bool>(false),
       audioPlaying = ValueNotifier<bool>(false),
-      recording = ValueNotifier<bool>(false);
+      recording = ValueNotifier<bool>(false),
+      brightness = ValueNotifier<double>(0.0);
 
   /// Singer slot (uses the real slot number). Notifier so UI can react to changes at runtime.
   final ValueNotifier<int> myIndex;
@@ -19,6 +20,9 @@ class ClientState {
 
   /// Whether the flashlight is currently on.
   final ValueNotifier<bool> flashOn;
+
+  /// Current screen brightness (0–1).
+  final ValueNotifier<double> brightness;
 
   /// Whether audio is currently playing.
   final ValueNotifier<bool> audioPlaying;
