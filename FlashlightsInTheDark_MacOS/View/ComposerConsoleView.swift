@@ -62,8 +62,12 @@ struct ComposerConsoleView: View {
         8: .hotMagenta,
         9: .skyBlue
     ]
-    
+
     @State private var leftPanelWidth: CGFloat = 300
+    /// Returns true when any connected device's torch is currently on.
+    private var anyTorchOn: Bool {
+        state.devices.contains { $0.torchOn }
+    }
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -325,6 +329,15 @@ struct ComposerConsoleView: View {
                         height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
                     )
                     .environmentObject(state)
+            }
+            // Full-screen flash overlay when any lamp is on
+            if anyTorchOn {
+                Color.mintGlow
+                    .opacity(0.8)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .animation(.easeOut(duration: 0.3), value: anyTorchOn)
+                    .allowsHitTesting(false)
             }
         }
     }
