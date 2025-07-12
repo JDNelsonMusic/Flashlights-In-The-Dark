@@ -10,7 +10,6 @@ struct ComposerConsoleView: View {
     @State private var showRouting: Bool = false
 
     // Strobe effect state
-    @State private var strobeActive: Bool = false
     @State private var strobeOn: Bool = false
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
@@ -205,30 +204,15 @@ struct ComposerConsoleView: View {
                         .tint(.blue)
                         
                         Spacer(minLength: 20)
-                        Button("Blackout") {
-                            state.blackoutAll()
+                        Button(anyTorchOn ? "All Off" : "All On") {
+                            state.toggleAllTorches()
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                        .disabled(!state.isBroadcasting)
-                        
-                        Button("All-On") {
-                            state.playAll()
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(Color.indigo.opacity(0.6))
+                        .tint(anyTorchOn ? .red : Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
 
-                        Button(strobeActive ? "Stop Strobe" : "Strobe") {
-                            if strobeActive {
-                                strobeActive = false
-                                strobeOn = false
-                            } else {
-                                strobeActive = true
-                                withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
-                                    strobeOn.toggle()
-                                }
-                            }
+                        Button(state.strobeActive ? "Stop Strobe" : "Strobe") {
+                            state.strobeActive.toggle()
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.mintGlow)
@@ -301,7 +285,7 @@ struct ComposerConsoleView: View {
             }
             // Overlay effects stacked above console content
             .overlay(
-                FullScreenFlashView(strobeActive: strobeActive, strobeOn: strobeOn)
+                FullScreenFlashView(strobeActive: state.strobeActive, strobeOn: strobeOn)
                     .environmentObject(state)
             )
             .overlay(
@@ -313,6 +297,10 @@ struct ComposerConsoleView: View {
                         // Envelope on “0”
                         if char == "0" {
                             state.startEnvelopeAll()
+                            return
+                        }
+                        if char == "=" {
+                            state.strobeActive.toggle()
                             return
                         }
                         if let note = typingMapper.note(for: char) {
@@ -354,6 +342,15 @@ struct ComposerConsoleView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .zIndex(1)
+        }
+        .onChange(of: state.strobeActive) { active in
+            if active {
+                withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+                    strobeOn.toggle()
+                }
+            } else {
+                strobeOn = false
+            }
         }
     }
     
