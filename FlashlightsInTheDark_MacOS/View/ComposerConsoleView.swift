@@ -6,6 +6,9 @@ struct ComposerConsoleView: View {
     @State private var showRouting: Bool = false
 
     @State private var triggeredSlots: Set<Int> = []
+    // Strobe effect state
+    @State private var strobeActive: Bool = false
+    @State private var strobeOn: Bool = false
 
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
@@ -62,8 +65,12 @@ struct ComposerConsoleView: View {
         8: .hotMagenta,
         9: .skyBlue
     ]
-    
+
     @State private var leftPanelWidth: CGFloat = 300
+    /// Returns true when any connected device's torch is currently on.
+    private var anyTorchOn: Bool {
+        state.devices.contains { $0.torchOn }
+    }
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -211,6 +218,21 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.bordered)
                         .tint(Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
+
+                        Button(strobeActive ? "Stop Strobe" : "Strobe") {
+                            if strobeActive {
+                                strobeActive = false
+                                strobeOn = false
+                            } else {
+                                strobeActive = true
+                                withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+                                    strobeOn.toggle()
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mintGlow)
+                        .disabled(!state.isBroadcasting)
                         // Play all tones
                         Button("Play All Tones") {
                             state.playAllTones()
@@ -326,6 +348,21 @@ struct ComposerConsoleView: View {
                     )
                     .environmentObject(state)
             }
+            // Full-screen flash overlay when torches or strobe are active
+            if anyTorchOn || strobeActive {
+                Color.mintGlow
+                    .opacity(strobeActive ? (strobeOn ? 0.8 : 0.0) : 0.8)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .animation(.easeOut(duration: 0.3), value: anyTorchOn || strobeActive)
+                    .allowsHitTesting(false)
+            }
+            // Always-on purple/navy veil overlay
+            Color.purpleNavy
+                .opacity(0.5)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .zIndex(1)
         }
     }
     

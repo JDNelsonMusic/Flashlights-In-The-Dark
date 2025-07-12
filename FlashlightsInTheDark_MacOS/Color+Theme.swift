@@ -17,4 +17,7 @@ extension Color {
     static let slotOrange = Color(red: 240/255, green: 81/255, blue: 0/255)
     static let hotMagenta = Color(red: 1.0, green: 0.0, blue: 215/255)
     static let skyBlue    = Color(red: 158/255, green: 228/255, blue: 1.0)
+
+    /// Always-on overlay color – dark purple/navy tint
+    static let purpleNavy = Color(red: 0.1, green: 0.0, blue: 0.2)
 }
