@@ -59,6 +59,8 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     // Slots currently glowing for UI feedback
     @Published public var glowingSlots: Set<Int> = []
+    /// Slots currently triggered via typing keyboard
+    @Published public var triggeredSlots: Set<Int> = []
 
     private let tripleTriggers: [Int: [Int]] = [
         1: [27, 41, 42],
@@ -151,6 +153,15 @@ public final class ConsoleState: ObservableObject, Sendable {
             try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             glowingSlots.remove(slot)
         }
+    }
+
+    /// Track pressed typing slots for UI feedback
+    public func addTriggeredSlot(_ slot: Int) {
+        triggeredSlots.insert(slot)
+    }
+
+    public func removeTriggeredSlot(_ slot: Int) {
+        triggeredSlots.remove(slot)
     }
 
     /// Append a MIDI message string to the log, trimming to last 20 entries.
