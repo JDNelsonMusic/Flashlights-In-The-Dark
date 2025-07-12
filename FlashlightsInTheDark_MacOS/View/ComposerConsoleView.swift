@@ -145,8 +145,14 @@ struct ComposerConsoleView: View {
                         }
                     }
                     Divider()
-                    Text("MIDI Controls:")
-                        .font(.headline)
+                    HStack(spacing: 4) {
+                        Text("MIDI Controls:")
+                        Image(systemName: "info.circle")
+                            .font(.subheadline)
+                            .foregroundColor(.accentColor)
+                            .help("Select a Pro Tools MIDI output here to receive cues from your DAW in real time. This app will respond to MIDI notes and mod-wheel (CC1) from your Pro Tools track. Likewise, choosing a Pro Tools input as MIDI Output will send triggers performed here back to your DAW as MIDI events.")
+                    }
+                    .font(.headline)
                     Picker("MIDI Input", selection: $state.selectedMidiInput) {
                         ForEach(state.midiInputNames, id: \.self) { name in
                             Text(name)
