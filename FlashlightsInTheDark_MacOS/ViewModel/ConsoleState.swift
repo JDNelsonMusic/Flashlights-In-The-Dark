@@ -277,6 +277,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func refreshMidiDevices() {
         midiInputNames = midi.inputNames
         midiOutputNames = midi.outputNames
+        // Filter out the app's own virtual MIDI endpoints
+        midiInputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
+        midiOutputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
         if let scarlett = midiInputNames.first(where: { $0.contains("Scarlett 18i20 USB") }) {
             selectedMidiInput = scarlett
         } else if selectedMidiInput.isEmpty, let first = midiInputNames.first {
