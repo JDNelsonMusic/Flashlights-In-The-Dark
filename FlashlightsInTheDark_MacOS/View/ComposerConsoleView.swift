@@ -368,18 +368,9 @@ struct ComposerConsoleView: View {
                     )
                     .environmentObject(state)
             }
-            // Full-screen flash overlay when torches or strobe are active
-            if anyTorchOn || strobeActive {
-                Color.mintGlow
-                    .opacity(strobeActive ? (strobeOn ? 0.8 : 0.0) : 0.8)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .animation(.easeOut(duration: 0.3), value: anyTorchOn || strobeActive)
-                    .allowsHitTesting(false)
-            }
             // Always-on purple/navy veil overlay
             Color.purpleNavy
-                .opacity(0.25)
+                .opacity(0.2)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .zIndex(1)
@@ -461,17 +452,41 @@ struct ComposerConsoleView: View {
                             .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
                     )
                     .overlay(
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
-                                    center: .center,
-                                    startRadius: 0,
-                                    endRadius: 36
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 36
+                                    )
                                 )
-                            )
-                            .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                            LightRaysView(color: .mintGlow)
+                        }
+                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
                     )
+                }
+            }
+        }
+    }
+
+    private struct LightRaysView: View {
+        var color: Color
+        var body: some View {
+            ZStack {
+                ForEach(0..<8, id: \.self) { i in
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [color.opacity(0.8), .clear]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 2, height: 24)
+                        .offset(y: -12)
+                        .rotationEffect(.degrees(Double(i) / 8 * 360))
                 }
             }
         }
