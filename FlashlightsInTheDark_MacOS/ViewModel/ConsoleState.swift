@@ -267,29 +267,47 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Trigger playback of a preloaded audio file on a specific device
     public func triggerSound(device: ChoirDevice) {
         guard !device.isPlaceholder else { return }
+
         Task.detached { [weak self] in
             guard let self = self else { return }
             do {
+                // --- Cross-actor property: broadcasterTask ---
                 let oscBroadcaster = try await self.broadcasterTask.value
+
                 let slot = Int32(device.id + 1)
                 let gain: Float32 = 1.0
-                let sets = self.activeToneSets.isEmpty ? ["A"] : self.activeToneSets.sorted()
-                for set in sets {
+
+                // --- Collect main-actor data once, then use it ---
+                let toneSets: [String] = await MainActor.run {
+                    let raw = self.activeToneSets
+                    return raw.isEmpty ? ["A"] : raw.sorted()
+                }
+
+                for set in toneSets {
                     let prefix = set.lowercased()
                     let file = "\(prefix)\(slot).mp3"
-                    try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
-                    await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
-                    let noteBase = device.id * 4
-                    let noteOffset: Int
-                    switch set.lowercased() {
-                    case "a": noteOffset = 0
-                    case "b": noteOffset = 1
-                    case "c": noteOffset = 2
-                    default:  noteOffset = 3
+
+                    try await oscBroadcaster.send(AudioPlay(index: slot,
+                                                            file: file,
+                                                            gain: gain))
+
+                    await MainActor.run {
+                        self.lastLog = "/audio/play \(slot) \(file)"
                     }
-                    self.midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
+
+                    // --- Cross-actor property: midi ---
+                    let noteBase = device.id * 4
+                    let noteOffset: Int = switch set.lowercased() {
+                        case "a": 0
+                        case "b": 1
+                        case "c": 2
+                        default:  3
+                    }
+                    await self.midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
                 }
-                await MainActor.run { self.glow(slot: device.id + 1) }
+
+                // --- Cross-actor call: glow ---
+                await self.glow(slot: device.id + 1)
             } catch {
                 print("Error triggering sound for slot \(device.id + 1): \(error)")
             }
