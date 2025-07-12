@@ -8,12 +8,12 @@ struct FullScreenFlashView: View {
 
     var body: some View {
         Group {
-            if state.isAnyTorchOn || strobeActive {
+            if strobeActive {
                 Color.mintGlow
-                    .opacity(strobeActive ? (strobeOn ? 0.8 : 0.0) : 0.8)
+                    .opacity(strobeOn ? 0.8 : 0.0)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                    .animation(.easeOut(duration: 0.3), value: state.isAnyTorchOn || strobeActive)
+                    .animation(.easeOut(duration: 0.3), value: strobeActive)
                     .allowsHitTesting(false)
             }
         }
@@ -24,7 +24,7 @@ struct FullScreenFlashView: View {
 struct ColorOverlayVeil: View {
     var body: some View {
         Color.purpleNavy
-            .opacity(0.5)
+            .opacity(0.2)
             .ignoresSafeArea()
             .allowsHitTesting(false)
             .zIndex(1)
