@@ -534,26 +534,27 @@ public final class ConsoleState: ObservableObject, Sendable {
         strobeTask?.cancel()
         strobeTask = Task.detached { [weak self] in
             guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                let devicesList = await self.devices
-                var phase: Double = 0
-                let updateRate: Double = 30  // messages per second
-                let freq: Double = 5         // strobe frequency in Hz
-                let step = 1.0 / updateRate
-                while await self.strobeActive {
-                    let intensity = Float32((sin(phase) + 1) / 2)
-                    for d in devicesList where !d.isPlaceholder {
-                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+            await MainActor.run { self.lastLog = "⚡️ Strobe (CC1) active" }
+            var on = true
+            let interval: UInt64 = 100_000_000 // 100 ms half-cycle (~5 Hz)
+            while await self.strobeActive {
+                let val: UInt8 = on ? 127 : 0
+                await MainActor.run {
+                    for ch in 0..<16 {
+                        self.midi.setChannel(ch + 1)
+                        self.midi.sendControlChange(1, value: val)
                     }
-                    phase += 2 * .pi * freq * step
-                    try await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
                 }
-                for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                on.toggle()
+                try await Task.sleep(nanoseconds: interval)
+            }
+            await MainActor.run {
+                for ch in 0..<16 {
+                    self.midi.setChannel(ch + 1)
+                    self.midi.sendControlChange(1, value: 0)
                 }
-            } catch {
-                print("⚠️ strobeTask error: \(error)")
+                self.midi.setChannel(self.outputChannel)
+                self.lastLog = "⚡️ Strobe stopped"
             }
         }
     }
@@ -565,14 +566,12 @@ public final class ConsoleState: ObservableObject, Sendable {
 
         Task.detached { [weak self] in
             guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                let devicesList = await self.devices
-                for d in devicesList where !d.isPlaceholder {
-                    try? await osc.send(FlashOff(index: Int32(d.id + 1)))
+            await MainActor.run {
+                for ch in 0..<16 {
+                    self.midi.setChannel(ch + 1)
+                    self.midi.sendControlChange(1, value: 0)
                 }
-            } catch {
-                print("⚠️ stopStrobe error: \(error)")
+                self.midi.setChannel(self.outputChannel)
             }
         }
     }
