@@ -357,6 +357,12 @@ struct ComposerConsoleView: View {
                     .animation(.easeOut(duration: 0.3), value: anyTorchOn || strobeActive)
                     .allowsHitTesting(false)
             }
+            // Always-on purple/navy veil overlay
+            Color.purpleNavy
+                .opacity(0.5)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .zIndex(1)
         }
     }
     
