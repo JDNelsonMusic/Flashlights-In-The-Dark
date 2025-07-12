@@ -389,12 +389,13 @@ struct ComposerConsoleView: View {
                         .frame(width: 28, height: 28)
                         .frame(maxWidth: .infinity, minHeight: 44)
                 } else {
-                    VStack(spacing: 4) {
-                        if let keyLabel = keyLabel {
-                            Text(keyLabel)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
+                    ZStack(alignment: .topTrailing) {
+                        VStack(spacing: 4) {
+                            if let keyLabel = keyLabel {
+                                Text(keyLabel)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                         Image(systemName: "flashlight.on.fill")
                             .font(.system(size: 28))
                             .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
@@ -418,6 +419,44 @@ struct ComposerConsoleView: View {
                                 .help("Trigger sound on \(device.name)…")
                         }
                         .buttonStyle(.plain)
+                        }
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(outline ?? .clear, lineWidth: 3)
+                                .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
+                        )
+                        .overlay(
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        RadialGradient(
+                                            gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
+                                            center: .center,
+                                            startRadius: 0,
+                                            endRadius: 36
+                                        )
+                                    )
+                                LightRaysView(color: .mintGlow)
+                            }
+                            .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                            .allowsHitTesting(false)
+                        )
+                        Menu {
+                            ForEach(1...16, id: \.
+self) { ch in
+                                Button("Channel \(ch)") {
+                                    state.setDeviceChannel(device.id, ch)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down.circle")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .menuStyle(.borderlessButtonMenuStyle())
+                        .help("Assign MIDI channel for this slot")
+                        .padding(4)
                     }
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())
@@ -432,28 +471,6 @@ struct ComposerConsoleView: View {
                             state.triggerSound(device: device)
                         }
                     }
-                    .padding(8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(outline ?? .clear, lineWidth: 3)
-                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
-                    )
-                    .overlay(
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 36
-                                    )
-                                )
-                            LightRaysView(color: .mintGlow)
-                        }
-                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
-                        .allowsHitTesting(false)
-                    )
                 }
             }
         }

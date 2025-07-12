@@ -92,22 +92,22 @@ public final class ConsoleState: ObservableObject, Sendable {
             devices.map { ($0.id, DeviceStatus.clean) }
         )
         // MIDI callbacks for incoming messages
-        midi.noteOnHandler = { [weak self] note, vel in
+        midi.noteOnHandler = { [weak self] note, vel, chan in
             guard let self = self else { return }
             Task { @MainActor in
-                self.handleNoteOn(note: note, velocity: vel)
+                self.handleNoteOn(note: note, velocity: vel, channel: chan)
             }
         }
-        midi.noteOffHandler = { [weak self] note in
+        midi.noteOffHandler = { [weak self] note, chan in
             guard let self = self else { return }
             Task { @MainActor in
-                self.handleNoteOff(note: note)
+                self.handleNoteOff(note: note, channel: chan)
             }
         }
-        midi.controlChangeHandler = { [weak self] cc, value in
+        midi.controlChangeHandler = { [weak self] cc, value, chan in
             guard let self = self else { return }
             Task { @MainActor in
-                self.handleControlChange(cc: cc, value: value)
+                self.handleControlChange(cc: cc, value: value, channel: chan)
             }
         }
 
@@ -704,7 +704,8 @@ public final class ConsoleState: ObservableObject, Sendable {
                                  udid: udid,
                                  name: name,
                                  ip: ip,
-                                 listeningSlot: newId + 1)
+                                 listeningSlot: newId + 1,
+                                 midiChannel: 1)
         devices.append(device)
         statuses[newId] = .clean
     }
@@ -725,7 +726,15 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
-    
+
+    /// Update the MIDI channel for a device
+    public func setDeviceChannel(_ deviceId: Int, _ newChannel: Int) {
+        guard let idx = devices.firstIndex(where: { $0.id == deviceId }) else { return }
+        devices[idx].midiChannel = newChannel
+        objectWillChange.send()
+        logMidi("Slot \(deviceId + 1) -> MIDI Ch \(newChannel)")
+    }
+
     /// Assign a new listening slot to a specific device at runtime.
     /// Updates the local model and sends a unicast OSC message to notify the client.
     public func assignSlot(device: ChoirDevice, slot: Int) {
@@ -797,22 +806,23 @@ extension ConsoleState {
 
 // MARK: - MIDI Handling
 extension ConsoleState {
-    fileprivate func handleNoteOn(note: UInt8, velocity: UInt8) {
+    fileprivate func handleNoteOn(note: UInt8, velocity: UInt8, channel: UInt8) {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
-            // Mark this slot as actively glowing while the MIDI note is held
-            glowingSlots.insert(val)
-            switch keyboardTriggerMode {
-            case .torch:
-                flashOn(id: idx)
-            case .sound:
-                let device = devices[idx]
-                triggerSound(device: device)
-            case .both:
-                flashOn(id: idx)
-                let device = devices[idx]
-                triggerSound(device: device)
+            let device = devices[idx]
+            if device.midiChannel == Int(channel + 1) {
+                glowingSlots.insert(val)
+                switch keyboardTriggerMode {
+                case .torch:
+                    flashOn(id: idx)
+                case .sound:
+                    triggerSound(device: device)
+                case .both:
+                    flashOn(id: idx)
+                    triggerSound(device: device)
+                }
+            }
             }
         } else if val >= 61 && val <= 69 {
             let group = val - 60
@@ -824,52 +834,64 @@ extension ConsoleState {
         } else if val == 71 {
             toggleAllTorches()
         }
-        logMidi("NoteOn \(note) vel \(velocity)")
+        logMidi("NoteOn \(note) ch\(channel+1) vel \(velocity)")
     }
 
-    fileprivate func handleNoteOff(note: UInt8) {
+    fileprivate func handleNoteOff(note: UInt8, channel: UInt8) {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
-            // Clear the glow highlight when the MIDI note ends
-            glowingSlots.remove(val)
-            switch keyboardTriggerMode {
-            case .torch:
-                flashOff(id: idx)
-            case .sound:
-                let device = devices[idx]
-                stopSound(device: device)
-            case .both:
-                flashOff(id: idx)
-                let device = devices[idx]
-                stopSound(device: device)
+            let device = devices[idx]
+            if device.midiChannel == Int(channel + 1) {
+                glowingSlots.remove(val)
+                switch keyboardTriggerMode {
+                case .torch:
+                    flashOff(id: idx)
+                case .sound:
+                    stopSound(device: device)
+                case .both:
+                    flashOff(id: idx)
+                    stopSound(device: device)
+                }
             }
         } else if val == 70 {
             strobeActive = false
         }
-        logMidi("NoteOff \(note)")
+        logMidi("NoteOff \(note) ch\(channel+1)")
     }
 
-    fileprivate func handleControlChange(cc: UInt8, value: UInt8) {
-        let deviceNum = Int(cc)
-        guard deviceNum >= 1 && deviceNum <= devices.count else { return }
-        let intensity = Float32(value) / 127.0
-        Task.detached { [weak self] in
-            guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                if intensity > 0 {
-                    try await osc.send(FlashOn(index: Int32(deviceNum), intensity: intensity))
-                    await MainActor.run { self.lastLog = "/flash/on [\(deviceNum), \(intensity)]" }
-                } else {
-                    try await osc.send(FlashOff(index: Int32(deviceNum)))
-                    await MainActor.run { self.lastLog = "/flash/off [\(deviceNum)]" }
+    fileprivate func handleControlChange(cc: UInt8, value: UInt8, channel: UInt8) {
+        let ctrl = Int(cc)
+        let val = Int(value)
+        if ctrl == 1 {
+            let intensity = Float32(val) / 127.0
+            let targetChannel = Int(channel + 1)
+            for device in devices where !device.isPlaceholder {
+                if device.midiChannel == targetChannel {
+                    Task.detached { [weak self] in
+                        guard let self = self else { return }
+                        do {
+                            let osc = try await self.broadcasterTask.value
+                            if intensity > 0 {
+                                try await osc.send(FlashOn(index: Int32(device.id + 1), intensity: intensity))
+                            } else {
+                                try await osc.send(FlashOff(index: Int32(device.id + 1)))
+                            }
+                        } catch {
+                            print("Error sending brightness CC for device \(device.id+1): \(error)")
+                        }
+                    }
                 }
-            } catch {
-                print("Error handling CC for device \(deviceNum): \(error)")
+            }
+            Task { @MainActor in
+                if val > 0 {
+                    self.lastLog = "/flash/bright CH\(targetChannel) val \(val)"
+                } else {
+                    self.lastLog = "/flash/off [CH\(targetChannel)]"
+                }
             }
         }
-        logMidi("CC \(cc) val \(value)")
+        logMidi("CC\(cc) ch\(channel+1) val \(value)")
     }
 }
 
@@ -877,13 +899,17 @@ extension ConsoleState {
 extension ConsoleState {
     /// Send a MIDI Note On from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOn(_ note: UInt8, velocity: UInt8 = 127) {
-        handleNoteOn(note: note, velocity: velocity)
+        let idx = Int(note) - 1
+        let chan: UInt8 = idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        handleNoteOn(note: note, velocity: velocity, channel: chan)
         midi.sendNoteOn(note, velocity: velocity)
     }
 
     /// Send a MIDI Note Off from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOff(_ note: UInt8) {
-        handleNoteOff(note: note)
+        let idx = Int(note) - 1
+        let chan: UInt8 = idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        handleNoteOff(note: note, channel: chan)
         midi.sendNoteOff(note)
     }
 }

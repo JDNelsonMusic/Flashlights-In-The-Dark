@@ -15,6 +15,8 @@ public struct ChoirDevice: Identifiable, Sendable {
     public var ip: String
     /// Current slot assignment the client should listen for (1-based).
     public var listeningSlot: Int
+    /// MIDI channel this device responds to (1-16)
+    public var midiChannel: Int
 
     public init(
         id: Int,
@@ -25,6 +27,7 @@ public struct ChoirDevice: Identifiable, Sendable {
         audioPlaying: Bool = false,
         micActive: Bool = false,
         listeningSlot: Int? = nil,
+        midiChannel: Int = 1,
         isPlaceholder: Bool = false
     ) {
         self.id = id
@@ -37,6 +40,7 @@ public struct ChoirDevice: Identifiable, Sendable {
         self.isPlaceholder = isPlaceholder
         // Default to own slot (1-based) if not provided
         self.listeningSlot = listeningSlot ?? (id + 1)
+        self.midiChannel = midiChannel
     }
 }
 
@@ -53,6 +57,7 @@ extension ChoirDevice {
                 id: i - 1,
                 udid: "",
                 name: "",
+                midiChannel: 1,
                 isPlaceholder: !realSlots.contains(i)
             )
         }
