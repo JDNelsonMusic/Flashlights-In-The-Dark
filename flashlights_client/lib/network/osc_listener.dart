@@ -163,7 +163,7 @@ class OscListener {
             : 1.0;
         if (id == myIndex) {
           try {
-            final clamped = intensity.clamp(0, 1);
+            final clamped = intensity.clamp(0.0, 1.0) as double;
             if ((client.brightness.value - clamped).abs() > 0.01) {
               client.brightness.value = clamped;
               await ScreenBrightness.instance.setScreenBrightness(clamped);
@@ -207,7 +207,7 @@ class OscListener {
             print('[OSC] Failed to load asset $assetPath: $e');
             await _player.setUrl(fileName);
           }
-          await _player.setVolume(gain.clamp(0, 1));
+            await _player.setVolume(gain.clamp(0.0, 1.0) as double);
           await _player.play();
           client.audioPlaying.value = true;
         }
