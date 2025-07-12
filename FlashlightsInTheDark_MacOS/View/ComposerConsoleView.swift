@@ -121,7 +121,7 @@ struct ComposerConsoleView: View {
                                 ZStack {
                                     Circle()
                                         .fill(state.keyboardTriggerMode == mode
-                                              ? Color.blue
+                                              ? Color.accentColor
                                               : Color.gray.opacity(0.3))
                                         .frame(width: 40, height: 40)
                                     // Icon for mode
