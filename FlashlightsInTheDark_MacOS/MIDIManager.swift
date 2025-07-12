@@ -13,9 +13,9 @@ final class MIDIManager {
     private var channel: UInt8 = 0 // MIDI channel 1
 
     /// Handlers for incoming MIDI messages.
-    var noteOnHandler: ((UInt8, UInt8) -> Void)?
-    var noteOffHandler: ((UInt8) -> Void)?
-    var controlChangeHandler: ((UInt8, UInt8) -> Void)?
+    var noteOnHandler: ((UInt8, UInt8, UInt8) -> Void)?
+    var noteOffHandler: ((UInt8, UInt8) -> Void)?
+    var controlChangeHandler: ((UInt8, UInt8, UInt8) -> Void)?
 
     init() {
         MIDIClientCreate("FlashlightsMIDIClient" as CFString, nil, nil, &client)
@@ -126,18 +126,19 @@ final class MIDIManager {
             let status = packet.pointee.data.0
             let data1  = packet.pointee.data.1
             let data2  = packet.pointee.data.2
-            let type = status & 0xF0
-            switch type {
+            let messageType = status & 0xF0
+            let channel = status & 0x0F
+            switch messageType {
             case 0x90:
                 if data2 > 0 {
-                    manager.noteOnHandler?(data1, data2)
+                    manager.noteOnHandler?(data1, data2, channel)
                 } else {
-                    manager.noteOffHandler?(data1)
+                    manager.noteOffHandler?(data1, channel)
                 }
             case 0x80:
-                manager.noteOffHandler?(data1)
+                manager.noteOffHandler?(data1, channel)
             case 0xB0:
-                manager.controlChangeHandler?(data1, data2)
+                manager.controlChangeHandler?(data1, data2, channel)
             default:
                 break
             }
