@@ -9,6 +9,7 @@ import 'network/osc_listener.dart';
 // import 'dart:convert';
 // removed discovery code
 import 'model/client_state.dart';
+import 'color_theme.dart';
 import 'version.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
@@ -114,10 +115,22 @@ class _BootstrapState extends State<Bootstrap> {
                     ValueListenableBuilder<int>(
                       valueListenable: client.myIndex,
                       builder: (context, myIndex, _) {
-                        return Text(
-                          'Singer #$myIndex',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 20),
+                        final color = kSlotOutlineColors[myIndex];
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 4, horizontal: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: color ?? Colors.transparent,
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Singer #$myIndex',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20),
+                          ),
                         );
                       },
                     ),
