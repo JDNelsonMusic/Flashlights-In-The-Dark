@@ -24,7 +24,8 @@ struct FullScreenFlashView: View {
 struct ColorOverlayVeil: View {
     var body: some View {
         Color.purpleNavy
-            .opacity(0.2)
+            // Slightly lighter tint for more subtle overlay
+            .opacity(0.1)
             .ignoresSafeArea()
             .allowsHitTesting(false)
             .zIndex(1)

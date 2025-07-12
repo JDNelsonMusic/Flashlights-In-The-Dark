@@ -367,7 +367,8 @@ struct ComposerConsoleView: View {
             }
             // Always-on purple/navy veil overlay
             Color.purpleNavy
-                .opacity(0.2)
+                // Subtler overlay to reduce intensity
+                .opacity(0.1)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .zIndex(1)
