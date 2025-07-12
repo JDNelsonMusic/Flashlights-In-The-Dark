@@ -1,6 +1,8 @@
 # Flashlights In The Dark
 
+
 A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-based control system
+
 
 # Table of Contents
 
@@ -31,7 +33,11 @@ Duration    ~9 minutes
 Core idea    Smartphones become distributed “instruments,” projecting light & sound that weave into the live choral texture.
 Status    Actively developed – software & docs evolve with each rehearsal cycle.
 
+
+
+
 # System Architecture
+
 
 ## 1. Conductor’s Computer (Mac)
 
@@ -39,11 +45,13 @@ The “brain” of the piece – sends OSC messages over a closed Wi-Fi network.
 
 Accepts manual, timeline, or MIDI-triggered cues.
 
+
 ## 2. Smartphone Clients (x28)
 
 Cross-platform Flutter app (flashlights_client) for iOS 16+ & Android 10+.
 
 Reacts to incoming OSC commands to:<br> • Toggle flashlight<br> • Play pre-loaded audio samples<br> • (Experimental) record short mic snippets
+
 
 ## 3. Closed Wi-Fi Network
 
@@ -51,11 +59,14 @@ Stand-alone router or Mac-hosted hotspot.
 
 Isolated from the internet ➜ <10 ms latency typical.
 
+
 ## 4. Optional MIDI Controller / DAW
 
 Map notes/CC to cue groups of phones or global actions.
 
 Enables click-track or fully sequenced automation.
+
+
 
 # How the Performance Unfolds
 
@@ -69,21 +80,23 @@ Device Discovery
 
 Phones power up & broadcast /hello → Mac records slot IDs (1-54).
 
-Clock Synchronization
+## Clock Synchronization
 
 Mac sends periodic /sync pulses (NTP time tags) → devices adjust drift.
 
-# Triggering Events
+## Triggering Events
 
 Flashlight ⚡️ | Audio 🔊 | Mic 🎙 — individually or in groups.
 
-Visual & Aural Choreography
+## Visual & Aural Choreography
 
 Waves of light, spatialised chords, or percussive “tick-tock” clicks.
 
 Fallback Safety
 
 “All Off” & resync buttons built into the console for quick recovery.
+
+
 
 # Setup & Requirements
 
@@ -95,12 +108,14 @@ Qty    Item    Notes
 1    Wi-Fi Router    Dedicated SSID, no internet, client isolation off
 (opt.)    MIDI Keyboard / DAW    For live or pre-programmed cues
 
+
+
 # Software & Deployment
 
 <details> <summary><strong>iOS On-Boarding (<code>fastlane</code> + <code>cfgutil</code>)</strong></summary>
+
+
 bash
-Copy
-Edit
 
 # macOS prerequisites
 brew bundle --file=scripts/Brewfile   # installs cfgutil, fastlane, adb …
@@ -110,16 +125,14 @@ scripts/choir_onboard.sh
 Registers UDIDs, refreshes Ad-Hoc profile, installs .ipa, records ID → slot map.
 
 </details> <details> <summary><strong>Android On-Boarding</strong></summary>
+
 bash
-Copy
-Edit
 
-# phones must have USB debugging enabled
 
-scripts/choir_onboard.sh   # same script detects adb devices & pushes APK
-</details>
-Running a Performance
-Pre-concert
+
+# Running a Performance
+
+## Pre-concert
 
 Launch Flashlights Client on each phone → confirm “Connected · Singer #X”.
 
@@ -131,6 +144,8 @@ Sound & Light Checks
 
 ⌘+Shift+A (All Audio Test) — set phone volumes to 100 %.
 
+Press `\` (backslash) to toggle all flashlights on/off.
+
 During the Piece
 
 Follow score or DAW timeline.
@@ -141,14 +156,22 @@ Post-concert
 
 Collect devices, stop console (logs auto-saved to logs/YYYY-MM-DD.txt).
 
-Director & Ensemble Checklist
+
+
+## Director & Ensemble Checklist
+
 ✓    Task
+
 Reserve extra rehearsal time with phones in hand.
 Dim venue lights sufficiently for flashlight effects.
 Enable Do Not Disturb & Guided Access / Screen On on all phones.
 Charge devices (or supply battery packs) before each run-through.
 Have a tech lead familiar with Apple provisioning & Wi-Fi troubleshooting.
-Provide audience advisories if using rapid strobe patterns.
+
+# **Provide audience advisories if using rapid strobe patterns.**
+
+
+==========================================================================
 
 #Repository Tour
 
@@ -164,7 +187,8 @@ flashlights-in-the-dark/
 └── README.md                  # ← you are here
 
 
-Contact & Support
+## Contact & Support
+
 Composer / Developer: Jon D. Nelson
 ✉️ email: jdnelsonmusic@gmail.com
 

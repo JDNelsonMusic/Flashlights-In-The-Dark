@@ -1,31 +1,69 @@
-# Environment
+# -------------------------------
+#  Environment / OS cruft
+# -------------------------------
 .env
+.DS_Store
+*.sw?
+*.swo
 
-# ---- Flutter client outputs ----
+# -------------------------------
+#  Xcode & SwiftPM
+# -------------------------------
+**/DerivedData/
+**/Build/
+.build/
+Package.resolved
+*.moved-aside
+
+# Per-user project + workspace data
+**/*.xcuserstate
+**/*.xcuserdata/
+**/*.xcuserdatad/
+**/*.xcworkspace/xcuserdata/
+**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+**/xcschemes/*.plist    # scheme management caches
+
+# CocoaPods / Carthage
+Pods/
+Carthage/Build/
+
+# -------------------------------
+#  Flutter / Dart
+# -------------------------------
 flashlights_client/.dart_tool/
 flashlights_client/.idea/
 flashlights_client/build/
-flashlights_client/ios/Flutter/Flutter.framework
-flashlights_client/ios/Pods/
 flashlights_client/ios/.symlinks/
+flashlights_client/ios/Pods/
+flashlights_client/ios/Flutter/Flutter.framework
 flashlights_client/ios/Runner.xcworkspace/
 flashlights_client/android/.gradle/
 flashlights_client/android/.idea/
 flashlights_client/pubspec.lock
 
-# fastlane
-/fastlane/report*.json
-fastlane/build_logs/
-
-# Mobile binaries
+# Mobile bundles
 *.ipa
 *.apk
 
-# --- Xcode user data (ignore all user-specific state) ---
-**/*.xcuserdata/
-**/*.xcuserdatad/
-**/*.xcuserstate
-**/xcschemes/*.plist
+# -------------------------------
+#  Fastlane artefacts
+# -------------------------------
+fastlane/report*.json
+fastlane/build_logs/
 
-# (Optionally: ignore workspace-level user data too)
-*.xcworkspace/xcuserdata/
+# -------------------------------
+#  Pro Tools – large binary sessions
+# -------------------------------
+FlashlightsInTheDark_Protools-Session*/
+FlashlightsInTheDark_Protools-Session-OLD*/
+*.ptx
+*.wfm
+
+# -------------------------------
+#  Common Dev tooling
+# -------------------------------
+.vscode/
+.idea/
+node_modules/
+__pycache__/
+*.py[cod]

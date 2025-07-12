@@ -299,6 +299,10 @@ struct ComposerConsoleView: View {
                             state.startEnvelopeAll()
                             return
                         }
+                        if char == "\\" {
+                            state.toggleAllTorches()
+                            return
+                        }
                         if char == "=" {
                             state.strobeActive.toggle()
                             return

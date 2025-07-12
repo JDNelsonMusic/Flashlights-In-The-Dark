@@ -11,6 +11,7 @@ Below is a detailed breakdown of the repository contents and how each part funct
 Repository Structure
 graphql
 Copy
+
 Flashlights-In-The-Dark/
 ├── FlashlightsInTheDark_MacOS/       # macOS Conductor's app (Swift, Xcode project)
 │   ├── Model/                        # Data models representing devices and possibly other structures
@@ -52,7 +53,9 @@ Flashlights-In-The-Dark/
 ├── flash_ip+udid_map.json            # JSON mapping of device slots to UDIDs, IPs, and names (generated during onboarding)
 ├── README.md                         # (Original readme – replaced by the content we’re improving on)
 └── AGENTS.md                         # This technical overview document
+
 Next, we’ll dive into each major component and explain how it works internally.
+
 Mobile Client Application (flashlights_client)
 Platform: Flutter (Dart) – runs on iOS, Android, and can be compiled for other platforms if needed. Purpose: Listens for OSC commands from the conductor’s computer and executes actions on the device (turn flashlight on/off, play/stop sounds, record audio snippet). It also announces its presence to allow the conductor’s app to detect and map it. Key elements of the client:
 OSC Listener: Implemented in lib/network/osc_listener.dart. When the app starts, it creates a singleton OscListener that:
