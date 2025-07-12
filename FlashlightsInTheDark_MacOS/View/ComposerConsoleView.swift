@@ -25,6 +25,8 @@ struct ComposerConsoleView: View {
     private var keyLabels: [Int: String] {
         Dictionary(uniqueKeysWithValues: keyToSlot.map { ($0.value, String($0.key)) })
     }
+    // Mapper converting typed characters to MIDI note numbers
+    private lazy var typingMapper = TypingMidiMapper(keyToSlot: keyToSlot)
     private let slotRows: [[Int]] = [
         Array(1...12),
         Array(13...26),
@@ -314,20 +316,9 @@ struct ComposerConsoleView: View {
                             state.startEnvelopeAll()
                             return
                         }
-                        if let slot = keyToSlot[char] {
-                            let idx = slot - 1
-                            triggeredSlots.insert(slot)
-                            switch state.keyboardTriggerMode {
-                            case .torch:
-                                state.flashOn(id: idx)
-                            case .sound:
-                                let device = state.devices[idx]
-                                state.triggerSound(device: device)
-                            case .both:
-                                state.flashOn(id: idx)
-                                let deviceBoth = state.devices[idx]
-                                state.triggerSound(device: deviceBoth)
-                            }
+                        if let note = typingMapper.note(for: char) {
+                            triggeredSlots.insert(Int(note))
+                            state.typingNoteOn(note)
                             return
                         }
                     },
@@ -337,20 +328,9 @@ struct ComposerConsoleView: View {
                             state.releaseEnvelopeAll()
                             return
                         }
-                        if let slot = keyToSlot[char] {
-                            let idx = slot - 1
-                            triggeredSlots.remove(slot)
-                            switch state.keyboardTriggerMode {
-                            case .torch:
-                                state.flashOff(id: idx)
-                            case .sound:
-                                let device = state.devices[idx]
-                                state.stopSound(device: device)
-                            case .both:
-                                state.flashOff(id: idx)
-                                let deviceBoth = state.devices[idx]
-                                state.stopSound(device: deviceBoth)
-                            }
+                        if let note = typingMapper.note(for: char) {
+                            triggeredSlots.remove(Int(note))
+                            state.typingNoteOff(note)
                             return
                         }
                     }
@@ -466,6 +446,7 @@ struct ComposerConsoleView: View {
                             LightRaysView(color: .mintGlow)
                         }
                         .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                        .allowsHitTesting(false)
                     )
                 }
             }

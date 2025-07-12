@@ -786,3 +786,18 @@ extension ConsoleState {
         logMidi("CC \(cc) val \(value)")
     }
 }
+
+// MARK: - Typing MIDI Dispatch
+extension ConsoleState {
+    /// Send a MIDI Note On from the typing keyboard and handle it like incoming MIDI.
+    public func typingNoteOn(_ note: UInt8, velocity: UInt8 = 127) {
+        handleNoteOn(note: note, velocity: velocity)
+        midi.sendNoteOn(note, velocity: velocity)
+    }
+
+    /// Send a MIDI Note Off from the typing keyboard and handle it like incoming MIDI.
+    public func typingNoteOff(_ note: UInt8) {
+        handleNoteOff(note: note)
+        midi.sendNoteOff(note)
+    }
+}
