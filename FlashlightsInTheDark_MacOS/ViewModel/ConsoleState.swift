@@ -89,13 +89,22 @@ public final class ConsoleState: ObservableObject, Sendable {
         )
         // MIDI callbacks for incoming messages
         midi.noteOnHandler = { [weak self] note, vel in
-            self?.handleNoteOn(note: note, velocity: vel)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleNoteOn(note: note, velocity: vel)
+            }
         }
         midi.noteOffHandler = { [weak self] note in
-            self?.handleNoteOff(note: note)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleNoteOff(note: note)
+            }
         }
         midi.controlChangeHandler = { [weak self] cc, value in
-            self?.handleControlChange(cc: cc, value: value)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleControlChange(cc: cc, value: value)
+            }
         }
 
         midi.setChannel(outputChannel)
