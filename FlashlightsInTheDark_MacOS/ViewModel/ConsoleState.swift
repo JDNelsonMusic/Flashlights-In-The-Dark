@@ -670,6 +670,8 @@ extension ConsoleState {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
+            // Mark this slot as actively glowing while the MIDI note is held
+            glowingSlots.insert(val)
             switch keyboardTriggerMode {
             case .torch:
                 flashOn(id: idx)
@@ -693,6 +695,8 @@ extension ConsoleState {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
+            // Clear the glow highlight when the MIDI note ends
+            glowingSlots.remove(val)
             switch keyboardTriggerMode {
             case .torch:
                 flashOff(id: idx)
