@@ -3,13 +3,16 @@ import AppKit
 
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
+    /// Returns true if any device's torch is currently on
+    private var anyTorchOn: Bool {
+        state.devices.contains { $0.torchOn }
+    }
     @State private var showRouting: Bool = false
 
     @State private var triggeredSlots: Set<Int> = []
     // Strobe effect state
     @State private var strobeActive: Bool = false
     @State private var strobeOn: Bool = false
-
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
     private let keyToSlot: [Character: Int] = [
