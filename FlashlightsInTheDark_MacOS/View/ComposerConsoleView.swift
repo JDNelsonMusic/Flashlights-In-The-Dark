@@ -314,7 +314,8 @@ struct ComposerConsoleView: View {
                             return
                         }
                         if let note = typingMapper.note(for: char) {
-                            state.addTriggeredSlot(Int(note))
+                            let slot = Int(note) - 35
+                            state.addTriggeredSlot(slot)
                             state.typingNoteOn(note)
                             return
                         }
@@ -326,7 +327,8 @@ struct ComposerConsoleView: View {
                             return
                         }
                         if let note = typingMapper.note(for: char) {
-                            state.removeTriggeredSlot(Int(note))
+                            let slot = Int(note) - 35
+                            state.removeTriggeredSlot(slot)
                             state.typingNoteOff(note)
                             return
                         }
@@ -443,8 +445,7 @@ struct ComposerConsoleView: View {
                             .allowsHitTesting(false)
                         )
                         Menu {
-                            ForEach(1...16, id: \.
-self) { ch in
+                            ForEach(1...16, id: \.self) { ch in
                                 Button("Channel \(ch)") {
                                     state.setDeviceChannel(device.id, ch)
                                 }

@@ -41,6 +41,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
+    /// Base offset so MIDI note 36 corresponds to device 1
+    private let midiNoteOffset = 35
 
     // MIDI device lists and selections
     @Published public var midiInputNames: [String] = []
@@ -808,8 +810,9 @@ extension ConsoleState {
 extension ConsoleState {
     fileprivate func handleNoteOn(note: UInt8, velocity: UInt8, channel: UInt8) {
         let val = Int(note)
-        if val >= 1 && val <= devices.count {
-            let idx = val - 1
+        if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
+            let idx = val - midiNoteOffset - 1
+            guard idx < devices.count else { return }
             let device = devices[idx]
             if device.midiChannel == Int(channel + 1) {
                 glowingSlots.insert(val)
@@ -823,15 +826,15 @@ extension ConsoleState {
                     triggerSound(device: device)
                 }
             }
-            }
-        } else if val >= 61 && val <= 69 {
-            let group = val - 60
+        }
+        else if val >= 96 && val <= 104 {
+            let group = val - 95
             if let slots = tripleTriggers[group] {
                 triggerSlots(realSlots: slots)
             }
-        } else if val == 70 {
+        } else if val == 105 {
             strobeActive = true
-        } else if val == 71 {
+        } else if val == 106 {
             toggleAllTorches()
         }
         logMidi("NoteOn \(note) ch\(channel+1) vel \(velocity)")
@@ -839,8 +842,9 @@ extension ConsoleState {
 
     fileprivate func handleNoteOff(note: UInt8, channel: UInt8) {
         let val = Int(note)
-        if val >= 1 && val <= devices.count {
-            let idx = val - 1
+        if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
+            let idx = val - midiNoteOffset - 1
+            guard idx < devices.count else { return }
             let device = devices[idx]
             if device.midiChannel == Int(channel + 1) {
                 glowingSlots.remove(val)
@@ -854,7 +858,7 @@ extension ConsoleState {
                     stopSound(device: device)
                 }
             }
-        } else if val == 70 {
+        } else if val == 105 {
             strobeActive = false
         }
         logMidi("NoteOff \(note) ch\(channel+1)")
@@ -899,16 +903,16 @@ extension ConsoleState {
 extension ConsoleState {
     /// Send a MIDI Note On from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOn(_ note: UInt8, velocity: UInt8 = 127) {
-        let idx = Int(note) - 1
-        let chan: UInt8 = idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        let idx = Int(note) - midiNoteOffset - 1
+        let chan: UInt8 = idx >= 0 && idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
         handleNoteOn(note: note, velocity: velocity, channel: chan)
         midi.sendNoteOn(note, velocity: velocity)
     }
 
     /// Send a MIDI Note Off from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOff(_ note: UInt8) {
-        let idx = Int(note) - 1
-        let chan: UInt8 = idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        let idx = Int(note) - midiNoteOffset - 1
+        let chan: UInt8 = idx >= 0 && idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
         handleNoteOff(note: note, channel: chan)
         midi.sendNoteOff(note)
     }

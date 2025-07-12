@@ -7,8 +7,9 @@ struct TypingMidiMapper {
     init(keyToSlot: [Character: Int]) {
         var map: [Character: UInt8] = [:]
         for (key, slot) in keyToSlot {
-            if slot > 0 && slot < 128 {
-                map[key] = UInt8(slot)
+            let note = slot + 35
+            if note > 0 && note < 128 {
+                map[key] = UInt8(note)
             }
         }
         self.keyToNote = map
