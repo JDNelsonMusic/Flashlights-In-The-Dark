@@ -359,7 +359,7 @@ struct ComposerConsoleView: View {
             }
             // Always-on purple/navy veil overlay
             Color.purpleNavy
-                .opacity(0.5)
+                .opacity(0.25)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .zIndex(1)
@@ -441,10 +441,16 @@ struct ComposerConsoleView: View {
                             .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.clear, lineWidth: 0)
-                            .shadow(color: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? Color.white.opacity(0.95) : .clear,
-                                    radius: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 36 : 0)
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 36
+                                )
+                            )
+                            .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
                     )
                 }
             }

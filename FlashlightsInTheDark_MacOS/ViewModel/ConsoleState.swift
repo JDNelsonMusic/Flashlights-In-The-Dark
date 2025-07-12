@@ -688,6 +688,7 @@ extension ConsoleState {
         } catch {
             lastLog = "⚠️ Network start failed: \(error)"
             print("⚠️ startNetwork error: \(error)")
+            isBroadcasting = false
         }
     }
 
