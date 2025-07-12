@@ -463,6 +463,7 @@ struct ComposerConsoleView: View {
                             LightRaysView(color: .mintGlow)
                         }
                         .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                        .allowsHitTesting(false)
                     )
                 }
             }
