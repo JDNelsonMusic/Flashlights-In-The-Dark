@@ -146,9 +146,9 @@ struct ComposerConsoleView: View {
                             Text(name)
                         }
                     }
-                    Picker("MIDI Output", selection: $state.selectedMidiOutput) {
-                        ForEach(state.midiOutputNames, id: \.self) { name in
-                            Text(name)
+                    Picker("Output Channel", selection: $state.outputChannel) {
+                        ForEach(1...16, id: \.self) { ch in
+                            Text("\(ch)")
                         }
                     }
                     .onAppear { state.refreshMidiDevices() }
