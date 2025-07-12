@@ -163,13 +163,15 @@ class OscListener {
             : 1.0;
         if (id == myIndex) {
           try {
-            client.brightness.value = intensity;
-            await ScreenBrightness.instance
-                .setScreenBrightness(intensity.clamp(0, 1));
-            if (intensity > 0.05) {
+            final clamped = intensity.clamp(0, 1);
+            if ((client.brightness.value - clamped).abs() > 0.01) {
+              client.brightness.value = clamped;
+              await ScreenBrightness.instance.setScreenBrightness(clamped);
+            }
+            if (clamped > 0.05 && !client.flashOn.value) {
               await TorchLight.enableTorch();
               client.flashOn.value = true;
-            } else {
+            } else if (clamped <= 0.05 && client.flashOn.value) {
               await TorchLight.disableTorch();
               client.flashOn.value = false;
             }

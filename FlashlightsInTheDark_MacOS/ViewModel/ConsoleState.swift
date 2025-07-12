@@ -557,8 +557,22 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
 
     private func stopStrobe() {
-        strobeTask?.cancel()
+        let task = strobeTask
         strobeTask = nil
+        task?.cancel()
+
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let devicesList = await self.devices
+                for d in devicesList where !d.isPlaceholder {
+                    try? await osc.send(FlashOff(index: Int32(d.id + 1)))
+                }
+            } catch {
+                print("⚠️ stopStrobe error: \(error)")
+            }
+        }
     }
     
     // MARK: – Build only  🔨
