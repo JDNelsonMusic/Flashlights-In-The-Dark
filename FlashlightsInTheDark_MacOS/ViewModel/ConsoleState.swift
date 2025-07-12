@@ -89,13 +89,22 @@ public final class ConsoleState: ObservableObject, Sendable {
         )
         // MIDI callbacks for incoming messages
         midi.noteOnHandler = { [weak self] note, vel in
-            self?.handleNoteOn(note: note, velocity: vel)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleNoteOn(note: note, velocity: vel)
+            }
         }
         midi.noteOffHandler = { [weak self] note in
-            self?.handleNoteOff(note: note)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleNoteOff(note: note)
+            }
         }
         midi.controlChangeHandler = { [weak self] cc, value in
-            self?.handleControlChange(cc: cc, value: value)
+            guard let self = self else { return }
+            Task { @MainActor in
+                self.handleControlChange(cc: cc, value: value)
+            }
         }
 
         midi.setChannel(outputChannel)
@@ -142,17 +151,23 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard !devices[idx].isPlaceholder else { return devices }
         objectWillChange.send()
         devices[idx].torchOn.toggle()
-        Task {
-            let osc = try await broadcasterTask.value
-            if devices[idx].torchOn {
-                try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
-                await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
-                midi.sendControlChange(UInt8(id + 1), value: 127)
-                glow(slot: id + 1)
-            } else {
-                try await osc.send(FlashOff(index: Int32(id + 1)))
-                await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
-                midi.sendControlChange(UInt8(id + 1), value: 0)
+        let isOn = devices[idx].torchOn
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                if isOn {
+                    try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
+                    await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
+                    self.midi.sendControlChange(UInt8(id + 1), value: 127)
+                    await MainActor.run { self.glow(slot: id + 1) }
+                } else {
+                    try await osc.send(FlashOff(index: Int32(id + 1)))
+                    await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
+                    self.midi.sendControlChange(UInt8(id + 1), value: 0)
+                }
+            } catch {
+                print("Error toggling torch for slot \(id + 1): \(error)")
             }
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
@@ -165,12 +180,17 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
         devices[idx].torchOn = true
-        Task {
-            let osc = try await broadcasterTask.value
-            try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
-            await MainActor.run { lastLog = "/flash/on [\(id + 1), 1]" }
-            midi.sendControlChange(UInt8(id + 1), value: 127)
-            glow(slot: id + 1)
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
+                await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
+                self.midi.sendControlChange(UInt8(id + 1), value: 127)
+                await MainActor.run { self.glow(slot: id + 1) }
+            } catch {
+                print("Error sending FlashOn for slot \(id + 1): \(error)")
+            }
         }
     }
     /// Directly flash off a specific lamp slot and update state.
@@ -179,11 +199,16 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
         devices[idx].torchOn = false
-        Task {
-            let osc = try await broadcasterTask.value
-            try await osc.send(FlashOff(index: Int32(id + 1)))
-            await MainActor.run { lastLog = "/flash/off [\(id + 1)]" }
-            midi.sendControlChange(UInt8(id + 1), value: 0)
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                try await osc.send(FlashOff(index: Int32(id + 1)))
+                await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
+                self.midi.sendControlChange(UInt8(id + 1), value: 0)
+            } catch {
+                print("Error sending FlashOff for slot \(id + 1): \(error)")
+            }
         }
     }
 
@@ -242,28 +267,32 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Trigger playback of a preloaded audio file on a specific device
     public func triggerSound(device: ChoirDevice) {
         guard !device.isPlaceholder else { return }
-        Task {
-            let oscBroadcaster = try await broadcasterTask.value
-            let slot = Int32(device.id + 1)
-            let gain: Float32 = 1.0
-            // Determine tone sets to send: default to ["A"] if none selected
-            let sets = activeToneSets.isEmpty ? ["A"] : activeToneSets.sorted()
-            for set in sets {
-                let prefix = set.lowercased()
-                let file = "\(prefix)\(slot).mp3"
-                try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
-                await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
-                let noteBase = device.id * 4
-                let noteOffset: Int
-                switch set.lowercased() {
-                case "a": noteOffset = 0
-                case "b": noteOffset = 1
-                case "c": noteOffset = 2
-                default:  noteOffset = 3
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let oscBroadcaster = try await self.broadcasterTask.value
+                let slot = Int32(device.id + 1)
+                let gain: Float32 = 1.0
+                let sets = self.activeToneSets.isEmpty ? ["A"] : self.activeToneSets.sorted()
+                for set in sets {
+                    let prefix = set.lowercased()
+                    let file = "\(prefix)\(slot).mp3"
+                    try await oscBroadcaster.send(AudioPlay(index: slot, file: file, gain: gain))
+                    await MainActor.run { self.lastLog = "/audio/play [\(slot), \(file), \(gain)]" }
+                    let noteBase = device.id * 4
+                    let noteOffset: Int
+                    switch set.lowercased() {
+                    case "a": noteOffset = 0
+                    case "b": noteOffset = 1
+                    case "c": noteOffset = 2
+                    default:  noteOffset = 3
+                    }
+                    self.midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
                 }
-                midi.sendNoteOn(UInt8(noteBase + noteOffset), velocity: 127)
+                await MainActor.run { self.glow(slot: device.id + 1) }
+            } catch {
+                print("Error triggering sound for slot \(device.id + 1): \(error)")
             }
-            glow(slot: device.id + 1)
         }
     }
     /// Play audio on all devices slots based on current activeToneSets
@@ -277,6 +306,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func refreshMidiDevices() {
         midiInputNames = midi.inputNames
         midiOutputNames = midi.outputNames
+        // Filter out the app's own virtual MIDI endpoints
+        midiInputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
+        midiOutputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
         if let scarlett = midiInputNames.first(where: { $0.contains("Scarlett 18i20 USB") }) {
             selectedMidiInput = scarlett
         } else if selectedMidiInput.isEmpty, let first = midiInputNames.first {
@@ -348,14 +380,19 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func stopSound(device: ChoirDevice) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
-        Task {
-            let osc = try await broadcasterTask.value
-            let slot = Int32(device.id + 1)
-            try await osc.send(AudioStop(index: slot))
-            await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
-            let base = device.id * 4
-            for offset in 0..<4 {
-                midi.sendNoteOff(UInt8(base + offset))
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let slot = Int32(device.id + 1)
+                try await osc.send(AudioStop(index: slot))
+                await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
+                let base = device.id * 4
+                for offset in 0..<4 {
+                    self.midi.sendNoteOff(UInt8(base + offset))
+                }
+            } catch {
+                print("Error stopping sound for slot \(device.id + 1): \(error)")
             }
         }
     }
@@ -363,14 +400,15 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Start a global ADSR envelope across all lamps
     public func startEnvelopeAll() {
         envelopeTask?.cancel()
-        envelopeTask = Task {
+        envelopeTask = Task.detached { [weak self] in
+            guard let self = self else { return }
             do {
-                let osc = try await broadcasterTask.value
+                let osc = try await self.broadcasterTask.value
                 let steps = 10
                 // Attack phase
                 for i in 0...steps {
                     let intensity = Float32(i) / Float32(steps)
-                    for d in devices where !d.isPlaceholder {
+                    for d in self.devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(attackMs) * 1_000_000 / UInt64(steps))
@@ -380,7 +418,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 for i in 0...steps {
                     let t = Float32(i) / Float32(steps)
                     let intensity = (1 - t) + t * sustainLevel
-                    for d in devices where !d.isPlaceholder {
+                    for d in self.devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(decayMs) * 1_000_000 / UInt64(steps))
@@ -395,22 +433,23 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Release the envelope: fade out and send flash-off
     public func releaseEnvelopeAll() {
         envelopeTask?.cancel()
-        envelopeTask = Task {
+        envelopeTask = Task.detached { [weak self] in
+            guard let self = self else { return }
             do {
-                let osc = try await broadcasterTask.value
+                let osc = try await self.broadcasterTask.value
                 let steps = 10
                 let sustainLevel = Float32(sustainPct) / 100
                 for i in 0...steps {
                     let intensity = sustainLevel * (1 - Float32(i) / Float32(steps))
-                    for d in devices where !d.isPlaceholder {
+                    for d in self.devices where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(releaseMs) * 1_000_000 / UInt64(steps))
                 }
-                for d in devices where !d.isPlaceholder {
+                for d in self.devices where !d.isPlaceholder {
                     do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
                 }
-                await MainActor.run { lastLog = "/envelope release" }
+                await MainActor.run { self.lastLog = "/envelope release" }
             } catch {
                 print("⚠️ releaseEnvelopeAll error: \(error)")
             }
@@ -495,9 +534,14 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func playAll() -> [ChoirDevice] {
         for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = true
-            Task {
-                let osc = try await broadcasterTask.value
-                try await osc.send(FlashOn(index: Int32(idx + 1), intensity: 1))
+            Task.detached { [weak self] in
+                guard let self = self else { return }
+                do {
+                    let osc = try await self.broadcasterTask.value
+                    try await osc.send(FlashOn(index: Int32(idx + 1), intensity: 1))
+                } catch {
+                    print("Error sending FlashOn for slot \(idx + 1): \(error)")
+                }
             }
         }
         print("[ConsoleState] All torches turned on")
@@ -508,9 +552,14 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func blackoutAll() -> [ChoirDevice] {
         for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = false
-            Task {
-                let osc = try await broadcasterTask.value
-                try await osc.send(FlashOff(index: Int32(idx + 1)))
+            Task.detached { [weak self] in
+                guard let self = self else { return }
+                do {
+                    let osc = try await self.broadcasterTask.value
+                    try await osc.send(FlashOff(index: Int32(idx + 1)))
+                } catch {
+                    print("Error sending FlashOff for slot \(idx + 1): \(error)")
+                }
             }
         }
         print("[ConsoleState] All torches turned off")
@@ -552,10 +601,11 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func assignSlot(device: ChoirDevice, slot: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
         devices[idx].listeningSlot = slot
-        Task {
-            let osc = try await broadcasterTask.value
-            let msg = SetSlot(slot: Int32(slot))
+        Task.detached { [weak self] in
+            guard let self = self else { return }
             do {
+                let osc = try await self.broadcasterTask.value
+                let msg = SetSlot(slot: Int32(slot))
                 try await osc.sendUnicast(msg.encode(), toIP: device.ip)
                 await MainActor.run { self.lastLog = "/set-slot [\(device.ip), \(slot)]" }
             } catch {
@@ -620,6 +670,8 @@ extension ConsoleState {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
+            // Mark this slot as actively glowing while the MIDI note is held
+            glowingSlots.insert(val)
             switch keyboardTriggerMode {
             case .torch:
                 flashOn(id: idx)
@@ -643,6 +695,8 @@ extension ConsoleState {
         let val = Int(note)
         if val >= 1 && val <= devices.count {
             let idx = val - 1
+            // Clear the glow highlight when the MIDI note ends
+            glowingSlots.remove(val)
             switch keyboardTriggerMode {
             case .torch:
                 flashOff(id: idx)
@@ -661,14 +715,19 @@ extension ConsoleState {
         let deviceNum = Int(cc)
         guard deviceNum >= 1 && deviceNum <= devices.count else { return }
         let intensity = Float32(value) / 127.0
-        Task {
-            let osc = try await broadcasterTask.value
-            if intensity > 0 {
-                try await osc.send(FlashOn(index: Int32(deviceNum), intensity: intensity))
-                await MainActor.run { self.lastLog = "/flash/on [\(deviceNum), \(intensity)]" }
-            } else {
-                try await osc.send(FlashOff(index: Int32(deviceNum)))
-                await MainActor.run { self.lastLog = "/flash/off [\(deviceNum)]" }
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                if intensity > 0 {
+                    try await osc.send(FlashOn(index: Int32(deviceNum), intensity: intensity))
+                    await MainActor.run { self.lastLog = "/flash/on [\(deviceNum), \(intensity)]" }
+                } else {
+                    try await osc.send(FlashOff(index: Int32(deviceNum)))
+                    await MainActor.run { self.lastLog = "/flash/off [\(deviceNum)]" }
+                }
+            } catch {
+                print("Error handling CC for device \(deviceNum): \(error)")
             }
         }
     }
