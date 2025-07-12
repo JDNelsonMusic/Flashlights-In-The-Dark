@@ -6,6 +6,9 @@ struct ComposerConsoleView: View {
     @State private var showRouting: Bool = false
 
     @State private var triggeredSlots: Set<Int> = []
+    // Strobe effect state
+    @State private var strobeActive: Bool = false
+    @State private var strobeOn: Bool = false
 
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
@@ -215,6 +218,21 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.bordered)
                         .tint(Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
+
+                        Button(strobeActive ? "Stop Strobe" : "Strobe") {
+                            if strobeActive {
+                                strobeActive = false
+                                strobeOn = false
+                            } else {
+                                strobeActive = true
+                                withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+                                    strobeOn.toggle()
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mintGlow)
+                        .disabled(!state.isBroadcasting)
                         // Play all tones
                         Button("Play All Tones") {
                             state.playAllTones()
@@ -330,13 +348,13 @@ struct ComposerConsoleView: View {
                     )
                     .environmentObject(state)
             }
-            // Full-screen flash overlay when any lamp is on
-            if anyTorchOn {
+            // Full-screen flash overlay when torches or strobe are active
+            if anyTorchOn || strobeActive {
                 Color.mintGlow
-                    .opacity(0.8)
+                    .opacity(strobeActive ? (strobeOn ? 0.8 : 0.0) : 0.8)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                    .animation(.easeOut(duration: 0.3), value: anyTorchOn)
+                    .animation(.easeOut(duration: 0.3), value: anyTorchOn || strobeActive)
                     .allowsHitTesting(false)
             }
         }
