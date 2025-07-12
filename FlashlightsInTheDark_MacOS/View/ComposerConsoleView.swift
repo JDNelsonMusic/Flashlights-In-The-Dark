@@ -67,10 +67,6 @@ struct ComposerConsoleView: View {
     ]
 
     @State private var leftPanelWidth: CGFloat = 300
-    /// Returns true when any connected device's torch is currently on.
-    private var anyTorchOn: Bool {
-        state.devices.contains { $0.torchOn }
-    }
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -286,6 +282,27 @@ struct ComposerConsoleView: View {
                 .padding()
                 .background(Color.deepPurple.ignoresSafeArea())
             }
+            
+            
+
+            // Routing sheet
+            .sheet(isPresented: $showRouting) {
+                RoutingView()
+                // size to 80% of main screen
+                    .frame(
+                        width: (NSScreen.main?.visibleFrame.width ?? 1024) * 0.8,
+                        height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
+                    )
+                    .environmentObject(state)
+            }
+            // Overlay effects stacked above console content
+            .overlay(
+                FullScreenFlashView(strobeActive: strobeActive, strobeOn: strobeOn)
+                    .environmentObject(state)
+            )
+            .overlay(
+                ColorOverlayVeil()
+            )
             .overlay(
                 KeyCaptureView(
                     onKeyDown: { char in
