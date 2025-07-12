@@ -124,7 +124,15 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// True whenever any connected device currently has its torch on.
     @Published public var isAnyTorchOn: Bool = false
     /// Whether the strobe effect is active.
-    @Published public var strobeActive: Bool = false
+    @Published public var strobeActive: Bool = false {
+        didSet {
+            if strobeActive {
+                startStrobe()
+            } else {
+                stopStrobe()
+            }
+        }
+    }
     /// Active audio tone sets ("A","B","C","D").
     @Published public var activeToneSets: Set<String> = []
     // Envelope parameters (ms, %)
@@ -142,6 +150,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var keyboardTriggerMode: KeyboardTriggerMode = .torch
     // Envelope task to allow cancellation
     private var envelopeTask: Task<Void, Never>?
+    // Strobe oscillation task
+    private var strobeTask: Task<Void, Never>?
 
     /// Recalculate `isAnyTorchOn` based on current device states.
     private func updateAnyTorchOn() {
@@ -515,6 +525,40 @@ public final class ConsoleState: ObservableObject, Sendable {
                 print("⚠️ releaseEnvelopeAll error: \(error)")
             }
         }
+    }
+
+    // MARK: – Strobe control
+    private func startStrobe() {
+        strobeTask?.cancel()
+        strobeTask = Task.detached { [weak self] in
+            guard let self = self else { return }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let devicesList = await self.devices
+                var phase: Double = 0
+                let updateRate: Double = 30  // messages per second
+                let freq: Double = 5         // strobe frequency in Hz
+                let step = 1.0 / updateRate
+                while await self.strobeActive {
+                    let intensity = Float32((sin(phase) + 1) / 2)
+                    for d in devicesList where !d.isPlaceholder {
+                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                    }
+                    phase += 2 * .pi * freq * step
+                    try await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
+                }
+                for d in devicesList where !d.isPlaceholder {
+                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                }
+            } catch {
+                print("⚠️ strobeTask error: \(error)")
+            }
+        }
+    }
+
+    private func stopStrobe() {
+        strobeTask?.cancel()
+        strobeTask = nil
     }
     
     // MARK: – Build only  🔨
