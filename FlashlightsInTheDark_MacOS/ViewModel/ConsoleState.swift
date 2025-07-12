@@ -159,12 +159,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                 if isOn {
                     try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
                     await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
-                    self.midi.sendControlChange(UInt8(id + 1), value: 127)
+                    await self.midi.sendControlChange(UInt8(id + 1), value: 127)
                     await MainActor.run { self.glow(slot: id + 1) }
                 } else {
                     try await osc.send(FlashOff(index: Int32(id + 1)))
                     await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
-                    self.midi.sendControlChange(UInt8(id + 1), value: 0)
+                    await self.midi.sendControlChange(UInt8(id + 1), value: 0)
                 }
             } catch {
                 print("Error toggling torch for slot \(id + 1): \(error)")
@@ -186,7 +186,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
                 await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
-                self.midi.sendControlChange(UInt8(id + 1), value: 127)
+                await self.midi.sendControlChange(UInt8(id + 1), value: 127)
                 await MainActor.run { self.glow(slot: id + 1) }
             } catch {
                 print("Error sending FlashOn for slot \(id + 1): \(error)")
@@ -205,7 +205,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 try await osc.send(FlashOff(index: Int32(id + 1)))
                 await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
-                self.midi.sendControlChange(UInt8(id + 1), value: 0)
+                await self.midi.sendControlChange(UInt8(id + 1), value: 0)
             } catch {
                 print("Error sending FlashOff for slot \(id + 1): \(error)")
             }
@@ -407,7 +407,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
                 let base = device.id * 4
                 for offset in 0..<4 {
-                    self.midi.sendNoteOff(UInt8(base + offset))
+                    await self.midi.sendNoteOff(UInt8(base + offset))
                 }
             } catch {
                 print("Error stopping sound for slot \(device.id + 1): \(error)")
@@ -423,23 +423,28 @@ public final class ConsoleState: ObservableObject, Sendable {
             do {
                 let osc = try await self.broadcasterTask.value
                 let steps = 10
+                // capture snapshot of actor-bound state
+                let devicesList = await self.devices
+                let attack = await self.attackMs
+                let decay = await self.decayMs
+                let sustainParam = await self.sustainPct
                 // Attack phase
                 for i in 0...steps {
                     let intensity = Float32(i) / Float32(steps)
-                    for d in self.devices where !d.isPlaceholder {
+                    for d in devicesList where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
-                    try await Task.sleep(nanoseconds: UInt64(attackMs) * 1_000_000 / UInt64(steps))
+                    try await Task.sleep(nanoseconds: UInt64(attack) * 1_000_000 / UInt64(steps))
                 }
                 // Decay to sustain
-                let sustainLevel = Float32(sustainPct) / 100
+                let sustainLevel = Float32(sustainParam) / 100
                 for i in 0...steps {
                     let t = Float32(i) / Float32(steps)
                     let intensity = (1 - t) + t * sustainLevel
-                    for d in self.devices where !d.isPlaceholder {
+                    for d in devicesList where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
-                    try await Task.sleep(nanoseconds: UInt64(decayMs) * 1_000_000 / UInt64(steps))
+                    try await Task.sleep(nanoseconds: UInt64(decay) * 1_000_000 / UInt64(steps))
                 }
                 // Hold sustain until release called
             } catch {
@@ -456,15 +461,19 @@ public final class ConsoleState: ObservableObject, Sendable {
             do {
                 let osc = try await self.broadcasterTask.value
                 let steps = 10
-                let sustainLevel = Float32(sustainPct) / 100
+                // capture snapshot of actor-bound state
+                let devicesList = await self.devices
+                let releaseDur = await self.releaseMs
+                let sustainParam = await self.sustainPct
+                let sustainLevel = Float32(sustainParam) / 100
                 for i in 0...steps {
                     let intensity = sustainLevel * (1 - Float32(i) / Float32(steps))
-                    for d in self.devices where !d.isPlaceholder {
+                    for d in devicesList where !d.isPlaceholder {
                         do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
                     }
-                    try await Task.sleep(nanoseconds: UInt64(releaseMs) * 1_000_000 / UInt64(steps))
+                    try await Task.sleep(nanoseconds: UInt64(releaseDur) * 1_000_000 / UInt64(steps))
                 }
-                for d in self.devices where !d.isPlaceholder {
+                for d in devicesList where !d.isPlaceholder {
                     do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
                 }
                 await MainActor.run { self.lastLog = "/envelope release" }
