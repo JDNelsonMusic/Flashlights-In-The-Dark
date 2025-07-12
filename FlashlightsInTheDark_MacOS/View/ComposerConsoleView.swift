@@ -14,7 +14,7 @@ struct ComposerConsoleView: View {
     @State private var strobeOn: Bool = false
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
-    private let keyToSlot: [Character: Int] = [
+    private static let keyToSlot: [Character: Int] = [
         "2": 1, "3": 3, "4": 4, "5": 5, "u": 7, "7": 9, "9": 12,
         "q": 14, "w": 15, "d": 16, "e": 18, "r": 19, "k": 20, "i": 21,
         "8": 23, "o": 24, "p": 25, "a": 27, "s": 29, "j": 34, "l": 38,
@@ -22,10 +22,10 @@ struct ComposerConsoleView: View {
     ]
     // Reverse lookup so each slot can display its bound key
     private var keyLabels: [Int: String] {
-        Dictionary(uniqueKeysWithValues: keyToSlot.map { ($0.value, String($0.key)) })
+        Dictionary(uniqueKeysWithValues: Self.keyToSlot.map { ($0.value, String($0.key)) })
     }
     // Mapper converting typed characters to MIDI note numbers
-    private lazy var typingMapper = TypingMidiMapper(keyToSlot: keyToSlot)
+    private var typingMapper = TypingMidiMapper(keyToSlot: Self.keyToSlot)
     private let slotRows: [[Int]] = [
         Array(1...12),
         Array(13...26),
