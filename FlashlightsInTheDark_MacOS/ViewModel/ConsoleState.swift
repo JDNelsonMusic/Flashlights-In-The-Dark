@@ -123,6 +123,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var isBroadcasting: Bool = false
     /// True whenever any connected device currently has its torch on.
     @Published public var isAnyTorchOn: Bool = false
+    /// Whether the strobe effect is active.
+    @Published public var strobeActive: Bool = false
     /// Active audio tone sets ("A","B","C","D").
     @Published public var activeToneSets: Set<String> = []
     // Envelope parameters (ms, %)
@@ -626,6 +628,15 @@ public final class ConsoleState: ObservableObject, Sendable {
         updateAnyTorchOn()
         return devices
     }
+
+    /// Toggle all torches on or off depending on the current state.
+    public func toggleAllTorches() {
+        if isAnyTorchOn {
+            _ = blackoutAll()
+        } else {
+            _ = playAll()
+        }
+    }
     
     // MARK: – Dynamic device management  📱
     /// Add a new device at runtime. Assigns next available zero-based id and initializes status.
@@ -750,6 +761,10 @@ extension ConsoleState {
             if let slots = tripleTriggers[group] {
                 triggerSlots(realSlots: slots)
             }
+        } else if val == 70 {
+            strobeActive = true
+        } else if val == 71 {
+            toggleAllTorches()
         }
         logMidi("NoteOn \(note) vel \(velocity)")
     }
@@ -771,6 +786,8 @@ extension ConsoleState {
                 let device = devices[idx]
                 stopSound(device: device)
             }
+        } else if val == 70 {
+            strobeActive = false
         }
         logMidi("NoteOff \(note)")
     }
