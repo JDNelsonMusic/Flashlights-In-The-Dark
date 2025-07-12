@@ -355,6 +355,31 @@ struct ComposerConsoleView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .allowsHitTesting(false)
             )
+            // Routing sheet
+            .sheet(isPresented: $showRouting) {
+                RoutingView()
+                // size to 80% of main screen
+                    .frame(
+                        width: (NSScreen.main?.visibleFrame.width ?? 1024) * 0.8,
+                        height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
+                    )
+                    .environmentObject(state)
+            }
+            // Full-screen flash overlay when torches or strobe are active
+            if anyTorchOn || strobeActive {
+                Color.mintGlow
+                    .opacity(strobeActive ? (strobeOn ? 0.8 : 0.0) : 0.8)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .animation(.easeOut(duration: 0.3), value: anyTorchOn || strobeActive)
+                    .allowsHitTesting(false)
+            }
+            // Always-on purple/navy veil overlay
+            Color.purpleNavy
+                .opacity(0.25)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .zIndex(1)
         }
     }
     
@@ -433,10 +458,16 @@ struct ComposerConsoleView: View {
                             .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.clear, lineWidth: 0)
-                            .shadow(color: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? Color.white.opacity(0.95) : .clear,
-                                    radius: (isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 36 : 0)
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 36
+                                )
+                            )
+                            .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
                     )
                 }
             }
