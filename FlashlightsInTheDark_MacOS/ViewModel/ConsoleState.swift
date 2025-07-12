@@ -119,6 +119,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
     @Published public var isBroadcasting: Bool = false
+    /// True whenever any connected device currently has its torch on.
+    @Published public var isAnyTorchOn: Bool = false
     /// Active audio tone sets ("A","B","C","D").
     @Published public var activeToneSets: Set<String> = []
     // Envelope parameters (ms, %)
@@ -136,6 +138,11 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var keyboardTriggerMode: KeyboardTriggerMode = .torch
     // Envelope task to allow cancellation
     private var envelopeTask: Task<Void, Never>?
+
+    /// Recalculate `isAnyTorchOn` based on current device states.
+    private func updateAnyTorchOn() {
+        isAnyTorchOn = devices.contains { $0.torchOn }
+    }
 
     /// Make a slot glow in the UI for a short duration
     public func glow(slot: Int, duration: Double = 0.3) {
@@ -181,6 +188,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
+        updateAnyTorchOn()
         return devices
     }
     
@@ -202,6 +210,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 print("Error sending FlashOn for slot \(id + 1): \(error)")
             }
         }
+        updateAnyTorchOn()
     }
     /// Directly flash off a specific lamp slot and update state.
     public func flashOff(id: Int) {
@@ -220,6 +229,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 print("Error sending FlashOff for slot \(id + 1): \(error)")
             }
         }
+        updateAnyTorchOn()
     }
 
     /// Trigger a list of real slots according to the current keyboardTriggerMode.
@@ -403,6 +413,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 devices[idx].name = info.name
             }
         }
+        updateAnyTorchOn()
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {
@@ -582,6 +593,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
         print("[ConsoleState] All torches turned on")
+        updateAnyTorchOn()
         return devices
     }
 
@@ -600,6 +612,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
         print("[ConsoleState] All torches turned off")
+        updateAnyTorchOn()
         return devices
     }
     
