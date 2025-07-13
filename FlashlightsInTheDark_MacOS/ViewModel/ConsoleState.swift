@@ -550,26 +550,36 @@ public final class ConsoleState: ObservableObject, Sendable {
         strobeTask?.cancel()
         strobeTask = Task.detached { [weak self] in
             guard let self = self else { return }
+
+            // Constants controlling the strobe oscillation and update rate
+            let oscillationHz: Float = 5
+            let updateHz: Float = 12
+            let updateIntervalNs = UInt64(1_000_000_000 / Double(updateHz))
+
             await MainActor.run { self.lastLog = "⚡️ Strobe active" }
             do {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
-                var phase: Double = 0
-                let frequency = 5.0
-                let interval: UInt64 = 50_000_000 // 50 ms update (~5 Hz cycle)
-                let dt = Double(interval) / 1_000_000_000
-                let step = 2 * Double.pi * frequency * dt
+
+                var phase: Float = 0
+                let twoPi: Float = .pi * 2
+
                 while await self.strobeActive {
-                    let intensity = Float32(0.5 * (1 + sin(phase)))
-                    for d in devicesList where !d.isPlaceholder {
-                        do {
-                            try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity))
-                        } catch {}
+                    let intensity = 0.5 * (1 + sin(phase))
+                    await MainActor.run {
+                        for d in self.devices where !d.isPlaceholder {
+                            try? await osc.send(
+                                FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                            )
+                        }
                     }
-                    phase += step
-                    if phase > 2 * Double.pi { phase -= 2 * Double.pi }
-                    try? await Task.sleep(nanoseconds: interval)
+
+                    phase += twoPi * oscillationHz / updateHz
+                    if phase >= twoPi { phase -= twoPi }
+
+                    try? await Task.sleep(nanoseconds: updateIntervalNs)
                 }
+
                 for d in devicesList where !d.isPlaceholder {
                     do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
                 }
