@@ -54,13 +54,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             guard let chars = event.charactersIgnoringModifiers?.lowercased(),
                   let c = chars.first else { return event }
-            // Envelope trigger on “0” key (ADSR all lamps)
-            if c == "0" {
-                if event.type == .keyDown {
-                    self.state.startEnvelopeAll()
-                } else {
-                    self.state.releaseEnvelopeAll()
-                }
+            // Glow Ramp toggle on "0"
+            if c == "0" && event.type == .keyDown {
+                self.state.glowRampActive.toggle()
                 return nil
             }
             // Mapping from keyboard key to real slot number
