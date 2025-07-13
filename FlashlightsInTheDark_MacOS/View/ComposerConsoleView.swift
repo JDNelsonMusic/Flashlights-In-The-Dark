@@ -217,6 +217,12 @@ struct ComposerConsoleView: View {
                         .tint(anyTorchOn ? .red : Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
 
+                        Button(state.slowGlowRampActive ? "Stop Slow Glow" : "Slow Glow Ramp") {
+                            state.slowGlowRampActive.toggle()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mintGlow)
+                        .disabled(!state.isBroadcasting)
                         Button(state.glowRampActive ? "Stop Glow" : "Glow Ramp") {
                             state.glowRampActive.toggle()
                         }
@@ -305,7 +311,7 @@ struct ComposerConsoleView: View {
             }
             // Overlay effects stacked above console content
             .overlay(
-                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive || state.glowRampActive, strobeOn: strobeOn)
+                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive || state.glowRampActive || state.slowGlowRampActive, strobeOn: strobeOn)
                     .environmentObject(state)
             )
             .overlay(
@@ -314,8 +320,12 @@ struct ComposerConsoleView: View {
             .overlay(
                 KeyCaptureView(
                     onKeyDown: { char in
-                        if char == "0" {
+                        if char == "]" {
                             state.glowRampActive.toggle()
+                            return
+                        }
+                        if char == "[" {
+                            state.slowGlowRampActive.toggle()
                             return
                         }
                         if char == "\\" {
@@ -377,14 +387,18 @@ struct ComposerConsoleView: View {
         .onChange(of: state.glowRampActive) { _ in
             updateStrobeAnimation()
         }
+        .onChange(of: state.slowGlowRampActive) { _ in
+            updateStrobeAnimation()
+        }
     }
 
     private func updateStrobeAnimation() {
-        let isActive = state.strobeActive || state.slowStrobeActive || state.glowRampActive
+        let isActive = state.strobeActive || state.slowStrobeActive || state.glowRampActive || state.slowGlowRampActive
         let duration: Double = {
             if state.strobeActive { return 0.1 }
             if state.slowStrobeActive { return 0.4 }
             if state.glowRampActive { return 0.8 }
+            if state.slowGlowRampActive { return 1.6 }
             return 0.1
         }()
         if isActive {
