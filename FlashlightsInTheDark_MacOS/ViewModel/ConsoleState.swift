@@ -552,11 +552,11 @@ public final class ConsoleState: ObservableObject, Sendable {
             guard let self = self else { return }
 
             // Constants controlling the strobe oscillation and update rate
-            let oscillationHz: Float = 5
-            let updateHz: Float = 12
-            let updateIntervalNs = UInt64(1_000_000_000 / Double(updateHz))
+            let oscillationHz: Float = 5        // 5 Hz brightness waveform
+            let updateHz: Float = 12            // send ~12 frames per second
+            let updateIntervalNs = UInt64(1_000_000_000 / updateHz)
 
-            await MainActor.run { self.lastLog = "⚡️ Strobe active" }
+            await MainActor.run { self.lastLog = "⚡️ Strobe active (12 Hz updates)" }
             do {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
