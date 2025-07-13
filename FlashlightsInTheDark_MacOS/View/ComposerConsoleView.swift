@@ -217,14 +217,21 @@ struct ComposerConsoleView: View {
                         .tint(anyTorchOn ? .red : Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
 
-                        Button(state.slowStrobeActive ? "Stop Slow" : "Slow Strobe") {
+                        Button(state.glowRampActive ? "Stop Glow" : "Glow Ramp") {
+                            state.glowRampActive.toggle()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mintGlow)
+                        .disabled(!state.isBroadcasting)
+
+                        Button(state.slowStrobeActive ? "Stop Medium" : "Medium Strobe") {
                             state.slowStrobeActive.toggle()
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.mintGlow)
                         .disabled(!state.isBroadcasting)
 
-                        Button(state.strobeActive ? "Stop Strobe" : "Strobe") {
+                        Button(state.strobeActive ? "Stop Rapid" : "Rapid Strobe") {
                             state.strobeActive.toggle()
                         }
                         .buttonStyle(.borderedProminent)
@@ -298,7 +305,7 @@ struct ComposerConsoleView: View {
             }
             // Overlay effects stacked above console content
             .overlay(
-                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive, strobeOn: strobeOn)
+                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive || state.glowRampActive, strobeOn: strobeOn)
                     .environmentObject(state)
             )
             .overlay(
@@ -307,9 +314,8 @@ struct ComposerConsoleView: View {
             .overlay(
                 KeyCaptureView(
                     onKeyDown: { char in
-                        // Envelope on “0”
                         if char == "0" {
-                            state.startEnvelopeAll()
+                            state.glowRampActive.toggle()
                             return
                         }
                         if char == "\\" {
@@ -332,11 +338,6 @@ struct ComposerConsoleView: View {
                         }
                     },
                     onKeyUp: { char in
-                        // Envelope release on “0”
-                        if char == "0" {
-                            state.releaseEnvelopeAll()
-                            return
-                        }
                         if let note = typingMapper.note(for: char) {
                             let slot = Int(note) - 35
                             state.removeTriggeredSlot(slot)
@@ -373,11 +374,19 @@ struct ComposerConsoleView: View {
         .onChange(of: state.slowStrobeActive) { _ in
             updateStrobeAnimation()
         }
+        .onChange(of: state.glowRampActive) { _ in
+            updateStrobeAnimation()
+        }
     }
 
     private func updateStrobeAnimation() {
-        let isActive = state.strobeActive || state.slowStrobeActive
-        let duration = state.slowStrobeActive ? 0.4 : 0.1
+        let isActive = state.strobeActive || state.slowStrobeActive || state.glowRampActive
+        let duration: Double = {
+            if state.strobeActive { return 0.1 }
+            if state.slowStrobeActive { return 0.4 }
+            if state.glowRampActive { return 0.8 }
+            return 0.1
+        }()
         if isActive {
             withAnimation(Animation.linear(duration: duration).repeatForever(autoreverses: true)) {
                 strobeOn.toggle()

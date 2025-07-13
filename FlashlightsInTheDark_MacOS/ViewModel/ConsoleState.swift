@@ -143,9 +143,22 @@ public final class ConsoleState: ObservableObject, Sendable {
         didSet {
             if slowStrobeActive {
                 strobeActive = false
+                glowRampActive = false
                 startSlowStrobe()
             } else {
                 stopSlowStrobe()
+            }
+        }
+    }
+    /// Whether the glow ramp effect is active.
+    @Published public var glowRampActive: Bool = false {
+        didSet {
+            if glowRampActive {
+                strobeActive = false
+                slowStrobeActive = false
+                startGlowRamp()
+            } else {
+                stopGlowRamp()
             }
         }
     }
@@ -170,6 +183,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var strobeTask: Task<Void, Never>?
     // Slow strobe oscillation task
     private var slowStrobeTask: Task<Void, Never>?
+    // Glow ramp oscillation task
+    private var glowRampTask: Task<Void, Never>?
 
     /// Recalculate `isAnyTorchOn` based on current device states.
     private func updateAnyTorchOn() {
@@ -665,6 +680,65 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
+
+    private func startGlowRamp() {
+        glowRampTask?.cancel()
+        glowRampTask = Task.detached { [weak self] in
+            guard let self = self else { return }
+
+            let oscillationHz: Float = 0.625      // half speed of medium strobe
+            let updateHz: Float = 12
+            let updateIntervalNs = UInt64(1_000_000_000 / updateHz)
+
+            await MainActor.run { self.lastLog = "⚡️ Glow Ramp active (12 Hz updates)" }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let devicesList = await self.devices
+
+                var phase: Float = 0
+                let twoPi: Float = .pi * 2
+
+                while await self.glowRampActive {
+                    let intensity = 0.5 * (1 + sin(phase))
+
+                    for d in devicesList where !d.isPlaceholder {
+                        try? await osc.send(
+                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                        )
+                    }
+
+                    phase += twoPi * oscillationHz / updateHz
+                    if phase >= twoPi { phase -= twoPi }
+
+                    try? await Task.sleep(nanoseconds: updateIntervalNs)
+                }
+
+                for d in devicesList where !d.isPlaceholder {
+                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                }
+            } catch {
+                print("⚠️ startGlowRamp error: \(error)")
+            }
+            await MainActor.run { self.lastLog = "⚡️ Glow Ramp stopped" }
+        }
+    }
+
+    private func stopGlowRamp() {
+        let task = glowRampTask
+        glowRampTask = nil
+        task?.cancel()
+
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            await MainActor.run {
+                for ch in 0..<16 {
+                    self.midi.setChannel(ch + 1)
+                    self.midi.sendControlChange(1, value: 0)
+                }
+                self.midi.setChannel(self.outputChannel)
+            }
+        }
+    }
     
     // MARK: – Build only  🔨
     /// Build the app for a single device slot.
@@ -923,6 +997,8 @@ extension ConsoleState {
             if let slots = tripleTriggers[group] {
                 triggerSlots(realSlots: slots)
             }
+        } else if val == 72 {
+            glowRampActive = true
         } else if val == 105 {
             strobeActive = true
         } else if val == 106 {
@@ -949,6 +1025,8 @@ extension ConsoleState {
                     stopSound(device: device)
                 }
             }
+        } else if val == 72 {
+            glowRampActive = false
         } else if val == 105 {
             strobeActive = false
         }
