@@ -162,6 +162,19 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
+    /// Whether the slow glow ramp effect is active.
+    @Published public var slowGlowRampActive: Bool = false {
+        didSet {
+            if slowGlowRampActive {
+                strobeActive = false
+                slowStrobeActive = false
+                glowRampActive = false
+                startSlowGlowRamp()
+            } else {
+                stopSlowGlowRamp()
+            }
+        }
+    }
     /// Active audio tone sets ("A","B","C","D").
     @Published public var activeToneSets: Set<String> = []
     // Envelope parameters (ms, %)
@@ -185,6 +198,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var slowStrobeTask: Task<Void, Never>?
     // Glow ramp oscillation task
     private var glowRampTask: Task<Void, Never>?
+    // Slow glow ramp oscillation task
+    private var slowGlowRampTask: Task<Void, Never>?
 
     /// Recalculate `isAnyTorchOn` based on current device states.
     private func updateAnyTorchOn() {
@@ -739,6 +754,65 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
+
+    private func startSlowGlowRamp() {
+        slowGlowRampTask?.cancel()
+        slowGlowRampTask = Task.detached { [weak self] in
+            guard let self = self else { return }
+
+            let oscillationHz: Float = 0.3125     // half speed of glow ramp
+            let updateHz: Float = 12
+            let updateIntervalNs = UInt64(1_000_000_000 / updateHz)
+
+            await MainActor.run { self.lastLog = "⚡️ Slow Glow Ramp active (12 Hz updates)" }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let devicesList = await self.devices
+
+                var phase: Float = 0
+                let twoPi: Float = .pi * 2
+
+                while await self.slowGlowRampActive {
+                    let intensity = 0.5 * (1 + sin(phase))
+
+                    for d in devicesList where !d.isPlaceholder {
+                        try? await osc.send(
+                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                        )
+                    }
+
+                    phase += twoPi * oscillationHz / updateHz
+                    if phase >= twoPi { phase -= twoPi }
+
+                    try? await Task.sleep(nanoseconds: updateIntervalNs)
+                }
+
+                for d in devicesList where !d.isPlaceholder {
+                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                }
+            } catch {
+                print("⚠️ startSlowGlowRamp error: \(error)")
+            }
+            await MainActor.run { self.lastLog = "⚡️ Slow Glow Ramp stopped" }
+        }
+    }
+
+    private func stopSlowGlowRamp() {
+        let task = slowGlowRampTask
+        slowGlowRampTask = nil
+        task?.cancel()
+
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            await MainActor.run {
+                for ch in 0..<16 {
+                    self.midi.setChannel(ch + 1)
+                    self.midi.sendControlChange(1, value: 0)
+                }
+                self.midi.setChannel(self.outputChannel)
+            }
+        }
+    }
     
     // MARK: – Build only  🔨
     /// Build the app for a single device slot.
@@ -997,6 +1071,8 @@ extension ConsoleState {
             if let slots = tripleTriggers[group] {
                 triggerSlots(realSlots: slots)
             }
+        } else if val == 71 {
+            slowGlowRampActive = true
         } else if val == 72 {
             glowRampActive = true
         } else if val == 105 {
@@ -1025,6 +1101,8 @@ extension ConsoleState {
                     stopSound(device: device)
                 }
             }
+        } else if val == 71 {
+            slowGlowRampActive = false
         } else if val == 72 {
             glowRampActive = false
         } else if val == 105 {
