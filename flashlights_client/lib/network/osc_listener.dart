@@ -11,9 +11,13 @@ import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:flutter/services.dart';
 import 'package:mic_stream/mic_stream.dart' as mic;
 
 import '../model/client_state.dart';
+
+/// Native channel to control torch brightness.
+const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
 OSCSocket _createBroadcastSocket({
@@ -147,6 +151,28 @@ class OscListener {
     return OSCMessage(address, arguments: List<Object>.from(args));
   }
 
+  /// Sets the torch brightness on the native side. Falls back to
+  /// [TorchLight.enableTorch]/[TorchLight.disableTorch] if the platform
+  /// channel isn't implemented (older Android versions).
+  Future<void> _setTorchLevel(double level) async {
+    try {
+      await _torchChannel.invokeMethod('setTorchLevel', level);
+      client.flashOn.value = level > 0;
+    } on MissingPluginException {
+      // Older Android versions: only on/off available via TorchLight.
+      if (level > 0) {
+        await TorchLight.enableTorch();
+        client.flashOn.value = true;
+      } else {
+        await TorchLight.disableTorch();
+        client.flashOn.value = false;
+      }
+    } catch (e) {
+      print('[OSC] Torch error: $e');
+      client.flashOn.value = false;
+    }
+  }
+
   /* -------------------------------------------------------------------- */
   /*                               Dispatcher                             */
   /* -------------------------------------------------------------------- */
@@ -168,13 +194,7 @@ class OscListener {
               client.brightness.value = clamped;
               await ScreenBrightness.instance.setScreenBrightness(clamped);
             }
-            if (clamped > 0.05 && !client.flashOn.value) {
-              await TorchLight.enableTorch();
-              client.flashOn.value = true;
-            } else if (clamped <= 0.05 && client.flashOn.value) {
-              await TorchLight.disableTorch();
-              client.flashOn.value = false;
-            }
+            await _setTorchLevel(clamped);
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = false;
@@ -185,8 +205,7 @@ class OscListener {
       case '/flash/off':
         if (m.arguments[0] as int == myIndex) {
           try {
-            await TorchLight.disableTorch();
-            client.flashOn.value = false;
+            await _setTorchLevel(0);
             client.brightness.value = 0;
             await ScreenBrightness.instance.setScreenBrightness(0);
           } catch (e) {
