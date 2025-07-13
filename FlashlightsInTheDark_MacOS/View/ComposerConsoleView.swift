@@ -217,6 +217,13 @@ struct ComposerConsoleView: View {
                         .tint(anyTorchOn ? .red : Color.indigo.opacity(0.6))
                         .disabled(!state.isBroadcasting)
 
+                        Button(state.slowStrobeActive ? "Stop Slow" : "Slow Strobe") {
+                            state.slowStrobeActive.toggle()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mintGlow)
+                        .disabled(!state.isBroadcasting)
+
                         Button(state.strobeActive ? "Stop Strobe" : "Strobe") {
                             state.strobeActive.toggle()
                         }
@@ -291,7 +298,7 @@ struct ComposerConsoleView: View {
             }
             // Overlay effects stacked above console content
             .overlay(
-                FullScreenFlashView(strobeActive: state.strobeActive, strobeOn: strobeOn)
+                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive, strobeOn: strobeOn)
                     .environmentObject(state)
             )
             .overlay(
@@ -311,6 +318,10 @@ struct ComposerConsoleView: View {
                         }
                         if char == "=" {
                             state.strobeActive.toggle()
+                            return
+                        }
+                        if char == "-" {
+                            state.slowStrobeActive.toggle()
                             return
                         }
                         if let note = typingMapper.note(for: char) {
@@ -357,13 +368,22 @@ struct ComposerConsoleView: View {
         }
         // Respond to strobe state changes
         .onChange(of: state.strobeActive) { _ in
-            if state.strobeActive {
-                withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
-                    strobeOn.toggle()
-                }
-            } else {
-                strobeOn = false
+            updateStrobeAnimation()
+        }
+        .onChange(of: state.slowStrobeActive) { _ in
+            updateStrobeAnimation()
+        }
+    }
+
+    private func updateStrobeAnimation() {
+        let isActive = state.strobeActive || state.slowStrobeActive
+        let duration = state.slowStrobeActive ? 0.4 : 0.1
+        if isActive {
+            withAnimation(Animation.linear(duration: duration).repeatForever(autoreverses: true)) {
+                strobeOn.toggle()
             }
+        } else {
+            strobeOn = false
         }
     }
     

@@ -131,9 +131,21 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var strobeActive: Bool = false {
         didSet {
             if strobeActive {
+                slowStrobeActive = false
                 startStrobe()
             } else {
                 stopStrobe()
+            }
+        }
+    }
+    /// Whether the slow strobe effect is active.
+    @Published public var slowStrobeActive: Bool = false {
+        didSet {
+            if slowStrobeActive {
+                strobeActive = false
+                startSlowStrobe()
+            } else {
+                stopSlowStrobe()
             }
         }
     }
@@ -156,6 +168,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var envelopeTask: Task<Void, Never>?
     // Strobe oscillation task
     private var strobeTask: Task<Void, Never>?
+    // Slow strobe oscillation task
+    private var slowStrobeTask: Task<Void, Never>?
 
     /// Recalculate `isAnyTorchOn` based on current device states.
     private func updateAnyTorchOn() {
@@ -568,6 +582,56 @@ public final class ConsoleState: ObservableObject, Sendable {
     private func stopStrobe() {
         let task = strobeTask
         strobeTask = nil
+        task?.cancel()
+
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            await MainActor.run {
+                for ch in 0..<16 {
+                    self.midi.setChannel(ch + 1)
+                    self.midi.sendControlChange(1, value: 0)
+                }
+                self.midi.setChannel(self.outputChannel)
+            }
+        }
+    }
+
+    private func startSlowStrobe() {
+        slowStrobeTask?.cancel()
+        slowStrobeTask = Task.detached { [weak self] in
+            guard let self = self else { return }
+            await MainActor.run { self.lastLog = "⚡️ Slow Strobe active" }
+            do {
+                let osc = try await self.broadcasterTask.value
+                let devicesList = await self.devices
+                var on = true
+                let interval: UInt64 = 400_000_000 // 400 ms half-cycle (~1.25 Hz)
+                while await self.slowStrobeActive {
+                    for d in devicesList where !d.isPlaceholder {
+                        do {
+                            if on {
+                                try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: 1))
+                            } else {
+                                try await osc.send(FlashOff(index: Int32(d.id + 1)))
+                            }
+                        } catch {}
+                    }
+                    on.toggle()
+                    try? await Task.sleep(nanoseconds: interval)
+                }
+                for d in devicesList where !d.isPlaceholder {
+                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                }
+            } catch {
+                print("⚠️ startSlowStrobe error: \(error)")
+            }
+            await MainActor.run { self.lastLog = "⚡️ Slow Strobe stopped" }
+        }
+    }
+
+    private func stopSlowStrobe() {
+        let task = slowStrobeTask
+        slowStrobeTask = nil
         task?.cancel()
 
         Task.detached { [weak self] in
