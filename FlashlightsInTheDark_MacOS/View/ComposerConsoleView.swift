@@ -355,8 +355,8 @@ struct ComposerConsoleView: View {
                 .allowsHitTesting(false)
                 .zIndex(1)
         }
-        .onChange(of: state.strobeActive) { active in
-            if active {
+        .onChange(state.strobeActive) {
+            if state.strobeActive {
                 withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
                     strobeOn.toggle()
                 }
