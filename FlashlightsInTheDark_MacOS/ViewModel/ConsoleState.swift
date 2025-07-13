@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import NIOPosix
 //import Network   // auto-discovery removed
 
 /// Possible device statuses for build/run lifecycle
@@ -788,6 +789,10 @@ extension ConsoleState {
                 }
             }
             print("[ConsoleState] Network stack started ✅")
+        } catch let err as IOError where err.errnoCode == EHOSTDOWN {
+            lastLog = "⚠️ No active network interface" 
+            print("⚠️ startNetwork host down: \(err)")
+            isBroadcasting = false
         } catch {
             lastLog = "⚠️ Network start failed: \(error)"
             print("⚠️ startNetwork error: \(error)")

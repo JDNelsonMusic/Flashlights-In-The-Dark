@@ -102,7 +102,17 @@ public actor OscBroadcaster {
             var buffer = channel.allocator.buffer(capacity: data.count)
             buffer.writeBytes(data)
             let env = AddressedEnvelope(remoteAddress: addr, data: buffer)
-            try await channel.writeAndFlush(env)
+            do {
+                try await channel.writeAndFlush(env)
+            } catch let error as IOError {
+                // Ignore "Host is down" errors so the network stack can start
+                // even if no interface is currently active.
+                if error.errnoCode == EHOSTDOWN {
+                    print("⚠️ sendmsg to \(addr) failed: Host is down")
+                    continue
+                }
+                throw error
+            }
         }
         print("→ \(osc.addressPattern.stringValue)")
     }
