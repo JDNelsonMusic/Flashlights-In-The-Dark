@@ -566,12 +566,11 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                 while await self.strobeActive {
                     let intensity = 0.5 * (1 + sin(phase))
-                    await MainActor.run {
-                        for d in self.devices where !d.isPlaceholder {
-                            try? await osc.send(
-                                FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
-                            )
-                        }
+
+                    for d in devicesList where !d.isPlaceholder {
+                        try? await osc.send(
+                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                        )
                     }
 
                     phase += twoPi * oscillationHz / updateHz
