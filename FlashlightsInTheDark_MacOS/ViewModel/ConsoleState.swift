@@ -554,19 +554,20 @@ public final class ConsoleState: ObservableObject, Sendable {
             do {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
-                var on = true
-                let interval: UInt64 = 100_000_000 // 100 ms half-cycle (~5 Hz)
+                var phase: Double = 0
+                let frequency = 5.0
+                let interval: UInt64 = 50_000_000 // 50 ms update (~5 Hz cycle)
+                let dt = Double(interval) / 1_000_000_000
+                let step = 2 * Double.pi * frequency * dt
                 while await self.strobeActive {
+                    let intensity = Float32(0.5 * (1 + sin(phase)))
                     for d in devicesList where !d.isPlaceholder {
                         do {
-                            if on {
-                                try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: 1))
-                            } else {
-                                try await osc.send(FlashOff(index: Int32(d.id + 1)))
-                            }
+                            try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity))
                         } catch {}
                     }
-                    on.toggle()
+                    phase += step
+                    if phase > 2 * Double.pi { phase -= 2 * Double.pi }
                     try? await Task.sleep(nanoseconds: interval)
                 }
                 for d in devicesList where !d.isPlaceholder {
