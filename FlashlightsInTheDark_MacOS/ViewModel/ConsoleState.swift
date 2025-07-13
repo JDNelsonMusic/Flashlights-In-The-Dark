@@ -784,7 +784,7 @@ extension ConsoleState {
             // need to call the async `deviceDiscovered(slot:ip:)` that lives on the
             // MainActor.  Wrap the call in a detached Task so the compiler gets the
             // synchronous signature it expects.
-            await broadcaster.registerHelloHandler { [weak self] slot, ip in
+            broadcaster.registerHelloHandler { [weak self] slot, ip in
                 Task { @MainActor in
                     await self?.deviceDiscovered(slot: slot, ip: ip)
                 }
