@@ -383,21 +383,28 @@ struct ComposerConsoleView: View {
         let outline: Color?
         let isTriggered: Bool
 
+        /// Convenience accessors for the device’s status text & color
+        private var statusText: String {
+            state.statuses[device.id]?.rawValue ?? ""
+        }
+        private var statusColor: Color {
+            state.statuses[device.id]?.color ?? .clear
+        }
+
         var body: some View {
-            Group {
-                if device.isPlaceholder {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 28, height: 28)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                } else {
-                    ZStack(alignment: .topTrailing) {
-                        VStack(spacing: 4) {
-                            if let keyLabel = keyLabel {
-                                Text(keyLabel)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
+            if device.isPlaceholder {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 28, height: 28)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            } else {
+                ZStack(alignment: .topTrailing) {
+                    VStack(spacing: 4) {
+                        if let keyLabel = keyLabel {
+                            Text(keyLabel)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                         Image(systemName: "flashlight.on.fill")
                             .font(.system(size: 28))
                             .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
@@ -409,10 +416,9 @@ struct ComposerConsoleView: View {
                         Text(device.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                        let st = state.statuses[device.id] ?? .clean
-                        Text(st.rawValue)
+                        Text(statusText)
                             .font(.caption2)
-                            .foregroundStyle(st.color)
+                            .foregroundStyle(statusColor)
                         Button {
                             state.triggerSound(device: device)
                         } label: {
@@ -421,56 +427,55 @@ struct ComposerConsoleView: View {
                                 .help("Trigger sound on \(device.name)…")
                         }
                         .buttonStyle(.plain)
-                        }
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(outline ?? .clear, lineWidth: 3)
-                                .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
-                        )
-                        .overlay(
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        RadialGradient(
-                                            gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
-                                            center: .center,
-                                            startRadius: 0,
-                                            endRadius: 36
-                                        )
-                                    )
-                                LightRaysView(color: .mintGlow)
-                            }
-                            .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
-                            .allowsHitTesting(false)
-                        )
-                        Menu {
-                            ForEach(1...16, id: \.self) { ch in
-                                Button("Channel \(ch)") {
-                                    state.setDeviceChannel(device.id, ch)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down.circle")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .menuStyle(.borderlessButtonMenuStyle())
-                        .help("Assign MIDI channel for this slot")
-                        .padding(4)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        switch state.keyboardTriggerMode {
-                        case .torch:
-                            state.toggleTorch(id: device.id)
-                        case .sound:
-                            state.triggerSound(device: device)
-                        case .both:
-                            state.toggleTorch(id: device.id)
-                            state.triggerSound(device: device)
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(outline ?? .clear, lineWidth: 3)
+                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
+                    )
+                    .overlay(
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 36
+                                    )
+                                )
+                            LightRaysView(color: .mintGlow)
                         }
+                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                        .allowsHitTesting(false)
+                    )
+                    Menu {
+                        ForEach(1...16, id: \.self) { ch in
+                            Button("Channel \(ch)") {
+                                state.setDeviceChannel(device.id, ch)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "chevron.down.circle")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .menuStyle(BorderlessButtonMenuStyle())
+                    .help("Assign MIDI channel for this slot")
+                    .padding(4)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    switch state.keyboardTriggerMode {
+                    case .torch:
+                        state.toggleTorch(id: device.id)
+                    case .sound:
+                        state.triggerSound(device: device)
+                    case .both:
+                        state.toggleTorch(id: device.id)
+                        state.triggerSound(device: device)
                     }
                 }
             }

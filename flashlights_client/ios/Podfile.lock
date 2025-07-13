@@ -12,6 +12,8 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
+  - screen_brightness_ios (0.1.0):
+    - Flutter
   - torch_light (0.0.1):
     - Flutter
 
@@ -22,6 +24,7 @@ DEPENDENCIES:
   - mic_stream (from `.symlinks/plugins/mic_stream/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - torch_light (from `.symlinks/plugins/torch_light/ios`)
 
 EXTERNAL SOURCES:
@@ -37,6 +40,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  screen_brightness_ios:
+    :path: ".symlinks/plugins/screen_brightness_ios/ios"
   torch_light:
     :path: ".symlinks/plugins/torch_light/ios"
 
@@ -47,8 +52,9 @@ SPEC CHECKSUMS:
   mic_stream: 5b34e9b3939173b7d42ad30a92d704b72221bacf
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  screen_brightness_ios: 9953fd7da5bd480f1a93990daeec2eb42d4f3b52
   torch_light: d093d579a221a59ef8a6b8c0eca20d52f7178087
 
-PODFILE CHECKSUM: 19d12dc5bff51bea41642f012f418ead646426cb
+PODFILE CHECKSUM: 36e1aa019f76041e1b45925d5f2757d4c9d032b5
 
 COCOAPODS: 1.16.2

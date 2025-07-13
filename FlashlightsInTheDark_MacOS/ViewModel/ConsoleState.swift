@@ -546,7 +546,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                     }
                 }
                 on.toggle()
-                try await Task.sleep(nanoseconds: interval)
+                try? await Task.sleep(nanoseconds: interval)
             }
             await MainActor.run {
                 for ch in 0..<16 {
