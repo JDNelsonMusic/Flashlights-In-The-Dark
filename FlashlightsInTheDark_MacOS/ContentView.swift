@@ -8,7 +8,11 @@ struct ContentView: View {
         ComposerConsoleView()
             .environmentObject(state)
             .onChange(of: phase) { _, newPhase in
-                if newPhase != .active { state.shutdown() }
+                if newPhase == .active {
+                    Task { await state.startNetwork() }
+                } else {
+                    state.shutdown()
+                }
             }
     }
 }
