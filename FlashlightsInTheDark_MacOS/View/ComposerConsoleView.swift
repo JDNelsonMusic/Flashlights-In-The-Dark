@@ -223,7 +223,6 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.borderedProminent)
                         .tint(.mintGlow)
                         .disabled(!state.isBroadcasting)
-
                         Button(state.glowRampActive ? "Stop Glow" : "Glow Ramp") {
                             state.glowRampActive.toggle()
                         }
