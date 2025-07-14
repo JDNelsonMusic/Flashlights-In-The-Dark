@@ -341,7 +341,7 @@ struct ComposerConsoleView: View {
                             return
                         }
                         if let note = typingMapper.note(for: char) {
-                            let slot = Int(note) - 35
+                            let slot = Int(note)
                             state.addTriggeredSlot(slot)
                             state.typingNoteOn(note)
                             return
@@ -349,7 +349,7 @@ struct ComposerConsoleView: View {
                     },
                     onKeyUp: { char in
                         if let note = typingMapper.note(for: char) {
-                            let slot = Int(note) - 35
+                            let slot = Int(note)
                             state.removeTriggeredSlot(slot)
                             state.typingNoteOff(note)
                             return

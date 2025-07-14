@@ -5,8 +5,8 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     var state: ConsoleState!
     private let midi = MIDIManager()
-    /// Base MIDI note number for slot 0 (C2)
-    private let baseNote: UInt8 = 36
+    /// Base MIDI note number for slot 1
+    private let baseNote: UInt8 = 1
     /// Offsets within an octave for each column (as per prototype scale)
     private let noteOffsets: [UInt8] = [0, 1, 3, 4, 7, 8, 10, 11]
     /// Sustain pedal state (SPACE key)
