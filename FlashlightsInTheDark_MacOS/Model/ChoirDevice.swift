@@ -27,7 +27,7 @@ public struct ChoirDevice: Identifiable, Sendable {
         audioPlaying: Bool = false,
         micActive: Bool = false,
         listeningSlot: Int? = nil,
-        midiChannel: Int = 1,
+        midiChannel: Int = 10,
         isPlaceholder: Bool = false
     ) {
         self.id = id
@@ -57,7 +57,7 @@ extension ChoirDevice {
                 id: i - 1,
                 udid: "",
                 name: "",
-                midiChannel: 1,
+                midiChannel: 10,
                 isPlaceholder: !realSlots.contains(i)
             )
         }
