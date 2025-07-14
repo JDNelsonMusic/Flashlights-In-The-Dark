@@ -1056,8 +1056,10 @@ extension ConsoleState {
     fileprivate func handleNoteOn(note: UInt8, velocity: UInt8, channel: UInt8) {
         let val = Int(note)
         if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
-            let idx = val - midiNoteOffset - 1
-            guard idx < devices.count else { return }
+            let slot = val - midiNoteOffset
+            guard let idx = devices.firstIndex(where: { $0.listeningSlot == slot }) else {
+                return
+            }
             let device = devices[idx]
             if device.midiChannel == Int(channel + 1) {
                 glowingSlots.insert(val)
@@ -1092,8 +1094,10 @@ extension ConsoleState {
     fileprivate func handleNoteOff(note: UInt8, channel: UInt8) {
         let val = Int(note)
         if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
-            let idx = val - midiNoteOffset - 1
-            guard idx < devices.count else { return }
+            let slot = val - midiNoteOffset
+            guard let idx = devices.firstIndex(where: { $0.listeningSlot == slot }) else {
+                return
+            }
             let device = devices[idx]
             if device.midiChannel == Int(channel + 1) {
                 glowingSlots.remove(val)
