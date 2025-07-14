@@ -73,17 +73,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Slots currently triggered via typing keyboard
     @Published public var triggeredSlots: Set<Int> = []
 
-    private let tripleTriggers: [Int: [Int]] = [
-        1: [27, 41, 42],
-        2: [1, 14, 15],
-        3: [16, 29, 44],
-        4: [3, 4, 18],
-        5: [7, 19, 34],
-        6: [9, 20, 21],
-        7: [23, 38, 51],
-        8: [12, 24, 25],
-        9: [40, 53, 54]
-    ]
+    /// Members for dynamic groups 1-9
+    @Published public var groupMembers: [Int: [Int]] = [:]
 
     public init() {
         // start clock-sync service once broadcaster is ready
@@ -480,15 +471,53 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
 
     private func updateDevices(from dict: [String: ConsoleSlotInfo]) {
+        let maxSlot = dict.keys.compactMap { Int($0) }.max() ?? devices.count
+
+        if maxSlot > devices.count {
+            for slot in (devices.count + 1)...maxSlot {
+                let dev = ChoirDevice(id: slot - 1,
+                                      udid: "",
+                                      name: "",
+                                      midiChannel: 10,
+                                      isPlaceholder: true)
+                devices.append(dev)
+                statuses[slot - 1] = .clean
+            }
+        }
+
+        for idx in devices.indices {
+            devices[idx].isPlaceholder = true
+            devices[idx].udid = ""
+            devices[idx].name = ""
+            devices[idx].ip = ""
+            devices[idx].midiChannel = 10
+            devices[idx].listeningSlot = idx + 1
+        }
+
         for (key, info) in dict {
             if let slot = Int(key), slot > 0, slot <= devices.count {
                 let idx = slot - 1
                 devices[idx].ip = info.ip
                 devices[idx].udid = info.udid
                 devices[idx].name = info.name
+                devices[idx].isPlaceholder = false
+                devices[idx].midiChannel = 10
+                devices[idx].listeningSlot = slot
             }
         }
+
         updateAnyTorchOn()
+
+        var groups: [Int: [Int]] = [:]
+        for g in 1...9 { groups[g] = [] }
+        let realSlots = devices.filter { !$0.isPlaceholder }.map { $0.listeningSlot }.sorted()
+        var gIndex = 1
+        for slot in realSlots {
+            groups[gIndex]?.append(slot)
+            gIndex = (gIndex % 9) + 1
+        }
+        groupMembers = groups
+        print("[ConsoleState] groupMembers: \(groups)")
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {
@@ -1080,7 +1109,7 @@ extension ConsoleState {
         }
         else if val >= 96 && val <= 104 {
             let group = val - 95
-            if let slots = tripleTriggers[group] {
+            if let slots = groupMembers[group] {
                 triggerSlots(realSlots: slots)
             }
         } else if val == 71 {
