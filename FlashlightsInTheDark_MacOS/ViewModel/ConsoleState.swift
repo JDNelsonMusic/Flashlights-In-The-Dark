@@ -1087,14 +1087,78 @@ extension ConsoleState {
 // MARK: - MIDI Handling
 extension ConsoleState {
     fileprivate func handleNoteOn(note: UInt8, velocity: UInt8, channel: UInt8) {
+        let ch = Int(channel) + 1
         let val = Int(note)
+
+        // Primer tones triggered by group channels 1–9
+        if (1...9).contains(ch),
+           (0...48).contains(val) || (50...98).contains(val) {
+            let fileName = val < 50 ? "short\(val).mp3" : "long\(val).mp3"
+            if let slots = groupMembers[ch] {
+                for slot in slots {
+                    Task.detached { [weak self] in
+                        guard let self = self else { return }
+                        do {
+                            let osc = try await self.broadcasterTask.value
+                            try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                        } catch {
+                            print("Error sending primer tone to slot \(slot): \(error)")
+                        }
+                    }
+                }
+            }
+            logMidi("Primer \(val) -> Group \(ch)")
+            return
+        }
+
+        // Complex sound events from banks on channels 11–16
+        if (11...16).contains(ch) {
+            var slots: [Int] = []
+            var prefix = ""
+            var eventId = val
+
+            switch ch {
+            case 11:
+                prefix = "seL-"; slots = (1...3).flatMap { groupMembers[$0] ?? [] }
+            case 12:
+                prefix = "seL-"; eventId += 128; slots = (1...3).flatMap { groupMembers[$0] ?? [] }
+            case 13:
+                prefix = "seC-"; slots = (4...6).flatMap { groupMembers[$0] ?? [] }
+            case 14:
+                prefix = "seC-"; eventId += 128; slots = (4...6).flatMap { groupMembers[$0] ?? [] }
+            case 15:
+                prefix = "seR-"; slots = (7...9).flatMap { groupMembers[$0] ?? [] }
+            case 16:
+                prefix = "seR-"; eventId += 128; slots = (7...9).flatMap { groupMembers[$0] ?? [] }
+            default: break
+            }
+
+            let fileName = "\(prefix)\(eventId).mp3"
+            for slot in slots {
+                Task.detached { [weak self] in
+                    guard let self = self else { return }
+                    do {
+                        let osc = try await self.broadcasterTask.value
+                        try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                    } catch {
+                        print("Error sending sound event to slot \(slot): \(error)")
+                    }
+                }
+            }
+
+            let region = ch <= 12 ? "Left" : ch <= 14 ? "Center" : "Right"
+            logMidi("SoundEvent \(eventId) -> \(region)")
+            return
+        }
+
+        // Legacy per-device handling and group triggers
         if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
             let slot = val - midiNoteOffset
             guard let idx = devices.firstIndex(where: { $0.listeningSlot == slot }) else {
                 return
             }
             let device = devices[idx]
-            if device.midiChannel == Int(channel + 1) {
+            if device.midiChannel == ch {
                 glowingSlots.insert(val)
                 switch keyboardTriggerMode {
                 case .torch:
@@ -1106,8 +1170,7 @@ extension ConsoleState {
                     triggerSound(device: device)
                 }
             }
-        }
-        else if val >= 96 && val <= 104 {
+        } else if val >= 96 && val <= 104 {
             let group = val - 95
             if let slots = groupMembers[group] {
                 triggerSlots(realSlots: slots)
@@ -1121,18 +1184,39 @@ extension ConsoleState {
         } else if val == 106 {
             toggleAllTorches()
         }
-        logMidi("NoteOn \(note) ch\(channel+1) vel \(velocity)")
+        logMidi("NoteOn \(note) ch\(ch) vel \(velocity)")
     }
 
     fileprivate func handleNoteOff(note: UInt8, channel: UInt8) {
+        let ch = Int(channel) + 1
         let val = Int(note)
+
+        // Stop primer tones for group channels 1–9
+        if (1...9).contains(ch),
+           (0...48).contains(val) || (50...98).contains(val),
+           let slots = groupMembers[ch] {
+            for slot in slots {
+                Task.detached { [weak self] in
+                    guard let self = self else { return }
+                    do {
+                        let osc = try await self.broadcasterTask.value
+                        try await osc.send(AudioStop(index: Int32(slot)))
+                    } catch {
+                        print("Error stopping primer tone on slot \(slot): \(error)")
+                    }
+                }
+            }
+            logMidi("PrimerStop \(val) -> Group \(ch)")
+            return
+        }
+
         if val >= midiNoteOffset + 1 && val < midiNoteOffset + 1 + devices.count {
             let slot = val - midiNoteOffset
             guard let idx = devices.firstIndex(where: { $0.listeningSlot == slot }) else {
                 return
             }
             let device = devices[idx]
-            if device.midiChannel == Int(channel + 1) {
+            if device.midiChannel == ch {
                 glowingSlots.remove(val)
                 switch keyboardTriggerMode {
                 case .torch:
@@ -1151,7 +1235,7 @@ extension ConsoleState {
         } else if val == 105 {
             strobeActive = false
         }
-        logMidi("NoteOff \(note) ch\(channel+1)")
+        logMidi("NoteOff \(note) ch\(ch)")
     }
 
     fileprivate func handleControlChange(cc: UInt8, value: UInt8, channel: UInt8) {
