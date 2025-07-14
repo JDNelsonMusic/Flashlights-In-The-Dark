@@ -13,12 +13,7 @@ struct ComposerConsoleView: View {
     @State private var strobeOn: Bool = false
     private let columns = Array(repeating: GridItem(.flexible()), count: 8)
     // Mapping from keyboard key to real slot number
-    private static let keyToSlot: [Character: Int] = [
-        "2": 1, "3": 3, "4": 4, "5": 5, "u": 7, "7": 9, "9": 12,
-        "q": 14, "w": 15, "d": 16, "e": 18, "r": 19, "k": 20, "i": 21,
-        "8": 23, "o": 24, "p": 25, "a": 27, "s": 29, "j": 34, "l": 38,
-        ";": 40, "x": 41, "c": 42, "v": 44, "m": 51, ",": 53, ".": 54
-    ]
+    private static let keyToSlot = KeyboardKeyToSlot
     // Reverse lookup so each slot can display its bound key
     private var keyLabels: [Int: String] {
         Dictionary(uniqueKeysWithValues: Self.keyToSlot.map { ($0.value, String($0.key)) })
