@@ -122,6 +122,10 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
+    /// Last time a /hello was heard from each slot.
+    private var lastHello: [Int: Date] = [:]
+    private var heartbeatTimer: Timer?
+
     @Published public var isBroadcasting: Bool = false
     /// True whenever any connected device currently has its torch on.
     @Published public var isAnyTorchOn: Bool = false
@@ -1033,11 +1037,12 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Update device info when a /hello is received from a client
     @MainActor
-    func deviceDiscovered(slot: Int, ip: String) {
+    func deviceDiscovered(slot: Int, ip: String, udid: String?) {
         guard slot > 0 && slot <= devices.count else { return }
         let idx = slot - 1
         devices[idx].ip = ip
         statuses[idx] = .live
+        lastHello[slot] = Date()
         lastLog = "📳 Device \(slot) announced at \(ip)"
     }
 }
@@ -1057,10 +1062,18 @@ extension ConsoleState {
 
             // Call must be awaited because registerHelloHandler is actor-isolated.
             // deviceDiscovered is a synchronous @MainActor method, so no `await`.
-            await broadcaster.registerHelloHandler { [weak self] slot, ip in
+            await broadcaster.registerHelloHandler { [weak self] slot, ip, udid in
                 Task { @MainActor in
-                    self?.deviceDiscovered(slot: slot, ip: ip)
+                    self?.deviceDiscovered(slot: slot, ip: ip, udid: udid)
                 }
+            }
+            await broadcaster.registerAckHandler { [weak self] slot in
+                Task { @MainActor in
+                    self?.lastLog = "✅ Ack from slot \(slot)"
+                }
+            }
+            heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+                self?.checkHeartbeats()
             }
             print("[ConsoleState] Network stack started ✅")
         } catch let err as POSIXError where err.code == .EHOSTDOWN {
@@ -1078,9 +1091,23 @@ extension ConsoleState {
     @MainActor
     public func shutdown() {
         isBroadcasting = false
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = nil
         // ClockSyncService de-initialises itself when its Task is cancelled.
         // Add additional cleanup here (file handles, etc.) as the project grows.
         print("[ConsoleState] Network stack suspended 💤")
+    }
+
+    private func checkHeartbeats() {
+        let now = Date()
+        for slot in 1...devices.count {
+            let idx = slot - 1
+            if let last = lastHello[slot] {
+                if now.timeIntervalSince(last) > 5 {
+                    statuses[idx] = .lostConnection
+                }
+            }
+        }
     }
 }
 

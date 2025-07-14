@@ -195,6 +195,7 @@ class OscListener {
               await ScreenBrightness.instance.setScreenBrightness(clamped);
             }
             await _setTorchLevel(clamped);
+            _sendAck();
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = false;
@@ -208,6 +209,7 @@ class OscListener {
             await _setTorchLevel(0);
             client.brightness.value = 0;
             await ScreenBrightness.instance.setScreenBrightness(0);
+            _sendAck();
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = true;
@@ -229,6 +231,7 @@ class OscListener {
             await _player.setVolume(gain.clamp(0.0, 1.0) as double);
           await _player.play();
           client.audioPlaying.value = true;
+          _sendAck();
         }
         break;
 
@@ -236,6 +239,7 @@ class OscListener {
         if (m.arguments[0] as int == myIndex) {
           await _player.stop();
           client.audioPlaying.value = false;
+          _sendAck();
         }
         break;
 
@@ -246,6 +250,7 @@ class OscListener {
         if (newSlot != client.myIndex.value) {
           client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');
+          _sendAck();
         }
         break;
 
@@ -300,6 +305,7 @@ class OscListener {
               print('[OSC] Mic recording of $durationSec s completed');
             },
           );
+          _sendAck();
         }
         break;
     }
@@ -313,7 +319,8 @@ class OscListener {
   void _sendHello() {
     if (_socket == null) return;
 
-    final msg = OSCMessage('/hello', arguments: [client.myIndex.value]);
+    final msg =
+        OSCMessage('/hello', arguments: [client.myIndex.value, client.udid]);
 
     // Primary broadcast via the socket’s predefined destination.
     try {
@@ -346,6 +353,16 @@ class OscListener {
         }
       }
     });
+  }
+
+  void _sendAck() {
+    if (_socket == null) return;
+    final msg = OSCMessage('/ack', arguments: [client.myIndex.value]);
+    try {
+      _socket!.send(msg);
+    } catch (e) {
+      print('[OSC] Ack send error: $e');
+    }
   }
 
   void _markConnected() {
