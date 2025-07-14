@@ -1090,6 +1090,31 @@ extension ConsoleState {
         let ch = Int(channel) + 1
         let val = Int(note)
 
+        // Dedicated flashlight channel
+        if ch == 10 {
+            if val >= 1 && val <= devices.count {
+                if let idx = devices.firstIndex(where: { $0.listeningSlot == val }) {
+                    flashOn(id: idx)
+                    glowingSlots.insert(val)
+                }
+            } else if val >= 96 && val <= 104 {
+                let group = val - 95
+                if let slots = groupMembers[group] {
+                    for slot in slots {
+                        let idx = slot - 1
+                        flashOn(id: idx)
+                        glowingSlots.insert(slot)
+                    }
+                }
+            } else if val == 105 {
+                strobeActive = true
+            } else if val == 106 {
+                toggleAllTorches()
+            }
+            logMidi("TorchOn \(note) ch\(ch)")
+            return
+        }
+
         // Primer tones triggered by group channels 1–9
         if (1...9).contains(ch),
            (0...48).contains(val) || (50...98).contains(val) {
@@ -1190,6 +1215,28 @@ extension ConsoleState {
     fileprivate func handleNoteOff(note: UInt8, channel: UInt8) {
         let ch = Int(channel) + 1
         let val = Int(note)
+
+        if ch == 10 {
+            if val >= 1 && val <= devices.count {
+                if let idx = devices.firstIndex(where: { $0.listeningSlot == val }) {
+                    flashOff(id: idx)
+                    glowingSlots.remove(val)
+                }
+            } else if val >= 96 && val <= 104 {
+                let group = val - 95
+                if let slots = groupMembers[group] {
+                    for slot in slots {
+                        let idx = slot - 1
+                        flashOff(id: idx)
+                        glowingSlots.remove(slot)
+                    }
+                }
+            } else if val == 105 {
+                strobeActive = false
+            }
+            logMidi("TorchOff \(note) ch\(ch)")
+            return
+        }
 
         // Stop primer tones for group channels 1–9
         if (1...9).contains(ch),
