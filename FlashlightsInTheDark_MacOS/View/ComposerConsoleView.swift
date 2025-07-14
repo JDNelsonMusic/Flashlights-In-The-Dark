@@ -506,6 +506,7 @@ struct ComposerConsoleView: View {
                             .foregroundColor(.secondary)
                     }
                     .menuStyle(BorderlessButtonMenuStyle())
+                    .menuIndicator(.hidden)
                     .help("Assign MIDI channel for this slot")
                     .padding(4)
                 }
