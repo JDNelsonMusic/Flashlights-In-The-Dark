@@ -43,8 +43,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
-    /// Base offset so MIDI note 36 corresponds to device 1
-    private let midiNoteOffset = 35
+    /// Base offset so MIDI note 1 corresponds to device 1
+    private let midiNoteOffset = 0
     private let allInputsLabel = "All MIDI Inputs"
 
     // MIDI device lists and selections
