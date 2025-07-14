@@ -10,6 +10,7 @@ final class MIDIManager {
     private var virtualDst = MIDIEndpointRef()
     private var selectedOutput = MIDIEndpointRef()
     private var selectedInput  = MIDIEndpointRef()
+    private var connectedInputs: [MIDIEndpointRef] = []
     private var channel: UInt8 = 0 // MIDI channel 1
 
     /// Handlers for incoming MIDI messages.
@@ -63,15 +64,34 @@ final class MIDIManager {
     }
 
     func connectInput(named name: String) {
-        if selectedInput != 0 { MIDIPortDisconnectSource(inPort, selectedInput) }
+        // Disconnect any previously connected sources
+        for src in connectedInputs {
+            MIDIPortDisconnectSource(inPort, src)
+        }
+        connectedInputs.removeAll()
         selectedInput = 0
         for i in 0..<MIDIGetNumberOfSources() {
             let src = MIDIGetSource(i)
             if endpointName(src) == name {
                 MIDIPortConnectSource(inPort, src, nil)
                 selectedInput = src
+                connectedInputs = [src]
                 break
             }
+        }
+    }
+
+    func connectAllInputs() {
+        // Disconnect any previously connected sources
+        for src in connectedInputs {
+            MIDIPortDisconnectSource(inPort, src)
+        }
+        connectedInputs.removeAll()
+        selectedInput = 0
+        for i in 0..<MIDIGetNumberOfSources() {
+            let src = MIDIGetSource(i)
+            MIDIPortConnectSource(inPort, src, nil)
+            connectedInputs.append(src)
         }
     }
 
