@@ -45,12 +45,19 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let midi = MIDIManager()
     /// Base offset so MIDI note 36 corresponds to device 1
     private let midiNoteOffset = 35
+    private let allInputsLabel = "All MIDI Inputs"
 
     // MIDI device lists and selections
     @Published public var midiInputNames: [String] = []
     @Published public var midiOutputNames: [String] = []
     @Published public var selectedMidiInput: String = "" {
-        didSet { midi.connectInput(named: selectedMidiInput) }
+        didSet {
+            if selectedMidiInput == allInputsLabel {
+                midi.connectAllInputs()
+            } else {
+                midi.connectInput(named: selectedMidiInput)
+            }
+        }
     }
     @Published public var selectedMidiOutput: String = "" {
         didSet { midi.connectOutput(named: selectedMidiOutput) }
@@ -413,11 +420,8 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Refresh available MIDI devices and reconnect selections
     public func refreshMidiDevices() {
-        midiInputNames = midi.inputNames
+        midiInputNames = [allInputsLabel] + midi.inputNames
         midiOutputNames = midi.outputNames
-        // Filter out the app's own virtual MIDI endpoints
-        midiInputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
-        midiOutputNames.removeAll { $0 == "Flashlights Bridge" || $0 == "Flashlights Bridge In" }
         if let scarlett = midiInputNames.first(where: { $0.contains("Scarlett 18i20 USB") }) {
             selectedMidiInput = scarlett
         } else if selectedMidiInput.isEmpty, let first = midiInputNames.first {
