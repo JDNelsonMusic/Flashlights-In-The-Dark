@@ -35,7 +35,8 @@ public actor OscBroadcaster {
     let channel: Channel
     let port: Int
     let broadcastAddrs: [SocketAddress]
-    private var helloHandler: ((Int, String) -> Void)?
+    private var helloHandler: ((Int, String, String?) -> Void)?
+    private var ackHandler: ((Int) -> Void)?
     /// Runtime IPs learned from /hello announcements (slot -> ip)
     var dynamicIPs: [Int: String] = [:]
 
@@ -151,8 +152,13 @@ public actor OscBroadcaster {
     }
 
     /// Register a callback for incoming /hello announcements
-    public func registerHelloHandler(_ handler: @escaping (Int, String) -> Void) {
+    public func registerHelloHandler(_ handler: @escaping (Int, String, String?) -> Void) {
         helloHandler = handler
+    }
+
+    /// Register a callback for incoming /ack messages
+    public func registerAckHandler(_ handler: @escaping (Int) -> Void) {
+        ackHandler = handler
     }
 
     // --------------------------------------------------------------------
@@ -163,9 +169,22 @@ public actor OscBroadcaster {
         Task { try? await ch.close() }
     }
 
-    func emitHello(slot: Int, ip: String) {
+    func emitHello(slot: Int, ip: String, udid: String?) {
         dynamicIPs[slot] = ip
-        helloHandler?(slot, ip)
+        // Check UDID mapping and correct slot if needed
+        if let u = udid,
+           let expected = slotInfos.first(where: { $0.value.udid == u })?.key,
+           expected != slot {
+            Task {
+                let msg = SetSlot(slot: Int32(expected)).encode()
+                try? await sendUnicast(msg, toIP: ip)
+            }
+        }
+        helloHandler?(slot, ip, udid)
+    }
+
+    func emitAck(slot: Int) {
+        ackHandler?(slot)
     }
 }
 
@@ -182,11 +201,8 @@ extension OscBroadcaster {
 
 // MARK: - Incoming Hello Handling
 extension OscBroadcaster {
-    /// Basic OSC parser to detect `/hello` with a numeric slot argument.
-    ///
-    /// Earlier prototypes only sent an Int32, but some client libraries may
-    /// emit Int64 values.  Accept either format for robustness.
-    fileprivate func parseHelloSlot(_ bytes: [UInt8]) -> Int? {
+    /// Parse `/hello` datagram extracting slot and optional UDID.
+    fileprivate func parseHello(_ bytes: [UInt8]) -> (Int, String?)? {
         guard let addrEnd = bytes.firstIndex(of: 0),
               let addr = String(bytes: bytes[0..<addrEnd], encoding: .utf8),
               addr == "/hello" else { return nil }
@@ -212,13 +228,58 @@ extension OscBroadcaster {
             return Int(v)
         }
 
-        if tags.contains("i") {                // Int32
-            return readInt32(at: index)
-        } else if tags.contains("h") {         // Int64
-            return readInt64(at: index)
-        } else {
-            return nil
+        func readString(at idx: Int) -> (String, Int)? {
+            guard idx < bytes.count else { return nil }
+            guard let end = bytes[idx...].firstIndex(of: 0) else { return nil }
+            let str = String(bytes: bytes[idx..<end], encoding: .utf8) ?? ""
+            let next = (end + 4) & ~3
+            return (str, next)
         }
+
+        var slot: Int?
+        var udid: String?
+        var pos = index
+        for t in tags.dropFirst() {
+            switch t {
+            case "i":
+                slot = readInt32(at: pos); pos += 4
+            case "h":
+                slot = readInt64(at: pos); pos += 8
+            case "s":
+                if let (s, next) = readString(at: pos) {
+                    udid = s; pos = next
+                }
+            default:
+                break
+            }
+        }
+        if let s = slot { return (s, udid) } else { return nil }
+    }
+
+    /// Parse `/ack` datagram extracting slot.
+    fileprivate func parseAck(_ bytes: [UInt8]) -> Int? {
+        guard let addrEnd = bytes.firstIndex(of: 0),
+              let addr = String(bytes: bytes[0..<addrEnd], encoding: .utf8),
+              addr == "/ack" else { return nil }
+
+        var index = (addrEnd + 4) & ~3
+        guard index < bytes.count,
+              bytes[index] == UInt8(ascii: ",") else { return nil }
+        guard let tagEnd = bytes[index...].firstIndex(of: 0) else { return nil }
+        let tags = String(bytes: bytes[index..<tagEnd], encoding: .utf8) ?? ""
+        index = (tagEnd + 4) & ~3
+
+        func readInt32(at idx: Int) -> Int? {
+            guard idx + 3 < bytes.count else { return nil }
+            var v: Int32 = 0
+            for b in bytes[idx..<(idx+4)] { v = (v << 8) | Int32(b) }
+            return Int(v)
+        }
+
+        if tags.contains("i") {
+            return readInt32(at: index)
+        }
+        return nil
     }
 }
 
@@ -238,8 +299,10 @@ final class HelloDatagramHandler: ChannelInboundHandler {
         guard let ip = env.remoteAddress.ipAddress else { return }
 
         Task {
-            if let slot = await owner.parseHelloSlot(bytes) {
-                await owner.emitHello(slot: slot, ip: ip)
+            if let (slot, udid) = await owner.parseHello(bytes) {
+                await owner.emitHello(slot: slot, ip: ip, udid: udid)
+            } else if let slot = await owner.parseAck(bytes) {
+                await owner.emitAck(slot: slot)
             }
         }
     }

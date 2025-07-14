@@ -6,6 +6,7 @@ class ClientState {
     : myIndex = ValueNotifier<int>(
         const int.fromEnvironment('SLOT', defaultValue: 1),
       ),
+      udid = const String.fromEnvironment('UDID', defaultValue: 'unknown'),
       clockOffsetMs = 0.0,
       flashOn = ValueNotifier<bool>(false),
       audioPlaying = ValueNotifier<bool>(false),
@@ -14,6 +15,9 @@ class ClientState {
 
   /// Singer slot (uses the real slot number). Notifier so UI can react to changes at runtime.
   final ValueNotifier<int> myIndex;
+
+  /// Unique device identifier used for slot verification.
+  final String udid;
 
   /// Rolling average clock offset from /sync (ms).
   double clockOffsetMs;
