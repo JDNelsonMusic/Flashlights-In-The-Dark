@@ -591,7 +591,10 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
 
-                var phase: Float = 0
+                // Start at -π/2 so the first frame begins at minimum
+                // intensity and ramps upward rather than starting in the
+                // middle of the waveform.
+                var phase: Float = -.pi / 2
                 let twoPi: Float = .pi * 2
 
                 while await self.strobeActive {
@@ -651,7 +654,8 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
 
-                var phase: Float = 0
+                // Offset phase so the strobe ramps up from darkness
+                var phase: Float = -.pi / 2
                 let twoPi: Float = .pi * 2
 
                 while await self.slowStrobeActive {
@@ -710,7 +714,8 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
 
-                var phase: Float = 0
+                // Begin at minimum brightness so the ramp grows from dark
+                var phase: Float = -.pi / 2
                 let twoPi: Float = .pi * 2
 
                 while await self.glowRampActive {
@@ -769,7 +774,8 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let osc = try await self.broadcasterTask.value
                 let devicesList = await self.devices
 
-                var phase: Float = 0
+                // Offset start to -π/2 for an initial ramp-up from darkness
+                var phase: Float = -.pi / 2
                 let twoPi: Float = .pi * 2
 
                 while await self.slowGlowRampActive {
