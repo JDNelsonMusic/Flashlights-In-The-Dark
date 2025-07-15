@@ -65,6 +65,7 @@ struct ComposerConsoleView: View {
     ]
 
     @State private var leftPanelWidth: CGFloat = 300
+    @State private var startLeftPanelWidth: CGFloat?
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -186,11 +187,24 @@ struct ComposerConsoleView: View {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 4)
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.resizeLeftRight.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
                     .gesture(
                         DragGesture(minimumDistance: 2)
                             .onChanged { value in
-                                let newWidth = value.location.x
+                                if startLeftPanelWidth == nil {
+                                    startLeftPanelWidth = leftPanelWidth
+                                }
+                                let newWidth = (startLeftPanelWidth ?? leftPanelWidth) + value.translation.width
                                 leftPanelWidth = max(150, min(newWidth, 600))
+                            }
+                            .onEnded { _ in
+                                startLeftPanelWidth = nil
                             }
                     )
                 // Main console content
