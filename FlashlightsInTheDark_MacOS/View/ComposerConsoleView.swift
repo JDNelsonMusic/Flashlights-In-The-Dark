@@ -145,11 +145,11 @@ struct ComposerConsoleView: View {
                             }
                         }
                         VStack(spacing: 0) {
-                            Text("⎧")
-                            Text("⎨")
-                            Text("⎩")
+                            Text("⎫")
+                            Text("⎬")
+                            Text("⎭")
                         }
-                        .font(.system(size: 20))
+                        .font(.system(size: 40))
                         Text("Sound Events")
                             .font(.subheadline)
                     }
