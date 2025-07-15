@@ -64,6 +64,26 @@ struct ComposerConsoleView: View {
         9: .skyBlue
     ]
 
+    /// Human readable labels for MIDI channels
+    private static let channelLabels: [Int: String] = [
+        1: "primerTones Blue",
+        2: "primerTones Red",
+        3: "primerTones Green",
+        4: "primerTones Purple",
+        5: "primerTones Yellow",
+        6: "primerTones Pink",
+        7: "primerTones Orange",
+        8: "primerTones Magenta",
+        9: "primerTones Cyan",
+        10: "torchSignals",
+        11: "seLeft:0-127",
+        12: "seLeft:128-255",
+        13: "seCenter:0-127",
+        14: "seCenter:128-255",
+        15: "seRight:0-127",
+        16: "seRight:128-255"
+    ]
+
     @State private var leftPanelWidth: CGFloat = 300
     @State private var startLeftPanelWidth: CGFloat?
     @State private var midiLogHeight: CGFloat = 100
@@ -643,7 +663,11 @@ struct ComposerConsoleView: View {
 
         var body: some View {
             HStack {
-                Text("Ch \(channel)")
+                if let label = ComposerConsoleView.channelLabels[channel] {
+                    Text("Ch \(channel) (\(label))")
+                } else {
+                    Text("Ch \(channel)")
+                }
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark")
