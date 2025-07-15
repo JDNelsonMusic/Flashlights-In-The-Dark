@@ -157,6 +157,22 @@ Post-concert
 
 Collect devices, stop console (logs auto-saved to logs/YYYY-MM-DD.txt).
 
+## Run-time Validation Checklist
+
+Build & run the macOS app.
+On first launch every real slot shows ✔︎ next to ch10 and its primer + event channels exactly as in the color-group spec.
+Pick one slot, uncheck ch10 ⇒ its flashlight no longer responds. Re-check ⇒ it responds again.
+
+Network
+
+Run at least one phone with the Flutter client on the same Wi-Fi.
+In Xcode’s console you should see "✅ [OSC] Sent to <phone-IP> …" lines; on the phone’s debug console you’ll see "📲 OSC <<< …" mirrors.
+
+Session files
+
+File ▸ Save '.flashlights' Session produces a file with the current JSON.
+File ▸ Open '.flashlights' Session immediately updates all check-marks.
+
 
 
 ## Director & Ensemble Checklist
