@@ -21,11 +21,14 @@ struct FlashlightsInTheDarkApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(state)
                 .onAppear {
                     // Immediately bootstrap network
                     Task { await state.startNetwork() }
                 }
+        }
+        .environmentObject(state)
+        .commands {
+            MenuCommands()
         }
     }
 }

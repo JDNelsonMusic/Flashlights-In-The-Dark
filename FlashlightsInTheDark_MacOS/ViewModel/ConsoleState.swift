@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import AppKit
 import NIOPosix
 //import Network   // auto-discovery removed
 import Darwin           // for POSIXError & EHOSTDOWN
@@ -76,6 +77,19 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Members for dynamic groups 1-9
     @Published public var groupMembers: [Int: [Int]] = [:]
 
+    /// Default slot group mapping for primer tones
+    private let defaultGroups: [Int: [Int]] = [
+        1: [27, 41, 42],
+        2: [1, 14, 15],
+        3: [16, 29, 44],
+        4: [3, 4, 18],
+        5: [7, 19, 34],
+        6: [9, 20, 21],
+        7: [23, 38, 51],
+        8: [12, 24, 25],
+        9: [40, 53, 54]
+    ]
+
     public init() {
         // start clock-sync service once broadcaster is ready
         Task { [weak self] in
@@ -116,6 +130,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         midi.setChannel(outputChannel)
 
         refreshMidiDevices()
+        groupMembers = defaultGroups
     }
 
     @Published public private(set) var devices: [ChoirDevice] = []
@@ -125,6 +140,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Last time a /hello was heard from each slot.
     private var lastHello: [Int: Date] = [:]
     private var heartbeatTimer: Timer?
+
+    private var sessionURL: URL?
 
     @Published public var isBroadcasting: Bool = false
     /// True whenever any connected device currently has its torch on.
@@ -482,7 +499,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let dev = ChoirDevice(id: slot - 1,
                                       udid: "",
                                       name: "",
-                                      midiChannel: 10,
+                                      midiChannels: [10],
                                       isPlaceholder: true)
                 devices.append(dev)
                 statuses[slot - 1] = .clean
@@ -494,7 +511,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             devices[idx].udid = ""
             devices[idx].name = ""
             devices[idx].ip = ""
-            devices[idx].midiChannel = 10
+            devices[idx].midiChannels = [10]
             devices[idx].listeningSlot = idx + 1
         }
 
@@ -505,23 +522,15 @@ public final class ConsoleState: ObservableObject, Sendable {
                 devices[idx].udid = info.udid
                 devices[idx].name = info.name
                 devices[idx].isPlaceholder = false
-                devices[idx].midiChannel = 10
+                devices[idx].midiChannels = ChoirDevice.defaultChannelMap[slot] ?? [10]
                 devices[idx].listeningSlot = slot
             }
         }
 
         updateAnyTorchOn()
 
-        var groups: [Int: [Int]] = [:]
-        for g in 1...9 { groups[g] = [] }
-        let realSlots = devices.filter { !$0.isPlaceholder }.map { $0.listeningSlot }.sorted()
-        var gIndex = 1
-        for slot in realSlots {
-            groups[gIndex]?.append(slot)
-            gIndex = (gIndex % 9) + 1
-        }
-        groupMembers = groups
-        print("[ConsoleState] groupMembers: \(groups)")
+        groupMembers = defaultGroups
+        print("[ConsoleState] groupMembers: \(defaultGroups)")
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {
@@ -987,7 +996,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                                  name: name,
                                  ip: ip,
                                  listeningSlot: newId + 1,
-                                 midiChannel: 1)
+                                 midiChannels: [1])
         devices.append(device)
         statuses[newId] = .clean
     }
@@ -1009,12 +1018,16 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
     }
 
-    /// Update the MIDI channel for a device
-    public func setDeviceChannel(_ deviceId: Int, _ newChannel: Int) {
+    /// Toggle listening for a MIDI channel on a device
+    public func toggleDeviceChannel(_ deviceId: Int, _ channel: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == deviceId }) else { return }
-        devices[idx].midiChannel = newChannel
+        if devices[idx].midiChannels.contains(channel) {
+            devices[idx].midiChannels.remove(channel)
+        } else {
+            devices[idx].midiChannels.insert(channel)
+        }
         objectWillChange.send()
-        logMidi("Slot \(deviceId + 1) -> MIDI Ch \(newChannel)")
+        logMidi("Slot \(deviceId + 1) toggle MIDI Ch \(channel)")
     }
 
     /// Assign a new listening slot to a specific device at runtime.
@@ -1210,7 +1223,7 @@ extension ConsoleState {
                 return
             }
             let device = devices[idx]
-            if device.midiChannel == ch {
+            if device.midiChannels.contains(ch) {
                 glowingSlots.insert(val)
                 switch keyboardTriggerMode {
                 case .torch:
@@ -1290,7 +1303,7 @@ extension ConsoleState {
                 return
             }
             let device = devices[idx]
-            if device.midiChannel == ch {
+            if device.midiChannels.contains(ch) {
                 glowingSlots.remove(val)
                 switch keyboardTriggerMode {
                 case .torch:
@@ -1319,7 +1332,7 @@ extension ConsoleState {
             let intensity = Float32(val) / 127.0
             let targetChannel = Int(channel + 1)
             for device in devices where !device.isPlaceholder {
-                if device.midiChannel == targetChannel {
+                if device.midiChannels.contains(targetChannel) {
                     Task.detached { [weak self] in
                         guard let self = self else { return }
                         do {
@@ -1352,7 +1365,11 @@ extension ConsoleState {
     /// Send a MIDI Note On from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOn(_ note: UInt8, velocity: UInt8 = 127) {
         let idx = Int(note) - midiNoteOffset - 1
-        let chan: UInt8 = idx >= 0 && idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        let chan: UInt8 = {
+            guard idx >= 0 && idx < devices.count,
+                  let first = devices[idx].midiChannels.sorted().first else { return 0 }
+            return UInt8(first - 1)
+        }()
         handleNoteOn(note: note, velocity: velocity, channel: chan)
         midi.sendNoteOn(note, velocity: velocity)
     }
@@ -1360,8 +1377,78 @@ extension ConsoleState {
     /// Send a MIDI Note Off from the typing keyboard and handle it like incoming MIDI.
     public func typingNoteOff(_ note: UInt8) {
         let idx = Int(note) - midiNoteOffset - 1
-        let chan: UInt8 = idx >= 0 && idx < devices.count ? UInt8(devices[idx].midiChannel - 1) : 0
+        let chan: UInt8 = {
+            guard idx >= 0 && idx < devices.count,
+                  let first = devices[idx].midiChannels.sorted().first else { return 0 }
+            return UInt8(first - 1)
+        }()
         handleNoteOff(note: note, channel: chan)
         midi.sendNoteOff(note)
+    }
+}
+
+// MARK: - Session Persistence
+extension ConsoleState {
+    private struct DeviceSession: Codable {
+        var id: Int
+        var listeningSlot: Int
+        var channels: [Int]
+    }
+
+    private struct SessionData: Codable {
+        var devices: [DeviceSession]
+        var groups: [Int: [Int]]
+    }
+
+    /// Save current state to a file, using existing sessionURL if available.
+    @MainActor
+    public func saveSession() {
+        if let url = sessionURL {
+            try? writeSession(to: url)
+        } else {
+            saveSessionAs()
+        }
+    }
+
+    /// Prompt for location and save session.
+    @MainActor
+    public func saveSessionAs() {
+        let panel = NSSavePanel()
+        panel.allowedFileTypes = ["flashlights"]
+        panel.nameFieldStringValue = "Session.flashlights"
+        if panel.runModal() == .OK, let url = panel.url {
+            sessionURL = url
+            try? writeSession(to: url)
+        }
+    }
+
+    /// Prompt user to open a saved session.
+    @MainActor
+    public func openSession() {
+        let panel = NSOpenPanel()
+        panel.allowedFileTypes = ["flashlights"]
+        if panel.runModal() == .OK, let url = panel.url {
+            sessionURL = url
+            try? readSession(from: url)
+        }
+    }
+
+    private func writeSession(to url: URL) throws {
+        let devs = devices.map { DeviceSession(id: $0.id, listeningSlot: $0.listeningSlot, channels: Array($0.midiChannels)) }
+        let data = SessionData(devices: devs, groups: groupMembers)
+        let encoded = try JSONEncoder().encode(data)
+        try encoded.write(to: url)
+    }
+
+    private func readSession(from url: URL) throws {
+        let data = try Data(contentsOf: url)
+        let session = try JSONDecoder().decode(SessionData.self, from: data)
+        for dev in session.devices {
+            if let idx = devices.firstIndex(where: { $0.id == dev.id }) {
+                devices[idx].listeningSlot = dev.listeningSlot
+                devices[idx].midiChannels = Set(dev.channels)
+            }
+        }
+        groupMembers = session.groups
     }
 }
