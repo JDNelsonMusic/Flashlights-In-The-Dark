@@ -160,6 +160,8 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Last time a /hello was heard from each slot.
     private var lastHello: [Int: Date] = [:]
+    /// Last time an /ack was received from each slot.
+    private var lastAckTimes: [Int: Date] = [:]
     private var heartbeatTimer: Timer?
 
     private var sessionURL: URL?
@@ -265,6 +267,33 @@ public final class ConsoleState: ObservableObject, Sendable {
         triggeredSlots.remove(slot)
     }
 
+    /// Send a flashlight-on command and retry once if not acknowledged.
+    private func reliableFlashOn(slot: Int) {
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            let slotNum = slot + 1
+            do {
+                let osc = try await self.broadcasterTask.value
+                try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
+                await MainActor.run {
+                    self.lastLog = "/flash/on [\(slotNum), 1] (sent)"
+                    self.glow(slot: slotNum)
+                }
+                await self.midi.sendControlChange(UInt8(slotNum), value: 127)
+                try await Task.sleep(nanoseconds: 100_000_000)
+                let lastAck = await MainActor.run { self.lastAckTimes[slotNum] }
+                if Date().timeIntervalSince(lastAck ?? .distantPast) > 0.1 {
+                    try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
+                    await MainActor.run {
+                        self.lastLog = "⚠️ Re-sent /flash/on to \(slotNum) (no ack)"
+                    }
+                }
+            } catch {
+                print("Error in reliableFlashOn(\(slotNum)): \(error)")
+            }
+        }
+    }
+
     /// Append a MIDI message string to the log, trimming to last 20 entries.
     public func logMidi(_ message: String) {
         midiLog.append(message)
@@ -281,22 +310,19 @@ public final class ConsoleState: ObservableObject, Sendable {
         objectWillChange.send()
         devices[idx].torchOn.toggle()
         let isOn = devices[idx].torchOn
-        Task.detached { [weak self] in
-            guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                if isOn {
-                    try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
-                    await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
-                    await self.midi.sendControlChange(UInt8(id + 1), value: 127)
-                    await MainActor.run { self.glow(slot: id + 1) }
-                } else {
+        if isOn {
+            reliableFlashOn(slot: id)
+        } else {
+            Task.detached { [weak self] in
+                guard let self = self else { return }
+                do {
+                    let osc = try await self.broadcasterTask.value
                     try await osc.send(FlashOff(index: Int32(id + 1)))
                     await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
                     await self.midi.sendControlChange(UInt8(id + 1), value: 0)
+                } catch {
+                    print("Error toggling torch for slot \(id + 1): \(error)")
                 }
-            } catch {
-                print("Error toggling torch for slot \(id + 1): \(error)")
             }
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
@@ -310,18 +336,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
         devices[idx].torchOn = true
-        Task.detached { [weak self] in
-            guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                try await osc.send(FlashOn(index: Int32(id + 1), intensity: 1))
-                await MainActor.run { self.lastLog = "/flash/on [\(id + 1), 1]" }
-                await self.midi.sendControlChange(UInt8(id + 1), value: 127)
-                await MainActor.run { self.glow(slot: id + 1) }
-            } catch {
-                print("Error sending FlashOn for slot \(id + 1): \(error)")
-            }
-        }
+        reliableFlashOn(slot: id)
         updateAnyTorchOn()
     }
     /// Directly flash off a specific lamp slot and update state.
@@ -1116,6 +1131,7 @@ extension ConsoleState {
             await broadcaster.registerAckHandler { [weak self] slot in
                 Task { @MainActor in
                     self?.lastLog = "✅ Ack from slot \(slot)"
+                    self?.lastAckTimes[slot] = Date()
                 }
             }
             heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
