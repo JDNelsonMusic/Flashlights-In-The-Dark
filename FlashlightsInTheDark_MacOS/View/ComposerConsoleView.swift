@@ -86,34 +86,39 @@ struct ComposerConsoleView: View {
                     Divider()
                     Text("Tone Sets:") .font(.headline)
                     // Mapping of set identifier to display label
-                    let toneLabels = ["A": "primerTones",
+                    let toneLabels = ["A": "pT",
                                       "B": "seL",
                                       "C": "seC",
                                       "D": "seR"]
-                    let colorGroups = ["B": "Blue, Red, Green",
+                    let colorGroups = ["A": "primerTones[0-48:short, 50-98:long]",
+                                       "B": "Blue, Red, Green",
                                        "C": "Purple, Yellow, Pink",
                                        "D": "Orange, Magenta, Cyan"]
                     // Primer tones button
-                    Button(action: {
-                        if state.activeToneSets.contains("A") {
-                            state.activeToneSets.remove("A")
-                        } else {
-                            state.activeToneSets.insert("A")
+                    HStack(alignment: .center, spacing: 6) {
+                        Button(action: {
+                            if state.activeToneSets.contains("A") {
+                                state.activeToneSets.remove("A")
+                            } else {
+                                state.activeToneSets.insert("A")
+                            }
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(state.activeToneSets.contains("A")
+                                          ? Color.accentColor
+                                          : Color.gray.opacity(0.3))
+                                    .frame(width: 40, height: 40)
+                                Text(toneLabels["A"]!)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                            }
                         }
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(state.activeToneSets.contains("A")
-                                      ? Color.accentColor
-                                      : Color.gray.opacity(0.3))
-                                .frame(width: 40, height: 40)
-                            Text(toneLabels["A"]!)
-                                .font(.headline)
-                                .foregroundColor(.white)
-                        }
+                        .buttonStyle(.plain)
+                        .help("Toggle tone set primerTones")
+                        Text(colorGroups["A"]!)
+                            .font(.caption)
                     }
-                    .buttonStyle(.plain)
-                    .help("Toggle tone set primerTones")
                     // Sound Events group
                     HStack(alignment: .center, spacing: 4) {
                         VStack(alignment: .leading, spacing: 12) {
@@ -150,8 +155,12 @@ struct ComposerConsoleView: View {
                             Text("⎭")
                         }
                         .font(.system(size: 40))
-                        Text("Sound Events")
-                            .font(.subheadline)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Sound Events")
+                                .font(.subheadline)
+                            Text("(0-255:LCR)")
+                                .font(.caption)
+                        }
                     }
                     // Typing keyboard trigger mode selection
                     Divider()
