@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'network/osc_listener.dart';
 // import 'dart:io';
@@ -33,6 +35,12 @@ Future<void> _bootstrapNative() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _bootstrapNative();
+  final prefs = await SharedPreferences.getInstance();
+  final savedSlot = prefs.getInt('lastSlot');
+  if (savedSlot != null && savedSlot != 0) {
+    client.myIndex.value = savedSlot;
+  }
+  Wakelock.enable();
   runApp(const FlashlightsApp());
 }
 
@@ -153,9 +161,11 @@ class _BootstrapState extends State<Bootstrap> {
                                     child: Text('Slot $slot'),
                                   ))
                               .toList(),
-                          onChanged: (newSlot) {
+                          onChanged: (newSlot) async {
                             if (newSlot != null) {
                               client.myIndex.value = newSlot;
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.setInt('lastSlot', newSlot);
                             }
                           },
                         );
