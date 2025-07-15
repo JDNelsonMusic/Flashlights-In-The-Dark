@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ChoirDevice: Identifiable, Sendable {
+public struct ChoirDevice: Codable, Identifiable, Sendable {
     public var id: Int
     public var torchOn: Bool
     public var audioPlaying: Bool
