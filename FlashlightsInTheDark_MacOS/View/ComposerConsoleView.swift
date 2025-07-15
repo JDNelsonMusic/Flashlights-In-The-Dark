@@ -64,6 +64,18 @@ struct ComposerConsoleView: View {
         9: .skyBlue
     ]
 
+    private let tripleLabels: [Int: String] = [
+        1: "Blue",
+        2: "Red",
+        3: "Green",
+        4: "Purple",
+        5: "Yellow",
+        6: "Pink",
+        7: "Orange",
+        8: "Magenta",
+        9: "Cyan"
+    ]
+
     /// Human readable labels for MIDI channels
     private static let channelLabels: [Int: String] = [
         1: "primerTones Blue",
@@ -377,7 +389,19 @@ struct ComposerConsoleView: View {
                         .tint(.blue)
                         .disabled(!state.isBroadcasting)
                     }
-                    
+
+                    // Heading
+                    VStack(spacing: 2) {
+                        Text("Flashlights in the Dark")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Text("MIDI-to-ChorusOfSmartphones Control Interface")
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+                    .background(Color.black.opacity(0.2))
+
                     VStack(spacing: 24) {
                         ForEach(slotRows.indices, id: \.self) { row in
                             HStack(spacing: 24) {
@@ -394,13 +418,14 @@ struct ComposerConsoleView: View {
                     }
                     HStack(spacing: 12) {
                         ForEach(1...9, id: \.self) { idx in
-                            Button("C3-\(idx)") {
+                            Button(tripleLabels[idx] ?? "Group \(idx)") {
                                 if let slots = tripleTriggers[idx] {
                                     state.triggerSlots(realSlots: slots)
                                 }
                             }
                             .buttonStyle(.borderedProminent)
                             .tint(tripleColors[idx] ?? .white)
+                            .controlSize(.large)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
