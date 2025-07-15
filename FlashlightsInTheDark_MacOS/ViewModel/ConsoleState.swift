@@ -1467,9 +1467,11 @@ extension ConsoleState {
         try encoded.write(to: url)
     }
 
+    @MainActor
     private func readSession(from url: URL) throws {
         let data = try Data(contentsOf: url)
         let session = try JSONDecoder().decode(SessionData.self, from: data)
+        objectWillChange.send()
         for dev in session.devices {
             if let idx = devices.firstIndex(where: { $0.id == dev.id }) {
                 devices[idx].listeningSlot = dev.listeningSlot
