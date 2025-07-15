@@ -37,6 +37,7 @@ public actor OscBroadcaster {
     let broadcastAddrs: [SocketAddress]
     private var helloHandler: ((Int, String, String?) -> Void)?
     private var ackHandler: ((Int) -> Void)?
+    private var tapHandler: (() -> Void)?
     /// Runtime IPs learned from /hello announcements (slot -> ip)
     var dynamicIPs: [Int: String] = [:]
 
@@ -161,6 +162,11 @@ public actor OscBroadcaster {
         ackHandler = handler
     }
 
+    /// Register a callback for /tap messages
+    public func registerTapHandler(_ handler: @escaping () -> Void) {
+        tapHandler = handler
+    }
+
     // --------------------------------------------------------------------
     // MARK: - De-initialisation
     // --------------------------------------------------------------------
@@ -185,6 +191,10 @@ public actor OscBroadcaster {
 
     func emitAck(slot: Int) {
         ackHandler?(slot)
+    }
+
+    func emitTap() {
+        tapHandler?()
     }
 }
 
@@ -281,6 +291,13 @@ extension OscBroadcaster {
         }
         return nil
     }
+
+    /// Parse `/tap` datagram
+    fileprivate func parseTap(_ bytes: [UInt8]) -> Bool {
+        guard let addrEnd = bytes.firstIndex(of: 0),
+              let addr = String(bytes: bytes[0..<addrEnd], encoding: .utf8) else { return false }
+        return addr == "/tap"
+    }
 }
 
 final class HelloDatagramHandler: ChannelInboundHandler {
@@ -303,6 +320,8 @@ final class HelloDatagramHandler: ChannelInboundHandler {
                 await owner.emitHello(slot: slot, ip: ip, udid: udid)
             } else if let slot = await owner.parseAck(bytes) {
                 await owner.emitAck(slot: slot)
+            } else if await owner.parseTap(bytes) {
+                await owner.emitTap()
             }
         }
     }

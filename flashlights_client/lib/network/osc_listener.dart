@@ -374,6 +374,17 @@ class OscListener {
     });
   }
 
+  /// Send a custom OSC message to the server. Best effort only.
+  void sendCustom(String address, List<Object> args) {
+    if (_socket == null) return;
+    final msg = OSCMessage(address, arguments: args);
+    try {
+      _socket!.send(msg);
+    } catch (e) {
+      print('[OSC] sendCustom error: $e');
+    }
+  }
+
   /* -------------------------------------------------------------------- */
   /*                               Teardown                                */
   /* -------------------------------------------------------------------- */

@@ -15,6 +15,8 @@ public extension OscBroadcaster {
             try await directedOrBroadcast(slot: m.index, osc: m.encode())
         case let m as MicRecord:
             try await directedOrBroadcast(slot: m.index, osc: m.encode())
+        case _ as Tap:
+            try await send(model.encode())
         default:
             try await send(model.encode())
         }
