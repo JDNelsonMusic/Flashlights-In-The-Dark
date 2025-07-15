@@ -491,20 +491,17 @@ struct ComposerConsoleView: View {
                     )
                     Menu {
                         ForEach(1...16, id: \.self) { ch in
-                            Button {
-                                state.toggleDeviceChannel(device.id, ch)
-                            } label: {
+                            Button(action: { state.toggleDeviceChannel(device.id, ch) }) {
                                 if device.midiChannels.contains(ch) {
-                                    Label("Channel \(ch)", systemImage: "checkmark")
+                                    Label("Ch \(ch)", systemImage: "checkmark")
                                 } else {
-                                    Text("Channel \(ch)")
+                                    Text("Ch \(ch)")
                                 }
                             }
                         }
                     } label: {
-                        Image(systemName: "chevron.down.circle")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Image(systemName: "chevron.down")
+                            .imageScale(.small)
                     }
                     .menuStyle(BorderlessButtonMenuStyle())
                     .menuIndicator(.hidden)
