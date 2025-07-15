@@ -58,6 +58,27 @@ extension ChoirDevice {
         40: [10, 9, 15, 16], 53: [10, 9, 15, 16], 54: [10, 9, 15, 16]
     ]
 
+    /// Attempt to load a channel map from a JSON file. The JSON should be a
+    /// dictionary where keys are slot numbers as strings and values are arrays
+    /// of MIDI channel integers. Returns nil if the file cannot be parsed.
+    public static func loadChannelMap(from url: URL) -> [Int: Set<Int>]? {
+        do {
+            let data = try Data(contentsOf: url)
+            if let dict = try JSONSerialization.jsonObject(with: data) as? [String: [Int]] {
+                var result: [Int: Set<Int>] = [:]
+                for (slotStr, channels) in dict {
+                    if let slot = Int(slotStr) {
+                        result[slot] = Set(channels)
+                    }
+                }
+                return result
+            }
+        } catch {
+            print("Error loading channel map: \(error)")
+        }
+        return nil
+    }
+
     public static var demo: [ChoirDevice] {
         let realSlots = Set(defaultChannelMap.keys)
         return (1...54).map { i in

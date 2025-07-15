@@ -100,6 +100,20 @@ public final class ConsoleState: ObservableObject, Sendable {
             self.devices = ChoirDevice.demo // demo already contains defaultChannelMap
         }
 
+        // Override MIDI channel assignments from external JSON if present
+        if let mapURL = Bundle.main.url(forResource: "channel_map", withExtension: "json"),
+           let channelMap = ChoirDevice.loadChannelMap(from: mapURL) {
+            for (slot, channels) in channelMap {
+                if slot > 0 && slot <= devices.count {
+                    let idx = slot - 1
+                    devices[idx].midiChannels = channels
+                }
+            }
+            print("✅ Custom MIDI channel map loaded")
+        } else {
+            print("ℹ️ Using default MIDI channel map")
+        }
+
         // start clock-sync service once broadcaster is ready
         Task { [weak self] in
             guard let self = self else { return }

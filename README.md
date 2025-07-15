@@ -350,6 +350,8 @@ For Android devices, the same script will detect devices via adb and install the
 
 The script also maintains a JSON map of devices (flash_ip+udid_map.json), recording each device’s unique ID (UDID for iOS or a MAC address for Android) and assigned slot number. This mapping ensures that the system knows which singer/device corresponds to which slot ID (so cues are sent to the correct phone). After onboarding, this map file should be saved (committed in version control) so that reconnections or app restarts can remember the assignment.
 
+For MIDI integration, you can optionally include a channel_map.json file alongside the Mac app. This JSON lists each slot number and the MIDI channels it should respond to. When present, the app loads this file on launch and overrides the compiled defaults, making it easy to tweak channel assignments without rebuilding.
+
 Alternatively: If the above automation is not feasible, you can manually install the app on each phone (for iOS, via TestFlight or Configurator, and for Android, by sending the APK). In that case, you’d manually maintain the device-to-slot assignments in the JSON file or in the app UI (our app allows a manual override of its slot number if needed). However, using the provided tools is highly recommended for efficiency, especially with many devices.
 
 Rehearsal and Configuration: Once all devices are on the network and the app is running, do a thorough test:
