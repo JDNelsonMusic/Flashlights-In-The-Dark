@@ -1134,16 +1134,22 @@ extension ConsoleState {
         if ch == 10 {
             if val >= 1 && val <= devices.count {
                 if let idx = devices.firstIndex(where: { $0.listeningSlot == val }) {
-                    flashOn(id: idx)
-                    glowingSlots.insert(val)
+                    let device = devices[idx]
+                    if device.midiChannels.contains(ch) {
+                        flashOn(id: idx)
+                        glowingSlots.insert(val)
+                    }
                 }
             } else if val >= 96 && val <= 104 {
                 let group = val - 95
                 if let slots = groupMembers[group] {
                     for slot in slots {
                         let idx = slot - 1
-                        flashOn(id: idx)
-                        glowingSlots.insert(slot)
+                        let device = devices[idx]
+                        if device.midiChannels.contains(ch) {
+                            flashOn(id: idx)
+                            glowingSlots.insert(slot)
+                        }
                     }
                 }
             } else if val == 105 {
@@ -1161,13 +1167,18 @@ extension ConsoleState {
             let fileName = val < 50 ? "short\(val).mp3" : "long\(val).mp3"
             if let slots = groupMembers[ch] {
                 for slot in slots {
-                    Task.detached { [weak self] in
-                        guard let self = self else { return }
-                        do {
-                            let osc = try await self.broadcasterTask.value
-                            try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
-                        } catch {
-                            print("Error sending primer tone to slot \(slot): \(error)")
+                    let idx = slot - 1
+                    guard idx >= 0 && idx < devices.count else { continue }
+                    let device = devices[idx]
+                    if device.midiChannels.contains(ch) {
+                        Task.detached { [weak self] in
+                            guard let self = self else { return }
+                            do {
+                                let osc = try await self.broadcasterTask.value
+                                try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                            } catch {
+                                print("Error sending primer tone to slot \(slot): \(error)")
+                            }
                         }
                     }
                 }
@@ -1200,13 +1211,18 @@ extension ConsoleState {
 
             let fileName = "\(prefix)\(eventId).mp3"
             for slot in slots {
-                Task.detached { [weak self] in
-                    guard let self = self else { return }
-                    do {
-                        let osc = try await self.broadcasterTask.value
-                        try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
-                    } catch {
-                        print("Error sending sound event to slot \(slot): \(error)")
+                let idx = slot - 1
+                guard idx >= 0 && idx < devices.count else { continue }
+                let device = devices[idx]
+                if device.midiChannels.contains(ch) {
+                    Task.detached { [weak self] in
+                        guard let self = self else { return }
+                        do {
+                            let osc = try await self.broadcasterTask.value
+                            try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                        } catch {
+                            print("Error sending sound event to slot \(slot): \(error)")
+                        }
                     }
                 }
             }
@@ -1259,16 +1275,22 @@ extension ConsoleState {
         if ch == 10 {
             if val >= 1 && val <= devices.count {
                 if let idx = devices.firstIndex(where: { $0.listeningSlot == val }) {
-                    flashOff(id: idx)
-                    glowingSlots.remove(val)
+                    let device = devices[idx]
+                    if device.midiChannels.contains(ch) {
+                        flashOff(id: idx)
+                        glowingSlots.remove(val)
+                    }
                 }
             } else if val >= 96 && val <= 104 {
                 let group = val - 95
                 if let slots = groupMembers[group] {
                     for slot in slots {
                         let idx = slot - 1
-                        flashOff(id: idx)
-                        glowingSlots.remove(slot)
+                        let device = devices[idx]
+                        if device.midiChannels.contains(ch) {
+                            flashOff(id: idx)
+                            glowingSlots.remove(slot)
+                        }
                     }
                 }
             } else if val == 105 {
@@ -1283,13 +1305,18 @@ extension ConsoleState {
            (0...48).contains(val) || (50...98).contains(val),
            let slots = groupMembers[ch] {
             for slot in slots {
-                Task.detached { [weak self] in
-                    guard let self = self else { return }
-                    do {
-                        let osc = try await self.broadcasterTask.value
-                        try await osc.send(AudioStop(index: Int32(slot)))
-                    } catch {
-                        print("Error stopping primer tone on slot \(slot): \(error)")
+                let idx = slot - 1
+                guard idx >= 0 && idx < devices.count else { continue }
+                let device = devices[idx]
+                if device.midiChannels.contains(ch) {
+                    Task.detached { [weak self] in
+                        guard let self = self else { return }
+                        do {
+                            let osc = try await self.broadcasterTask.value
+                            try await osc.send(AudioStop(index: Int32(slot)))
+                        } catch {
+                            print("Error stopping primer tone on slot \(slot): \(error)")
+                        }
                     }
                 }
             }
