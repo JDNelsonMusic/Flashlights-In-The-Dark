@@ -96,7 +96,7 @@ struct ComposerConsoleView: View {
                             ZStack {
                                 Circle()
                                     .fill(state.activeToneSets.contains(set)
-                                          ? Color.blue
+                                          ? Color.mintGlow
                                           : Color.gray.opacity(0.3))
                                     .frame(width: 40, height: 40)
                                 Text(set)
@@ -476,7 +476,7 @@ struct ComposerConsoleView: View {
                             state.triggerSound(device: device)
                         } label: {
                             Image(systemName: "speaker.wave.2.fill")
-                                .foregroundStyle(.cyan)
+                                .foregroundStyle(Color.mintGlow)
                                 .help("Trigger sound on \(device.name)…")
                         }
                         .buttonStyle(.plain)
