@@ -90,6 +90,9 @@ struct ComposerConsoleView: View {
                                       "B": "seL",
                                       "C": "seC",
                                       "D": "seR"]
+                    let colorGroups = ["B": "Blue, Red, Green",
+                                       "C": "Purple, Yellow, Pink",
+                                       "D": "Orange, Magenta, Cyan"]
                     // Primer tones button
                     Button(action: {
                         if state.activeToneSets.contains("A") {
@@ -101,7 +104,7 @@ struct ComposerConsoleView: View {
                         ZStack {
                             Circle()
                                 .fill(state.activeToneSets.contains("A")
-                                      ? Color.blue
+                                      ? Color.accentColor
                                       : Color.gray.opacity(0.3))
                                 .frame(width: 40, height: 40)
                             Text(toneLabels["A"]!)
@@ -115,26 +118,30 @@ struct ComposerConsoleView: View {
                     HStack(alignment: .center, spacing: 4) {
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(["B", "C", "D"], id: \.self) { set in
-                                Button(action: {
-                                    if state.activeToneSets.contains(set) {
-                                        state.activeToneSets.remove(set)
-                                    } else {
-                                        state.activeToneSets.insert(set)
+                                HStack(alignment: .center, spacing: 6) {
+                                    Button(action: {
+                                        if state.activeToneSets.contains(set) {
+                                            state.activeToneSets.remove(set)
+                                        } else {
+                                            state.activeToneSets.insert(set)
+                                        }
+                                    }) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(state.activeToneSets.contains(set)
+                                                      ? Color.accentColor
+                                                      : Color.gray.opacity(0.3))
+                                                .frame(width: 40, height: 40)
+                                            Text(toneLabels[set]!)
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                        }
                                     }
-                                }) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(state.activeToneSets.contains(set)
-                                                  ? Color.blue
-                                                  : Color.gray.opacity(0.3))
-                                            .frame(width: 40, height: 40)
-                                        Text(toneLabels[set]!)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                    }
+                                    .buttonStyle(.plain)
+                                    .help("Toggle tone set \(toneLabels[set]!)")
+                                    Text(colorGroups[set]!)
+                                        .font(.caption)
                                 }
-                                .buttonStyle(.plain)
-                                .help("Toggle tone set \(toneLabels[set]!)")
                             }
                         }
                         VStack(spacing: 0) {
