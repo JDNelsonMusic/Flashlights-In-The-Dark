@@ -15,8 +15,8 @@ public struct ChoirDevice: Identifiable, Sendable {
     public var ip: String
     /// Current slot assignment the client should listen for (1-based).
     public var listeningSlot: Int
-    /// MIDI channel this device responds to (1-16)
-    public var midiChannel: Int
+    /// MIDI channels this device responds to (1-16)
+    public var midiChannels: Set<Int>
 
     public init(
         id: Int,
@@ -27,7 +27,7 @@ public struct ChoirDevice: Identifiable, Sendable {
         audioPlaying: Bool = false,
         micActive: Bool = false,
         listeningSlot: Int? = nil,
-        midiChannel: Int = 10,
+        midiChannels: Set<Int> = [10],
         isPlaceholder: Bool = false
     ) {
         self.id = id
@@ -40,24 +40,32 @@ public struct ChoirDevice: Identifiable, Sendable {
         self.isPlaceholder = isPlaceholder
         // Default to own slot (1-based) if not provided
         self.listeningSlot = listeningSlot ?? (id + 1)
-        self.midiChannel = midiChannel
+        self.midiChannels = midiChannels
     }
 }
 
 extension ChoirDevice {
+    /// Default mapping of real slot numbers to their listening MIDI channels.
+    public static let defaultChannelMap: [Int: Set<Int>] = [
+        27: [10, 1, 11, 12], 41: [10, 1, 11, 12], 42: [10, 1, 11, 12],
+        1: [10, 2, 11, 12], 14: [10, 2, 11, 12], 15: [10, 2, 11, 12],
+        16: [10, 3, 11, 12], 29: [10, 3, 11, 12], 44: [10, 3, 11, 12],
+        3: [10, 4, 13, 14], 4: [10, 4, 13, 14], 18: [10, 4, 13, 14],
+        7: [10, 5, 13, 14], 19: [10, 5, 13, 14], 34: [10, 5, 13, 14],
+        9: [10, 6, 13, 14], 20: [10, 6, 13, 14], 21: [10, 6, 13, 14],
+        23: [10, 7, 15, 16], 38: [10, 7, 15, 16], 51: [10, 7, 15, 16],
+        12: [10, 8, 15, 16], 24: [10, 8, 15, 16], 25: [10, 8, 15, 16],
+        40: [10, 9, 15, 16], 53: [10, 9, 15, 16], 54: [10, 9, 15, 16]
+    ]
+
     public static var demo: [ChoirDevice] {
-        let realSlots: Set<Int> = [
-            1, 3, 4, 5, 7, 9, 12,
-            14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
-            27, 29, 34, 38, 40,
-            41, 42, 44, 51, 53, 54
-        ]
+        let realSlots = Set(defaultChannelMap.keys)
         return (1...54).map { i in
             ChoirDevice(
                 id: i - 1,
                 udid: "",
                 name: "",
-                midiChannel: 10,
+                midiChannels: defaultChannelMap[i] ?? [10],
                 isPlaceholder: !realSlots.contains(i)
             )
         }

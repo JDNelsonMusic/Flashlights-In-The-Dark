@@ -491,8 +491,14 @@ struct ComposerConsoleView: View {
                     )
                     Menu {
                         ForEach(1...16, id: \.self) { ch in
-                            Button("Channel \(ch)") {
-                                state.setDeviceChannel(device.id, ch)
+                            Button {
+                                state.toggleDeviceChannel(device.id, ch)
+                            } label: {
+                                if device.midiChannels.contains(ch) {
+                                    Label("Channel \(ch)", systemImage: "checkmark")
+                                } else {
+                                    Text("Channel \(ch)")
+                                }
                             }
                         }
                     } label: {
