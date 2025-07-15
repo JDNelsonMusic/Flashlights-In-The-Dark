@@ -12,6 +12,7 @@ import 'package:osc/osc.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mic_stream/mic_stream.dart' as mic;
 
 import '../model/client_state.dart';
