@@ -85,27 +85,66 @@ struct ComposerConsoleView: View {
                     }
                     Divider()
                     Text("Tone Sets:") .font(.headline)
-                    ForEach(["A", "B", "C", "D"], id: \.self) { set in
-                        Button(action: {
-                            if state.activeToneSets.contains(set) {
-                                state.activeToneSets.remove(set)
-                            } else {
-                                state.activeToneSets.insert(set)
-                            }
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(state.activeToneSets.contains(set)
-                                          ? Color.mintGlow
-                                          : Color.gray.opacity(0.3))
-                                    .frame(width: 40, height: 40)
-                                Text(set)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
+                    // Mapping of set identifier to display label
+                    let toneLabels = ["A": "primerTones",
+                                      "B": "seL",
+                                      "C": "seC",
+                                      "D": "seR"]
+                    // Primer tones button
+                    Button(action: {
+                        if state.activeToneSets.contains("A") {
+                            state.activeToneSets.remove("A")
+                        } else {
+                            state.activeToneSets.insert("A")
+                        }
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(state.activeToneSets.contains("A")
+                                      ? Color.blue
+                                      : Color.gray.opacity(0.3))
+                                .frame(width: 40, height: 40)
+                            Text(toneLabels["A"]!)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .help("Toggle tone set primerTones")
+                    // Sound Events group
+                    HStack(alignment: .center, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(["B", "C", "D"], id: \.self) { set in
+                                Button(action: {
+                                    if state.activeToneSets.contains(set) {
+                                        state.activeToneSets.remove(set)
+                                    } else {
+                                        state.activeToneSets.insert(set)
+                                    }
+                                }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(state.activeToneSets.contains(set)
+                                                  ? Color.blue
+                                                  : Color.gray.opacity(0.3))
+                                            .frame(width: 40, height: 40)
+                                        Text(toneLabels[set]!)
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                .help("Toggle tone set \(toneLabels[set]!)")
                             }
                         }
-                        .buttonStyle(.plain)
-                        .help("Toggle tone set \(set)")
+                        VStack(spacing: 0) {
+                            Text("⎧")
+                            Text("⎨")
+                            Text("⎩")
+                        }
+                        .font(.system(size: 20))
+                        Text("Sound Events")
+                            .font(.subheadline)
                     }
                     // Typing keyboard trigger mode selection
                     Divider()
