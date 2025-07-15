@@ -201,8 +201,9 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
-    /// Active audio tone sets ("A","B","C","D").
-    @Published public var activeToneSets: Set<String> = []
+    /// Active audio tone sets ("A","B","C","D"). All banks are enabled by
+    /// default so the corresponding buttons start in the active state.
+    @Published public var activeToneSets: Set<String> = ["A", "B", "C", "D"]
     // Envelope parameters (ms, %)
     @Published public var attackMs: Int = 200
     @Published public var decayMs: Int = 200
