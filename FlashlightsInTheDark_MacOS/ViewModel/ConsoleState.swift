@@ -300,12 +300,11 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
     }
 
-    /// Append a MIDI message string to the log, trimming to last 20 entries.
+    /// Append a MIDI message string to the log.  Older entries are retained so
+    /// the user can scroll back through the full history.  Callers should
+    /// consider truncating externally if extremely large logs become a concern.
     public func logMidi(_ message: String) {
         midiLog.append(message)
-        if midiLog.count > 20 {
-            midiLog.removeFirst(midiLog.count - 20)
-        }
     }
     
 
