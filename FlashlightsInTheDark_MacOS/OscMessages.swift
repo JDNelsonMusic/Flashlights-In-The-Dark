@@ -8,6 +8,7 @@ public enum OscAddress: String {
     case audioStop = "/audio/stop"
     case micRecord = "/mic/record"
     case sync      = "/sync"
+    case tap       = "/tap"
     /// Dynamically assign the listening slot on a client
     case setSlot   = "/set-slot"
 }
@@ -196,5 +197,22 @@ public struct SetSlot: OscCodable {
             OSCAddressPattern(Self.address.rawValue),
             values: [ slot ]
         )
+    }
+}
+
+// MARK: – Tap ---------------------------------------------------------------
+/// Simple tap/cue message from a proxy device
+public struct Tap: OscCodable {
+    public static let address: OscAddress = .tap
+
+    public init() {}
+
+    public init?(from message: OSCMessage) {
+        guard message.addressPattern == OSCAddressPattern(Self.address.rawValue) else { return nil }
+        self.init()
+    }
+
+    public func encode() -> OSCMessage {
+        OSCMessage(OSCAddressPattern(Self.address.rawValue), values: [])
     }
 }

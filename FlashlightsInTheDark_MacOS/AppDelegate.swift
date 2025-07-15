@@ -168,4 +168,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return event
         }
     }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Task { @MainActor in
+            state.blackoutAll()
+            state.stopAllSounds()
+            state.shutdown()
+        }
+    }
 }

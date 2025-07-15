@@ -193,6 +193,28 @@ class _BootstrapState extends State<Bootstrap> {
                         );
                       },
                     ),
+                    const SizedBox(height: 24),
+                    ValueListenableBuilder<int>(
+                      valueListenable: client.myIndex,
+                      builder: (context, myIndex, _) {
+                        if (myIndex == 5) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              OscListener.instance.sendCustom('/tap', []);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 32.0),
+                              child: Text(
+                                'TAP',
+                                style: TextStyle(fontSize: 32),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ],
                 ),
               ),

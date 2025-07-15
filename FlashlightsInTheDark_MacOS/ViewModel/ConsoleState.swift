@@ -258,6 +258,12 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
     }
 
+    /// Handle a tap cue from the proxy device.
+    public func tapReceived() {
+        lastLog = "🎵 Tap signal received"
+        toggleAllTorches()
+    }
+
     /// Track pressed typing slots for UI feedback
     public func addTriggeredSlot(_ slot: Int) {
         triggeredSlots.insert(slot)
@@ -587,6 +593,13 @@ public final class ConsoleState: ObservableObject, Sendable {
             } catch {
                 print("Error stopping sound for slot \(device.id + 1): \(error)")
             }
+        }
+    }
+
+    /// Stop all audio playback on every device.
+    public func stopAllSounds() {
+        for device in devices where !device.isPlaceholder {
+            stopSound(device: device)
         }
     }
     
@@ -1132,6 +1145,11 @@ extension ConsoleState {
                 Task { @MainActor in
                     self?.lastLog = "✅ Ack from slot \(slot)"
                     self?.lastAckTimes[slot] = Date()
+                }
+            }
+            await broadcaster.registerTapHandler { [weak self] in
+                Task { @MainActor in
+                    self?.tapReceived()
                 }
             }
             heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
