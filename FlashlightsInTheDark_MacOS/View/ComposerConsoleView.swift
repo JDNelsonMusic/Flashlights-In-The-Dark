@@ -66,6 +66,8 @@ struct ComposerConsoleView: View {
 
     @State private var leftPanelWidth: CGFloat = 300
     @State private var startLeftPanelWidth: CGFloat?
+    @State private var midiLogHeight: CGFloat = 100
+    @State private var startMidiLogHeight: CGFloat?
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -232,8 +234,31 @@ struct ComposerConsoleView: View {
                             }
                         }
                     }
-                    .frame(height: 100)
+                    .frame(height: midiLogHeight)
                     .border(Color.gray.opacity(0.3))
+                    .overlay(
+                        GeometryReader { geo in
+                            // grab handle bottom-right
+                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                                .foregroundColor(.secondary)
+                                .position(x: geo.size.width - 8, y: geo.size.height - 8)
+                                .gesture(
+                                    DragGesture(minimumDistance: 1)
+                                        .onChanged { value in
+                                            if startMidiLogHeight == nil {
+                                                startMidiLogHeight = midiLogHeight
+                                            }
+                                            let newHeight = (startMidiLogHeight ?? midiLogHeight) - value.translation.height
+                                            midiLogHeight = max(80, min(newHeight, 300))
+                                        }
+                                        .onEnded { _ in
+                                            startMidiLogHeight = nil
+                                        }
+                                )
+                        }
+                    )
                     Spacer()
                 }
                 .frame(width: leftPanelWidth)
