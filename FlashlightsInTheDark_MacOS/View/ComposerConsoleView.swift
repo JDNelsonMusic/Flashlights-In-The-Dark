@@ -245,13 +245,22 @@ struct ComposerConsoleView: View {
                     Divider()
                     Text("MIDI Log:")
                         .font(.headline)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 2) {
-                            ForEach(state.midiLog.indices, id: \.self) { idx in
-                                Text(state.midiLog[idx])
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 2) {
+                                ForEach(state.midiLog.indices, id: \.self) { idx in
+                                    Text(state.midiLog[idx])
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Color.clear.frame(height: 1).id("midiBottom")
                             }
+                        }
+                        .onChange(of: state.midiLog.count) { _ in
+                            proxy.scrollTo("midiBottom", anchor: .bottom)
+                        }
+                        .onAppear {
+                            proxy.scrollTo("midiBottom", anchor: .bottom)
                         }
                     }
                     .frame(height: midiLogHeight)
@@ -271,7 +280,7 @@ struct ComposerConsoleView: View {
                                                 startMidiLogHeight = midiLogHeight
                                             }
                                             let newHeight = (startMidiLogHeight ?? midiLogHeight) - value.translation.height
-                                            midiLogHeight = max(80, min(newHeight, 300))
+                                            midiLogHeight = max(80, min(newHeight, 500))
                                         }
                                         .onEnded { _ in
                                             startMidiLogHeight = nil
