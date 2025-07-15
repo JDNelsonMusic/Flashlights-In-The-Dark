@@ -179,7 +179,7 @@ class OscListener {
 
   Future<void> _dispatch(OSCMessage m) async {
     final myIndex = client.myIndex.value;
-    print('OSC ↳ ${m.address} ${m.arguments}');
+    debugPrint('📲 OSC <<< ${m.address}  ${m.arguments}');
 
     switch (m.address) {
       case '/flash/on':

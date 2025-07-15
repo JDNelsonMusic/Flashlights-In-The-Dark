@@ -5,6 +5,7 @@ import AppKit
 import NIOPosix
 //import Network   // auto-discovery removed
 import Darwin           // for POSIXError & EHOSTDOWN
+import OSCKit
 
 /// Possible device statuses for build/run lifecycle
 public enum DeviceStatus: String, Sendable {
@@ -90,7 +91,15 @@ public final class ConsoleState: ObservableObject, Sendable {
         9: [40, 53, 54]
     ]
 
+    // MARK: – Init
     public init() {
+        // If a session file exists in UserDefaults, load it; else use defaults.
+        if let saved = Self.restoreLastSession() {
+            self.devices = saved
+        } else {
+            self.devices = ChoirDevice.demo // demo already contains defaultChannelMap
+        }
+
         // start clock-sync service once broadcaster is ready
         Task { [weak self] in
             guard let self = self else { return }
@@ -102,8 +111,6 @@ public final class ConsoleState: ObservableObject, Sendable {
                 return
             }
         }
-        // Initialize with all 54 slots (real + placeholder)
-        self.devices = ChoirDevice.demo
         self.statuses = Dictionary(uniqueKeysWithValues:
             devices.map { ($0.id, DeviceStatus.clean) }
         )
@@ -133,7 +140,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         groupMembers = defaultGroups
     }
 
-    @Published public private(set) var devices: [ChoirDevice] = []
+    @Published public private(set) var devices: [ChoirDevice]
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
 
@@ -1021,12 +1028,13 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Toggle listening for a MIDI channel on a device
     public func toggleDeviceChannel(_ deviceId: Int, _ channel: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == deviceId }) else { return }
-        if devices[idx].midiChannels.contains(channel) {
-            devices[idx].midiChannels.remove(channel)
+        var dev = devices[idx]
+        if dev.midiChannels.contains(channel) {
+            dev.midiChannels.remove(channel)
         } else {
-            devices[idx].midiChannels.insert(channel)
+            dev.midiChannels.insert(channel)
         }
-        objectWillChange.send()
+        devices[idx] = dev
         logMidi("Slot \(deviceId + 1) toggle MIDI Ch \(channel)")
     }
 
@@ -1063,6 +1071,16 @@ public final class ConsoleState: ObservableObject, Sendable {
 // MARK: - Lifecycle helpers
 
 extension ConsoleState {
+    /// Restore the most recent session devices from UserDefaults.
+    /// Returns nil if no session data was saved.
+    static func restoreLastSession() -> [ChoirDevice]? {
+        let defaults = UserDefaults.standard
+        guard let data = defaults.data(forKey: "lastSession") else { return nil }
+        if let session = try? JSONDecoder().decode([ChoirDevice].self, from: data) {
+            return session
+        }
+        return nil
+    }
     /// Idempotent network bootstrap for `.task {}` in ContentView.
     @MainActor
     public func startNetwork() async {

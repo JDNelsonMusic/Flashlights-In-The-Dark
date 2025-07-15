@@ -65,6 +65,7 @@ struct ComposerConsoleView: View {
     ]
 
     @State private var leftPanelWidth: CGFloat = 300
+    @State private var startLeftPanelWidth: CGFloat?
     var body: some View {
         ZStack {
             HStack(alignment: .top, spacing: 0) {
@@ -225,11 +226,24 @@ struct ComposerConsoleView: View {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 4)
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.resizeLeftRight.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
                     .gesture(
                         DragGesture(minimumDistance: 2)
                             .onChanged { value in
-                                let newWidth = value.location.x
+                                if startLeftPanelWidth == nil {
+                                    startLeftPanelWidth = leftPanelWidth
+                                }
+                                let newWidth = (startLeftPanelWidth ?? leftPanelWidth) + value.translation.width
                                 leftPanelWidth = max(150, min(newWidth, 600))
+                            }
+                            .onEnded { _ in
+                                startLeftPanelWidth = nil
                             }
                     )
                 // Main console content
@@ -501,7 +515,7 @@ struct ComposerConsoleView: View {
                             state.triggerSound(device: device)
                         } label: {
                             Image(systemName: "speaker.wave.2.fill")
-                                .foregroundStyle(.cyan)
+                                .foregroundStyle(Color.mintGlow)
                                 .help("Trigger sound on \(device.name)…")
                         }
                         .buttonStyle(.plain)
@@ -530,20 +544,17 @@ struct ComposerConsoleView: View {
                     )
                     Menu {
                         ForEach(1...16, id: \.self) { ch in
-                            Button {
-                                state.toggleDeviceChannel(device.id, ch)
-                            } label: {
+                            Button(action: { state.toggleDeviceChannel(device.id, ch) }) {
                                 if device.midiChannels.contains(ch) {
-                                    Label("Channel \(ch)", systemImage: "checkmark")
+                                    Label("Ch \(ch)", systemImage: "checkmark")
                                 } else {
-                                    Text("Channel \(ch)")
+                                    Text("Ch \(ch)")
                                 }
                             }
                         }
                     } label: {
-                        Image(systemName: "chevron.down.circle")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Image(systemName: "chevron.down")
+                            .imageScale(.small)
                     }
                     .menuStyle(BorderlessButtonMenuStyle())
                     .menuIndicator(.hidden)
