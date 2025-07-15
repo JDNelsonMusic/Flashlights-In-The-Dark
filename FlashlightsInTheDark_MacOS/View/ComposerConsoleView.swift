@@ -552,11 +552,7 @@ struct ComposerConsoleView: View {
                     Menu {
                         ForEach(1...16, id: \.self) { ch in
                             Button(action: { state.toggleDeviceChannel(device.id, ch) }) {
-                                if device.midiChannels.contains(ch) {
-                                    Label("Ch \(ch)", systemImage: "checkmark")
-                                } else {
-                                    Text("Ch \(ch)")
-                                }
+                                ChannelMenuItem(channel: ch, selected: device.midiChannels.contains(ch))
                             }
                         }
                     } label: {
@@ -601,6 +597,22 @@ struct ComposerConsoleView: View {
                         .frame(width: 2, height: 24)
                         .offset(y: -12)
                         .rotationEffect(.degrees(Double(i) / 8 * 360))
+                }
+            }
+        }
+    }
+
+    /// Menu item for channel selection with trailing checkmark
+    private struct ChannelMenuItem: View {
+        var channel: Int
+        var selected: Bool
+
+        var body: some View {
+            HStack {
+                Text("Ch \(channel)")
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark")
                 }
             }
         }
