@@ -9,8 +9,12 @@ enum OscSender {
     static func send(bundle: OSCBundle, to ip: String) {
         let targetHost = (ip == "broadcast") ? "255.255.255.255" : ip
         do {
-            let client = OSCClient(address: targetHost, port: port)
-            try client.send(bundle)
+            let client = OSCClient()
+            if ip == "broadcast" {
+                client.isIPv4BroadcastEnabled = true
+            }
+            try client.start()
+            try client.send(bundle, to: targetHost, port: Self.port)
             print("✅ [OSC] Sent to \(targetHost): \(bundle.elements)")
         } catch {
             print("❌ [OSC] Failed to send to \(targetHost): \(error)")
