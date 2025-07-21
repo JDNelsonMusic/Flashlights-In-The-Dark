@@ -129,6 +129,25 @@ Registers UDIDs, refreshes Ad-Hoc profile, installs .ipa, records ID → slot ma
 
 bash
 
+```bash
+# install prerequisites (Flutter SDK and Android platform tools)
+brew bundle --file=scripts/Brewfile    # installs adb via platform-tools
+flutter --version && adb version
+
+# apply required permissions to AndroidManifest.xml
+scripts/patch_manifests.sh
+
+# build the APK and deploy to all connected Android phones
+scripts/choir_onboard.sh
+```
+
+1. Enable **Developer Options** and **USB debugging** on each phone.
+2. Connect all devices via USB; the script installs the APK automatically.
+3. Disconnect the cables and join each phone to the closed performance Wi‑Fi network.
+4. Launch the Flashlights Client and confirm the status reads `Connected · Singer #X`.
+
+</details>
+
 
 
 # Running a Performance
