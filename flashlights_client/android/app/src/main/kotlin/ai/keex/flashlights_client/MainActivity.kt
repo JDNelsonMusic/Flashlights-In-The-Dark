@@ -1,4 +1,4 @@
-package com.example.flashlights_client
+package ai.keex.flashlights_client
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
@@ -7,6 +7,7 @@ import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import ai.keex.flashlights_client.KeepAliveService
 import kotlin.math.roundToInt
 
 class MainActivity : FlutterActivity() {
@@ -24,6 +25,18 @@ class MainActivity : FlutterActivity() {
                 } catch (e: Exception) {
                     result.error("TORCH_ERROR", e.message, null)
                 }
+            } else {
+                result.notImplemented()
+            }
+        }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "ai.keex.flashlights/client"
+        ).setMethodCallHandler { call, result ->
+            if (call.method == "startService") {
+                KeepAliveService.start(this)
+                result.success(null)
             } else {
                 result.notImplemented()
             }
