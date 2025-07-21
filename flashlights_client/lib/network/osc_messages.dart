@@ -195,5 +195,3 @@ BigInt oscNow() {
   final nowSecs = BigInt.from(DateTime.now().millisecondsSinceEpoch ~/ 1000);
   return eraOffset + nowSecs;
 }
-
-// TODO: Step 2.3 – integrate these models into the Flutter listener.
