@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flashlights_client/network/osc_listener.dart';
+import 'package:flashlights_client/network/osc_listener.dart' as flosc;
 // import 'dart:io';
 // import 'dart:convert';
 // removed discovery code
@@ -72,12 +72,12 @@ class _BootstrapState extends State<Bootstrap> {
   @override
   void initState() {
     super.initState();
-    OscListener.instance.start();
+    flosc.OscListener.instance.start();
   }
 
   @override
   void dispose() {
-    OscListener.instance.stop();
+    flosc.OscListener.instance.stop();
     super.dispose();
   }
 
@@ -200,7 +200,7 @@ class _BootstrapState extends State<Bootstrap> {
                         if (myIndex == 5) {
                           return ElevatedButton(
                             onPressed: () {
-                              OscListener.instance.sendCustom('/tap', []);
+                              flosc.OscListener.instance.sendCustom('/tap', []);
                             },
                             child: const Padding(
                               padding: EdgeInsets.symmetric(
