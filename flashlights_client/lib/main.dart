@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'network/osc_listener.dart';
+import 'package:flashlights_client/network/osc_listener.dart';
 // import 'dart:io';
 // import 'dart:convert';
 // removed discovery code
