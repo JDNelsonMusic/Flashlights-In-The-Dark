@@ -295,6 +295,9 @@ class OscListener {
           _sendAck();
         }
         break;
+      }
+
+      // Close the dispatcher function after handling all cases.
     }
 
   /* -------------------------------------------------------------------- */
