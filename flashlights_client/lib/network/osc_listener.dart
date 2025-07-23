@@ -393,18 +393,24 @@ class OscListener {
     _recvSocket?.close();
     _recvSocket = null;
 
+    // Cancel any mic recording.
     await _micSubscription?.cancel();
     _micSubscription = null;
     client.recording.value = false;
 
+    // Dispose of the audio player and mark the listener as no longer running.
     await _player.dispose();
     _running = false;
 
+    // Reset screen brightness to default and clear brightness state.
     try {
       await ScreenBrightness.instance.resetScreenBrightness();
       client.brightness.value = 0;
-    } catch (_) {}
+    } catch (_) {
+      // Ignore if the platform doesn’t support brightness reset.
+    }
 
+    // Cancel timers and update connection state.
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
     client.connected.value = false;
