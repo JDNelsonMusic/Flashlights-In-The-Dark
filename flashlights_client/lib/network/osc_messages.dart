@@ -1,5 +1,5 @@
 /// OSC message definitions for Flutter
-import 'package:osc/osc.dart';
+import 'osc_packet.dart';
 
 enum OscAddress {
   flashOn('/flash/on'),
