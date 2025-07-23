@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:just_audio/just_audio.dart';
-import 'package:osc/osc.dart';
+import 'osc_packet.dart';
 import 'osc_messages.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -34,19 +34,10 @@ OSCSocket _createBroadcastSocket({
     destination: InternetAddress('255.255.255.255'),
     destinationPort: serverPort,
   );
-
-  // Best‑effort: ask the wrapped RawDatagramSocket to allow broadcasting.
-  try {
-    // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
-    (socket as dynamic).rawSocket?.broadcastEnabled = true;
-  } catch (_) {
-    try {
-      // ignore: invalid_use_of_visible_for_testing_member, avoid_dynamic_calls
-      (socket as dynamic).socket?.broadcastEnabled = true;
-    } catch (_) {
-      // Some builds of the osc package don’t expose the inner socket.
-    }
-  }
+  // Best‑effort: create the socket immediately and allow broadcasting.
+  socket.bind().then((_) {
+    socket.rawSocket?.broadcastEnabled = true;
+  });
   return socket;
 }
 
