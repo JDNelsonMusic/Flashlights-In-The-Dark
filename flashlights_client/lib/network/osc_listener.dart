@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:osc/osc.dart';
+import 'osc_messages.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:flutter/services.dart';
@@ -184,11 +185,9 @@ class OscListener {
 
     switch (m.address) {
       case '/flash/on':
-        final id = m.arguments[0] as int;
-        final intensity = m.arguments.length > 1
-            ? (m.arguments[1] as num).toDouble()
-            : 1.0;
-        if (id == myIndex) {
+        final msg = FlashOn.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
+          final intensity = msg.intensity;
           try {
             final clamped = intensity.clamp(0.0, 1.0) as double;
             if ((client.brightness.value - clamped).abs() > 0.01) {
@@ -205,7 +204,8 @@ class OscListener {
         break;
 
       case '/flash/off':
-        if (m.arguments[0] as int == myIndex) {
+        final msg = FlashOff.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
           try {
             await _setTorchLevel(0);
             client.brightness.value = 0;
@@ -219,9 +219,10 @@ class OscListener {
         break;
 
       case '/audio/play':
-        if (m.arguments[0] as int == myIndex) {
-          final fileName = m.arguments[1] as String;
-          final gain = (m.arguments[2] as num).toDouble();
+        final msg = AudioPlay.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
+          final fileName = msg.file;
+          final gain = msg.gain;
           final assetPath = 'available-sounds/$fileName';
           try {
             await _player.setAsset(assetPath);
@@ -237,7 +238,8 @@ class OscListener {
         break;
 
       case '/audio/stop':
-        if (m.arguments[0] as int == myIndex) {
+        final msg = AudioStop.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
           await _player.stop();
           client.audioPlaying.value = false;
           _sendAck();
@@ -257,15 +259,9 @@ class OscListener {
 
       case '/sync':
         _markConnected();
-        if (m.arguments.isNotEmpty) {
-          final ts = m.arguments[0];
-          BigInt? ntp;
-          if (ts is BigInt) {
-            ntp = ts;
-          } else if (ts is int) {
-            ntp = BigInt.from(ts);
-          }
-          if (ntp != null) {
+        final msg = SyncMessage.fromOsc(m);
+        if (msg != null) {
+          final ntp = msg.timestamp;
             const eraOffset = 2208988800; // Seconds between 1900 and 1970.
             final serverSecs = ntp - BigInt.from(eraOffset);
             final serverMs = serverSecs.toInt() * 1000;
@@ -283,9 +279,9 @@ class OscListener {
         break;
 
       case '/mic/record':
-        final id = m.arguments[0] as int;
-        final durationSec = (m.arguments[1] as num).toDouble();
-        if (id == myIndex) {
+        final msg = MicRecord.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
+          final durationSec = msg.maxDuration;
           print('[OSC] Starting mic recording for $durationSec s');
           await mic.MicStream.shouldRequestPermission(true);
           final audioStream = mic.MicStream.microphone(
@@ -382,6 +378,16 @@ class OscListener {
       _socket!.send(msg);
     } catch (e) {
       print('[OSC] sendCustom error: $e');
+    }
+  }
+
+  /// Send a typed OSC message using [OscCodable].
+  void send(OscCodable message) {
+    if (_socket == null) return;
+    try {
+      _socket!.send(message.toOsc());
+    } catch (e) {
+      print('[OSC] send error: $e');
     }
   }
 

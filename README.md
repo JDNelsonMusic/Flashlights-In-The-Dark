@@ -113,21 +113,35 @@ Qty    Item    Notes
 
 # Software & Deployment
 
-<details> <summary><strong>iOS On-Boarding (<code>fastlane</code> + <code>cfgutil</code>)</strong></summary>
+<details> <summary><strong>iOS On-Boarding (TestFlight)</strong></summary>
 
-
-bash
-
-# macOS prerequisites
-brew bundle --file=scripts/Brewfile   # installs cfgutil, fastlane, adb …
-
-# mass-install to all connected iPhones
-scripts/choir_onboard.sh
-Registers UDIDs, refreshes Ad-Hoc profile, installs .ipa, records ID → slot map.
+1. Each singer supplies their Apple ID email in the choir survey.
+2. On App Store Connect, open the **TestFlight** tab for the Flashlights Client.
+3. Add the emails to a testing group and send invitations.
+4. Singers install the **TestFlight** app from the App Store and accept the invite to download the client build.
 
 </details> <details> <summary><strong>Android On-Boarding</strong></summary>
 
 bash
+
+```bash
+# install prerequisites (Flutter SDK and Android platform tools)
+brew bundle --file=scripts/Brewfile    # installs adb via platform-tools
+flutter --version && adb version
+
+# apply required permissions to AndroidManifest.xml
+scripts/patch_manifests.sh
+
+# build the APK and deploy to all connected Android phones
+scripts/choir_onboard.sh
+```
+
+1. Enable **Developer Options** and **USB debugging** on each phone.
+2. Connect all devices via USB; the script installs the APK automatically.
+3. Disconnect the cables and join each phone to the closed performance Wi‑Fi network.
+4. Launch the Flashlights Client and confirm the status reads `Connected · Singer #X`.
+
+</details>
 
 
 
@@ -196,7 +210,7 @@ flashlights-in-the-dark/
 ├── flashlights_client/        # Flutter mobile app
 ├── FlashlightsInTheDark_Mac/  # Swift-based conductor console
 ├── scripts/
-│   ├── choir_onboard.sh       # one-click device provisioning & install
+│   ├── choir_onboard.sh       # Android deployment & device mapping helper
 │   ├── Brewfile               # Homebrew dependencies
 │   └── …                      # misc. debugging helpers
 ├── docs/
@@ -314,7 +328,7 @@ Optionally, any MIDI hardware or DAW software if you plan to trigger cues via MI
 
 Smartphones: 28 smartphones (the exact number can be adjusted, but the composition is written with 28 in mind). Both iOS and Android devices are supported. Key considerations:
 
-iPhones: Ideally running iOS 16 or later for best compatibility. Since the Flashlights Client app is custom (not on the App Store), each iPhone must be registered in Apple’s Developer Portal and have the app sideloaded (installed) via an Ad Hoc provisioning profile or through a tool like Apple Configurator. We provide tools to automate this process for multiple devices (see Deployment Tools below).
+iPhones: Ideally running iOS 16 or later for best compatibility. The Flashlights Client is distributed via TestFlight. Each singer should provide their Apple ID so you can invite them to the testing group and they can install the app from TestFlight.
 
 Android phones: Running Android 10 or later. The app can be installed via an APK file. Developer mode and USB debugging should be enabled to allow our deployment script to install the app. After installation, the app does not require any special debug mode.
 
@@ -336,15 +350,13 @@ The Mac can connect via Wi-Fi or Ethernet (Ethernet to the router can be very re
 
 Flashlights Client App Deployment: We have provided scripts and a workflow to simplify getting the app onto all the singer’s phones:
 
-For iOS devices, you will use Apple’s developer tools. All iPhones’ UDIDs need to be added to the project’s provisioning profile. Our repository includes a fastlane configuration that, with your Apple Developer account credentials, can automate adding devices and refreshing the Ad Hoc provisioning profile.
+For iOS devices, distribute the app via **TestFlight**:
 
-We supply a one-command script that uses Apple Configurator (cfgutil) and Fastlane to detect all connected iPhones, register them, update the provisioning profile, and install the app (.ipa) to each phone in one go. This script is scripts/choir_onboard.sh. In practice, you would:
+1. Collect each singer’s Apple ID through the choir survey.
+2. In App Store Connect, open the TestFlight section for the Flashlights Client and add those emails to a testing group.
+3. Once invited, singers install the TestFlight app from the App Store and download the Flashlights Client build.
 
-Install Homebrew and run brew bundle --file=scripts/Brewfile to install dependencies (this gets cfgutil, fastlane, adb for Android, etc.).
-
-Connect all iPhones via USB to the Mac (use multiple USB hubs if needed).
-
-Run scripts/choir_onboard.sh. This will find each device, add it to the Apple Dev Portal, build or fetch the latest Ad Hoc app package, and deploy it to all devices. After completion, the iPhones will have the “Flashlights Client” app installed and ready to run.
+This approach eliminates the need for local device registration or Fastlane scripts.
 
 For Android devices, the same script will detect devices via adb and install the pre-built APK to each one. Ensure Android phones have file transfer or debugging mode on and are connected via USB.
 

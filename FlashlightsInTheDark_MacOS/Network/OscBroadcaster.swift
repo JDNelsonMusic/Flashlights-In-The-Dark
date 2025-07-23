@@ -2,7 +2,7 @@
 //  OscBroadcaster.swift
 //  FlashlightsInTheDark
 //
-//  Created by ChatGPT on 5/15/25.
+//  Created by OpenAI ChatGPT on 5/15/25.
 //
 
 import Foundation
