@@ -4,6 +4,7 @@
 
     <!-- ── Runtime permissions we rely on ─────────────────────────────── -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" android:usesPermissionFlags="neverForLocation"/>
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>

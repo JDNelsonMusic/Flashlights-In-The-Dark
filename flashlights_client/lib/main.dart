@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,7 +78,7 @@ class _BootstrapState extends State<Bootstrap> {
 
   @override
   void dispose() {
-    flosc.OscListener.instance.stop();
+    unawaited(flosc.OscListener.instance.stop());
     super.dispose();
   }
 
