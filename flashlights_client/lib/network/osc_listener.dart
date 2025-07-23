@@ -262,7 +262,6 @@ class OscListener {
                 (client.clockOffsetMs + offset) / 2; // Simple smoothing.
             print('[OSC] Clock offset updated to ${client.clockOffsetMs} ms');
           }
-        }
         break;
 
       case '/hello':
