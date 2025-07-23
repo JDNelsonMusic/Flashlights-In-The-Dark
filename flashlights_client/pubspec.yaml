@@ -13,7 +13,6 @@ dependencies:
 
   # --- runtime plugins ---
   cupertino_icons: ^1.0.8
-  osc: ^1.0.0          # Open-Sound-Control packets
   torch_light: ^1.1.0  # Flash/torch control (on/off only – no brightness)
   screen_brightness: ^2.1.5 # Control screen brightness for strobe dimming
   just_audio: ^0.9.37  # Audio playback
