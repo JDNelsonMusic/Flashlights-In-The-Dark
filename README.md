@@ -129,6 +129,9 @@ bash
 brew bundle --file=scripts/Brewfile    # installs adb via platform-tools
 flutter --version && adb version
 
+# configure Flutter project for iOS/Android builds
+scripts/setup_platforms.sh
+
 # apply required permissions to AndroidManifest.xml
 scripts/patch_manifests.sh
 
