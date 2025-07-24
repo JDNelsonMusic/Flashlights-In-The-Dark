@@ -19,6 +19,7 @@ dependencies:
   mic_stream: ^0.7.2   # Raw mic samples/recording
   permission_handler: ^11.4.0  # camera / mic permissions (iOS / Android only)
   wakelock: ^0.6.2     # Keep the screen awake during performances
+  wakelock_windows: ^0.2.1
   shared_preferences: ^2.5.3  # Persist selected slot between launches
 
 dev_dependencies:
