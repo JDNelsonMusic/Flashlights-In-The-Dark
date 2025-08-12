@@ -1,4 +1,4 @@
-import Simphoni1v from '@/components/Simphoni1v';
+import Simphoni1v from '@/components/SimpleChat/Simphoni1v';
 
 /**
  * Route wrapper for the Simphoni-1v experience without navbar.

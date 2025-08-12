@@ -1,0 +1,119 @@
+body {
+  background-color: #030107;
+}
+
+.simphoni1v-top-left {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.simphoni1v-logo {
+  height: 32px;
+  width: 32px;
+}
+
+.simphoni1v-label {
+  color: #A573C4;
+  font-weight: bold;
+}
+
+.simphoni1v-header {
+  font-size: 2rem;
+  text-align: center;
+  margin-top: 3rem;
+  background: linear-gradient(90deg, #9265AE, #A573C4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.simphoni1v-input-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.simphoni1v-input-bar {
+  display: flex;
+  align-items: center;
+  background-color: #2B1C36;
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  max-width: 600px;
+  color: #DCB2E7;
+}
+
+.simphoni1v-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #DCB2E7;
+  padding: 0 1rem;
+  outline: none;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: #DCB2E7;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.icon-button:hover {
+  color: #5A4067;
+}
+
+.cancel-button {
+  background: #5A4067;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  color: #DCB2E7;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background: #A573C4;
+}
+
+.messages {
+  max-width: 600px;
+  margin: 2rem auto 0;
+  color: #DCB2E7;
+}
+
+.message.user {
+  text-align: right;
+}
+
+.message.assistant {
+  text-align: left;
+}
+
+.save-prompt {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+  color: #DCB2E7;
+}
+
+.save-prompt button {
+  background: #2B1C36;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  color: #DCB2E7;
+  cursor: pointer;
+}
+
+.save-prompt button:hover {
+  background: #5A4067;
+}
