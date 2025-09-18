@@ -22,6 +22,8 @@ import '../model/client_state.dart';
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
+const int _oscPort = 9000;
+
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
   required int serverPort,
@@ -53,6 +55,7 @@ class OscListener {
   StreamSubscription<List<int>>? _micSubscription;
   bool _running = false;
   Timer? _disconnectTimer;
+  final Map<String, InternetAddress> _serverAddresses = {};
 
   /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
@@ -61,20 +64,21 @@ class OscListener {
 
     _socket = _createBroadcastSocket(
       serverAddress: InternetAddress.anyIPv4,
-      serverPort: 9000,
+      serverPort: _oscPort,
     );
 
     _recvSocket = await RawDatagramSocket.bind(
       InternetAddress.anyIPv4,
-      9000,
+      _oscPort,
       reuseAddress: true,
       reusePort: true,
     );
     _recvSocket!.broadcastEnabled = true;
-  _recvSocket!.listen((event) {
+    _recvSocket!.listen((event) {
       if (event == RawSocketEvent.read) {
         final dg = _recvSocket!.receive();
         if (dg != null) {
+          _rememberServer(dg.address);
           final msg = _parseMessage(dg.data);
           if (msg != null) {
             _dispatch(msg);
@@ -245,6 +249,7 @@ class OscListener {
           client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');
           _sendAck();
+          _sendHello();
         }
         break;
 
@@ -266,6 +271,12 @@ class OscListener {
 
       case '/hello':
         _markConnected();
+        break;
+
+      case '/discover':
+      case '/ping':
+        _markConnected();
+        _sendHello();
         break;
 
       case '/mic/record':
@@ -305,6 +316,25 @@ class OscListener {
   /* -------------------------------------------------------------------- */
 
   /// Broadcast a `/hello` so servers can discover this client.
+  void _rememberServer(InternetAddress address) {
+    if (address.type != InternetAddressType.IPv4) return;
+    if (address.isLoopback) return;
+    final key = address.address;
+    if (key.isEmpty) return;
+    _serverAddresses[key] = address;
+  }
+
+  Future<void> _sendToServers(OSCMessage msg) async {
+    if (_socket == null || _serverAddresses.isEmpty) return;
+    for (final entry in _serverAddresses.values) {
+      try {
+        await _socket!.sendTo(msg, dest: entry, port: _oscPort);
+      } catch (e) {
+        debugPrint('[OSC] Unicast send error to ${entry.address}: $e');
+      }
+    }
+  }
+
   void _sendHello() {
     if (_socket == null) return;
 
@@ -318,6 +348,10 @@ class OscListener {
       // Log but do not crash; we fall back to per‑interface broadcasts below.
       print('[OSC] Primary broadcast failed: $e');
     }
+
+    // Target any known servers directly first so they hear us even if broadcasts
+    // are filtered by the network.
+    unawaited(_sendToServers(msg));
 
     // Secondary: per‑interface subnet broadcast for routers that
     // ignore 255.255.255.255. Best‑effort only – errors intentionally ignored.
@@ -335,7 +369,7 @@ class OscListener {
             RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
                 .then((raw) {
               raw.broadcastEnabled = true;
-              raw.send(msg.toBytes(), bcast, 9000);
+              raw.send(msg.toBytes(), bcast, _oscPort);
               raw.close();
             }).catchError((_) {/* ignore */});
           }
@@ -349,6 +383,7 @@ class OscListener {
     final msg = OSCMessage('/ack', arguments: [client.myIndex.value]);
     try {
       _socket!.send(msg);
+      unawaited(_sendToServers(msg));
     } catch (e) {
       print('[OSC] Ack send error: $e');
     }
@@ -368,6 +403,7 @@ class OscListener {
     final msg = OSCMessage(address, arguments: args);
     try {
       _socket!.send(msg);
+      unawaited(_sendToServers(msg));
     } catch (e) {
       print('[OSC] sendCustom error: $e');
     }
@@ -377,7 +413,9 @@ class OscListener {
   void send(OscCodable message) {
     if (_socket == null) return;
     try {
-      _socket!.send(message.toOsc());
+      final osc = message.toOsc();
+      _socket!.send(osc);
+      unawaited(_sendToServers(osc));
     } catch (e) {
       print('[OSC] send error: $e');
     }
@@ -420,4 +458,3 @@ class OscListener {
   }
 
 }
-

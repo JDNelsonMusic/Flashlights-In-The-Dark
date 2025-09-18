@@ -86,8 +86,16 @@ class OSCSocket {
 
   Future<int> send(OSCMessage msg) async {
     await _ensureSocket();
-    return _socket!
-        .send(msg.toBytes(), destination, destinationPort);
+    return _socket!.send(msg.toBytes(), destination, destinationPort);
+  }
+
+  Future<int> sendTo(
+    OSCMessage msg, {
+    required InternetAddress dest,
+    required int port,
+  }) async {
+    await _ensureSocket();
+    return _socket!.send(msg.toBytes(), dest, port);
   }
 
   RawDatagramSocket? get rawSocket => _socket;

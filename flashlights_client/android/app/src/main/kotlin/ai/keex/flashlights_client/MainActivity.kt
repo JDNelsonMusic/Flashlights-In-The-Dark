@@ -8,9 +8,13 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import ai.keex.flashlights_client.KeepAliveService
+import android.net.wifi.WifiManager
+import android.content.Context.WIFI_SERVICE
 import kotlin.math.roundToInt
 
 class MainActivity : FlutterActivity() {
+    private var multicastLock: WifiManager.MulticastLock? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(
@@ -41,6 +45,18 @@ class MainActivity : FlutterActivity() {
                 result.notImplemented()
             }
         }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "ai.keex.flashlights/network"
+        ).setMethodCallHandler { call, result ->
+            if (call.method == "acquireMulticastLock") {
+                acquireMulticastLock()
+                result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
     }
 
     private fun setTorchLevel(level: Double) {
@@ -63,5 +79,27 @@ class MainActivity : FlutterActivity() {
         } else {
             cm.setTorchMode(cameraId, true)
         }
+    }
+
+    private fun acquireMulticastLock() {
+        if (multicastLock?.isHeld == true) return
+
+        val wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager
+            ?: return
+        val lock = wifiManager.createMulticastLock("FlashlightsMulticast").apply {
+            setReferenceCounted(true)
+            acquire()
+        }
+        multicastLock = lock
+    }
+
+    override fun onDestroy() {
+        multicastLock?.let {
+            if (it.isHeld) {
+                it.release()
+            }
+        }
+        multicastLock = null
+        super.onDestroy()
     }
 }

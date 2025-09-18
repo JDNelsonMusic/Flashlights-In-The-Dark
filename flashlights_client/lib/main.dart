@@ -4,7 +4,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flashlights_client/network/osc_listener.dart' as flosc;
@@ -30,6 +30,13 @@ Future<void> _bootstrapNative() async {
     } on PlatformException catch (e) {
       debugPrint('[KeepAliveService] start failed: $e');
     }
+
+    const MethodChannel networkChannel = MethodChannel('ai.keex.flashlights/network');
+    try {
+      await networkChannel.invokeMethod('acquireMulticastLock');
+    } on PlatformException catch (e) {
+      debugPrint('[MulticastLock] acquire failed: $e');
+    }
   }
 }
 
@@ -41,7 +48,7 @@ Future<void> main() async {
   if (savedSlot != null && savedSlot != 0) {
     client.myIndex.value = savedSlot;
   }
-  Wakelock.enable();
+  WakelockPlus.enable();
   runApp(const FlashlightsApp());
 }
 

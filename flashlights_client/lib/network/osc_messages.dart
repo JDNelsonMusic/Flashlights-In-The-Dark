@@ -7,6 +7,8 @@ enum OscAddress {
   audioPlay('/audio/play'),
   audioStop('/audio/stop'),
   hello('/hello'),
+  discover('/discover'),
+  ping('/ping'),
   micRecord('/mic/record'),
   sync('/sync');
 

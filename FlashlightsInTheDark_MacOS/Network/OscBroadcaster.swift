@@ -96,6 +96,7 @@ public actor OscBroadcaster {
     /// Announce self to the network upon startup
     public func start() async throws {
         try await announceSelf()
+        try await discoverKnownDevices()
     }
     /// Broadcast a single OSC message to all detected broadcast addresses.
     public func send(_ osc: OSCMessage) async throws {
@@ -165,6 +166,60 @@ public actor OscBroadcaster {
     /// Register a callback for /tap messages
     public func registerTapHandler(_ handler: @escaping () -> Void) {
         tapHandler = handler
+    }
+
+    /// Prompt every known device slot to announce itself by unicasting a
+    /// `/discover` message to any saved IP address. This supplements the
+    /// broadcast so environments that block 255.255.255.255 still reconnect.
+    public func discoverKnownDevices() async throws {
+        let osc = OSCMessage(
+            OSCAddressPattern("/discover"),
+            values: [Int32(0)]
+        )
+
+        // Start with a broadcast in case IP assignments have changed. Errors
+        // are already handled inside `send` so this call is best-effort.
+        try await send(osc)
+
+        var targets = Set<String>()
+        for (_, info) in slotInfos where !info.ip.isEmpty {
+            targets.insert(info.ip)
+        }
+        for (_, ip) in dynamicIPs where !ip.isEmpty {
+            targets.insert(ip)
+        }
+
+        for ip in targets {
+            do {
+                try await sendUnicast(osc, toIP: ip)
+            } catch {
+                print("⚠️ Unable to deliver /discover to \(ip): \(error)")
+            }
+        }
+    }
+
+    /// Request a specific slot to announce itself again. Falls back to
+    /// broadcast if we don't currently have an IP on record.
+    public func requestHello(forSlot slot: Int) async {
+        let osc = OSCMessage(
+            OSCAddressPattern("/discover"),
+            values: [Int32(slot)]
+        )
+
+        if let ip = dynamicIPs[slot] ?? slotInfos[slot]?.ip, !ip.isEmpty {
+            do {
+                try await sendUnicast(osc, toIP: ip)
+                return
+            } catch {
+                print("⚠️ requestHello unicast failed for slot \(slot): \(error)")
+            }
+        }
+
+        do {
+            try await send(osc)
+        } catch {
+            print("⚠️ requestHello broadcast failed for slot \(slot): \(error)")
+        }
     }
 
     // --------------------------------------------------------------------

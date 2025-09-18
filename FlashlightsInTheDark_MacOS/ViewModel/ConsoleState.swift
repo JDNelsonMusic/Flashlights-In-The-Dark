@@ -163,6 +163,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Last time an /ack was received from each slot.
     private var lastAckTimes: [Int: Date] = [:]
     private var heartbeatTimer: Timer?
+    /// When we last probed a given slot with a /discover ping.
+    private var lastHelloProbe: [Int: Date] = [:]
 
     private var sessionURL: URL?
 
@@ -1106,6 +1108,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         devices[idx].ip = ip
         statuses[idx] = .live
         lastHello[slot] = Date()
+        lastHelloProbe.removeValue(forKey: slot)
         lastLog = "📳 Device \(slot) announced at \(ip)"
     }
 }
@@ -1181,9 +1184,29 @@ extension ConsoleState {
         let now = Date()
         for slot in 1...devices.count {
             let idx = slot - 1
-            if let last = lastHello[slot] {
-                if now.timeIntervalSince(last) > 5 {
-                    statuses[idx] = .lostConnection
+            let lastSeen = lastHello[slot]
+            if let lastSeen, now.timeIntervalSince(lastSeen) <= 5 {
+                if statuses[idx] == .lostConnection {
+                    statuses[idx] = .live
+                }
+                continue
+            }
+
+            if statuses[idx] != .lostConnection {
+                statuses[idx] = .lostConnection
+            }
+
+            let lastProbe = lastHelloProbe[slot] ?? .distantPast
+            if now.timeIntervalSince(lastProbe) >= 10 {
+                lastHelloProbe[slot] = now
+                Task.detached { [weak self] in
+                    guard let self = self else { return }
+                    do {
+                        let broadcaster = try await self.broadcasterTask.value
+                        await broadcaster.requestHello(forSlot: slot)
+                    } catch {
+                        print("⚠️ heartbeat probe error for slot \(slot): \(error)")
+                    }
                 }
             }
         }
