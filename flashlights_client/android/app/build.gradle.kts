@@ -12,7 +12,7 @@ android {
 
     // SDK / NDK versions come from the Flutter wrapper variables
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "27.0.12077973"
 
     // ── Java / Kotlin toolchains ───────────────────────────────────────────────
     compileOptions {
