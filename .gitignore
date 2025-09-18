@@ -67,3 +67,10 @@ FlashlightsInTheDark_Protools-Session-OLD*/
 node_modules/
 __pycache__/
 *.py[cod]
+
+build/
+DerivedData/
+*.xcuserdata/
+xcuserdata/
+*.xcuserstate
+__MACOSX/

@@ -5,7 +5,7 @@ echo "🔧 Enabling iOS & Android tool-chains"
 flutter config --enable-ios
 flutter config --enable-android
 
-IOS_PBXPROJ="ios/Runner.xcodeproj/project.pbxproj"
+IOS_PBXPROJ="flashlights_client/ios/Runner.xcodeproj/project.pbxproj"
 IOS_OLD="com.keex.FlashlightsClient"
 IOS_NEW="com.keex.Flashlights-ITD-Client"
 
@@ -16,7 +16,7 @@ else
   perl -pi -e "s/${IOS_OLD}/${IOS_NEW}/g" "${IOS_PBXPROJ}"
 fi
 
-ANDROID_GRADLE="android/app/build.gradle.kts"
+ANDROID_GRADLE="flashlights_client/android/app/build.gradle.kts"
 ANDROID_NAMESPACE_NEW='namespace = "ai.keex.flashlights_client"'
 ANDROID_APPID_NEW='applicationId  = "ai.keex.flashlights_client"'
 
