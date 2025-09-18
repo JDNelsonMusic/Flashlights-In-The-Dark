@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="ai.keex.flashlights_client">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ── Runtime permissions we rely on ─────────────────────────────── -->
+    <!-- Runtime permissions required by the client -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.CAMERA" android:usesPermissionFlags="neverForLocation"/>
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        android:usesPermissionFlags="neverForLocation"/>
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
-    <!-- If you ever target Android 14+ and record audio in the background,
-         you may also need <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/> -->
+    <!-- Note: background recording on Android 14+ may require FOREGROUND_SERVICE_MEDIA_PLAYBACK -->
 
     <application
         android:label="flashlights_client"
@@ -41,20 +40,19 @@
             </intent-filter>
         </activity>
 
-        <!-- Keeps a minimal foreground notification alive so the isolate
-             can receive OSC packets (or continue audio) while backgrounded -->
+        <!-- Foreground service keeps OSC handling alive in the background -->
         <service
             android:name=".KeepAliveService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-        <!-- Flutter tooling flag – leave intact -->
+        <!-- Flutter tooling flag -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
-    <!-- Package-visibility exemption for ProcessTextPlugin --------------->
+    <!-- Package visibility exemption for ProcessTextPlugin -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

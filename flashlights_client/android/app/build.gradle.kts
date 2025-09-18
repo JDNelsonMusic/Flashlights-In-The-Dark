@@ -12,7 +12,7 @@ android {
 
     // SDK / NDK versions come from the Flutter wrapper variables
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "26.1.10909125"
 
     // ── Java / Kotlin toolchains ───────────────────────────────────────────────
     compileOptions {
@@ -26,18 +26,29 @@ android {
     // ── Global defaultConfig (applies to all build variants) ───────────────────
     defaultConfig {
         applicationId  = "ai.keex.flashlights_client"
-        minSdk         = flutter.minSdkVersion
+        minSdk         = maxOf(flutter.minSdkVersion, 23)
         targetSdk      = flutter.targetSdkVersion
         versionCode    = flutter.versionCode
         versionName    = flutter.versionName
+
     }
 
     buildTypes {
-        release {
-            // Signing with debug keys for now so `flutter run --release` works.
-            // Replace this with your own signingConfig for Play-store delivery.
-            signingConfig = signingConfigs.getByName("debug")
+        debug {
+            // Debug builds should NOT shrink or minify
             isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        release {
+            // Release builds can shrink+minify together
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            // keep the current signing config choice so 'flutter run --release' still works
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }

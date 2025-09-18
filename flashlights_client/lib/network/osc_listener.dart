@@ -88,8 +88,10 @@ class OscListener {
     });
 
     // Periodically announce our presence so servers can discover us.
-    _helloTimer =
-        Timer.periodic(const Duration(seconds: 2), (_) => _sendHello());
+    _helloTimer = Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => _sendHello(),
+    );
     _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
@@ -170,6 +172,9 @@ class OscListener {
     }
   }
 
+  /// Public helper so UI elements can adjust the torch directly.
+  Future<void> setTorchLevel(double level) => _setTorchLevel(level);
+
   /* -------------------------------------------------------------------- */
   /*                               Dispatcher                             */
   /* -------------------------------------------------------------------- */
@@ -177,6 +182,14 @@ class OscListener {
   Future<void> _dispatch(OSCMessage m) async {
     final myIndex = client.myIndex.value;
     debugPrint('📲 OSC <<< ${m.address}  ${m.arguments}');
+
+    final List<OSCMessage> updatedMessages = List<OSCMessage>.from(
+      client.recentMessages.value,
+    )..add(m);
+    if (updatedMessages.length > 10) {
+      updatedMessages.removeRange(0, updatedMessages.length - 10);
+    }
+    client.recentMessages.value = updatedMessages;
 
     switch (m.address) {
       case '/flash/on':
@@ -225,7 +238,7 @@ class OscListener {
             print('[OSC] Failed to load asset $assetPath: $e');
             await _player.setUrl(fileName);
           }
-            await _player.setVolume(gain.clamp(0.0, 1.0) as double);
+          await _player.setVolume(gain.clamp(0.0, 1.0) as double);
           await _player.play();
           client.audioPlaying.value = true;
           _sendAck();
@@ -258,15 +271,18 @@ class OscListener {
         final msg = SyncMessage.fromOsc(m);
         if (msg != null) {
           final ntp = msg.timestamp;
-            const eraOffset = 2208988800; // Seconds between 1900 and 1970.
-            final serverSecs = ntp - BigInt.from(eraOffset);
-            final serverMs = serverSecs.toInt() * 1000;
-            final localMs = DateTime.now().millisecondsSinceEpoch;
-            final offset = serverMs - localMs;
-            client.clockOffsetMs =
-                (client.clockOffsetMs + offset) / 2; // Simple smoothing.
-            print('[OSC] Clock offset updated to ${client.clockOffsetMs} ms');
-          }
+          const eraOffset = 2208988800; // Seconds between 1900 and 1970.
+          final serverSecs = ntp - BigInt.from(eraOffset);
+          final serverMs = serverSecs.toInt() * 1000;
+          final localMs = DateTime.now().millisecondsSinceEpoch;
+          final offset = serverMs - localMs;
+          final smoothed =
+              (client.clockOffsetMs.value + offset) / 2; // Simple smoothing.
+          client.clockOffsetMs.value = smoothed;
+          print(
+            '[OSC] Clock offset updated to ${client.clockOffsetMs.value} ms',
+          );
+        }
         break;
 
       case '/hello':
@@ -294,22 +310,19 @@ class OscListener {
           _micSubscription?.cancel();
           _micSubscription = audioStream.listen((_) {});
           client.recording.value = true;
-          Timer(
-            Duration(milliseconds: (durationSec * 1000).toInt()),
-            () async {
-              await _micSubscription?.cancel();
-              _micSubscription = null;
-              client.recording.value = false;
-              print('[OSC] Mic recording of $durationSec s completed');
-            },
-          );
+          Timer(Duration(milliseconds: (durationSec * 1000).toInt()), () async {
+            await _micSubscription?.cancel();
+            _micSubscription = null;
+            client.recording.value = false;
+            print('[OSC] Mic recording of $durationSec s completed');
+          });
           _sendAck();
         }
         break;
-      }
-
-      // Close the dispatcher function after handling all cases.
     }
+
+    // Close the dispatcher function after handling all cases.
+  }
 
   /* -------------------------------------------------------------------- */
   /*                         Discovery / Heart‑beat                        */
@@ -338,8 +351,10 @@ class OscListener {
   void _sendHello() {
     if (_socket == null) return;
 
-    final msg =
-        OSCMessage('/hello', arguments: [client.myIndex.value, client.udid]);
+    final msg = OSCMessage(
+      '/hello',
+      arguments: [client.myIndex.value, client.udid],
+    );
 
     // Primary broadcast via the socket’s predefined destination.
     try {
@@ -368,10 +383,13 @@ class OscListener {
 
             RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
                 .then((raw) {
-              raw.broadcastEnabled = true;
-              raw.send(msg.toBytes(), bcast, _oscPort);
-              raw.close();
-            }).catchError((_) {/* ignore */});
+                  raw.broadcastEnabled = true;
+                  raw.send(msg.toBytes(), bcast, _oscPort);
+                  raw.close();
+                })
+                .catchError((_) {
+                  /* ignore */
+                });
           }
         }
       }
@@ -456,5 +474,4 @@ class OscListener {
 
     print('[OSC] Listener stopped');
   }
-
 }

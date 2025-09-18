@@ -11,6 +11,7 @@ import ai.keex.flashlights_client.KeepAliveService
 import android.net.wifi.WifiManager
 import android.content.Context.WIFI_SERVICE
 import kotlin.math.roundToInt
+import android.util.Log
 
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
@@ -27,6 +28,7 @@ class MainActivity : FlutterActivity() {
                     setTorchLevel(level)
                     result.success(null)
                 } catch (e: Exception) {
+                    Log.e(TAG, "Torch channel error", e)
                     result.error("TORCH_ERROR", e.message, null)
                 }
             } else {
@@ -61,23 +63,29 @@ class MainActivity : FlutterActivity() {
 
     private fun setTorchLevel(level: Double) {
         val cm = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val cameraId = cm.cameraIdList.firstOrNull { id ->
-            val chars = cm.getCameraCharacteristics(id)
-            chars.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-        } ?: return
 
-        if (level <= 0.0) {
-            cm.setTorchMode(cameraId, false)
-            return
-        }
+        try {
+            val cameraId = cm.cameraIdList.firstOrNull { id ->
+                val chars = cm.getCameraCharacteristics(id)
+                chars.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+            } ?: throw IllegalStateException("No camera with flash available")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val max = cm.getCameraCharacteristics(cameraId)
-                .get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) ?: 1
-            var intLevel = (level * max).roundToInt().coerceIn(1, max)
-            cm.turnOnTorchWithStrengthLevel(cameraId, intLevel)
-        } else {
-            cm.setTorchMode(cameraId, true)
+            if (level <= 0.0) {
+                cm.setTorchMode(cameraId, false)
+                return
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val max = cm.getCameraCharacteristics(cameraId)
+                    .get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) ?: 1
+                val intLevel = (level * max).roundToInt().coerceIn(1, max)
+                cm.turnOnTorchWithStrengthLevel(cameraId, intLevel)
+            } else {
+                cm.setTorchMode(cameraId, true)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set torch level to $level", e)
+            throw e
         }
     }
 
@@ -103,3 +111,5 @@ class MainActivity : FlutterActivity() {
         super.onDestroy()
     }
 }
+
+private const val TAG = "FlashlightsClient"
