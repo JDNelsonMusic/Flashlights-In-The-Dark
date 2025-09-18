@@ -207,17 +207,21 @@ Have a tech lead familiar with Apple provisioning & Wi-Fi troubleshooting.
 
 ==========================================================================
 
-#Repository Tour
+# Repository Tour
+
+See [Repository Guidelines](AGENTS.md) for contributor expectations and workflow tips.
 
 flashlights-in-the-dark/
+├── AGENTS.md                  # contributor guide
 ├── flashlights_client/        # Flutter mobile app
-├── FlashlightsInTheDark_Mac/  # Swift-based conductor console
+├── FlashlightsInTheDark_MacOS/  # Swift-based conductor console
 ├── scripts/
 │   ├── choir_onboard.sh       # Android deployment & device mapping helper
 │   ├── Brewfile               # Homebrew dependencies
 │   └── …                      # misc. debugging helpers
 ├── docs/
-│   └── AGENTS.md              # deeper developer notes
+│   ├── EnableDeveloperMode.mobileconfig
+│   └── osc-schema.md          # OSC message reference
 └── README.md                  # ← you are here
 
 
@@ -432,6 +436,3 @@ Clock Synchronization: Both the Mac software and the mobile app implement a simp
 Logging and Monitoring: The Mac console logs each OSC message it sends and each “hello” it receives from devices. This is useful for debugging (for example, if one phone isn’t responding, you can see if it sent a hello or if it missed a command). We recommend saving these logs for the first few rehearsals to identify any patterns of technical issues (like a particular device that tends to disconnect – you might then swap it out).
 
 By covering the above points, this README has aimed to give both a broad conceptual understanding and a practical guide to using Flashlights In The Dark in performance. The piece represents a fusion of choral music with interactive technology, and while it introduces new logistical challenges, it offers an exciting palette of artistic possibilities. With careful preparation and the provided tools, an ensemble and its director should feel empowered to bring this innovative work to life. Enjoy exploring and please reach out to the composer/development team with any questions as you get ready to shine some lights in the dark!
-
-
-
