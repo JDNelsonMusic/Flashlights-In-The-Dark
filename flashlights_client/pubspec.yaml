@@ -1,7 +1,7 @@
 name: flashlights_client
 description: Remote torch/audio client for Flashlights-in-the-Dark
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+4
 
 environment:
   # Works with Flutter 3.19 + and Dart 3.7 +
@@ -16,12 +16,12 @@ dependencies:
   torch_light: ^1.1.0  # Flash/torch control (on/off only – no brightness)
   screen_brightness: ^2.1.5 # Control screen brightness for strobe dimming
   just_audio: ^0.10.4  # Audio playback
-  mic_stream: ^0.7.2   # Raw mic samples/recording
   permission_handler: ^11.4.0  # camera / mic permissions (iOS / Android only)
   wakelock_plus: ^1.2.5     # Keep the screen awake during performances
   shared_preferences: ^2.5.3  # Persist selected slot between launches
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0   # latest lint set for Dart 3
@@ -33,3 +33,8 @@ flutter:
 
 dependency_overrides:
   win32: ^5.14.0
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: FlashlightsInTheDark_Icons/FlashlightsInTheDark-Icon-1024.png

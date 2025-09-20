@@ -153,12 +153,11 @@ class _BootstrapState extends State<Bootstrap> {
 
   @override
   Widget build(BuildContext context) {
-    final platform =
-        Platform.isIOS
-            ? 'iOS'
-            : Platform.isAndroid
-            ? 'Android'
-            : 'Unknown';
+    final platform = Platform.isIOS
+        ? 'iOS'
+        : Platform.isAndroid
+        ? 'Android'
+        : 'Unknown';
     return RawKeyboardListener(
       focusNode: _keyboardFocusNode,
       autofocus: true,
@@ -188,8 +187,9 @@ class _BootstrapState extends State<Bootstrap> {
                         ValueListenableBuilder<bool>(
                           valueListenable: client.connected,
                           builder: (context, connected, _) {
-                            final status =
-                                connected ? 'Connected' : 'Searching…';
+                            final status = connected
+                                ? 'Connected'
+                                : 'Searching…';
                             return Text(
                               '$kAppVersion – $platform – $status',
                               textAlign: TextAlign.center,
@@ -265,15 +265,14 @@ class _BootstrapState extends State<Bootstrap> {
                               ];
                               return DropdownButton<int>(
                                 value: myIndex,
-                                items:
-                                    realSlots
-                                        .map(
-                                          (slot) => DropdownMenuItem(
-                                            value: slot,
-                                            child: Text('Slot $slot'),
-                                          ),
-                                        )
-                                        .toList(),
+                                items: realSlots
+                                    .map(
+                                      (slot) => DropdownMenuItem(
+                                        value: slot,
+                                        child: Text('Slot $slot'),
+                                      ),
+                                    )
+                                    .toList(),
                                 onChanged: (newSlot) async {
                                   if (newSlot != null) {
                                     client.myIndex.value = newSlot;
@@ -356,9 +355,8 @@ class _BootstrapState extends State<Bootstrap> {
                         _showDebugOverlay = false;
                       });
                     },
-                    onSendHello:
-                        () =>
-                            flosc.OscListener.instance.sendCustom('/hello', []),
+                    onSendHello: () =>
+                        flosc.OscListener.instance.sendCustom('/hello', []),
                   ),
                 ),
             ],
@@ -406,43 +404,38 @@ class DebugOverlay extends StatelessWidget {
               const SizedBox(height: 12),
               ValueListenableBuilder<int>(
                 valueListenable: client.myIndex,
-                builder:
-                    (context, slot, _) => Text(
-                      'Slot: $slot',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                builder: (context, slot, _) => Text(
+                  'Slot: $slot',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
-                builder:
-                    (context, connected, _) => Text(
-                      'Connected: $connected',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                builder: (context, connected, _) => Text(
+                  'Connected: $connected',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ),
               ValueListenableBuilder<double>(
                 valueListenable: client.brightness,
-                builder:
-                    (context, brightness, _) => Text(
-                      'Brightness: ${brightness.toStringAsFixed(2)}',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                builder: (context, brightness, _) => Text(
+                  'Brightness: ${brightness.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ),
               ValueListenableBuilder<bool>(
                 valueListenable: client.audioPlaying,
-                builder:
-                    (context, playing, _) => Text(
-                      'Audio playing: $playing',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                builder: (context, playing, _) => Text(
+                  'Audio playing: $playing',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ),
               ValueListenableBuilder<double>(
                 valueListenable: client.clockOffsetMs,
-                builder:
-                    (context, offset, _) => Text(
-                      'Clock offset (ms): ${offset.toStringAsFixed(2)}',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                builder: (context, offset, _) => Text(
+                  'Clock offset (ms): ${offset.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ),
               const SizedBox(height: 12),
               ElevatedButton(

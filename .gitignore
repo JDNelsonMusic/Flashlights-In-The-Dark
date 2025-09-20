@@ -74,3 +74,22 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 __MACOSX/
+# Android signing secrets
+**/android/key.properties
+*.jks
+*.keystore
+
+key.properties
+flashlights_client/android/key.properties
+android/key.properties
+
+
+
+
+
+
+
+
+
+
+

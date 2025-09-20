@@ -10,7 +10,7 @@ class OSCMessage {
   final List<Object> arguments;
 
   OSCMessage(this.address, {List<Object> arguments = const []})
-      : arguments = List<Object>.from(arguments);
+    : arguments = List<Object>.from(arguments);
 
   List<int> _stringBytes(String s) {
     final bytes = utf8.encode(s);
@@ -35,7 +35,9 @@ class OSCMessage {
       } else if (arg is String) {
         typeTags.write('s');
       } else {
-        throw ArgumentError('Unsupported OSC argument type: ${arg.runtimeType}');
+        throw ArgumentError(
+          'Unsupported OSC argument type: ${arg.runtimeType}',
+        );
       }
     }
     builder.add(_stringBytes(typeTags.toString()));
@@ -71,8 +73,12 @@ class OSCSocket {
   });
 
   Future<void> _ensureSocket() async {
-    _socket ??= await RawDatagramSocket.bind(serverAddress, serverPort,
-        reuseAddress: true, reusePort: true);
+    _socket ??= await RawDatagramSocket.bind(
+      serverAddress,
+      serverPort,
+      reuseAddress: true,
+      reusePort: true,
+    );
   }
 
   Future<void> bind() async {

@@ -25,3 +25,9 @@
 
 # mic_stream (be lenient about audio internals)
 -dontwarn android.media.**
+# === Play-Core compatibility (added by Codex) ===
+# Flutter deferred-components refer to Play Core classes in stubs.
+-dontwarn com.google.android.play.core.**
+-keep class io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager { *; }
+-keep class io.flutter.embedding.engine.FlutterJNI { *; }
+# === end ===

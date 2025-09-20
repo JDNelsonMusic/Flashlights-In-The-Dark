@@ -1,0 +1,9 @@
+Flashlights Client turns each singer’s phone into a light and sound instrument for the "Flashlights in the Dark" performance. Once connected to the conductor’s network, the app listens for Open Sound Control messages to trigger the torch, play bundled audio cues, and reflect status changes in real time. It’s purpose-built for rehearsals and live productions, keeping the device awake, honoring OSC commands instantly, and giving singers a simple status readout for their slot assignment.
+
+Key features:
+• Receives OSC messages over UDP to toggle the flashlight and trigger audio.
+• Shows connection health, assigned slot, and whether light/audio cues are active.
+• Keeps the device awake with a lightweight foreground service for reliable cues.
+• Supports Android 10+ and the latest Android 14 foreground service requirements.
+
+To participate in a performance, install the app, join the closed choir Wi‑Fi network, and select your assigned slot. The conductor’s Mac console broadcasts the OSC cues and the app responds automatically, so singers can focus entirely on the music.

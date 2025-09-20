@@ -14,12 +14,14 @@ import 'package:torch_light/torch_light.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mic_stream/mic_stream.dart' as mic;
+
+import '../services/mic_input.dart';
 
 import '../model/client_state.dart';
 
 /// Native channel to control torch brightness.
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
+const bool kEnableMic = false;
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
 const int _oscPort = 9000;
@@ -53,6 +55,7 @@ class OscListener {
   Timer? _helloTimer;
   late final AudioPlayer _player = AudioPlayer();
   StreamSubscription<List<int>>? _micSubscription;
+  final MicInput _mic = MicInputStub();
   bool _running = false;
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
@@ -256,8 +259,9 @@ class OscListener {
 
       // Dynamic slot assignment.
       case '/set-slot':
-        final newSlot =
-            m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
+        final newSlot = m.arguments.isNotEmpty
+            ? (m.arguments[0] as int)
+            : myIndex;
         if (newSlot != client.myIndex.value) {
           client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');
@@ -298,23 +302,23 @@ class OscListener {
       case '/mic/record':
         final msg = MicRecord.fromOsc(m);
         if (msg != null && msg.index == myIndex) {
+          if (!kEnableMic) {
+            print('[OSC] Mic disabled (stub).');
+            _sendAck();
+            break;
+          }
           final durationSec = msg.maxDuration;
-          print('[OSC] Starting mic recording for $durationSec s');
-          await mic.MicStream.shouldRequestPermission(true);
-          final audioStream = mic.MicStream.microphone(
-            audioSource: mic.AudioSource.DEFAULT,
-            sampleRate: 44100,
-            channelConfig: mic.ChannelConfig.CHANNEL_IN_MONO,
-            audioFormat: mic.AudioFormat.ENCODING_PCM_16BIT,
-          );
+          print('[OSC] Starting mic recording (stub) for $durationSec s');
+          final audioStream = _mic.start(sampleRate: 44100);
           _micSubscription?.cancel();
           _micSubscription = audioStream.listen((_) {});
           client.recording.value = true;
           Timer(Duration(milliseconds: (durationSec * 1000).toInt()), () async {
             await _micSubscription?.cancel();
             _micSubscription = null;
+            await _mic.stop();
             client.recording.value = false;
-            print('[OSC] Mic recording of $durationSec s completed');
+            print('[OSC] Mic recording of $durationSec s completed (stub)');
           });
           _sendAck();
         }
