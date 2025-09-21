@@ -146,6 +146,14 @@ scripts/choir_onboard.sh
 
 </details>
 
+### Light Chorus Spreadsheet Builder
+
+- Create or activate a Python 3.11+ virtualenv inside the repo and install the helper app dependencies:
+  `python3 -m venv .venv && .venv/bin/pip install -r light_chorus_app/requirements.txt`.
+- Launch the GUI with `python light_chorus_app_gui.py` (run from the repository root so relative paths resolve).
+- Click **Browse…** to select a Light Chorus MIDI export (e.g. `flashlights_client/FlashlightsInTheDark_SingerScore24.midi`), pick an output `.xlsx`, choose the octave numbering style, then press **Generate Spreadsheet**.
+- The tool writes an "Event Recipes" style workbook; each populated cell lists the pitch on the first line and the corresponding `primerTones/shortXX.mp3` asset on the second.
+
 
 
 # Running a Performance
