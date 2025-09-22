@@ -19,10 +19,19 @@ class NativeAudio {
 
     final assetKey = 'available-sounds/primerTones/$canonical';
     final clamped = volume.clamp(0.0, 1.0);
+    Uint8List bytes;
+    try {
+      bytes = await _ensureBytes(canonical, assetKey);
+    } catch (e, st) {
+      debugPrint('[NativeAudio] Failed to load asset $assetKey: $e');
+      debugPrint('$st');
+      return;
+    }
     final payload = <String, dynamic>{
       'fileName': canonical,
       'assetKey': assetKey,
       'volume': clamped,
+      'bytes': bytes,
     };
     await _channel.invokeMethod('playPrimerTone', payload);
     debugPrint('[NativeAudio] Requesting primer: $canonical (asset: $assetKey) @ vol=$clamped');
@@ -50,5 +59,33 @@ class NativeAudio {
       value = '$value.mp3';
     }
     return value;
+  }
+
+  static final Map<String, Uint8List> _byteCache = <String, Uint8List>{};
+  static final Map<String, Future<Uint8List>> _loadingCache = <String, Future<Uint8List>>{};
+
+  static Future<Uint8List> _ensureBytes(String canonical, String assetKey) {
+    final cached = _byteCache[canonical];
+    if (cached != null) {
+      return SynchronousFuture<Uint8List>(cached);
+    }
+    final pending = _loadingCache[canonical];
+    if (pending != null) {
+      return pending;
+    }
+    final future = _loadAndCacheBytes(canonical, assetKey);
+    _loadingCache[canonical] = future;
+    return future;
+  }
+
+  static Future<Uint8List> _loadAndCacheBytes(String canonical, String assetKey) async {
+    try {
+      final data = await rootBundle.load(assetKey);
+      final bytes = data.buffer.asUint8List();
+      _byteCache[canonical] = bytes;
+      return bytes;
+    } finally {
+      _loadingCache.remove(canonical);
+    }
   }
 }

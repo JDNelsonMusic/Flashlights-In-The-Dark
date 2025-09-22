@@ -15,6 +15,8 @@ import android.net.wifi.WifiManager
 import android.content.Context.WIFI_SERVICE
 import kotlin.math.roundToInt
 import android.util.Log
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
@@ -76,7 +78,9 @@ class MainActivity : FlutterActivity() {
                         return@setMethodCallHandler
                     }
                     val volume = (call.argument<Number>("volume") ?: 1.0).toFloat()
-                    playPrimerTone(fileName, volume)
+                    val assetKey = call.argument<String>("assetKey")
+                    val bytes = call.argument<ByteArray>("bytes")
+                    playPrimerTone(fileName, volume, assetKey, bytes)
                     result.success(null)
                 }
                 "stopPrimerTone" -> {
@@ -128,7 +132,12 @@ class MainActivity : FlutterActivity() {
         multicastLock = lock
     }
 
-    private fun playPrimerTone(fileName: String, volume: Float) {
+    private fun playPrimerTone(
+        fileName: String,
+        volume: Float,
+        assetKeyArg: String?,
+        bytes: ByteArray?
+    ) {
         try {
             var trimmed = fileName.trim()
             val parts = trimmed.split("/")
@@ -144,33 +153,44 @@ class MainActivity : FlutterActivity() {
             if (!canonical.lowercase().endsWith(".mp3")) {
                 canonical += ".mp3"
             }
-            val assetKey = "available-sounds/primerTones/$canonical"
-            val flutterLoader = FlutterInjector.instance().flutterLoader()
-            val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
+            val assetKey = assetKeyArg ?: "available-sounds/primerTones/$canonical"
 
             primerPlayer?.release()
             primerPlayer = null
 
-            val assetManager = applicationContext.assets
-            val descriptor = assetManager.openFd(lookupKey)
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            )
 
-            try {
-                val mp = MediaPlayer()
-                mp.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
-                mp.setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                val clampedVolume = volume.coerceIn(0f, 1f)
-                mp.setVolume(clampedVolume, clampedVolume)
-                mp.prepare()
-                mp.start()
-                primerPlayer = mp
-            } finally {
-                descriptor.close()
+            if (bytes != null) {
+                val cacheRoot = File(applicationContext.cacheDir, "primerTones")
+                if (!cacheRoot.exists()) {
+                    cacheRoot.mkdirs()
+                }
+                val cacheFile = File(cacheRoot, canonical)
+                if (!cacheFile.exists() || cacheFile.length().toInt() != bytes.size) {
+                    FileOutputStream(cacheFile).use { output ->
+                        output.write(bytes)
+                    }
+                }
+                mp.setDataSource(cacheFile.absolutePath)
+            } else {
+                val flutterLoader = FlutterInjector.instance().flutterLoader()
+                val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
+                applicationContext.assets.openFd(lookupKey).use { descriptor ->
+                    mp.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                }
             }
+
+            val clampedVolume = volume.coerceIn(0f, 1f)
+            mp.setVolume(clampedVolume, clampedVolume)
+            mp.prepare()
+            mp.start()
+            primerPlayer = mp
         } catch (e: Exception) {
             e.printStackTrace()
         }

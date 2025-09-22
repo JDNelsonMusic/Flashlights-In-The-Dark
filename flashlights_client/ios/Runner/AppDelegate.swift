@@ -81,7 +81,13 @@ import AVFoundation
         }
         let volume = (args["volume"] as? Double) ?? 1.0
         let assetKey = args["assetKey"] as? String
-        self.playPrimerTone(fileName: fileName, assetKey: assetKey, volume: volume)
+        let payload = args["bytes"] as? FlutterStandardTypedData
+        self.playPrimerTone(
+          fileName: fileName,
+          assetKey: assetKey,
+          volume: volume,
+          data: payload?.data
+        )
         result(nil)
       case "stopPrimerTone":
         self.stopPrimerTone()
@@ -133,11 +139,20 @@ import AVFoundation
     }
   }
 
-  private func playPrimerTone(fileName: String, assetKey: String?, volume: Double) {
+  private func playPrimerTone(fileName: String, assetKey: String?, volume: Double, data: Data?) {
     do {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
       try session.setActive(true)
+
+      if let buffer = data {
+        primerAudioPlayer?.stop()
+        primerAudioPlayer = try AVAudioPlayer(data: buffer)
+        primerAudioPlayer?.volume = Float(volume)
+        primerAudioPlayer?.prepareToPlay()
+        primerAudioPlayer?.play()
+        return
+      }
 
       var trimmed = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
       if let slash = trimmed.lastIndex(of: "/") {
