@@ -18,6 +18,7 @@ import 'color_theme.dart';
 import 'version.dart';
 import 'model/client_state.dart';
 import 'model/event_recipe.dart';
+// Removed PrimerToneLibrary; native audio handles asset lookup.
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {

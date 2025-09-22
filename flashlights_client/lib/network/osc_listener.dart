@@ -73,7 +73,7 @@ class OscListener {
       final playbackToken = ++_playbackToken;
       await NativeAudio.playPrimerTone(fileName, volume);
 
-      debugPrint('[OSC] Playing via native audio for $fileName @ vol=$volume');
+      debugPrint('[OSC] Native playback invoked: ${fileName.trim()} @ vol=$volume');
       client.audioPlaying.value = true;
       unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
         if (_playbackToken == playbackToken) {
@@ -81,7 +81,7 @@ class OscListener {
         }
       }));
     } catch (e) {
-      debugPrint('[OSC] Playback failed for $fileName: $e');
+      debugPrint('[OSC] Native playback failed for $fileName: $e');
       client.audioPlaying.value = false;
     }
     if (sendAck) {

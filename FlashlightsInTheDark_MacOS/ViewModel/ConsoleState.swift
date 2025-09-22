@@ -1358,19 +1358,34 @@ extension ConsoleState {
         guard isBroadcasting else { return }
         do {
             let broadcaster = try await broadcasterTask.value
-            for (color, assignment) in event.primerAssignments {
-                guard let fileName = assignment.oscFileName else { continue }
-                var targets = Set(slots(for: color))
-                targets.insert(color.groupIndex)
-                guard !targets.isEmpty else { continue }
-                for slot in targets {
-                    let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0)
-                    let osc = message.encode()
-                    try await broadcaster.send(osc, toSlot: slot)
-                    try await broadcaster.send(osc)
-                    await MainActor.run {
-                        self.lastLog = "/audio/play slot \(slot) → \(fileName)"
+            // Send all primer triggers concurrently instead of sequentially.
+            // We build a list of async tasks (one per slot and color) and then await them together.
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for (color, assignment) in event.primerAssignments {
+                    guard let fileName = assignment.oscFileName else { continue }
+                    var targets = Set(slots(for: color))
+                    // Include the group index so colour-only listeners also trigger
+                    targets.insert(color.groupIndex)
+                    guard !targets.isEmpty else { continue }
+                    for slot in targets {
+                        let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0)
+                        let osc = message.encode()
+                        // Create two concurrent tasks: one directed to the slot and one broadcast
+                        group.addTask {
+                            try await broadcaster.send(osc, toSlot: slot)
+                        }
+                        group.addTask {
+                            try await broadcaster.send(osc)
+                        }
                     }
+                }
+                // Wait for all sends to complete
+                try await group.waitForAll()
+            }
+            // Update log once at the end
+            if let first = event.primerAssignments.first, let fileName = first.value.oscFileName {
+                await MainActor.run {
+                    self.lastLog = "▶︎ Sent primers for Event #\(event.id) (\(fileName))"
                 }
             }
         } catch {

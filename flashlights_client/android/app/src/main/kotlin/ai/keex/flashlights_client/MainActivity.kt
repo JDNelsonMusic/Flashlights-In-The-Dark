@@ -6,7 +6,6 @@ import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import io.flutter.FlutterInjector
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -70,13 +69,13 @@ class MainActivity : FlutterActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "playPrimerTone" -> {
-                    val assetKey = call.argument<String>("assetKey")
-                    if (assetKey == null) {
-                        result.error("INVALID_ARGUMENTS", "assetKey missing", null)
+                    val fileName = call.argument<String>("fileName")
+                    if (fileName == null) {
+                        result.error("INVALID_ARGUMENTS", "fileName missing", null)
                         return@setMethodCallHandler
                     }
                     val volume = (call.argument<Number>("volume") ?: 1.0).toFloat()
-                    playPrimerTone(assetKey, volume)
+                    playPrimerTone(fileName, volume)
                     result.success(null)
                 }
                 "stopPrimerTone" -> {
@@ -128,29 +127,44 @@ class MainActivity : FlutterActivity() {
         multicastLock = lock
     }
 
-    private fun playPrimerTone(assetKey: String, volume: Float) {
+    private fun playPrimerTone(fileName: String, volume: Float) {
         try {
-            val flutterLoader = FlutterInjector.instance().flutterLoader()
-            val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
+            var trimmed = fileName.trim()
+            val parts = trimmed.split("/")
+            if (parts.isNotEmpty()) {
+                trimmed = parts.last()
+            }
+            val lower = trimmed.lowercase()
+            var canonical = when {
+                lower.startsWith("short") -> "Short" + trimmed.substring(5)
+                lower.startsWith("long") -> "Long" + trimmed.substring(4)
+                else -> trimmed
+            }
+            if (!canonical.lowercase().endsWith(".mp3")) {
+                canonical += ".mp3"
+            }
+            val path = "available-sounds/primerTones/$canonical"
+
+            primerPlayer?.release()
+            primerPlayer = null
 
             val assetManager = applicationContext.assets
-            val descriptor = assetManager.openFd(lookupKey)
+            val descriptor = assetManager.openFd(path)
 
             try {
-                primerPlayer?.release()
-                primerPlayer = MediaPlayer().apply {
-                    setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
-                    setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .build()
-                    )
-                    val clampedVolume = volume.coerceIn(0f, 1f)
-                    setVolume(clampedVolume, clampedVolume)
-                    prepare()
-                    start()
-                }
+                val mp = MediaPlayer()
+                mp.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                mp.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                val clampedVolume = volume.coerceIn(0f, 1f)
+                mp.setVolume(clampedVolume, clampedVolume)
+                mp.prepare()
+                mp.start()
+                primerPlayer = mp
             } finally {
                 descriptor.close()
             }

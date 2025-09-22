@@ -74,14 +74,14 @@ import AVFoundation
       case "playPrimerTone":
         guard
           let args = call.arguments as? [String: Any],
-          let assetKey = args["assetKey"] as? String
+          let fileName = args["fileName"] as? String
         else {
-          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected assetKey", details: nil))
+          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected fileName", details: nil))
           return
         }
         let volume = (args["volume"] as? Double) ?? 1.0
-        let fallbackName = (args["fileName"] as? String) ?? assetKey
-        self.playPrimerTone(assetKey: assetKey, fallbackName: fallbackName, volume: volume)
+        let assetKey = args["assetKey"] as? String
+        self.playPrimerTone(fileName: fileName, assetKey: assetKey, volume: volume)
         result(nil)
       case "stopPrimerTone":
         self.stopPrimerTone()
@@ -133,56 +133,96 @@ import AVFoundation
     }
   }
 
-  private func playPrimerTone(assetKey: String, fallbackName: String, volume: Double) {
-    guard let controller = flutterController else {
-      NSLog("Primer playback skipped – no Flutter controller")
-      return
-    }
-
+  private func playPrimerTone(fileName: String, assetKey: String?, volume: Double) {
     do {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(
-        .playback,
+        .playAndRecord,
         mode: .default,
-        options: [.defaultToSpeaker, .mixWithOthers]
+        options: [.defaultToSpeaker]
       )
       try session.setActive(true)
-    } catch {
-      NSLog("Failed to activate audio session: \(error)")
-    }
 
-    let resolvedKey = controller.lookupKey(forAsset: assetKey)
-    let bundleRoot = Bundle.main.bundlePath as NSString
-    var candidateKeys: [String] = [resolvedKey]
-    if !resolvedKey.hasPrefix("Frameworks/") {
-      candidateKeys.append("Frameworks/App.framework/flutter_assets/\(assetKey)")
-    }
-    candidateKeys.append(assetKey)
-
-    var finalPath: String?
-    for key in candidateKeys {
-      let candidate = bundleRoot.appendingPathComponent(key)
-      if FileManager.default.fileExists(atPath: candidate) {
-        finalPath = candidate
-        break
+      var trimmed = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+      if let slash = trimmed.lastIndex(of: "/") {
+        trimmed = String(trimmed[trimmed.index(after: slash)...])
       }
-    }
+      if trimmed.lowercased().hasPrefix("short") {
+        trimmed = "Short" + trimmed.dropFirst(5)
+      } else if trimmed.lowercased().hasPrefix("long") {
+        trimmed = "Long" + trimmed.dropFirst(4)
+      }
+      if !trimmed.lowercased().hasSuffix(".mp3") {
+        trimmed += ".mp3"
+      }
 
-    guard let finalPath = finalPath else {
-      NSLog("Primer file not found: \(assetKey) (fallback: \(fallbackName))")
-      return
-    }
+      let canonicalKey = (assetKey ?? "available-sounds/primerTones/\(trimmed)")
+        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+      let fm = FileManager.default
 
-    do {
-      let url = URL(fileURLWithPath: finalPath)
+      var candidates = [URL]()
+
+      func appendCandidate(_ url: URL?) {
+        guard let url else { return }
+        candidates.append(url)
+      }
+
+      if let controller = flutterController {
+        let lookup = controller.lookupKey(forAsset: canonicalKey)
+        appendCandidate(Bundle.main.bundleURL.appendingPathComponent(lookup))
+
+        if let privateFrameworks = Bundle.main.privateFrameworksURL?
+          .appendingPathComponent("App.framework/flutter_assets") {
+          appendCandidate(privateFrameworks.appendingPathComponent(lookup))
+        }
+      }
+
+      if let privateFrameworks = Bundle.main.privateFrameworksURL?
+        .appendingPathComponent("App.framework/flutter_assets") {
+        appendCandidate(privateFrameworks.appendingPathComponent(canonicalKey))
+        appendCandidate(privateFrameworks
+          .appendingPathComponent("available-sounds/primerTones/\(trimmed)"))
+      }
+
+      appendCandidate(Bundle.main.bundleURL
+        .appendingPathComponent("flutter_assets/\(canonicalKey)"))
+      appendCandidate(Bundle.main.bundleURL
+        .appendingPathComponent("flutter_assets/available-sounds/primerTones/\(trimmed)"))
+      appendCandidate(Bundle.main.bundleURL
+        .appendingPathComponent("Frameworks/App.framework/flutter_assets/\(canonicalKey)"))
+      appendCandidate(Bundle.main.bundleURL
+        .appendingPathComponent("Frameworks/App.framework/flutter_assets/available-sounds/primerTones/\(trimmed)"))
+
+      if let alt = Bundle.main.url(forResource: trimmed,
+                                   withExtension: nil,
+                                   subdirectory: "available-sounds/primerTones") {
+        appendCandidate(alt)
+      }
+
+      var soundURL: URL? = nil
+      var seenPaths = Set<String>()
+      for url in candidates {
+        let path = url.path
+        if seenPaths.contains(path) { continue }
+        seenPaths.insert(path)
+        if fm.fileExists(atPath: path) {
+          soundURL = url
+          break
+        }
+      }
+
+      guard let finalURL = soundURL else {
+        NSLog("Primer file not found: \(fileName) (canonical: \(trimmed)) assetKey: \(assetKey ?? "nil")")
+        return
+      }
+
       primerAudioPlayer?.stop()
-      primerAudioPlayer = try AVAudioPlayer(contentsOf: url)
-      let clampedVolume = Float(min(max(volume, 0.0), 1.0))
-      primerAudioPlayer?.volume = clampedVolume
+      primerAudioPlayer = try AVAudioPlayer(contentsOf: finalURL)
+      primerAudioPlayer?.volume = Float(volume)
       primerAudioPlayer?.prepareToPlay()
       primerAudioPlayer?.play()
     } catch {
-      NSLog("Failed to play primer tone \(assetKey): \(error)")
+      NSLog("Failed to play primer tone \(fileName): \(error)")
     }
   }
 
