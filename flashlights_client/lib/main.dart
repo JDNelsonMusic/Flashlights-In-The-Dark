@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 import 'dart:async' show Timer, unawaited;
 
 import 'package:audio_session/audio_session.dart' as audio_session;
-import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -66,32 +65,6 @@ Future<void> _bootstrapNative() async {
       ),
     );
     await session.setActive(true);
-    // Ensure audioplayers routes through the speaker on iOS and gains focus on Android.
-    await ap.AudioPlayer.global.setAudioContext(
-      const ap.AudioContext(
-        iOS: ap.AudioContextIOS(
-          category: ap.AVAudioSessionCategory.playAndRecord,
-          options: <ap.AVAudioSessionOptions>[
-            ap.AVAudioSessionOptions.defaultToSpeaker,
-            ap.AVAudioSessionOptions.mixWithOthers,
-          ],
-        ),
-        android: ap.AudioContextAndroid(
-          usageType: ap.AndroidUsageType.media,
-          contentType: ap.AndroidContentType.music,
-          audioFocus: ap.AndroidAudioFocus.gain,
-        ),
-      ),
-    );
-    ap.AudioCache.instance.prefix = '';
-    if (Platform.isIOS) {
-      const MethodChannel audioChannel = MethodChannel('ai.keex.flashlights/audio');
-      try {
-        await audioChannel.invokeMethod('forceSpeaker');
-      } on PlatformException catch (e) {
-        debugPrint('[AudioSession] forceSpeaker failed: $e');
-      }
-    }
   } catch (e) {
     debugPrint('[AudioSession] configuration failed: $e');
   }

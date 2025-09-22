@@ -4,6 +4,9 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import io.flutter.FlutterInjector
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -15,6 +18,7 @@ import android.util.Log
 
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
+    private var primerPlayer: MediaPlayer? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -59,6 +63,29 @@ class MainActivity : FlutterActivity() {
                 result.notImplemented()
             }
         }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "ai.keex.flashlights/audioNative"
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "playPrimerTone" -> {
+                    val assetKey = call.argument<String>("assetKey")
+                    if (assetKey == null) {
+                        result.error("INVALID_ARGUMENTS", "assetKey missing", null)
+                        return@setMethodCallHandler
+                    }
+                    val volume = (call.argument<Number>("volume") ?: 1.0).toFloat()
+                    playPrimerTone(assetKey, volume)
+                    result.success(null)
+                }
+                "stopPrimerTone" -> {
+                    stopPrimerTone()
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     private fun setTorchLevel(level: Double) {
@@ -101,6 +128,43 @@ class MainActivity : FlutterActivity() {
         multicastLock = lock
     }
 
+    private fun playPrimerTone(assetKey: String, volume: Float) {
+        try {
+            val flutterLoader = FlutterInjector.instance().flutterLoader()
+            val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
+
+            val assetManager = applicationContext.assets
+            val descriptor = assetManager.openFd(lookupKey)
+
+            try {
+                primerPlayer?.release()
+                primerPlayer = MediaPlayer().apply {
+                    setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    val clampedVolume = volume.coerceIn(0f, 1f)
+                    setVolume(clampedVolume, clampedVolume)
+                    prepare()
+                    start()
+                }
+            } finally {
+                descriptor.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun stopPrimerTone() {
+        primerPlayer?.stop()
+        primerPlayer?.release()
+        primerPlayer = null
+    }
+
     override fun onDestroy() {
         multicastLock?.let {
             if (it.isHeld) {
@@ -108,6 +172,7 @@ class MainActivity : FlutterActivity() {
             }
         }
         multicastLock = null
+        stopPrimerTone()
         super.onDestroy()
     }
 }

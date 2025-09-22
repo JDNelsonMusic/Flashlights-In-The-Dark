@@ -1,19 +1,20 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Caches primer tone assets in memory for low-latency playback.
+/// Lightweight index for primer tone assets.
+///
+/// The native audio layers expect canonical asset paths when triggering
+/// playback.  This service normalises incoming sample names (case-insensitive,
+/// with or without folder prefixes) and maps them to the exact asset key that
+/// Flutter bundled.
 class PrimerToneLibrary {
   PrimerToneLibrary._();
 
   static final PrimerToneLibrary instance = PrimerToneLibrary._();
 
   final Map<String, String> _assetByKey = <String, String>{};
-  final Map<String, Future<DeviceFileSource?>> _sourceByKey =
-      <String, Future<DeviceFileSource?>>{};
-  final AudioCache _cache = AudioCache(prefix: '');
   Future<void>? _warmUpFuture;
 
   Future<void> warmUp() {
@@ -27,7 +28,7 @@ class PrimerToneLibrary {
         .where((asset) => asset.startsWith('available-sounds/primerTones/'));
 
     for (final asset in assets) {
-      final canonical = _canonicalKey(asset);
+      final canonical = canonicalKey(asset);
       _assetByKey.putIfAbsent(canonical, () => asset);
     }
 
@@ -36,7 +37,7 @@ class PrimerToneLibrary {
 
   Future<String?> assetForSample(String sample) async {
     await warmUp();
-    final canonical = _canonicalKey(sample);
+    final canonical = canonicalKey(sample);
     final asset = _assetByKey[canonical];
     if (asset == null) {
       debugPrint('[PrimerToneLibrary] Missing asset for "$sample" (key: $canonical)');
@@ -44,42 +45,9 @@ class PrimerToneLibrary {
     return asset;
   }
 
-  Future<DeviceFileSource?> sourceForSample(String sample) async {
-    await warmUp();
-    final canonical = _canonicalKey(sample);
-    if (_sourceByKey.containsKey(canonical)) {
-      return _sourceByKey[canonical];
-    }
-    final asset = _assetByKey[canonical];
-    if (asset == null) {
-      debugPrint('[PrimerToneLibrary] Missing asset for "$sample" (key: $canonical)');
-      return null;
-    }
-    final loader = _loadDeviceSource(asset, canonical);
-    _sourceByKey[canonical] = loader;
-    return loader;
-  }
-
-  Future<DeviceFileSource?> _loadDeviceSource(
-    String asset,
-    String canonical,
-  ) async {
-    try {
-      final path = await _cache.loadPath(asset);
-      if (path.isEmpty) {
-        debugPrint('[PrimerToneLibrary] Cached path empty for $asset');
-        return null;
-      }
-      return DeviceFileSource(path);
-    } catch (e, stack) {
-      debugPrint('[PrimerToneLibrary] Failed to cache $asset: $e');
-      debugPrint('$stack');
-      _sourceByKey.remove(canonical);
-      return null;
-    }
-  }
-
-  String _canonicalKey(String raw) {
+  /// Normalises a primer sample name so lookups remain case-insensitive and
+  /// ignore folder prefixes.
+  String canonicalKey(String raw) {
     var t = raw.trim().replaceAll('\\', '/');
     if (t.startsWith('assets/')) {
       t = t.substring('assets/'.length);

@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:audio_session/audio_session.dart' as audio_session;
-import 'package:audioplayers/audioplayers.dart' as ap;
 import 'osc_packet.dart';
 import 'osc_messages.dart';
 import 'package:torch_light/torch_light.dart';
@@ -22,6 +21,8 @@ import '../model/client_state.dart';
 
 /// Native channel to control torch brightness.
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
+const MethodChannel _nativeAudioChannel =
+    MethodChannel('ai.keex.flashlights/audioNative');
 const bool kEnableMic = false;
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
@@ -48,75 +49,27 @@ OSCSocket _createBroadcastSocket({
 
 /// Singleton OSC listener handling flash / audio / mic / sync cues.
 class OscListener {
-  OscListener._() {
-    _player.audioCache.prefix = '';
-    _playerStateSubscription =
-        _player.onPlayerStateChanged.listen((ap.PlayerState state) {
-      if (state == ap.PlayerState.completed || state == ap.PlayerState.stopped) {
-        client.audioPlaying.value = false;
-        unawaited(_player.stop());
-      }
-    });
-    unawaited(_player.setReleaseMode(ap.ReleaseMode.stop));
-    unawaited(_player.setPlayerMode(ap.PlayerMode.mediaPlayer));
-    unawaited(_player.setAudioContext(
-      const ap.AudioContext(
-        iOS: ap.AudioContextIOS(
-          category: ap.AVAudioSessionCategory.playAndRecord,
-          options: <ap.AVAudioSessionOptions>[
-            ap.AVAudioSessionOptions.defaultToSpeaker,
-            ap.AVAudioSessionOptions.mixWithOthers,
-          ],
-        ),
-        android: ap.AudioContextAndroid(
-          usageType: ap.AndroidUsageType.media,
-          contentType: ap.AndroidContentType.music,
-          audioFocus: ap.AndroidAudioFocus.gain,
-        ),
-      ),
-    ));
-  }
+  OscListener._();
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
   RawDatagramSocket? _recvSocket;
   Timer? _helloTimer;
-  final ap.AudioPlayer _player = ap.AudioPlayer();
+  int _playbackToken = 0;
   StreamSubscription<List<int>>? _micSubscription;
-  StreamSubscription<ap.PlayerState>? _playerStateSubscription;
   final MicInput _mic = MicInputStub();
   bool _running = false;
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
-
-  String _assetPathForSample(String fileName) {
-    var sample = fileName.trim();
-    if (sample.isEmpty) {
-      return sample;
-    }
-    if (sample.startsWith('available-sounds/')) {
-      sample = sample.substring('available-sounds/'.length);
-    }
-    if (sample.startsWith('primerTones/')) {
-      sample = sample.substring('primerTones/'.length);
-    }
-    final lower = sample.toLowerCase();
-    if (lower.startsWith('short')) {
-      sample = 'Short${sample.substring(5)}';
-    } else if (lower.startsWith('long')) {
-      sample = 'Long${sample.substring(4)}';
-    }
-    return 'available-sounds/primerTones/$sample';
-  }
 
   Future<void> _playPrimer(
     String fileName,
     double gain, {
     bool sendAck = false,
   }) async {
-    final assetKey = _assetPathForSample(fileName);
-    if (assetKey.isEmpty) {
-      debugPrint('[OSC] Primer tone skipped: "$fileName" produced empty path');
+    final assetKey = await PrimerToneLibrary.instance.assetForSample(fileName);
+    if (assetKey == null || assetKey.isEmpty) {
+      debugPrint('[OSC] Primer tone asset unavailable for $fileName');
       if (sendAck) {
         _sendAck();
       }
@@ -126,26 +79,24 @@ class OscListener {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
 
-      final deviceSource =
-          await PrimerToneLibrary.instance.sourceForSample(fileName);
-      if (deviceSource == null) {
-        debugPrint('[OSC] Primer tone asset unavailable for $fileName (expected: $assetKey)');
-        if (sendAck) {
-          _sendAck();
-        }
-        return;
-      }
-
-      await _player.stop();
-
       final volume = gain.clamp(0.0, 1.0).toDouble();
-      await _player.setVolume(volume);
-      await _player.play(deviceSource, volume: volume);
+      final playbackToken = ++_playbackToken;
+      await _nativeAudioChannel.invokeMethod('playPrimerTone', <String, dynamic>{
+        'assetKey': assetKey,
+        'fileName': fileName,
+        'volume': volume,
+      });
 
-      debugPrint('[OSC] Playing primer tone: ${deviceSource.path} @ vol=$volume');
+      debugPrint('[OSC] Playing via native audio: $assetKey @ vol=$volume');
       client.audioPlaying.value = true;
+      unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
+        if (_playbackToken == playbackToken) {
+          client.audioPlaying.value = false;
+        }
+      }));
     } catch (e) {
       debugPrint('[OSC] Playback failed for $assetKey: $e');
+      client.audioPlaying.value = false;
     }
     if (sendAck) {
       _sendAck();
@@ -342,7 +293,12 @@ class OscListener {
         final msg = AudioStop.fromOsc(m);
         if (msg != null &&
             client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
-          await _player.stop();
+          _playbackToken++;
+          try {
+            await _nativeAudioChannel.invokeMethod('stopPrimerTone');
+          } catch (e) {
+            debugPrint('[OSC] Native stop failed: $e');
+          }
           client.audioPlaying.value = false;
           _sendAck();
         }
@@ -553,10 +509,12 @@ class OscListener {
     _micSubscription = null;
     client.recording.value = false;
 
-    await _playerStateSubscription?.cancel();
-    _playerStateSubscription = null;
-    // Dispose of the audio player and mark the listener as no longer running.
-    await _player.dispose();
+    try {
+      await _nativeAudioChannel.invokeMethod('stopPrimerTone');
+    } catch (e) {
+      debugPrint('[OSC] Failed to stop native primer playback: $e');
+    }
+    client.audioPlaying.value = false;
     _running = false;
 
     // Reset screen brightness to default and clear brightness state.
