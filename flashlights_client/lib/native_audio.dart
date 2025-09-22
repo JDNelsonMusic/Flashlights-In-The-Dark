@@ -19,11 +19,12 @@ class NativeAudio {
 
     final assetKey = 'available-sounds/primerTones/$canonical';
     final clamped = volume.clamp(0.0, 1.0);
-    await _channel.invokeMethod('playPrimerTone', {
+    final payload = <String, dynamic>{
       'fileName': canonical,
       'assetKey': assetKey,
       'volume': clamped,
-    });
+    };
+    await _channel.invokeMethod('playPrimerTone', payload);
     debugPrint('[NativeAudio] Requesting primer: $canonical (asset: $assetKey) @ vol=$clamped');
   }
 
@@ -32,6 +33,7 @@ class NativeAudio {
     await _channel.invokeMethod('stopPrimerTone');
   }
 
+  /// Normalise a primer tone filename so native code can locate the asset.
   static String _canonicalFileName(String raw) {
     var value = raw.trim();
     if (value.isEmpty) return '';

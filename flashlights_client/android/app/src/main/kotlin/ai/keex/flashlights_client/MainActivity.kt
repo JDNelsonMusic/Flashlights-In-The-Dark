@@ -6,6 +6,7 @@ import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import io.flutter.FlutterInjector
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -143,13 +144,15 @@ class MainActivity : FlutterActivity() {
             if (!canonical.lowercase().endsWith(".mp3")) {
                 canonical += ".mp3"
             }
-            val path = "available-sounds/primerTones/$canonical"
+            val assetKey = "available-sounds/primerTones/$canonical"
+            val flutterLoader = FlutterInjector.instance().flutterLoader()
+            val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
 
             primerPlayer?.release()
             primerPlayer = null
 
             val assetManager = applicationContext.assets
-            val descriptor = assetManager.openFd(path)
+            val descriptor = assetManager.openFd(lookupKey)
 
             try {
                 val mp = MediaPlayer()

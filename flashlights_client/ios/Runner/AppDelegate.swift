@@ -136,11 +136,7 @@ import AVFoundation
   private func playPrimerTone(fileName: String, assetKey: String?, volume: Double) {
     do {
       let session = AVAudioSession.sharedInstance()
-      try session.setCategory(
-        .playAndRecord,
-        mode: .default,
-        options: [.defaultToSpeaker]
-      )
+      try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
       try session.setActive(true)
 
       var trimmed = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -158,10 +154,8 @@ import AVFoundation
 
       let canonicalKey = (assetKey ?? "available-sounds/primerTones/\(trimmed)")
         .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-      let fm = FileManager.default
 
       var candidates = [URL]()
-
       func appendCandidate(_ url: URL?) {
         guard let url else { return }
         candidates.append(url)
@@ -170,7 +164,6 @@ import AVFoundation
       if let controller = flutterController {
         let lookup = controller.lookupKey(forAsset: canonicalKey)
         appendCandidate(Bundle.main.bundleURL.appendingPathComponent(lookup))
-
         if let privateFrameworks = Bundle.main.privateFrameworksURL?
           .appendingPathComponent("App.framework/flutter_assets") {
           appendCandidate(privateFrameworks.appendingPathComponent(lookup))
@@ -189,17 +182,10 @@ import AVFoundation
       appendCandidate(Bundle.main.bundleURL
         .appendingPathComponent("flutter_assets/available-sounds/primerTones/\(trimmed)"))
       appendCandidate(Bundle.main.bundleURL
-        .appendingPathComponent("Frameworks/App.framework/flutter_assets/\(canonicalKey)"))
-      appendCandidate(Bundle.main.bundleURL
-        .appendingPathComponent("Frameworks/App.framework/flutter_assets/available-sounds/primerTones/\(trimmed)"))
+        .appendingPathComponent("available-sounds/primerTones/\(trimmed)"))
 
-      if let alt = Bundle.main.url(forResource: trimmed,
-                                   withExtension: nil,
-                                   subdirectory: "available-sounds/primerTones") {
-        appendCandidate(alt)
-      }
-
-      var soundURL: URL? = nil
+      let fm = FileManager.default
+      var soundURL: URL?
       var seenPaths = Set<String>()
       for url in candidates {
         let path = url.path
@@ -212,7 +198,7 @@ import AVFoundation
       }
 
       guard let finalURL = soundURL else {
-        NSLog("Primer file not found: \(fileName) (canonical: \(trimmed)) assetKey: \(assetKey ?? "nil")")
+        NSLog("Primer file not found: \(fileName) (canonical: \(canonicalKey))")
         return
       }
 
