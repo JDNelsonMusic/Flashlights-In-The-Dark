@@ -18,7 +18,6 @@ import 'color_theme.dart';
 import 'version.dart';
 import 'model/client_state.dart';
 import 'model/event_recipe.dart';
-import 'services/primer_tone_library.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
@@ -73,7 +72,6 @@ Future<void> _bootstrapNative() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _bootstrapNative();
-  await PrimerToneLibrary.instance.warmUp();
   final prefs = await SharedPreferences.getInstance();
   final savedSlot = prefs.getInt('lastSlot');
   if (savedSlot != null && savedSlot != 0) {

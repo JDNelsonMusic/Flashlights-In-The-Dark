@@ -15,14 +15,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
 import '../services/mic_input.dart';
-import '../services/primer_tone_library.dart';
+import '../native_audio.dart';
 
 import '../model/client_state.dart';
 
 /// Native channel to control torch brightness.
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
-const MethodChannel _nativeAudioChannel =
-    MethodChannel('ai.keex.flashlights/audioNative');
 const bool kEnableMic = false;
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
@@ -67,27 +65,15 @@ class OscListener {
     double gain, {
     bool sendAck = false,
   }) async {
-    final assetKey = await PrimerToneLibrary.instance.assetForSample(fileName);
-    if (assetKey == null || assetKey.isEmpty) {
-      debugPrint('[OSC] Primer tone asset unavailable for $fileName');
-      if (sendAck) {
-        _sendAck();
-      }
-      return;
-    }
     try {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
 
       final volume = gain.clamp(0.0, 1.0).toDouble();
       final playbackToken = ++_playbackToken;
-      await _nativeAudioChannel.invokeMethod('playPrimerTone', <String, dynamic>{
-        'assetKey': assetKey,
-        'fileName': fileName,
-        'volume': volume,
-      });
+      await NativeAudio.playPrimerTone(fileName, volume);
 
-      debugPrint('[OSC] Playing via native audio: $assetKey @ vol=$volume');
+      debugPrint('[OSC] Playing via native audio for $fileName @ vol=$volume');
       client.audioPlaying.value = true;
       unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
         if (_playbackToken == playbackToken) {
@@ -95,7 +81,7 @@ class OscListener {
         }
       }));
     } catch (e) {
-      debugPrint('[OSC] Playback failed for $assetKey: $e');
+      debugPrint('[OSC] Playback failed for $fileName: $e');
       client.audioPlaying.value = false;
     }
     if (sendAck) {
@@ -295,7 +281,7 @@ class OscListener {
             client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
           _playbackToken++;
           try {
-            await _nativeAudioChannel.invokeMethod('stopPrimerTone');
+            await NativeAudio.stopPrimerTone();
           } catch (e) {
             debugPrint('[OSC] Native stop failed: $e');
           }
@@ -510,7 +496,7 @@ class OscListener {
     client.recording.value = false;
 
     try {
-      await _nativeAudioChannel.invokeMethod('stopPrimerTone');
+      await NativeAudio.stopPrimerTone();
     } catch (e) {
       debugPrint('[OSC] Failed to stop native primer playback: $e');
     }
