@@ -127,44 +127,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 return nil
             }
-            // Spacebar for sustain pedal
-            if event.keyCode == 49 { // space
-                if event.type == .keyDown {
-                    self.sustainOn = true
-                    self.midi.sendControlChange(64, value: 127)
-                } else {
-                    // release sustain pedal
-                    self.sustainOn = false
-                    // release any slots held due to sustain
-                    self.sustainedSlots.forEach { slot in
-                        switch self.state.keyboardTriggerMode {
-                        case .torch:
-                            self.state.flashOff(id: slot)
-                        case .sound:
-                            guard slot < self.state.devices.count else { return }
-                            let device = self.state.devices[slot]
-                            self.state.stopSound(device: device)
-                        case .both:
-                            self.state.flashOff(id: slot)
-                            guard slot < self.state.devices.count else { return }
-                            let device = self.state.devices[slot]
-                            self.state.stopSound(device: device)
-                        default:
-                            break
-                        }
-                        // send MIDI note off for sustained slot
-                        let r = slot / 8
-                        let col = slot % 8
-                        let octaveOffset = UInt8(r * 12)
-                        let offset = self.noteOffsets[col]
-                        let noteOff = self.baseNote + octaveOffset + offset
-                        self.midi.sendNoteOff(noteOff)
-                    }
-                    self.sustainedSlots.removeAll()
-                    self.midi.sendControlChange(64, value: 0)
-                }
-                return nil
-            }
             return event
         }
     }

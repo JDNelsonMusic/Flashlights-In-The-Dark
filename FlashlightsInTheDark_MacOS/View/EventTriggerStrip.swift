@@ -3,23 +3,60 @@ import SwiftUI
 struct EventTriggerStrip: View {
     @EnvironmentObject var state: ConsoleState
     private let previewCount = 3
+    @State private var jumpQuery: String = ""
+    @State private var jumpFeedback: String?
+    @FocusState private var jumpFieldFocused: Bool
+    @State private var ignoreOutsideTap = false
 
     var body: some View {
+        let previous = previousEvents()
+        let next = nextEvents()
+        let leadingPlaceholders = max(0, previewCount - previous.count)
+        let trailingPlaceholders = max(0, previewCount - next.count)
+
         VStack(spacing: 12) {
-            HStack {
-                Text("Event Recipes")
-                    .font(.title3)
-                    .bold()
-                    .foregroundStyle(.white)
-                Spacer()
-                Text(instructionText)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Event Recipes")
+                        .font(.title3)
+                        .bold()
+                        .foregroundStyle(.white)
+                    Text(instructionText)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 12)
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 8) {
+                        TextField("Jump to event or measure…", text: $jumpQuery)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 220)
+                            .onSubmit(handleQuickJump)
+                            .focused($jumpFieldFocused)
+                            .onTapGesture {
+                                ignoreOutsideTap = true
+                                state.isKeyCaptureEnabled = false
+                                jumpFieldFocused = true
+                            }
+                        Button("Jump") { handleQuickJump() }
+                            .disabled(jumpQuery.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                    if let feedback = jumpFeedback {
+                        Text(feedback)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             .padding(.horizontal, 4)
+            .onChange(of: jumpFieldFocused, perform: handleFocusChange)
 
             HStack(alignment: .center, spacing: 16) {
-                ForEach(previousEvents().reversed(), id: \.id) { event in
+                ForEach(0..<leadingPlaceholders, id: \.self) { _ in
+                    EventPlaceholderCard()
+                }
+
+                ForEach(previous.reversed(), id: \.id) { event in
                     EventPreviewCard(event: event,
                                      emphasis: .previous,
                                      isCurrent: false,
@@ -44,12 +81,16 @@ struct EventTriggerStrip: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
 
-                ForEach(nextEvents(), id: \.id) { event in
+                ForEach(next, id: \.id) { event in
                     EventPreviewCard(event: event,
                                      emphasis: .upcoming,
                                      isCurrent: false,
                                      isRecent: event.id == state.lastTriggeredEventID)
                         .onTapGesture { state.focusOnEvent(id: event.id) }
+                }
+
+                ForEach(0..<trailingPlaceholders, id: \.self) { _ in
+                    EventPlaceholderCard()
                 }
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.currentEventIndex)
@@ -59,6 +100,18 @@ struct EventTriggerStrip: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color.black.opacity(0.25))
                 .blendMode(.plusLighter)
+        )
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                if ignoreOutsideTap {
+                    ignoreOutsideTap = false
+                    return
+                }
+                if jumpFieldFocused {
+                    jumpFieldFocused = false
+                }
+                state.isKeyCaptureEnabled = true
+            }
         )
     }
 
@@ -85,6 +138,98 @@ struct EventTriggerStrip: View {
             return "← / → to cue · Space to trigger"
         }
         return "Load event recipes to enable triggers"
+    }
+
+    private func handleQuickJump() {
+        let trimmed = jumpQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let previousIndex = state.currentEventIndex
+        if let targetIndex = resolveEventIndex(from: trimmed) {
+            withAnimation {
+                state.currentEventIndex = targetIndex
+            }
+            if state.eventRecipes.indices.contains(targetIndex) {
+                let event = state.eventRecipes[targetIndex]
+                jumpFeedback = "Jumped to Event #\(event.id)"
+            } else {
+                jumpFeedback = nil
+            }
+            jumpQuery = ""
+        } else {
+            jumpFeedback = "No event found for ‘\(trimmed)’"
+            state.currentEventIndex = previousIndex
+        }
+        jumpFieldFocused = false
+        state.isKeyCaptureEnabled = true
+    }
+
+    private func handleFocusChange(_ isFocused: Bool) {
+        state.isKeyCaptureEnabled = !isFocused
+    }
+
+    private func resolveEventIndex(from query: String) -> Int? {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let normalized = trimmed.replacingOccurrences(of: "#", with: "")
+
+        if let eventID = Int(normalized) {
+            if let idx = state.eventRecipes.firstIndex(where: { $0.id == eventID }) {
+                return idx
+            }
+        }
+
+        let measureIndex = resolveMeasureQuery(from: normalized)
+        if let measureIndex {
+            return measureIndex
+        }
+
+        // Fallback: search by position string fragment
+        let lowerFragment = normalized.lowercased()
+        if let idx = state.eventRecipes.firstIndex(where: { recipe in
+            recipe.position?.lowercased().contains(lowerFragment) == true
+        }) {
+            return idx
+        }
+
+        return nil
+    }
+
+    private func resolveMeasureQuery(from raw: String) -> Int? {
+        var query = raw.lowercased()
+        if query.hasPrefix("measure") {
+            query.removeFirst("measure".count)
+        } else if query.hasPrefix("m") {
+            query.removeFirst()
+        }
+        query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+
+        var beatFragment: String?
+        var measureString = query
+
+        if let separatorIndex = query.firstIndex(where: { $0 == "." || $0 == " " || $0 == "-" }) {
+            measureString = String(query[..<separatorIndex])
+            let remainder = String(query[separatorIndex...]).trimmingCharacters(in: CharacterSet(charactersIn: " .-"))
+            if !remainder.isEmpty {
+                beatFragment = remainder
+            }
+        }
+
+        guard let measure = Int(measureString) else { return nil }
+
+        let matching = state.eventRecipes.enumerated().filter { $0.element.measure == measure }
+
+        guard !matching.isEmpty else { return nil }
+
+        if let beatFragment, !beatFragment.isEmpty {
+            let loweredFragment = beatFragment.replacingOccurrences(of: "of", with: " of ").lowercased()
+            if let match = matching.first(where: { $0.element.position?.lowercased().contains(loweredFragment) == true }) {
+                return match.offset
+            }
+        }
+
+        return matching.first?.offset
     }
 }
 
@@ -142,10 +287,6 @@ private struct CurrentEventCard: View {
     let movePrevious: () -> Void
     let moveNext: () -> Void
 
-    private var engagedParts: [PrimerColor] {
-        event.primerAssignments.keys.sorted { $0.rawValue < $1.rawValue }
-    }
-
     private let columns: [GridItem] = [
         GridItem(.flexible(minimum: 90), spacing: 6, alignment: .leading),
         GridItem(.flexible(minimum: 90), spacing: 6, alignment: .leading),
@@ -176,23 +317,19 @@ private struct CurrentEventCard: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            if !engagedParts.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Primer tones ready: \(engagedParts.count) parts")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
-                        ForEach(engagedParts, id: \.id) { color in
-                            if let assignment = event.primerAssignments[color] {
-                                MiniTag(color: color.displayName, detail: assignment.note ?? "")
-                            }
-                        }
-                    }
-                }
-            } else {
-                Text("No primer tones in this event")
+            VStack(alignment: .leading, spacing: 6) {
+                let activeCount = event.primerAssignments.count
+                Text("Primer tones ready: \(activeCount) parts")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
+                    ForEach(PrimerColor.allCases, id: \.id) { color in
+                        let assignment = event.primerAssignments[color]
+                        MiniTag(color: color.displayName,
+                                detail: assignment?.note ?? "—",
+                                isInactive: assignment == nil)
+                    }
+                }
             }
 
             Button(action: triggerAction) {
@@ -221,28 +358,49 @@ private struct CurrentEventCard: View {
     }
 }
 
+private struct EventPlaceholderCard: View {
+    var body: some View {
+        VStack(spacing: 4) {
+            Text("#000")
+                .font(.headline)
+            Text("—")
+                .font(.caption)
+            Text(" ")
+                .font(.caption2)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .frame(minWidth: 80)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.clear)
+        )
+        .opacity(0)
+    }
+}
+
 // MARK: - Helper Views --------------------------------------------------------
 private struct MiniTag: View {
     let color: String
     let detail: String
+    let isInactive: Bool
 
     var body: some View {
         HStack(spacing: 4) {
             Text(color)
                 .font(.caption2)
                 .bold()
-            if !detail.isEmpty {
-                Text(detail)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            Text(detail)
+                .font(.caption2)
+                .foregroundStyle(isInactive ? Color.secondary.opacity(0.35) : Color.secondary)
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .background(
             Capsule()
-                .fill(Color.white.opacity(0.08))
+                .fill(isInactive ? Color.white.opacity(0.04) : Color.white.opacity(0.12))
         )
+        .opacity(isInactive ? 0.55 : 1)
     }
 }
 

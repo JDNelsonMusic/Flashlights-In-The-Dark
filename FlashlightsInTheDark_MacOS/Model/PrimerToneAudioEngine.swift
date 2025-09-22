@@ -16,6 +16,7 @@ final class PrimerToneAudioEngine {
     private let centerMixer = AVAudioMixerNode()
     private let rightMixer = AVAudioMixerNode()
     private let playerQueue = DispatchQueue(label: "PrimerToneAudioEngine.players")
+    private let macOutputAttenuation: Float = 0.25118864 // ≈ -12 dB
 
     private struct BufferEnvelope {
         let buffer: AVAudioPCMBuffer
@@ -141,6 +142,7 @@ final class PrimerToneAudioEngine {
                 }
 
                 self.engine.connect(player, to: destination, format: envelope.format)
+                player.volume = self.macOutputAttenuation
                 player.scheduleBuffer(envelope.buffer, at: nil, options: []) { [weak self, weak player] in
                     guard let self, let player else { return }
                     self.playerQueue.async {

@@ -183,6 +183,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public private(set) var devices: [ChoirDevice]
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
+    @Published public var isKeyCaptureEnabled: Bool = true
 
     /// Last time a /hello was heard from each slot.
     private var lastHello: [Int: Date] = [:]
@@ -454,7 +455,8 @@ public final class ConsoleState: ObservableObject, Sendable {
                 // --- Cross-actor property: broadcasterTask ---
                 let oscBroadcaster = try await self.broadcasterTask.value
 
-                let slot = Int32(device.id + 1)
+                let slotNumber = device.listeningSlot
+                let slot = Int32(slotNumber)
                 let gain: Float32 = 1.0
 
                 // --- Collect main-actor data once, then use it ---
@@ -465,18 +467,18 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                 for set in toneSets {
                     let prefix = set.lowercased()
-                    let file = "\(prefix)\(slot).mp3"
+                    let file = "\(prefix)\(slotNumber).mp3"
 
                     try await oscBroadcaster.send(AudioPlay(index: slot,
                                                             file: file,
                                                             gain: gain))
 
                     await MainActor.run {
-                        self.lastLog = "/audio/play \(slot) \(file)"
+                        self.lastLog = "/audio/play \(slotNumber) \(file)"
                     }
 
                     // --- Cross-actor property: midi ---
-                    let noteBase = device.id * 4
+                    let noteBase = slotNumber * 4
                     let noteOffset: Int = switch set.lowercased() {
                         case "a": 0
                         case "b": 1
@@ -487,7 +489,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
 
                 // --- Cross-actor call: glow ---
-                await self.glow(slot: device.id + 1)
+                await self.glow(slot: slotNumber)
             } catch {
                 print("Error triggering sound for slot \(device.id + 1): \(error)")
             }
@@ -1267,6 +1269,44 @@ extension ConsoleState {
         }
     }
 
+    /// Last time a client at the specified slot sent a /hello message.
+    public func lastHelloDate(forSlot slot: Int) -> Date? {
+        lastHello[slot]
+    }
+
+    /// Last time a client at the specified slot acknowledged a command.
+    public func lastAckDate(forSlot slot: Int) -> Date? {
+        lastAckTimes[slot]
+    }
+
+    /// Attempts to infer the primary colour group for a slot number.
+    public func colorForSlot(_ slot: Int) -> PrimerColor? {
+        for color in PrimerColor.allCases {
+            if slots(for: color).contains(slot) {
+                return color
+            }
+        }
+        return nil
+    }
+
+    /// Sends a discovery ping to prompt the specified slot to announce itself.
+    public func pingSlot(_ slot: Int) {
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                await broadcaster.requestHello(forSlot: slot)
+                await MainActor.run {
+                    self.lastLog = "📡 Pinged slot #\(slot)"
+                }
+            } catch {
+                await MainActor.run {
+                    self.lastLog = "⚠️ Ping slot #\(slot) failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
     public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {
         guard eventRecipes.indices.contains(currentEventIndex) else {
             lastLog = "⚠️ No event selected"
@@ -1317,10 +1357,14 @@ extension ConsoleState {
             let broadcaster = try await broadcasterTask.value
             for (color, assignment) in event.primerAssignments {
                 guard let fileName = assignment.oscFileName else { continue }
-                let targets = slots(for: color)
+                var targets = Set(slots(for: color))
+                targets.insert(color.groupIndex)
                 guard !targets.isEmpty else { continue }
                 for slot in targets {
                     try await broadcaster.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                    await MainActor.run {
+                        self.lastLog = "/audio/play slot \(slot) → \(fileName)"
+                    }
                 }
             }
         } catch {
@@ -1330,7 +1374,7 @@ extension ConsoleState {
         }
     }
 
-    private func slots(for color: PrimerColor) -> [Int] {
+    func slots(for color: PrimerColor) -> [Int] {
         if let custom = groupMembers[color.groupIndex], !custom.isEmpty {
             return custom
         }

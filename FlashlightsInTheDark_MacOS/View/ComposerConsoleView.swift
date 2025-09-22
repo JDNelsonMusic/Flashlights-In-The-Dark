@@ -467,6 +467,7 @@ struct ComposerConsoleView: View {
             )
             .overlay(
                 KeyCaptureView(
+                    isEnabled: state.isKeyCaptureEnabled,
                     onKeyDown: { char in
                         Task { @MainActor in
                             handleTypingKeyDown(char)
@@ -770,6 +771,7 @@ struct ComposerConsoleView: View {
 
     // MARK: - Keyboard event capture for typing-trigger
     fileprivate struct KeyCaptureView: NSViewRepresentable {
+        var isEnabled: Bool
         var onKeyDown: (Character) -> Void
         var onKeyUp: (Character) -> Void
         var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)? = nil
@@ -777,6 +779,7 @@ struct ComposerConsoleView: View {
         
         func makeNSView(context: Context) -> KeyCaptureNSView {
             let view = KeyCaptureNSView()
+            view.isEnabled = isEnabled
             view.onKeyDown = onKeyDown
             view.onKeyUp = onKeyUp
             view.onSpecialKeyDown = onSpecialKeyDown
@@ -784,24 +787,41 @@ struct ComposerConsoleView: View {
             return view
         }
         
-        func updateNSView(_ nsView: KeyCaptureNSView, context: Context) {}
+        func updateNSView(_ nsView: KeyCaptureNSView, context: Context) {
+            nsView.isEnabled = isEnabled
+        }
     }
     
     fileprivate class KeyCaptureNSView: NSView {
+        var isEnabled: Bool = true {
+            didSet {
+                if isEnabled {
+                    window?.makeFirstResponder(self)
+                } else if window?.firstResponder == self {
+                    _ = window?.makeFirstResponder(nil)
+                }
+            }
+        }
         var onKeyDown: ((Character) -> Void)?
         var onKeyUp: ((Character) -> Void)?
         var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)?
         var onSpecialKeyUp: ((NSEvent.SpecialKey) -> Void)?
         
-        override var acceptsFirstResponder: Bool { true }
-        override func resignFirstResponder() -> Bool { return false }
+        override var acceptsFirstResponder: Bool { isEnabled }
+        override func resignFirstResponder() -> Bool { true }
         
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            window?.makeFirstResponder(self)
+            if isEnabled {
+                window?.makeFirstResponder(self)
+            }
         }
         
         override func keyDown(with event: NSEvent) {
+            guard isEnabled else {
+                nextResponder?.keyDown(with: event)
+                return
+            }
             if let special = event.specialKey {
                 onSpecialKeyDown?(special)
                 _ = window?.makeFirstResponder(self)
@@ -814,6 +834,10 @@ struct ComposerConsoleView: View {
         }
         
         override func keyUp(with event: NSEvent) {
+            guard isEnabled else {
+                nextResponder?.keyUp(with: event)
+                return
+            }
             if let special = event.specialKey {
                 onSpecialKeyUp?(special)
                 _ = window?.makeFirstResponder(self)

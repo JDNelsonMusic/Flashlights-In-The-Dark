@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 import 'osc_packet.dart';
 import 'osc_messages.dart';
@@ -47,23 +47,69 @@ OSCSocket _createBroadcastSocket({
 
 /// Singleton OSC listener handling flash / audio / mic / sync cues.
 class OscListener {
-  OscListener._();
+  OscListener._() {
+    _playerStateSubscription = _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed ||
+          (state.processingState == ProcessingState.idle && !state.playing)) {
+        client.audioPlaying.value = false;
+        unawaited(_player.seek(Duration.zero));
+      }
+    });
+  }
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
   RawDatagramSocket? _recvSocket;
   Timer? _helloTimer;
-  late final AudioPlayer _player = AudioPlayer();
+  final AudioPlayer _player = AudioPlayer();
   StreamSubscription<List<int>>? _micSubscription;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
   final MicInput _mic = MicInputStub();
   bool _running = false;
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
 
+  String _resolveAssetPath(String fileName) {
+    var trimmed = fileName.trim();
+    if (trimmed.isEmpty) {
+      return trimmed;
+    }
+    // Remove the available-sounds/ prefix if it was included by mistake.
+    const assetRoot = 'available-sounds/';
+    if (trimmed.startsWith(assetRoot)) {
+      trimmed = trimmed.substring(assetRoot.length);
+    }
+
+    final segments = trimmed.split('/').where((s) => s.isNotEmpty).toList();
+    if (segments.isEmpty) {
+      return '$assetRoot$trimmed';
+    }
+
+    final lastIndex = segments.length - 1;
+    final last = segments[lastIndex];
+    final lower = last.toLowerCase();
+    if (lower.startsWith('short')) {
+      segments[lastIndex] = 'Short${lower.substring(5)}';
+    } else if (lower.startsWith('long')) {
+      segments[lastIndex] = 'Long${lower.substring(4)}';
+    } else {
+      segments[lastIndex] = last;
+    }
+
+    return '$assetRoot${segments.join('/')}';
+  }
+
   /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
     if (_running) return;
     _running = true;
+
+    try {
+      final session = await AudioSession.instance;
+      await session.setActive(true);
+    } catch (e) {
+      debugPrint('[OSC] Failed to activate audio session: $e');
+    }
 
     _socket = _createBroadcastSocket(
       serverAddress: InternetAddress.anyIPv4,
@@ -200,7 +246,7 @@ class OscListener {
         if (msg != null && msg.index == myIndex) {
           final intensity = msg.intensity;
           try {
-            final clamped = intensity.clamp(0.0, 1.0) as double;
+            final clamped = intensity.clamp(0.0, 1.0).toDouble();
             if ((client.brightness.value - clamped).abs() > 0.01) {
               client.brightness.value = clamped;
               await ScreenBrightness.instance.setScreenBrightness(clamped);
@@ -234,15 +280,32 @@ class OscListener {
         if (msg != null && msg.index == myIndex) {
           final fileName = msg.file;
           final gain = msg.gain;
-          final assetPath = 'available-sounds/$fileName';
+          final assetPath = _resolveAssetPath(fileName);
           try {
-            await _player.setAsset(assetPath);
+            await _player.stop();
+            final session = await AudioSession.instance;
+            await session.setActive(true);
+            await _player.setAudioSource(AudioSource.asset(assetPath), preload: true);
           } catch (e) {
-            print('[OSC] Failed to load asset $assetPath: $e');
-            await _player.setUrl(fileName);
+            debugPrint('[OSC] Failed to set cached asset $assetPath: $e');
+            try {
+              await _player.stop();
+              await _player.setAsset(assetPath);
+            } catch (inner) {
+              debugPrint('[OSC] Fallback to direct URL for $fileName: $inner');
+              await _player.setUrl(fileName);
+            }
           }
-          await _player.setVolume(gain.clamp(0.0, 1.0) as double);
-          await _player.play();
+          final volume = gain.clamp(0.0, 1.0).toDouble();
+          await _player.setVolume(volume);
+          await _player.setLoopMode(LoopMode.off);
+          await _player.seek(Duration.zero);
+          try {
+            await _player.play();
+            debugPrint('[OSC] Playing primer tone: $assetPath at vol $volume');
+          } catch (playError) {
+            debugPrint('[OSC] Playback failed for $assetPath: $playError');
+          }
           client.audioPlaying.value = true;
           _sendAck();
         }
@@ -259,9 +322,8 @@ class OscListener {
 
       // Dynamic slot assignment.
       case '/set-slot':
-        final newSlot = m.arguments.isNotEmpty
-            ? (m.arguments[0] as int)
-            : myIndex;
+        final newSlot =
+            m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
         if (newSlot != client.myIndex.value) {
           client.myIndex.value = newSlot;
           print('[OSC] Updated listening slot to $newSlot');
@@ -459,6 +521,8 @@ class OscListener {
     _micSubscription = null;
     client.recording.value = false;
 
+    await _playerStateSubscription?.cancel();
+    _playerStateSubscription = null;
     // Dispose of the audio player and mark the listener as no longer running.
     await _player.dispose();
     _running = false;

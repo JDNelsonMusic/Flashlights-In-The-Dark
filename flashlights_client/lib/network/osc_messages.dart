@@ -101,8 +101,8 @@ class AudioPlay implements OscCodable {
     final arg0 = message.arguments[0];
     final arg1 = message.arguments[1];
     final arg2 = message.arguments[2];
-    if (arg0 is int && arg1 is String && arg2 is double) {
-      return AudioPlay(arg0, arg1, arg2);
+    if (arg0 is int && arg1 is String && arg2 is num) {
+      return AudioPlay(arg0, arg1, arg2.toDouble());
     }
     return null;
   }

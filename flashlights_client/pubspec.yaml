@@ -16,6 +16,7 @@ dependencies:
   torch_light: ^1.1.0  # Flash/torch control (on/off only – no brightness)
   screen_brightness: ^2.1.5 # Control screen brightness for strobe dimming
   just_audio: ^0.10.4  # Audio playback
+  audio_session: ^0.1.21 # Ensure playback works in silent mode on iOS/Android
   permission_handler: ^11.4.0  # camera / mic permissions (iOS / Android only)
   wakelock_plus: ^1.2.5     # Keep the screen awake during performances
   shared_preferences: ^2.5.3  # Persist selected slot between launches
