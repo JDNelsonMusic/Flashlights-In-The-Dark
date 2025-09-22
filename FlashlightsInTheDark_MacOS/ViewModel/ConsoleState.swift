@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 import AppKit
+import CoreAudio
 import NIOPosix
 //import Network   // auto-discovery removed
 import Darwin           // for POSIXError & EHOSTDOWN
@@ -45,6 +46,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
+    private let eventLoader = EventRecipeLoader()
+    private let primerAudioEngine = PrimerToneAudioEngine()
     /// Base offset so MIDI note 1 corresponds to device 1
     private let midiNoteOffset = 0
     private let allInputsLabel = "All MIDI Inputs"
@@ -69,6 +72,23 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     /// Recent MIDI messages for debugging
     @Published public var midiLog: [String] = []
+
+    // Event timeline & audio routing
+    @Published public private(set) var eventRecipes: [EventRecipe] = []
+    @Published public var currentEventIndex: Int = 0
+    @Published public var lastTriggeredEventID: Int?
+    @Published public private(set) var audioOutputDevices: [AudioDeviceInfo] = []
+    @Published public var selectedAudioDeviceID: UInt32 = 0 {
+        didSet {
+            guard selectedAudioDeviceID != oldValue else { return }
+            if selectedAudioDeviceID == 0 {
+                primerAudioEngine.setOutputDevice(nil)
+            } else {
+                primerAudioEngine.setOutputDevice(AudioDeviceID(selectedAudioDeviceID))
+            }
+        }
+    }
+    @Published public private(set) var eventLoadError: String?
 
     // Slots currently glowing for UI feedback
     @Published public var glowingSlots: Set<Int> = []
@@ -152,6 +172,12 @@ public final class ConsoleState: ObservableObject, Sendable {
 
         refreshMidiDevices()
         groupMembers = defaultGroups
+        loadEventRecipes()
+        refreshAudioOutputs()
+        let audioEngine = primerAudioEngine
+        DispatchQueue.global(qos: .userInitiated).async {
+            audioEngine.preloadPrimerTones()
+        }
     }
 
     @Published public private(set) var devices: [ChoirDevice]
@@ -1210,6 +1236,108 @@ extension ConsoleState {
                 }
             }
         }
+    }
+}
+
+// MARK: - Event Timeline & Primer Playback
+extension ConsoleState {
+    private func loadEventRecipes() {
+        do {
+            let recipes = try eventLoader.loadRecipes()
+            eventRecipes = recipes
+            currentEventIndex = 0
+            eventLoadError = nil
+            if let first = recipes.first {
+                lastLog = "Loaded \(recipes.count) event recipes · Next: Event #\(first.id)"
+            }
+        } catch {
+            eventRecipes = []
+            currentEventIndex = 0
+            eventLoadError = "Event recipe file missing or unreadable"
+            lastLog = "⚠️ Unable to load event recipes"
+        }
+    }
+
+    public func refreshAudioOutputs() {
+        let devices = primerAudioEngine.availableOutputDevices()
+        audioOutputDevices = devices
+        let current = primerAudioEngine.currentOutputDeviceID()
+        if current != selectedAudioDeviceID {
+            selectedAudioDeviceID = current
+        }
+    }
+
+    public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {
+        guard eventRecipes.indices.contains(currentEventIndex) else {
+            lastLog = "⚠️ No event selected"
+            return
+        }
+        let event = eventRecipes[currentEventIndex]
+        lastTriggeredEventID = event.id
+        Task { [weak self] in
+            await self?.fire(event: event)
+        }
+        if advanceAfterTrigger {
+            moveToNextEvent()
+        }
+    }
+
+    public func moveToNextEvent() {
+        guard !eventRecipes.isEmpty else { return }
+        let nextIndex = min(currentEventIndex + 1, eventRecipes.count - 1)
+        currentEventIndex = nextIndex
+    }
+
+    public func moveToPreviousEvent() {
+        guard !eventRecipes.isEmpty else { return }
+        let prevIndex = max(currentEventIndex - 1, 0)
+        currentEventIndex = prevIndex
+    }
+
+    public func focusOnEvent(id: Int) {
+        if let idx = eventRecipes.firstIndex(where: { $0.id == id }) {
+            currentEventIndex = idx
+        }
+    }
+
+    private func fire(event: EventRecipe) async {
+        await sendPrimerAssignments(for: event)
+        primerAudioEngine.play(assignments: event.primerAssignments)
+        let measureText = event.measure.map { "M\($0)" } ?? "M?"
+        let beatText = event.position ?? "?"
+        await MainActor.run {
+            lastLog = "▶︎ Event #\(event.id) • \(measureText) • \(beatText)"
+        }
+    }
+
+    private func sendPrimerAssignments(for event: EventRecipe) async {
+        guard !event.primerAssignments.isEmpty else { return }
+        guard isBroadcasting else { return }
+        do {
+            let broadcaster = try await broadcasterTask.value
+            for (color, assignment) in event.primerAssignments {
+                guard let fileName = assignment.oscFileName else { continue }
+                let targets = slots(for: color)
+                guard !targets.isEmpty else { continue }
+                for slot in targets {
+                    try await broadcaster.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                }
+            }
+        } catch {
+            await MainActor.run {
+                lastLog = "⚠️ Failed to send event: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func slots(for color: PrimerColor) -> [Int] {
+        if let custom = groupMembers[color.groupIndex], !custom.isEmpty {
+            return custom
+        }
+        if let defaults = defaultGroups[color.groupIndex] {
+            return defaults
+        }
+        return []
     }
 }
 

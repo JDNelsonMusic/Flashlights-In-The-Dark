@@ -46,8 +46,9 @@ class NoteEntry:
     note_name: str
     short_sample: str
 
-    def as_cell_text(self) -> str:
-        return f"{self.note_name}\nprimerTones/short{self.short_sample}.mp3"
+    @property
+    def sample_path(self) -> str:
+        return f"primerTones/short{self.short_sample}.mp3"
 
 
 @dataclass
@@ -279,19 +280,28 @@ def build_workbook(events: Sequence[EventColumn], part_order: Sequence[str]) -> 
 
     color_lookup = {name: color for name, color in PART_DEFINITIONS}
 
-    # Part rows with styling
-    for row_offset, part_name in enumerate(part_order, start=4):
-        color_hex = color_lookup.get(part_name, "#3c3c3c")
-        label_cell = sheet.cell(row=row_offset, column=1, value=part_name)
-        label_cell.font = Font(bold=True, color="FFFFFF")
-        label_cell.fill = PatternFill(fill_type="solid", fgColor=color_hex.replace("#", ""))
-        label_cell.alignment = alignment_center
+    # Part rows with styling (two rows per part: primer tone paths then pitch names)
+    for part_index, part_name in enumerate(part_order):
+        base_row = 4 + part_index * 2
+        primer_row = base_row
+        pitch_row = base_row + 1
+        color_hex = color_lookup.get(part_name, "#3c3c3c").replace("#", "")
+
+        for row, label in ((primer_row, part_name), (pitch_row, "")):
+            label_cell = sheet.cell(row=row, column=1, value=label)
+            label_cell.font = Font(bold=True, color="FFFFFF")
+            label_cell.fill = PatternFill(fill_type="solid", fgColor=color_hex)
+            label_cell.alignment = alignment_center
+
         for col_index, event in enumerate(events, start=2):
-            cell = sheet.cell(row=row_offset, column=col_index)
             entries = event.part_notes.get(part_name)
+            primer_cell = sheet.cell(row=primer_row, column=col_index)
+            pitch_cell = sheet.cell(row=pitch_row, column=col_index)
             if entries:
-                cell.value = "\n".join(entry.as_cell_text() for entry in entries)
-            cell.alignment = alignment_center
+                primer_cell.value = ", ".join(entry.sample_path for entry in entries)
+                pitch_cell.value = ", ".join(entry.note_name for entry in entries)
+            primer_cell.alignment = alignment_center
+            pitch_cell.alignment = alignment_center
 
     # Adjust column widths for readability
     for col_index in range(1, len(events) + 2):

@@ -18,5 +18,19 @@ struct MenuCommands: Commands {
                 state.openSession()
             }
         }
+        CommandMenu("Event Timeline") {
+            Button("Trigger Current Event") {
+                state.triggerCurrentEvent()
+            }
+            .keyboardShortcut(.space, modifiers: [])
+            Button("Previous Event") {
+                state.moveToPreviousEvent()
+            }
+            .keyboardShortcut(.leftArrow, modifiers: [])
+            Button("Next Event") {
+                state.moveToNextEvent()
+            }
+            .keyboardShortcut(.rightArrow, modifiers: [])
+        }
     }
 }

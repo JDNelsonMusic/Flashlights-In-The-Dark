@@ -176,6 +176,8 @@ During the Piece
 
 Follow score or DAW timeline.
 
+Use the console's Event Trigger strip to cue the pre-authored Light Chorus recipes (←/→ to browse, Space to fire the highlighted event).
+
 Manual overrides always available (click device tiles, press mapped MIDI keys).
 
 Post-concert

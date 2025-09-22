@@ -209,7 +209,6 @@ struct ComposerConsoleView: View {
                                               ? Color.accentColor
                                               : Color.gray.opacity(0.3))
                                         .frame(width: 40, height: 40)
-                                    // Icon for mode
                                     Group {
                                         if mode == .torch {
                                             Image(systemName: "flashlight.on.fill")
@@ -229,6 +228,24 @@ struct ComposerConsoleView: View {
                             .help("Keyboard: \(mode.rawValue)")
                         }
                     }
+                    Divider()
+                    Text("Audio Output:")
+                        .font(.headline)
+                    Picker("Device", selection: $state.selectedAudioDeviceID) {
+                        Text("System Default").tag(UInt32(0))
+                        ForEach(state.audioOutputDevices, id: \.id) { device in
+                            Text(device.name)
+                                .tag(device.id)
+                        }
+                    }
+                    .labelsHidden()
+                    .onAppear { state.refreshAudioOutputs() }
+                    Button {
+                        state.refreshAudioOutputs()
+                    } label: {
+                        Label("Refresh Outputs", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
                     Divider()
                     HStack(spacing: 4) {
                         Text("MIDI Controls:")
@@ -416,19 +433,7 @@ struct ComposerConsoleView: View {
                             .frame(maxWidth: .infinity)
                         }
                     }
-                    HStack(spacing: 12) {
-                        ForEach(1...9, id: \.self) { idx in
-                            Button(tripleLabels[idx] ?? "Group \(idx)") {
-                                if let slots = tripleTriggers[idx] {
-                                    state.triggerSlots(realSlots: slots)
-                                }
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(tripleColors[idx] ?? .white)
-                            .controlSize(.large)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
+                    groupTriggerStripe
                     Spacer(minLength: 8)
                     // Status bar
                     Text(state.lastLog)
@@ -463,39 +468,18 @@ struct ComposerConsoleView: View {
             .overlay(
                 KeyCaptureView(
                     onKeyDown: { char in
-                        if char == "]" {
-                            state.glowRampActive.toggle()
-                            return
-                        }
-                        if char == "[" {
-                            state.slowGlowRampActive.toggle()
-                            return
-                        }
-                        if char == "\\" {
-                            state.toggleAllTorches()
-                            return
-                        }
-                        if char == "=" {
-                            state.strobeActive.toggle()
-                            return
-                        }
-                        if char == "-" {
-                            state.slowStrobeActive.toggle()
-                            return
-                        }
-                        if let note = typingMapper.note(for: char) {
-                            let slot = Int(note)
-                            state.addTriggeredSlot(slot)
-                            state.typingNoteOn(note)
-                            return
+                        Task { @MainActor in
+                            handleTypingKeyDown(char)
                         }
                     },
                     onKeyUp: { char in
-                        if let note = typingMapper.note(for: char) {
-                            let slot = Int(note)
-                            state.removeTriggeredSlot(slot)
-                            state.typingNoteOff(note)
-                            return
+                        Task { @MainActor in
+                            handleTypingKeyUp(char)
+                        }
+                    },
+                    onSpecialKeyDown: { key in
+                        Task { @MainActor in
+                            handleSpecialKeyDown(key)
                         }
                     }
                 )
@@ -552,7 +536,60 @@ struct ComposerConsoleView: View {
             strobeOn = false
         }
     }
-    
+
+    @MainActor
+    private func handleTypingKeyDown(_ char: Character) {
+        switch char {
+        case " ":
+            state.triggerCurrentEvent()
+            return
+        case "]":
+            state.glowRampActive.toggle()
+            return
+        case "[":
+            state.slowGlowRampActive.toggle()
+            return
+        case "\\":
+            state.toggleAllTorches()
+            return
+        case "=":
+            state.strobeActive.toggle()
+            return
+        case "-":
+            state.slowStrobeActive.toggle()
+            return
+        default:
+            break
+        }
+
+        if let note = typingMapper.note(for: char) {
+            let slot = Int(note)
+            state.addTriggeredSlot(slot)
+            state.typingNoteOn(note)
+        }
+    }
+
+    @MainActor
+    private func handleTypingKeyUp(_ char: Character) {
+        if let note = typingMapper.note(for: char) {
+            let slot = Int(note)
+            state.removeTriggeredSlot(slot)
+            state.typingNoteOff(note)
+        }
+    }
+
+    @MainActor
+    private func handleSpecialKeyDown(_ key: NSEvent.SpecialKey) {
+        switch key {
+        case .leftArrow:
+            state.moveToPreviousEvent()
+        case .rightArrow:
+            state.moveToNextEvent()
+        default:
+            break
+        }
+    }
+
 #if DEBUG
     struct ComposerConsoleView_Previews: PreviewProvider {
         static var previews: some View {
@@ -561,6 +598,27 @@ struct ComposerConsoleView: View {
         }
     }
 #endif
+
+
+    private var groupTriggerStripe: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                ForEach(1...9, id: \.self) { idx in
+                    Button(tripleLabels[idx] ?? "Group \(idx)") {
+                        if let slots = tripleTriggers[idx] {
+                            state.triggerSlots(realSlots: slots)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(tripleColors[idx] ?? .white)
+                    .controlSize(.large)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            EventTriggerStrip()
+                .environmentObject(state)
+        }
+    }
 
     // MARK: - Slot Cell View
     struct SlotCell: View {
@@ -714,11 +772,15 @@ struct ComposerConsoleView: View {
     fileprivate struct KeyCaptureView: NSViewRepresentable {
         var onKeyDown: (Character) -> Void
         var onKeyUp: (Character) -> Void
+        var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)? = nil
+        var onSpecialKeyUp: ((NSEvent.SpecialKey) -> Void)? = nil
         
         func makeNSView(context: Context) -> KeyCaptureNSView {
             let view = KeyCaptureNSView()
             view.onKeyDown = onKeyDown
             view.onKeyUp = onKeyUp
+            view.onSpecialKeyDown = onSpecialKeyDown
+            view.onSpecialKeyUp = onSpecialKeyUp
             return view
         }
         
@@ -728,6 +790,8 @@ struct ComposerConsoleView: View {
     fileprivate class KeyCaptureNSView: NSView {
         var onKeyDown: ((Character) -> Void)?
         var onKeyUp: ((Character) -> Void)?
+        var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)?
+        var onSpecialKeyUp: ((NSEvent.SpecialKey) -> Void)?
         
         override var acceptsFirstResponder: Bool { true }
         override func resignFirstResponder() -> Bool { return false }
@@ -738,21 +802,28 @@ struct ComposerConsoleView: View {
         }
         
         override func keyDown(with event: NSEvent) {
+            if let special = event.specialKey {
+                onSpecialKeyDown?(special)
+                _ = window?.makeFirstResponder(self)
+                return
+            }
             if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
                 onKeyDown?(c)
             }
-            // keep focus
             _ = window?.makeFirstResponder(self)
         }
         
         override func keyUp(with event: NSEvent) {
+            if let special = event.specialKey {
+                onSpecialKeyUp?(special)
+                _ = window?.makeFirstResponder(self)
+                return
+            }
             if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
                 onKeyUp?(c)
             }
-            // keep focus
             _ = window?.makeFirstResponder(self)
         }
-        // Do not intercept mouse events: allow clicks through
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
