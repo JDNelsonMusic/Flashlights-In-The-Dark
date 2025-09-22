@@ -1,23 +1,33 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:flashlights_client/model/event_recipe.dart';
 import 'package:flashlights_client/network/osc_packet.dart';
 
 /// Global client state, holds the dynamic slot and clock offset.
 class ClientState {
   ClientState()
-    : myIndex = ValueNotifier<int>(
-        const int.fromEnvironment('SLOT', defaultValue: 1),
-      ),
+    : myIndex = ValueNotifier<int>(_initialSlot),
+      myColor = ValueNotifier<PrimerColor?>(_slotColorMap[_initialSlot]),
       udid = const String.fromEnvironment('UDID', defaultValue: 'unknown'),
       clockOffsetMs = ValueNotifier<double>(0.0),
       flashOn = ValueNotifier<bool>(false),
       audioPlaying = ValueNotifier<bool>(false),
       recording = ValueNotifier<bool>(false),
       brightness = ValueNotifier<double>(0.0),
-      recentMessages = ValueNotifier<List<OSCMessage>>(<OSCMessage>[]);
+      recentMessages = ValueNotifier<List<OSCMessage>>(<OSCMessage>[]),
+      eventRecipes = ValueNotifier<List<EventRecipe>>(<EventRecipe>[]),
+      practiceEventIndex = ValueNotifier<int>(0) {
+    myIndex.addListener(() {
+      final slot = myIndex.value;
+      myColor.value = colorForSlot(slot);
+    });
+  }
 
   /// Singer slot (uses the real slot number). Notifier so UI can react to changes at runtime.
   final ValueNotifier<int> myIndex;
+
+  /// Convenience notifier for the currently selected colour group.
+  final ValueNotifier<PrimerColor?> myColor;
 
   /// Unique device identifier used for slot verification.
   final String udid;
@@ -42,6 +52,109 @@ class ClientState {
 
   /// Most recent OSC messages (capped at 10 entries).
   final ValueNotifier<List<OSCMessage>> recentMessages;
+
+  /// Cached list of 192 event recipes used for practice browsing.
+  final ValueNotifier<List<EventRecipe>> eventRecipes;
+
+  /// Current event index highlighted in the practice strip.
+  final ValueNotifier<int> practiceEventIndex;
+
+  static const Map<PrimerColor, List<int>> defaultGroups = {
+    PrimerColor.blue: [27, 41, 42],
+    PrimerColor.red: [1, 14, 15],
+    PrimerColor.green: [16, 29, 44],
+    PrimerColor.purple: [3, 4, 18],
+    PrimerColor.yellow: [7, 19, 34],
+    PrimerColor.pink: [9, 20, 21],
+    PrimerColor.orange: [23, 38, 51],
+    PrimerColor.magenta: [12, 24, 25],
+    PrimerColor.cyan: [40, 53, 54],
+  };
+
+  static const int _initialSlot = int.fromEnvironment('SLOT', defaultValue: 1);
+
+  static Map<int, PrimerColor> _buildSlotColorMap() {
+    final slots = <int, PrimerColor>{};
+    for (final entry in defaultGroups.entries) {
+      for (final slot in entry.value) {
+        slots[slot] = entry.key;
+      }
+    }
+    return Map.unmodifiable(slots);
+  }
+
+  static List<int> _buildAvailableSlots() {
+    final slotSet = <int>{};
+    for (final slots in defaultGroups.values) {
+      slotSet.addAll(slots);
+    }
+    final ordered = slotSet.toList()..sort();
+    return List.unmodifiable(ordered);
+  }
+
+  static final Map<int, PrimerColor> _slotColorMap = _buildSlotColorMap();
+  static final List<int> _availableSlots = _buildAvailableSlots();
+
+  /// Public accessor for known seating slots.
+  List<int> get availableSlots => _availableSlots;
+
+  PrimerColor? colorForSlot(int slot) => _slotColorMap[slot];
+
+  PrimerColor? colorForGroupIndex(int index) {
+    if (index < 1 || index > PrimerColor.values.length) {
+      return null;
+    }
+    return PrimerColor.values[index - 1];
+  }
+
+  Future<void> ensureEventRecipesLoaded() async {
+    if (eventRecipes.value.isNotEmpty) return;
+    final recipes = await loadEventRecipesAsset();
+    eventRecipes.value = recipes;
+    if (practiceEventIndex.value >= recipes.length) {
+      practiceEventIndex.value = 0;
+    }
+  }
+
+  PrimerAssignment? assignmentForSlot(EventRecipe event, int slot) {
+    final color = colorForSlot(slot);
+    if (color != null) {
+      return event.primerAssignments[color];
+    }
+    return null;
+  }
+
+  bool shouldHandleIndex(int messageIndex, {int? slotOverride}) {
+    final slot = slotOverride ?? myIndex.value;
+    if (messageIndex == slot) {
+      return true;
+    }
+    final color = colorForSlot(slot);
+    return color != null && messageIndex == color.groupIndex;
+  }
+
+  void movePracticeEvent(int delta) {
+    final events = eventRecipes.value;
+    if (events.isEmpty) return;
+    final nextIndex = (practiceEventIndex.value + delta).clamp(
+      0,
+      events.length - 1,
+    );
+    practiceEventIndex.value = nextIndex;
+  }
+
+  void setPracticeEventIndex(int index) {
+    final events = eventRecipes.value;
+    if (events.isEmpty) return;
+    final nextIndex = index.clamp(0, events.length - 1);
+    practiceEventIndex.value = nextIndex;
+  }
+
+  EventRecipe? practiceEventAt(int index) {
+    final events = eventRecipes.value;
+    if (index < 0 || index >= events.length) return null;
+    return events[index];
+  }
 }
 
 /// Singleton client state

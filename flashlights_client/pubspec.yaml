@@ -15,8 +15,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   torch_light: ^1.1.0  # Flash/torch control (on/off only – no brightness)
   screen_brightness: ^2.1.5 # Control screen brightness for strobe dimming
-  just_audio: ^0.10.4  # Audio playback
-  audio_session: ^0.1.21 # Ensure playback works in silent mode on iOS/Android
+  audio_session: ^0.1.25 # Ensure playback works in silent mode on iOS/Android
+  audioplayers: ^5.2.1  # Low-latency asset playback for primer tones
   permission_handler: ^11.4.0  # camera / mic permissions (iOS / Android only)
   wakelock_plus: ^1.2.5     # Keep the screen awake during performances
   shared_preferences: ^2.5.3  # Persist selected slot between launches
@@ -31,6 +31,8 @@ flutter:
   uses-material-design: true
   assets:
     - available-sounds/
+    - available-sounds/primerTones/
+    - assets/event_recipes.json
 
 dependency_overrides:
   win32: ^5.14.0

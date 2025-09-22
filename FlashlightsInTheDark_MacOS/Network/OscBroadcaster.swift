@@ -153,6 +153,20 @@ public actor OscBroadcaster {
         print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
     }
 
+    /// Attempt to send an OSC message directly to the slot's last-known IP,
+    /// falling back to broadcast if no address is available.
+    public func send(_ osc: OSCMessage, toSlot slot: Int) async throws {
+        if let ip = dynamicIPs[slot], !ip.isEmpty {
+            try await sendUnicast(osc, toIP: ip)
+            return
+        }
+        if let info = slotInfos[slot], !info.ip.isEmpty {
+            try await sendUnicast(osc, toIP: info.ip)
+            return
+        }
+        try await send(osc)
+    }
+
     /// Register a callback for incoming /hello announcements
     public func registerHelloHandler(_ handler: @escaping (Int, String, String?) -> Void) {
         helloHandler = handler

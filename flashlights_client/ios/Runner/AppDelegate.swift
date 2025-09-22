@@ -11,10 +11,10 @@ import AVFoundation
     GeneratedPluginRegistrant.register(with: self)
 
     let controller = window?.rootViewController as? FlutterViewController
-    let channel = FlutterMethodChannel(name: "ai.keex.flashlights/torch",
-                                       binaryMessenger: controller!.binaryMessenger)
+    let torchChannel = FlutterMethodChannel(name: "ai.keex.flashlights/torch",
+                                            binaryMessenger: controller!.binaryMessenger)
 
-    channel.setMethodCallHandler { call, result in
+    torchChannel.setMethodCallHandler { call, result in
       if call.method == "setTorchLevel" {
         if let level = call.arguments as? Double {
           self.setTorchLevel(level: level)
@@ -23,6 +23,21 @@ import AVFoundation
           result(FlutterError(code: "BAD_ARGS", message: nil, details: nil))
         }
       } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    let audioChannel = FlutterMethodChannel(name: "ai.keex.flashlights/audio",
+                                            binaryMessenger: controller!.binaryMessenger)
+    audioChannel.setMethodCallHandler { call, result in
+      switch call.method {
+      case "forceSpeaker":
+        self.forceSpeaker()
+        result(nil)
+      case "resetAudio":
+        self.resetAudio()
+        result(nil)
+      default:
         result(FlutterMethodNotImplemented)
       }
     }
@@ -43,6 +58,27 @@ import AVFoundation
       device.unlockForConfiguration()
     } catch {
       NSLog("Torch error: \(error)")
+    }
+  }
+
+  private func forceSpeaker() {
+    let session = AVAudioSession.sharedInstance()
+    do {
+      try session.setCategory(.playAndRecord,
+                              mode: .default,
+                              options: [.defaultToSpeaker, .mixWithOthers])
+      try session.setActive(true, options: [])
+    } catch {
+      NSLog("Audio session error: \(error)")
+    }
+  }
+
+  private func resetAudio() {
+    let session = AVAudioSession.sharedInstance()
+    do {
+      try session.setActive(false, options: [.notifyOthersOnDeactivation])
+    } catch {
+      NSLog("Audio session reset error: \(error)")
     }
   }
 }

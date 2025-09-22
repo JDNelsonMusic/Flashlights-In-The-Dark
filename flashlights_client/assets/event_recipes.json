@@ -1,0 +1,5221 @@
+{
+  "source": "Flashlights-ITD_EventRecipes_3.csv",
+  "eventCount": 192,
+  "generated": "2025-09-21",
+  "events": [
+    {
+      "id": 1,
+      "measure": 1,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 2,
+      "measure": 2,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 3,
+      "measure": 4,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "magenta": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "orange": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "measure": 4,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "measure": 4,
+      "position": "4-of-4",
+      "primer": {
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "measure": 5,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "measure": 6,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 8,
+      "measure": 7,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short1.mp3",
+          "note": "Db2"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "measure": 10,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 10,
+      "measure": 11,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long97.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/long94.mp3",
+          "note": "Ab5"
+        },
+        "orange": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "red": {
+          "sample": "primerTones/long85.mp3",
+          "note": "B4"
+        },
+        "cyan": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/long77.mp3",
+          "note": "Eb4"
+        },
+        "pink": {
+          "sample": "primerTones/long73.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/long70.mp3",
+          "note": "Ab3"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "measure": 11,
+      "position": "4-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "purple": {
+          "sample": "primerTones/short2.mp3",
+          "note": "D2"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "measure": 12,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short46.mp3",
+          "note": "Bb5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "measure": 13,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long97.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/long94.mp3",
+          "note": "Ab5"
+        },
+        "orange": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "red": {
+          "sample": "primerTones/long85.mp3",
+          "note": "B4"
+        },
+        "cyan": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/long77.mp3",
+          "note": "Eb4"
+        },
+        "pink": {
+          "sample": "primerTones/long73.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/long70.mp3",
+          "note": "Ab3"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "measure": 13,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long96.mp3",
+          "note": "Bb5"
+        },
+        "magenta": {
+          "sample": "primerTones/long95.mp3",
+          "note": "A5"
+        },
+        "orange": {
+          "sample": "primerTones/long93.mp3",
+          "note": "G5"
+        },
+        "blue": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/long72.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/long71.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "measure": 15,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long95.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/long87.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/long75.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "pink": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/long75.mp3",
+          "note": "Db4"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "measure": 15,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long95.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/long91.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/long88.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/long79.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "pink": {
+          "sample": "primerTones/long79.mp3",
+          "note": "F4"
+        },
+        "purple": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "measure": 16,
+      "position": "2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "measure": 17,
+      "position": "1-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/long80.mp3",
+          "note": "Gb4"
+        },
+        "cyan": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "measure": 18,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long92.mp3",
+          "note": "Gb5"
+        },
+        "magenta": {
+          "sample": "primerTones/long88.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/long87.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/long80.mp3",
+          "note": "Gb4"
+        },
+        "cyan": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/long75.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/long71.mp3",
+          "note": "A3"
+        },
+        "purple": {
+          "sample": "primerTones/long68.mp3",
+          "note": "Gb3"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "measure": 20,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 21,
+      "measure": 22,
+      "position": "2+3/8-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "measure": 22,
+      "position": "3-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "measure": 24,
+      "position": "1-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 24,
+      "measure": 24,
+      "position": "2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 25,
+      "measure": 25,
+      "position": "2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        },
+        "purple": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        }
+      }
+    },
+    {
+      "id": 26,
+      "measure": 27,
+      "position": "3-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/long74.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/long74.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/long74.mp3",
+          "note": "C4"
+        }
+      }
+    },
+    {
+      "id": 27,
+      "measure": 28,
+      "position": "3-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        }
+      }
+    },
+    {
+      "id": 28,
+      "measure": 31,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 29,
+      "measure": 32,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "red": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "measure": 32,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 31,
+      "measure": 34,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 32,
+      "measure": 35,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short42.mp3",
+          "note": "Gb5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        }
+      }
+    },
+    {
+      "id": 33,
+      "measure": 35,
+      "position": "2-of-3",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "purple": {
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
+        }
+      }
+    },
+    {
+      "id": 34,
+      "measure": 36,
+      "position": "2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "purple": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        }
+      }
+    },
+    {
+      "id": 35,
+      "measure": 37,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        }
+      }
+    },
+    {
+      "id": 36,
+      "measure": 38,
+      "position": "2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short42.mp3",
+          "note": "Gb5"
+        },
+        "magenta": {
+          "sample": "primerTones/short42.mp3",
+          "note": "Gb5"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 37,
+      "measure": 38,
+      "position": "2+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "magenta": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        }
+      }
+    },
+    {
+      "id": 38,
+      "measure": 38,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 39,
+      "measure": 38,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 40,
+      "measure": 39,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        }
+      }
+    },
+    {
+      "id": 41,
+      "measure": 39,
+      "position": "2-of-4",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "orange": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        }
+      }
+    },
+    {
+      "id": 42,
+      "measure": 39,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "pink": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "purple": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        }
+      }
+    },
+    {
+      "id": 43,
+      "measure": 39,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 44,
+      "measure": 40,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        }
+      }
+    },
+    {
+      "id": 45,
+      "measure": 40,
+      "position": "2-of-4",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short44.mp3",
+          "note": "Ab5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "pink": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "purple": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        }
+      }
+    },
+    {
+      "id": 46,
+      "measure": 40,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "purple": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        }
+      }
+    },
+    {
+      "id": 47,
+      "measure": 41,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 48,
+      "measure": 41,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "magenta": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short5.mp3",
+          "note": "F2"
+        }
+      }
+    },
+    {
+      "id": 49,
+      "measure": 42,
+      "position": "2-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 50,
+      "measure": 42,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "magenta": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 51,
+      "measure": 43,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "magenta": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        }
+      }
+    },
+    {
+      "id": 52,
+      "measure": 43,
+      "position": "4-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short5.mp3",
+          "note": "F2"
+        }
+      }
+    },
+    {
+      "id": 53,
+      "measure": 44,
+      "position": "2-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short5.mp3",
+          "note": "F2"
+        }
+      }
+    },
+    {
+      "id": 54,
+      "measure": 45,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "pink": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 55,
+      "measure": 48,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "magenta": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "orange": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 56,
+      "measure": 48,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        }
+      }
+    },
+    {
+      "id": 57,
+      "measure": 49,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 58,
+      "measure": 49,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "magenta": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 59,
+      "measure": 50,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 60,
+      "measure": 50,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 61,
+      "measure": 51,
+      "position": "1-of-4",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 62,
+      "measure": 51,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "red": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        }
+      }
+    },
+    {
+      "id": 63,
+      "measure": 52,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 64,
+      "measure": 52,
+      "position": "2-of-3",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 65,
+      "measure": 52,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "cyan": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        }
+      }
+    },
+    {
+      "id": 66,
+      "measure": 52,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short44.mp3",
+          "note": "Ab5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "red": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "cyan": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        }
+      }
+    },
+    {
+      "id": 67,
+      "measure": 53,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short46.mp3",
+          "note": "Bb5"
+        },
+        "magenta": {
+          "sample": "primerTones/short44.mp3",
+          "note": "Ab5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "cyan": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        }
+      }
+    },
+    {
+      "id": 68,
+      "measure": 54,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "magenta": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 69,
+      "measure": 54,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        }
+      }
+    },
+    {
+      "id": 70,
+      "measure": 54,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        }
+      }
+    },
+    {
+      "id": 71,
+      "measure": 54,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 72,
+      "measure": 55,
+      "position": "1-of-3",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        }
+      }
+    },
+    {
+      "id": 73,
+      "measure": 55,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 74,
+      "measure": 55,
+      "position": "2-of-3",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 75,
+      "measure": 55,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        }
+      }
+    },
+    {
+      "id": 76,
+      "measure": 55,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 77,
+      "measure": 56,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "orange": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        }
+      }
+    },
+    {
+      "id": 78,
+      "measure": 56,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        }
+      }
+    },
+    {
+      "id": 79,
+      "measure": 56,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "orange": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "red": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 80,
+      "measure": 56,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "cyan": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        }
+      }
+    },
+    {
+      "id": 81,
+      "measure": 56,
+      "position": "3-of-3",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        }
+      }
+    },
+    {
+      "id": 82,
+      "measure": 56,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "blue": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        }
+      }
+    },
+    {
+      "id": 83,
+      "measure": 57,
+      "position": "1-of-3",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 84,
+      "measure": 57,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "red": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        }
+      }
+    },
+    {
+      "id": 85,
+      "measure": 57,
+      "position": "2-of-3",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 86,
+      "measure": 57,
+      "position": "3-of-3",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        }
+      }
+    },
+    {
+      "id": 87,
+      "measure": 58,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 88,
+      "measure": 58,
+      "position": "2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "purple": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        }
+      }
+    },
+    {
+      "id": 89,
+      "measure": 60,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 90,
+      "measure": 61,
+      "position": "1+2/7-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 91,
+      "measure": 61,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        },
+        "purple": {
+          "sample": "primerTones/short18.mp3",
+          "note": "Gb3"
+        }
+      }
+    },
+    {
+      "id": 92,
+      "measure": 61,
+      "position": "3-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 93,
+      "measure": 61,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 94,
+      "measure": 62,
+      "position": "3-of-3",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/long71.mp3",
+          "note": "A3"
+        },
+        "purple": {
+          "sample": "primerTones/long71.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 95,
+      "measure": 63,
+      "position": "3-of-3",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/long61.mp3",
+          "note": "B2"
+        },
+        "purple": {
+          "sample": "primerTones/long61.mp3",
+          "note": "B2"
+        }
+      }
+    },
+    {
+      "id": 96,
+      "measure": 65,
+      "position": "2-of-3",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/long60.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/long60.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 97,
+      "measure": 66,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
+        }
+      }
+    },
+    {
+      "id": 98,
+      "measure": 66,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        }
+      }
+    },
+    {
+      "id": 99,
+      "measure": 67,
+      "position": "2-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        }
+      }
+    },
+    {
+      "id": 100,
+      "measure": 67,
+      "position": "2+1/2-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 101,
+      "measure": 67,
+      "position": "3+2/7-of-4",
+      "primer": {}
+    },
+    {
+      "id": 102,
+      "measure": 67,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 103,
+      "measure": 68,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short44.mp3",
+          "note": "Ab5"
+        }
+      }
+    },
+    {
+      "id": 104,
+      "measure": 68,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "yellow": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        }
+      }
+    },
+    {
+      "id": 105,
+      "measure": 68,
+      "position": "4+1/4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 106,
+      "measure": 69,
+      "position": "1-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 107,
+      "measure": 69,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
+        }
+      }
+    },
+    {
+      "id": 108,
+      "measure": 69,
+      "position": "2-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        }
+      }
+    },
+    {
+      "id": 109,
+      "measure": 69,
+      "position": "2+1/2-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        }
+      }
+    },
+    {
+      "id": 110,
+      "measure": 69,
+      "position": "2+3/4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short42.mp3",
+          "note": "Gb5"
+        }
+      }
+    },
+    {
+      "id": 111,
+      "measure": 69,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
+        }
+      }
+    },
+    {
+      "id": 112,
+      "measure": 69,
+      "position": "3+3/4-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 113,
+      "measure": 69,
+      "position": "4-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 114,
+      "measure": 69,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 115,
+      "measure": 70,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        }
+      }
+    },
+    {
+      "id": 116,
+      "measure": 70,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 117,
+      "measure": 70,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long88.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/long88.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/long80.mp3",
+          "note": "Gb4"
+        },
+        "blue": {
+          "sample": "primerTones/long80.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/long68.mp3",
+          "note": "Gb3"
+        },
+        "pink": {
+          "sample": "primerTones/long64.mp3",
+          "note": "D3"
+        },
+        "purple": {
+          "sample": "primerTones/long56.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 118,
+      "measure": 71,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "magenta": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "orange": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/long72.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/long72.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/long57.mp3",
+          "note": "G2"
+        }
+      }
+    },
+    {
+      "id": 119,
+      "measure": 73,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "magenta": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "orange": {
+          "sample": "primerTones/long82.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/long82.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/long77.mp3",
+          "note": "Eb4"
+        },
+        "cyan": {
+          "sample": "primerTones/long77.mp3",
+          "note": "Eb4"
+        },
+        "yellow": {
+          "sample": "primerTones/long70.mp3",
+          "note": "Ab3"
+        },
+        "pink": {
+          "sample": "primerTones/long65.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/long58.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 120,
+      "measure": 74,
+      "position": "2-of-2",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long93.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/long93.mp3",
+          "note": "G5"
+        },
+        "orange": {
+          "sample": "primerTones/long86.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/long86.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/long74.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/long62.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 121,
+      "measure": 77,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "blue": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        }
+      }
+    },
+    {
+      "id": 122,
+      "measure": 77,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "pink": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 123,
+      "measure": 78,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short44.mp3",
+          "note": "Ab5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        }
+      }
+    },
+    {
+      "id": 124,
+      "measure": 78,
+      "position": "3-of-4",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 125,
+      "measure": 80,
+      "position": "1-of-3",
+      "primer": {}
+    },
+    {
+      "id": 126,
+      "measure": 89,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 127,
+      "measure": 97,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 128,
+      "measure": 98,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        }
+      }
+    },
+    {
+      "id": 129,
+      "measure": 98,
+      "position": "2-of-4",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 130,
+      "measure": 98,
+      "position": "3-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 131,
+      "measure": 98,
+      "position": "4-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        }
+      }
+    },
+    {
+      "id": 132,
+      "measure": 99,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 133,
+      "measure": 99,
+      "position": "2-of-4",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        }
+      }
+    },
+    {
+      "id": 134,
+      "measure": 99,
+      "position": "3-of-4",
+      "primer": {
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 135,
+      "measure": 99,
+      "position": "4-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 136,
+      "measure": 100,
+      "position": "1-of-4",
+      "primer": {
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 137,
+      "measure": 100,
+      "position": "1+1/2-of-4",
+      "primer": {
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 138,
+      "measure": 100,
+      "position": "2-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 139,
+      "measure": 100,
+      "position": "3-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 140,
+      "measure": 100,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 141,
+      "measure": 101,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        }
+      }
+    },
+    {
+      "id": 142,
+      "measure": 101,
+      "position": "2-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 143,
+      "measure": 101,
+      "position": "3-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
+    },
+    {
+      "id": 144,
+      "measure": 101,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 145,
+      "measure": 102,
+      "position": "1-of-4",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        }
+      }
+    },
+    {
+      "id": 146,
+      "measure": 102,
+      "position": "2-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 147,
+      "measure": 102,
+      "position": "2+1/2-of-4",
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 148,
+      "measure": 102,
+      "position": "3-of-4",
+      "primer": {
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        }
+      }
+    },
+    {
+      "id": 149,
+      "measure": 102,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 150,
+      "measure": 102,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 151,
+      "measure": 102,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        }
+      }
+    },
+    {
+      "id": 152,
+      "measure": 103,
+      "position": "2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "cyan": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "yellow": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        }
+      }
+    },
+    {
+      "id": 153,
+      "measure": 103,
+      "position": "2+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "blue": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "cyan": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        }
+      }
+    },
+    {
+      "id": 154,
+      "measure": 103,
+      "position": "3-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "yellow": {
+          "sample": "primerTones/short33.mp3, primerTones/short29.mp3",
+          "note": "A4, F4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        }
+      }
+    },
+    {
+      "id": 155,
+      "measure": 103,
+      "position": "3+1/2-of-4",
+      "primer": {
+        "red": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "yellow": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        }
+      }
+    },
+    {
+      "id": 156,
+      "measure": 104,
+      "position": "1-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "magenta": {
+          "sample": "primerTones/long89.mp3",
+          "note": "Eb5"
+        },
+        "orange": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "blue": {
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
+        },
+        "red": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/long77.mp3",
+          "note": "Eb4"
+        },
+        "pink": {
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/long60.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 157,
+      "measure": 107,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 158,
+      "measure": 112,
+      "position": "1-of-4",
+      "primer": {}
+    },
+    {
+      "id": 159,
+      "measure": 115,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "magenta": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 160,
+      "measure": 116,
+      "position": "2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "magenta": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "orange": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 161,
+      "measure": 116,
+      "position": "3-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "magenta": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "orange": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 162,
+      "measure": 117,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "magenta": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 163,
+      "measure": 118,
+      "position": "2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "magenta": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "orange": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 164,
+      "measure": 119,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "magenta": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "orange": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 165,
+      "measure": 120,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "magenta": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 166,
+      "measure": 120,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "magenta": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "orange": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 167,
+      "measure": 121,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "magenta": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "orange": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 168,
+      "measure": 122,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "magenta": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "orange": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        }
+      }
+    },
+    {
+      "id": 169,
+      "measure": 122,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "magenta": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "orange": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "blue": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "red": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "cyan": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        },
+        "purple": {
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
+        }
+      }
+    },
+    {
+      "id": 170,
+      "measure": 124,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "magenta": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "orange": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 171,
+      "measure": 124,
+      "position": "3-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "pink": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        },
+        "purple": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        }
+      }
+    },
+    {
+      "id": 172,
+      "measure": 125,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        },
+        "purple": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        }
+      }
+    },
+    {
+      "id": 173,
+      "measure": 126,
+      "position": "1-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 174,
+      "measure": 127,
+      "position": "1-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "pink": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        },
+        "purple": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        }
+      }
+    },
+    {
+      "id": 175,
+      "measure": 127,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        },
+        "purple": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        }
+      }
+    },
+    {
+      "id": 176,
+      "measure": 127,
+      "position": "3-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 177,
+      "measure": 128,
+      "position": "2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "pink": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        },
+        "purple": {
+          "sample": "primerTones/short7.mp3",
+          "note": "G2"
+        }
+      }
+    },
+    {
+      "id": 178,
+      "measure": 129,
+      "position": "2-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        },
+        "purple": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        }
+      }
+    },
+    {
+      "id": 179,
+      "measure": 129,
+      "position": "3-of-3",
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 180,
+      "measure": 130,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "magenta": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "red": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 181,
+      "measure": 131,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "orange": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 182,
+      "measure": 132,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "magenta": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "orange": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "blue": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        },
+        "purple": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        }
+      }
+    },
+    {
+      "id": 183,
+      "measure": 132,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "magenta": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "red": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 184,
+      "measure": 133,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "orange": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 185,
+      "measure": 134,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "magenta": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "orange": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "blue": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        },
+        "purple": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        }
+      }
+    },
+    {
+      "id": 186,
+      "measure": 135,
+      "position": "1+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "magenta": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "red": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 187,
+      "measure": 135,
+      "position": "3-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "orange": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 188,
+      "measure": 137,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "magenta": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "orange": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "blue": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        },
+        "purple": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        }
+      }
+    },
+    {
+      "id": 189,
+      "measure": 138,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "magenta": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "orange": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "blue": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "red": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "cyan": {
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
+        },
+        "yellow": {
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        }
+      }
+    },
+    {
+      "id": 190,
+      "measure": 138,
+      "position": "3+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "magenta": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "orange": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "blue": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "pink": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        },
+        "purple": {
+          "sample": "primerTones/short6.mp3",
+          "note": "Gb2"
+        }
+      }
+    },
+    {
+      "id": 191,
+      "measure": 139,
+      "position": "2+1/2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "magenta": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "orange": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "blue": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "red": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "cyan": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        },
+        "purple": {
+          "sample": "primerTones/short3.mp3",
+          "note": "Eb2"
+        }
+      }
+    },
+    {
+      "id": 192,
+      "measure": 140,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "magenta": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "orange": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        },
+        "purple": {
+          "sample": "primerTones/short9.mp3",
+          "note": "A2"
+        }
+      }
+    }
+  ]
+}

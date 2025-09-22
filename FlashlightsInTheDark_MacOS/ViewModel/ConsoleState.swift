@@ -469,9 +469,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                     let prefix = set.lowercased()
                     let file = "\(prefix)\(slotNumber).mp3"
 
-                    try await oscBroadcaster.send(AudioPlay(index: slot,
-                                                            file: file,
-                                                            gain: gain))
+                    let message = AudioPlay(index: slot,
+                                             file: file,
+                                             gain: gain)
+                    let osc = message.encode()
+                    try await oscBroadcaster.send(osc, toSlot: slotNumber)
+                    try await oscBroadcaster.send(osc)
 
                     await MainActor.run {
                         self.lastLog = "/audio/play \(slotNumber) \(file)"
@@ -1361,7 +1364,10 @@ extension ConsoleState {
                 targets.insert(color.groupIndex)
                 guard !targets.isEmpty else { continue }
                 for slot in targets {
-                    try await broadcaster.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                    let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0)
+                    let osc = message.encode()
+                    try await broadcaster.send(osc, toSlot: slot)
+                    try await broadcaster.send(osc)
                     await MainActor.run {
                         self.lastLog = "/audio/play slot \(slot) → \(fileName)"
                     }
