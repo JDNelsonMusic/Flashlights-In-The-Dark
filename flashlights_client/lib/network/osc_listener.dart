@@ -63,7 +63,6 @@ class OscListener {
   Future<void> _playPrimer(
     String fileName,
     double gain, {
-    double? startAtMs,
     bool sendAck = false,
   }) async {
     try {
@@ -72,18 +71,6 @@ class OscListener {
 
       final volume = gain.clamp(0.0, 1.0).toDouble();
       final playbackToken = ++_playbackToken;
-
-      if (startAtMs != null) {
-        final offsetMs = client.clockOffsetMs.value;
-        final localNowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
-        final localStartMs = startAtMs - offsetMs;
-        final waitMs = localStartMs - localNowMs;
-        if (waitMs > 1) {
-          debugPrint('[OSC] Scheduling primer in ${waitMs.toStringAsFixed(1)} ms (clock offset ${offsetMs.toStringAsFixed(1)}).');
-          final delayUs = (waitMs * 1000).clamp(0, double.maxFinite).toInt();
-          await Future<void>.delayed(Duration(microseconds: delayUs));
-        }
-      }
 
       await NativeAudio.playPrimerTone(fileName, volume);
 
@@ -180,6 +167,11 @@ class OscListener {
           if (idx + 4 > data.length) return null;
           args.add(bd.getFloat32(idx, Endian.big));
           idx += 4;
+          break;
+        case 'd':
+          if (idx + 8 > data.length) return null;
+          args.add(bd.getFloat64(idx, Endian.big));
+          idx += 8;
           break;
         case 's':
           final end = data.indexOf(0, idx);
@@ -285,7 +277,7 @@ class OscListener {
             client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
           final fileName = msg.file;
           final gain = msg.gain;
-          await _playPrimer(fileName, gain, startAtMs: msg.startAtMs, sendAck: true);
+          await _playPrimer(fileName, gain, sendAck: true);
         }
         break;
 
@@ -317,21 +309,10 @@ class OscListener {
         break;
 
       case '/sync':
+        // Clock syncing disabled: acknowledge reachability but ignore timestamp data.
         _markConnected();
-        final msg = SyncMessage.fromOsc(m);
-        if (msg != null) {
-          final ntp = msg.timestamp;
-          const eraOffset = 2208988800; // Seconds between 1900 and 1970.
-          final serverSecs = ntp - BigInt.from(eraOffset);
-          final serverMs = serverSecs.toInt() * 1000;
-          final localMs = DateTime.now().millisecondsSinceEpoch;
-          final offset = serverMs - localMs;
-          final smoothed =
-              (client.clockOffsetMs.value + offset) / 2; // Simple smoothing.
-          client.clockOffsetMs.value = smoothed;
-          print(
-            '[OSC] Clock offset updated to ${client.clockOffsetMs.value} ms',
-          );
+        if (client.clockOffsetMs.value != 0) {
+          client.clockOffsetMs.value = 0;
         }
         break;
 

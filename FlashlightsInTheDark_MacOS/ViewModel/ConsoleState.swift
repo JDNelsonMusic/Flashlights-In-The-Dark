@@ -42,7 +42,6 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let broadcasterTask = Task<OscBroadcaster, Error> {
         try await OscBroadcaster()
     }
-    private var clockSync: ClockSyncService?
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
@@ -135,17 +134,6 @@ public final class ConsoleState: ObservableObject, Sendable {
             print("ℹ️ Using default MIDI channel map")
         }
 
-        // start clock-sync service once broadcaster is ready
-        Task { [weak self] in
-            guard let self = self else { return }
-            do {
-                let broadcaster = try await self.broadcasterTask.value
-                self.clockSync = ClockSyncService(broadcaster: broadcaster)
-            } catch {
-                // ignore errors (e.g. preview/sandbox)
-                return
-            }
-        }
         self.statuses = Dictionary(uniqueKeysWithValues:
             devices.map { ($0.id, DeviceStatus.clean) }
         )
@@ -1209,8 +1197,6 @@ extension ConsoleState {
         isBroadcasting = false
         heartbeatTimer?.invalidate()
         heartbeatTimer = nil
-        // ClockSyncService de-initialises itself when its Task is cancelled.
-        // Add additional cleanup here (file handles, etc.) as the project grows.
         print("[ConsoleState] Network stack suspended 💤")
     }
 

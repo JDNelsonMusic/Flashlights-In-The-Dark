@@ -19,6 +19,7 @@ import 'version.dart';
 import 'model/client_state.dart';
 import 'model/event_recipe.dart';
 // Removed PrimerToneLibrary; native audio handles asset lookup.
+import 'native_audio.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
@@ -67,6 +68,13 @@ Future<void> _bootstrapNative() async {
     await session.setActive(true);
   } catch (e) {
     debugPrint('[AudioSession] configuration failed: $e');
+  }
+
+  // 4. Warm up primer tone library so all audio buffers are ready before use.
+  try {
+    await NativeAudio.preloadPrimerLibrary();
+  } catch (e) {
+    debugPrint('[Bootstrap] primer preload failed: $e');
   }
 }
 

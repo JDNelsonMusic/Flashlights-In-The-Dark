@@ -20,7 +20,14 @@ import java.io.FileOutputStream
 
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
-    private var primerPlayer: MediaPlayer? = null
+    private val primerPlayers: MutableMap<String, MediaPlayer> = mutableMapOf()
+    private val primerCacheDir: File by lazy {
+        File(applicationContext.cacheDir, "primerTones").apply {
+            if (!exists()) {
+                mkdirs()
+            }
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -81,6 +88,17 @@ class MainActivity : FlutterActivity() {
                     val assetKey = call.argument<String>("assetKey")
                     val bytes = call.argument<ByteArray>("bytes")
                     playPrimerTone(fileName, volume, assetKey, bytes)
+                    result.success(null)
+                }
+                "preloadPrimerTone" -> {
+                    val fileName = call.argument<String>("fileName")
+                    if (fileName == null) {
+                        result.error("INVALID_ARGUMENTS", "fileName missing", null)
+                        return@setMethodCallHandler
+                    }
+                    val assetKey = call.argument<String>("assetKey")
+                    val bytes = call.argument<ByteArray>("bytes")
+                    preloadPrimerTone(fileName, assetKey, bytes)
                     result.success(null)
                 }
                 "stopPrimerTone" -> {
@@ -155,51 +173,84 @@ class MainActivity : FlutterActivity() {
             }
             val assetKey = assetKeyArg ?: "available-sounds/primerTones/$canonical"
 
-            primerPlayer?.release()
-            primerPlayer = null
-
-            val mp = MediaPlayer()
-            mp.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-            )
-
-            if (bytes != null) {
-                val cacheRoot = File(applicationContext.cacheDir, "primerTones")
-                if (!cacheRoot.exists()) {
-                    cacheRoot.mkdirs()
-                }
-                val cacheFile = File(cacheRoot, canonical)
-                if (!cacheFile.exists() || cacheFile.length().toInt() != bytes.size) {
-                    FileOutputStream(cacheFile).use { output ->
-                        output.write(bytes)
-                    }
-                }
-                mp.setDataSource(cacheFile.absolutePath)
-            } else {
-                val flutterLoader = FlutterInjector.instance().flutterLoader()
-                val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
-                applicationContext.assets.openFd(lookupKey).use { descriptor ->
-                    mp.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
-                }
-            }
-
+            val player = primerPlayers[canonical] ?: createPlayer(canonical, assetKey, bytes)
             val clampedVolume = volume.coerceIn(0f, 1f)
-            mp.setVolume(clampedVolume, clampedVolume)
-            mp.prepare()
-            mp.start()
-            primerPlayer = mp
+            player.setVolume(clampedVolume, clampedVolume)
+            if (player.isPlaying) {
+                player.seekTo(0)
+            } else {
+                player.seekTo(0)
+            }
+            player.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun preloadPrimerTone(
+        fileName: String,
+        assetKeyArg: String?,
+        bytes: ByteArray?
+    ) {
+        try {
+            var trimmed = fileName.trim()
+            val parts = trimmed.split("/")
+            if (parts.isNotEmpty()) {
+                trimmed = parts.last()
+            }
+            val lower = trimmed.lowercase()
+            var canonical = when {
+                lower.startsWith("short") -> "Short" + trimmed.substring(5)
+                lower.startsWith("long") -> "Long" + trimmed.substring(4)
+                else -> trimmed
+            }
+            if (!canonical.lowercase().endsWith(".mp3")) {
+                canonical += ".mp3"
+            }
+            val assetKey = assetKeyArg ?: "available-sounds/primerTones/$canonical"
+
+            if (!primerPlayers.containsKey(canonical)) {
+                val player = createPlayer(canonical, assetKey, bytes)
+                player.seekTo(0)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun stopPrimerTone() {
-        primerPlayer?.stop()
-        primerPlayer?.release()
-        primerPlayer = null
+        primerPlayers.values.forEach {
+            it.stop()
+            it.seekTo(0)
+        }
+    }
+
+    private fun createPlayer(canonical: String, assetKey: String, bytes: ByteArray?): MediaPlayer {
+        val player = MediaPlayer()
+        player.setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+        )
+
+        if (bytes != null) {
+            val cacheFile = File(primerCacheDir, canonical)
+            if (!cacheFile.exists() || cacheFile.length().toInt() != bytes.size) {
+                FileOutputStream(cacheFile).use { it.write(bytes) }
+            }
+            player.setDataSource(cacheFile.absolutePath)
+        } else {
+            val flutterLoader = FlutterInjector.instance().flutterLoader()
+            val lookupKey = flutterLoader.getLookupKeyForAsset(assetKey)
+            applicationContext.assets.openFd(lookupKey).use { descriptor ->
+                player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+            }
+        }
+
+        player.prepare()
+        primerPlayers[canonical] = player
+        return player
     }
 
     override fun onDestroy() {
@@ -209,7 +260,8 @@ class MainActivity : FlutterActivity() {
             }
         }
         multicastLock = null
-        stopPrimerTone()
+        primerPlayers.values.forEach { it.release() }
+        primerPlayers.clear()
         super.onDestroy()
     }
 }

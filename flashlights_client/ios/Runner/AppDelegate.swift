@@ -5,7 +5,7 @@ import AVFoundation
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private weak var flutterController: FlutterViewController?
-  private var primerAudioPlayer: AVAudioPlayer?
+  private var primerPlayers: [String: AVAudioPlayer] = [:]
 
   override func application(
     _ application: UIApplication,
@@ -89,6 +89,22 @@ import AVFoundation
           data: payload?.data
         )
         result(nil)
+      case "preloadPrimerTone":
+        guard
+          let args = call.arguments as? [String: Any],
+          let fileName = args["fileName"] as? String
+        else {
+          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected fileName", details: nil))
+          return
+        }
+        let assetKey = args["assetKey"] as? String
+        let payload = args["bytes"] as? FlutterStandardTypedData
+        self.preloadPrimerTone(
+          fileName: fileName,
+          assetKey: assetKey,
+          data: payload?.data
+        )
+        result(nil)
       case "stopPrimerTone":
         self.stopPrimerTone()
         result(nil)
@@ -145,90 +161,135 @@ import AVFoundation
       try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
       try session.setActive(true)
 
-      if let buffer = data {
-        primerAudioPlayer?.stop()
-        primerAudioPlayer = try AVAudioPlayer(data: buffer)
-        primerAudioPlayer?.volume = Float(volume)
-        primerAudioPlayer?.prepareToPlay()
-        primerAudioPlayer?.play()
-        return
-      }
+      let canonicalName = canonicalFileName(from: fileName)
+      let canonicalKey = canonicalAssetKey(for: canonicalName, assetKey: assetKey)
 
-      var trimmed = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
-      if let slash = trimmed.lastIndex(of: "/") {
-        trimmed = String(trimmed[trimmed.index(after: slash)...])
+      let player = try resolvePlayer(
+        canonicalKey: canonicalKey,
+        fileName: canonicalName,
+        assetKey: assetKey,
+        data: data
+      )
+      player.currentTime = 0
+      player.volume = Float(volume)
+      if !player.isPlaying {
+        player.prepareToPlay()
       }
-      if trimmed.lowercased().hasPrefix("short") {
-        trimmed = "Short" + trimmed.dropFirst(5)
-      } else if trimmed.lowercased().hasPrefix("long") {
-        trimmed = "Long" + trimmed.dropFirst(4)
-      }
-      if !trimmed.lowercased().hasSuffix(".mp3") {
-        trimmed += ".mp3"
-      }
-
-      let canonicalKey = (assetKey ?? "available-sounds/primerTones/\(trimmed)")
-        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-
-      var candidates = [URL]()
-      func appendCandidate(_ url: URL?) {
-        guard let url else { return }
-        candidates.append(url)
-      }
-
-      if let controller = flutterController {
-        let lookup = controller.lookupKey(forAsset: canonicalKey)
-        appendCandidate(Bundle.main.bundleURL.appendingPathComponent(lookup))
-        if let privateFrameworks = Bundle.main.privateFrameworksURL?
-          .appendingPathComponent("App.framework/flutter_assets") {
-          appendCandidate(privateFrameworks.appendingPathComponent(lookup))
-        }
-      }
-
-      if let privateFrameworks = Bundle.main.privateFrameworksURL?
-        .appendingPathComponent("App.framework/flutter_assets") {
-        appendCandidate(privateFrameworks.appendingPathComponent(canonicalKey))
-        appendCandidate(privateFrameworks
-          .appendingPathComponent("available-sounds/primerTones/\(trimmed)"))
-      }
-
-      appendCandidate(Bundle.main.bundleURL
-        .appendingPathComponent("flutter_assets/\(canonicalKey)"))
-      appendCandidate(Bundle.main.bundleURL
-        .appendingPathComponent("flutter_assets/available-sounds/primerTones/\(trimmed)"))
-      appendCandidate(Bundle.main.bundleURL
-        .appendingPathComponent("available-sounds/primerTones/\(trimmed)"))
-
-      let fm = FileManager.default
-      var soundURL: URL?
-      var seenPaths = Set<String>()
-      for url in candidates {
-        let path = url.path
-        if seenPaths.contains(path) { continue }
-        seenPaths.insert(path)
-        if fm.fileExists(atPath: path) {
-          soundURL = url
-          break
-        }
-      }
-
-      guard let finalURL = soundURL else {
-        NSLog("Primer file not found: \(fileName) (canonical: \(canonicalKey))")
-        return
-      }
-
-      primerAudioPlayer?.stop()
-      primerAudioPlayer = try AVAudioPlayer(contentsOf: finalURL)
-      primerAudioPlayer?.volume = Float(volume)
-      primerAudioPlayer?.prepareToPlay()
-      primerAudioPlayer?.play()
+      player.play()
     } catch {
       NSLog("Failed to play primer tone \(fileName): \(error)")
     }
   }
 
+  private func preloadPrimerTone(fileName: String, assetKey: String?, data: Data?) {
+    do {
+      let canonicalName = canonicalFileName(from: fileName)
+      let canonicalKey = canonicalAssetKey(for: canonicalName, assetKey: assetKey)
+      let player = try resolvePlayer(
+        canonicalKey: canonicalKey,
+        fileName: canonicalName,
+        assetKey: assetKey,
+        data: data
+      )
+      player.prepareToPlay()
+      player.currentTime = 0
+    } catch {
+      NSLog("Failed to preload primer tone \(fileName): \(error)")
+    }
+  }
+
   private func stopPrimerTone() {
-    primerAudioPlayer?.stop()
-    primerAudioPlayer = nil
+    for player in primerPlayers.values {
+      player.stop()
+      player.currentTime = 0
+    }
+  }
+
+  private func resolvePlayer(canonicalKey: String, fileName: String, assetKey: String?, data: Data?) throws -> AVAudioPlayer {
+    if let existing = primerPlayers[canonicalKey] {
+      if existing.isPlaying {
+        existing.stop()
+      }
+      return existing
+    }
+
+    if let data {
+      let created = try AVAudioPlayer(data: data)
+      primerPlayers[canonicalKey] = created
+      return created
+    }
+
+    guard let url = locatePrimerURL(canonicalKey: canonicalKey, fileName: fileName, assetKey: assetKey) else {
+      throw NSError(domain: "ai.keex.flashlights", code: -1, userInfo: [NSLocalizedDescriptionKey: "Primer file not found: \(canonicalKey)"])
+    }
+    let created = try AVAudioPlayer(contentsOf: url)
+    primerPlayers[canonicalKey] = created
+    return created
+  }
+
+  private func locatePrimerURL(canonicalKey: String, fileName: String, assetKey: String?) -> URL? {
+    var candidates = [URL]()
+    func appendCandidate(_ url: URL?) {
+      guard let url else { return }
+      candidates.append(url)
+    }
+
+    if let controller = flutterController {
+      let lookup = controller.lookupKey(forAsset: canonicalKey)
+      appendCandidate(Bundle.main.bundleURL.appendingPathComponent(lookup))
+      if let privateFrameworks = Bundle.main.privateFrameworksURL?
+        .appendingPathComponent("App.framework/flutter_assets") {
+        appendCandidate(privateFrameworks.appendingPathComponent(lookup))
+      }
+    }
+
+    if let privateFrameworks = Bundle.main.privateFrameworksURL?
+      .appendingPathComponent("App.framework/flutter_assets") {
+      appendCandidate(privateFrameworks.appendingPathComponent(canonicalKey))
+      appendCandidate(privateFrameworks
+        .appendingPathComponent("available-sounds/primerTones/\(fileName)"))
+    }
+
+    appendCandidate(Bundle.main.bundleURL
+      .appendingPathComponent("flutter_assets/\(canonicalKey)"))
+    appendCandidate(Bundle.main.bundleURL
+      .appendingPathComponent("flutter_assets/available-sounds/primerTones/\(fileName)"))
+    appendCandidate(Bundle.main.bundleURL
+      .appendingPathComponent("available-sounds/primerTones/\(fileName)"))
+
+    let fm = FileManager.default
+    var soundURL: URL?
+    var seenPaths = Set<String>()
+    for url in candidates {
+      let path = url.path
+      if seenPaths.contains(path) { continue }
+      seenPaths.insert(path)
+      if fm.fileExists(atPath: path) {
+        soundURL = url
+        break
+      }
+    }
+    return soundURL
+  }
+
+  private func canonicalFileName(from raw: String) -> String {
+    var trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    if let slash = trimmed.lastIndex(of: "/") {
+      trimmed = String(trimmed[trimmed.index(after: slash)...])
+    }
+    if trimmed.lowercased().hasPrefix("short") {
+      trimmed = "Short" + trimmed.dropFirst(5)
+    } else if trimmed.lowercased().hasPrefix("long") {
+      trimmed = "Long" + trimmed.dropFirst(4)
+    }
+    if !trimmed.lowercased().hasSuffix(".mp3") {
+      trimmed += ".mp3"
+    }
+    return trimmed
+  }
+
+  private func canonicalAssetKey(for canonicalName: String, assetKey: String?) -> String {
+    return (assetKey ?? "available-sounds/primerTones/\(canonicalName)")
+      .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
   }
 }
