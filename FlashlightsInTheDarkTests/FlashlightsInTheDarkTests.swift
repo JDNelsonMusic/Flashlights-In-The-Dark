@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import OSCKit
 @testable import FlashlightsInTheDark
 
 final class OscMessagesTests: XCTestCase {
@@ -25,12 +26,20 @@ final class OscMessagesTests: XCTestCase {
     }
 
     func testAudioPlayRoundTrip() {
-        let original = AudioPlay(index: 3, file: "test.wav", gain: 0.75)
+        let original = AudioPlay(index: 3, file: "test.wav", gain: 0.75, startAtMs: 1234.5)
         let msg = original.encode()
         let decoded = AudioPlay(from: msg)
         XCTAssertEqual(decoded?.index, original.index)
         XCTAssertEqual(decoded?.file, original.file)
         XCTAssertEqual(decoded?.gain, original.gain)
+        XCTAssertEqual(decoded?.startAtMs, original.startAtMs)
+    }
+
+    func testAudioPlayBackwardCompatibility() {
+        let legacy = AudioPlay(index: 2, file: "legacy.mp3", gain: 1.0)
+        let msg = legacy.encode()
+        let decoded = AudioPlay(from: msg)
+        XCTAssertEqual(decoded?.startAtMs, nil)
     }
 
     func testAudioStopRoundTrip() {

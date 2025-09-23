@@ -48,6 +48,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let midi = MIDIManager()
     private let eventLoader = EventRecipeLoader()
     private let primerAudioEngine = PrimerToneAudioEngine()
+    private let primerLeadTimeMs: Double = 180.0
     /// Base offset so MIDI note 1 corresponds to device 1
     private let midiNoteOffset = 0
     private let allInputsLabel = "All MIDI Inputs"
@@ -458,6 +459,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let slotNumber = device.listeningSlot
                 let slot = Int32(slotNumber)
                 let gain: Float32 = 1.0
+                let startAtMs = Date().timeIntervalSince1970 * 1000.0 + self.primerLeadTimeMs
 
                 // --- Collect main-actor data once, then use it ---
                 let toneSets: [String] = await MainActor.run {
@@ -471,7 +473,8 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                     let message = AudioPlay(index: slot,
                                              file: file,
-                                             gain: gain)
+                                             gain: gain,
+                                             startAtMs: startAtMs)
                     let osc = message.encode()
                     try await oscBroadcaster.send(osc, toSlot: slotNumber)
                     try await oscBroadcaster.send(osc)
@@ -1344,8 +1347,11 @@ extension ConsoleState {
     }
 
     private func fire(event: EventRecipe) async {
-        await sendPrimerAssignments(for: event)
-        primerAudioEngine.play(assignments: event.primerAssignments)
+        let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
+        if !event.primerAssignments.isEmpty {
+            primerAudioEngine.play(assignments: event.primerAssignments, startAt: startAtMs)
+        }
+        await sendPrimerAssignments(for: event, startAtMs: startAtMs)
         let measureText = event.measure.map { "M\($0)" } ?? "M?"
         let beatText = event.position ?? "?"
         await MainActor.run {
@@ -1353,7 +1359,7 @@ extension ConsoleState {
         }
     }
 
-    private func sendPrimerAssignments(for event: EventRecipe) async {
+    private func sendPrimerAssignments(for event: EventRecipe, startAtMs: Double) async {
         guard !event.primerAssignments.isEmpty else { return }
         guard isBroadcasting else { return }
         do {
@@ -1368,7 +1374,7 @@ extension ConsoleState {
                     targets.insert(color.groupIndex)
                     guard !targets.isEmpty else { continue }
                     for slot in targets {
-                        let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0)
+                        let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0, startAtMs: startAtMs)
                         let osc = message.encode()
                         // Create two concurrent tasks: one directed to the slot and one broadcast
                         group.addTask {
@@ -1447,6 +1453,7 @@ extension ConsoleState {
         if (1...9).contains(ch),
            (0...48).contains(val) || (50...98).contains(val) {
             let fileName = val < 50 ? "short\(val).mp3" : "long\(val).mp3"
+            let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
             if let slots = groupMembers[ch] {
                 for slot in slots {
                     let idx = slot - 1
@@ -1457,7 +1464,7 @@ extension ConsoleState {
                             guard let self = self else { return }
                             do {
                                 let osc = try await self.broadcasterTask.value
-                                try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                                try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0, startAtMs: startAtMs))
                             } catch {
                                 print("Error sending primer tone to slot \(slot): \(error)")
                             }
@@ -1474,6 +1481,7 @@ extension ConsoleState {
             var slots: [Int] = []
             var prefix = ""
             var eventId = val
+            let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
 
             switch ch {
             case 11:
@@ -1501,7 +1509,7 @@ extension ConsoleState {
                         guard let self = self else { return }
                         do {
                             let osc = try await self.broadcasterTask.value
-                            try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0))
+                            try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0, startAtMs: startAtMs))
                         } catch {
                             print("Error sending sound event to slot \(slot): \(error)")
                         }

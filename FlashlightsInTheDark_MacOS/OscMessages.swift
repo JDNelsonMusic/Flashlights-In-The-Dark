@@ -78,9 +78,13 @@ public struct AudioPlay: OscCodable {
     public let index: Int32
     public let file: String
     public let gain: Float32
+    public let startAtMs: Double?
 
-    public init(index: Int32, file: String, gain: Float32) {
-        self.index = index; self.file = file; self.gain = gain
+    public init(index: Int32, file: String, gain: Float32, startAtMs: Double? = nil) {
+        self.index = index
+        self.file = file
+        self.gain = gain
+        self.startAtMs = startAtMs
     }
 
     public init?(from message: OSCMessage) {
@@ -89,13 +93,31 @@ public struct AudioPlay: OscCodable {
               let name = message.values.string(at: 1),
               let g    = message.values.float32(at: 2)
         else { return nil }
-        self.init(index: idx, file: name, gain: g)
+
+        let start: Double?
+        if message.values.count >= 4 {
+            if let raw64 = message.values.float64(at: 3) {
+                start = Double(raw64)
+            } else if let raw32 = message.values.float32(at: 3) {
+                start = Double(raw32)
+            } else {
+                start = nil
+            }
+        } else {
+            start = nil
+        }
+
+        self.init(index: idx, file: name, gain: g, startAtMs: start)
     }
 
     public func encode() -> OSCMessage {
-        OSCMessage(
+        var values: [any OSCValue] = [index, file, gain]
+        if let startAtMs {
+            values.append(Float64(startAtMs))
+        }
+        return OSCMessage(
             OSCAddressPattern(Self.address.rawValue),
-            values: [ index, file, gain ]
+            values: values
         )
     }
 }

@@ -82,27 +82,40 @@ class AudioPlay implements OscCodable {
   final int index;
   final String file;
   final double gain;
+  final double? startAtMs;
 
-  AudioPlay(this.index, this.file, this.gain);
+  AudioPlay(this.index, this.file, this.gain, [this.startAtMs]);
 
   @override
   OscAddress get address => OscAddress.audioPlay;
 
   @override
   OSCMessage toOsc() {
-    return OSCMessage(address.value, arguments: [index, file, gain]);
+    final args = <Object>[index, file, gain];
+    final start = startAtMs;
+    if (start != null) {
+      args.add(start);
+    }
+    return OSCMessage(address.value, arguments: args);
   }
 
   static AudioPlay? fromOsc(OSCMessage message) {
     if (message.address != OscAddress.audioPlay.value ||
-        message.arguments.length != 3) {
+        message.arguments.length < 3) {
       return null;
     }
     final arg0 = message.arguments[0];
     final arg1 = message.arguments[1];
     final arg2 = message.arguments[2];
     if (arg0 is int && arg1 is String && arg2 is num) {
-      return AudioPlay(arg0, arg1, arg2.toDouble());
+      double? start;
+      if (message.arguments.length >= 4) {
+        final arg3 = message.arguments[3];
+        if (arg3 is num) {
+          start = arg3.toDouble();
+        }
+      }
+      return AudioPlay(arg0, arg1, arg2.toDouble(), start);
     }
     return null;
   }

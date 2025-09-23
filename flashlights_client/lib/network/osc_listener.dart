@@ -63,6 +63,7 @@ class OscListener {
   Future<void> _playPrimer(
     String fileName,
     double gain, {
+    double? startAtMs,
     bool sendAck = false,
   }) async {
     try {
@@ -71,6 +72,19 @@ class OscListener {
 
       final volume = gain.clamp(0.0, 1.0).toDouble();
       final playbackToken = ++_playbackToken;
+
+      if (startAtMs != null) {
+        final offsetMs = client.clockOffsetMs.value;
+        final localNowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
+        final localStartMs = startAtMs - offsetMs;
+        final waitMs = localStartMs - localNowMs;
+        if (waitMs > 1) {
+          debugPrint('[OSC] Scheduling primer in ${waitMs.toStringAsFixed(1)} ms (clock offset ${offsetMs.toStringAsFixed(1)}).');
+          final delayUs = (waitMs * 1000).clamp(0, double.maxFinite).toInt();
+          await Future<void>.delayed(Duration(microseconds: delayUs));
+        }
+      }
+
       await NativeAudio.playPrimerTone(fileName, volume);
 
       debugPrint('[OSC] Native playback invoked: ${fileName.trim()} @ vol=$volume');
@@ -271,7 +285,7 @@ class OscListener {
             client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
           final fileName = msg.file;
           final gain = msg.gain;
-          await _playPrimer(fileName, gain, sendAck: true);
+          await _playPrimer(fileName, gain, startAtMs: msg.startAtMs, sendAck: true);
         }
         break;
 

@@ -124,9 +124,10 @@ final class PrimerToneAudioEngine {
         url.lastPathComponent.lowercased()
     }
 
-    func play(assignments: [PrimerColor: PrimerAssignment]) {
+    func play(assignments: [PrimerColor: PrimerAssignment], startAt startAtMs: Double? = nil) {
         playerQueue.async { [weak self] in
             guard let self else { return }
+            let scheduledHostTime: UInt64? = startAtMs.flatMap(self.hostTime)
             for (color, assignment) in assignments {
                 guard let sample = assignment.normalizedMacFileName else { continue }
                 let key = sample.components(separatedBy: "/").last?.lowercased() ?? sample.lowercased()
@@ -143,15 +144,33 @@ final class PrimerToneAudioEngine {
 
                 self.engine.connect(player, to: destination, format: envelope.format)
                 player.volume = self.macOutputAttenuation
-                player.scheduleBuffer(envelope.buffer, at: nil, options: []) { [weak self, weak player] in
+                let when = scheduledHostTime.map { AVAudioTime(hostTime: $0) }
+                player.scheduleBuffer(envelope.buffer, at: when, options: []) { [weak self, weak player] in
                     guard let self, let player else { return }
                     self.playerQueue.async {
                         self.engine.detach(player)
                     }
                 }
-                player.play()
+                if let when {
+                    player.play(at: when)
+                } else {
+                    player.play()
+                }
             }
         }
+    }
+
+    private func hostTime(for startAtMs: Double) -> UInt64? {
+        let nowMs = Date().timeIntervalSince1970 * 1000.0
+        let deltaMs = startAtMs - nowMs
+        guard deltaMs > 1 else { return nil }
+
+        let hostTimeNow = AudioGetCurrentHostTime()
+        let frequency = AudioGetHostClockFrequency()
+        let deltaSeconds = deltaMs / 1000.0
+        let ticks = max(0.0, deltaSeconds * frequency)
+        guard ticks > 0 else { return nil }
+        return hostTimeNow + UInt64(ticks.rounded())
     }
 
     private func loadBufferAndReturn(sample: String) -> BufferEnvelope? {
