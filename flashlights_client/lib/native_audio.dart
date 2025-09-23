@@ -12,94 +12,136 @@ class NativeAudio {
   static const MethodChannel _channel =
       MethodChannel('ai.keex.flashlights/audioNative');
 
-  static final Map<String, Uint8List> _byteCache = <String, Uint8List>{};
-  static final Map<String, Future<Uint8List>> _loadingCache =
-      <String, Future<Uint8List>>{};
-  static final Set<String> _primersPreloaded = <String>{};
-  static Future<void>? _preloadFuture;
+  static Completer<void>? _readyCompleter;
+  static bool _initialising = false;
+  static Map<String, dynamic>? _lastInitSnapshot;
+  static Object? _lastInitError;
+  static Timer? _retryTimer;
+
+  /// Returns whether the native layer reports the primer library as prepared.
+  static bool get isReady => _readyCompleter?.isCompleted ?? false;
+
+  /// Last diagnostics snapshot provided by the platform after initialisation.
+  static Map<String, dynamic>? get lastInitSnapshot => _lastInitSnapshot;
+
+  /// Last initialisation error surfaced by the native layer, if any.
+  static Object? get lastInitError => _lastInitError;
+
+  /// Ensures the native audio engine has loaded every primer tone into memory.
+  static Future<void> ensureInitialized() {
+    final completer = _readyCompleter ??= Completer<void>();
+    if (completer.isCompleted) {
+      return completer.future;
+    }
+    if (!_initialising) {
+      _initialising = true;
+      () async {
+        try {
+          final manifest = await _primeAssets();
+          final value = await _channel.invokeMapMethod<String, dynamic>(
+            'initializePrimerLibrary',
+            manifest,
+          );
+
+          if (value != null) {
+            final snapshot = Map<String, dynamic>.unmodifiable(value);
+            _lastInitSnapshot = snapshot;
+            final status = snapshot['status'] as String?;
+            final count = snapshot['count'] ?? snapshot['sounds'];
+            debugPrint(
+                '[NativeAudio] Primer library ready (${count ?? 'n/a'} assets, status=${status ?? 'unknown'})');
+
+            if (status == 'failed') {
+              throw PlatformException(
+                code: 'INIT_FAILED',
+                message: 'Primer preload returned failed status',
+                details: snapshot,
+              );
+            }
+          } else {
+            _lastInitSnapshot = null;
+            debugPrint('[NativeAudio] Primer library ready (no diagnostics)');
+          }
+
+          _lastInitError = null;
+          _retryTimer?.cancel();
+          _retryTimer = null;
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        } catch (error, stack) {
+          debugPrint('[NativeAudio] Primer initialisation failed: $error');
+          _lastInitError = error;
+          if (!completer.isCompleted) {
+            completer.completeError(error, stack);
+          }
+          _readyCompleter = null;
+          _retryTimer ??= Timer(const Duration(seconds: 2), () {
+            _retryTimer = null;
+            if (_readyCompleter == null) {
+              ensureInitialized();
+            }
+          });
+        } finally {
+          _initialising = false;
+        }
+      }();
+    }
+    return completer.future;
+  }
+
+  static Future<Map<String, dynamic>> _primeAssets() async {
+    final manifestJson = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> decoded = jsonDecode(manifestJson);
+    final primerAssets = decoded.keys
+        .where((key) => key.startsWith('available-sounds/primerTones/'))
+        .where((key) => key.toLowerCase().endsWith('.mp3'))
+        .toList()
+      ..sort();
+    final canonical = primerAssets
+        .map((asset) => _canonicalFileName(asset))
+        .toList();
+
+    return <String, dynamic>{
+      'assets': primerAssets,
+      'canonical': canonical,
+      'requested': primerAssets.length,
+      'generatedAt': DateTime.now().toIso8601String(),
+    };
+  }
 
   /// Triggers playback of the given [fileName] using the platform audio layer.
   static Future<void> playPrimerTone(String fileName, double volume) async {
+    await ensureInitialized();
     final canonical = _canonicalFileName(fileName);
     if (canonical.isEmpty) {
       debugPrint('[NativeAudio] Ignoring empty primer tone request for "$fileName"');
       return;
     }
-    final assetKey = 'available-sounds/primerTones/$canonical';
-    final clamped = volume.clamp(0.0, 1.0);
-    Uint8List? bytes;
-    if (!_primersPreloaded.contains(canonical)) {
-      try {
-        bytes = await _ensureBytes(canonical, assetKey);
-      } catch (e, st) {
-        debugPrint('[NativeAudio] Failed to load asset $assetKey: $e');
-        debugPrint('$st');
-        return;
-      }
-    }
     final payload = <String, dynamic>{
       'fileName': canonical,
-      'assetKey': assetKey,
-      'volume': clamped,
+      'volume': volume.clamp(0.0, 1.0),
     };
-    if (bytes != null) {
-      payload['bytes'] = bytes;
-    }
     await _channel.invokeMethod('playPrimerTone', payload);
-    debugPrint('[NativeAudio] Requesting primer: $canonical (asset: $assetKey) @ vol=$clamped');
-    if (bytes != null) {
-      _primersPreloaded.add(canonical);
-    }
   }
 
   /// Stops any primer tone playback in progress on the native side.
   static Future<void> stopPrimerTone() async {
+    await ensureInitialized();
     await _channel.invokeMethod('stopPrimerTone');
   }
 
-  /// Loads all primer tone assets into memory and primes the native caches.
-  static Future<void> preloadPrimerLibrary() {
-    _preloadFuture ??= _doPreloadPrimerLibrary();
-    return _preloadFuture!;
-  }
-
-  static Future<void> _doPreloadPrimerLibrary() async {
+  /// Requests a fresh diagnostics snapshot from the native layer.
+  static Future<Map<String, dynamic>?> diagnostics() async {
     try {
-      final manifestJson = await rootBundle.loadString('AssetManifest.json');
-      final dynamic decoded = jsonDecode(manifestJson);
-      if (decoded is! Map<String, dynamic>) {
-        debugPrint('[NativeAudio] Unexpected AssetManifest format');
-        return;
-      }
-      final primerAssets = decoded.keys
-          .where((key) => key.startsWith('available-sounds/primerTones/'))
-          .where((key) => key.toLowerCase().endsWith('.mp3'))
-          .toList()
-        ..sort();
-      for (final assetKey in primerAssets) {
-        final canonical = _canonicalFileName(assetKey);
-        if (canonical.isEmpty) {
-          continue;
-        }
-        try {
-          final bytes = await _ensureBytes(canonical, assetKey);
-          final args = <String, dynamic>{
-            'fileName': canonical,
-            'assetKey': assetKey,
-            'bytes': bytes,
-            'volume': 1.0,
-          };
-          await _channel.invokeMethod('preloadPrimerTone', args);
-          _primersPreloaded.add(canonical);
-          if (kDebugMode) {
-            debugPrint('[NativeAudio] Preloaded $canonical');
-          }
-        } catch (e) {
-          debugPrint('[NativeAudio] Failed to preload $assetKey: $e');
-        }
-      }
+      final payload =
+          await _channel.invokeMapMethod<String, dynamic>('diagnostics');
+      return payload == null
+          ? null
+          : Map<String, dynamic>.unmodifiable(payload);
     } catch (e) {
-      debugPrint('[NativeAudio] Manifest load failed: $e');
+      debugPrint('[NativeAudio] Diagnostics request failed: $e');
+      return null;
     }
   }
 
@@ -120,30 +162,5 @@ class NativeAudio {
       value = '$value.mp3';
     }
     return value;
-  }
-
-  static Future<Uint8List> _ensureBytes(String canonical, String assetKey) {
-    final cached = _byteCache[canonical];
-    if (cached != null) {
-      return SynchronousFuture<Uint8List>(cached);
-    }
-    final pending = _loadingCache[canonical];
-    if (pending != null) {
-      return pending;
-    }
-    final future = _loadAndCacheBytes(canonical, assetKey);
-    _loadingCache[canonical] = future;
-    return future;
-  }
-
-  static Future<Uint8List> _loadAndCacheBytes(String canonical, String assetKey) async {
-    try {
-      final data = await rootBundle.load(assetKey);
-      final bytes = data.buffer.asUint8List();
-      _byteCache[canonical] = bytes;
-      return bytes;
-    } finally {
-      _loadingCache.remove(canonical);
-    }
   }
 }

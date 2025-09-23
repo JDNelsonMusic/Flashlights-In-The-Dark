@@ -25,6 +25,8 @@ const bool kEnableMic = false;
 
 /// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
 const int _oscPort = 9000;
+const Duration _fastHelloInterval = Duration(seconds: 2);
+const Duration _slowHelloInterval = Duration(seconds: 10);
 
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
@@ -53,6 +55,7 @@ class OscListener {
   OSCSocket? _socket;
   RawDatagramSocket? _recvSocket;
   Timer? _helloTimer;
+  Duration _currentHelloInterval = _fastHelloInterval;
   int _playbackToken = 0;
   StreamSubscription<List<int>>? _micSubscription;
   final MicInput _mic = MicInputStub();
@@ -128,10 +131,7 @@ class OscListener {
     });
 
     // Periodically announce our presence so servers can discover us.
-    _helloTimer = Timer.periodic(
-      const Duration(seconds: 2),
-      (_) => _sendHello(),
-    );
+    _restartHelloTimer(_fastHelloInterval);
     _sendHello();
 
     print('[OSC] Listening on 0.0.0.0:9000');
@@ -226,7 +226,13 @@ class OscListener {
 
   Future<void> _dispatch(OSCMessage m) async {
     final myIndex = client.myIndex.value;
-    debugPrint('📲 OSC <<< ${m.address}  ${m.arguments}');
+    final isSelfHello = m.address == '/hello' && m.arguments.isNotEmpty &&
+        m.arguments[0] is int && m.arguments[0] == myIndex &&
+        (m.arguments.length < 2 ||
+            (m.arguments[1] is String && m.arguments[1] == client.udid));
+    if (!isSelfHello) {
+      debugPrint('📲 OSC <<< ${m.address}  ${m.arguments}');
+    }
 
     final List<OSCMessage> updatedMessages = List<OSCMessage>.from(
       client.recentMessages.value,
@@ -383,6 +389,15 @@ class OscListener {
     }
   }
 
+  void _restartHelloTimer(Duration interval) {
+    if (_currentHelloInterval == interval && _helloTimer?.isActive == true) {
+      return;
+    }
+    _helloTimer?.cancel();
+    _currentHelloInterval = interval;
+    _helloTimer = Timer.periodic(interval, (_) => _sendHello());
+  }
+
   void _sendHello() {
     if (_socket == null) return;
 
@@ -445,8 +460,14 @@ class OscListener {
   void _markConnected() {
     client.connected.value = true;
     _disconnectTimer?.cancel();
+    if (_currentHelloInterval != _slowHelloInterval) {
+      _restartHelloTimer(_slowHelloInterval);
+    }
     _disconnectTimer = Timer(const Duration(seconds: 2), () {
       client.connected.value = false;
+      if (_currentHelloInterval != _fastHelloInterval) {
+        _restartHelloTimer(_fastHelloInterval);
+      }
     });
   }
 

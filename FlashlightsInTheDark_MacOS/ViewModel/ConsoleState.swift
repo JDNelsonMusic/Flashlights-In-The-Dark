@@ -558,39 +558,57 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
 
     private func updateDevices(from dict: [String: ConsoleSlotInfo]) {
-        let maxSlot = dict.keys.compactMap { Int($0) }.max() ?? devices.count
+        let maxSlot = max(dict.keys.compactMap { Int($0) }.max() ?? 0, devices.count)
 
         if maxSlot > devices.count {
             for slot in (devices.count + 1)...maxSlot {
-                let dev = ChoirDevice(id: slot - 1,
-                                      udid: "",
-                                      name: "",
-                                      midiChannels: [10],
-                                      isPlaceholder: true)
+                let isKnownReal = ChoirDevice.defaultChannelMap.keys.contains(slot)
+                let dev = ChoirDevice(
+                    id: slot - 1,
+                    udid: "",
+                    name: "",
+                    midiChannels: ChoirDevice.defaultChannelMap[slot] ?? [10],
+                    isPlaceholder: !isKnownReal
+                )
                 devices.append(dev)
                 statuses[slot - 1] = .clean
             }
         }
 
-        for idx in devices.indices {
-            devices[idx].isPlaceholder = true
-            devices[idx].udid = ""
-            devices[idx].name = ""
-            devices[idx].ip = ""
-            devices[idx].midiChannels = [10]
-            devices[idx].listeningSlot = idx + 1
-        }
+        let snapshot = devices
+        let realSlots = Set(ChoirDevice.defaultChannelMap.keys)
 
-        for (key, info) in dict {
-            if let slot = Int(key), slot > 0, slot <= devices.count {
-                let idx = slot - 1
-                devices[idx].ip = info.ip
-                devices[idx].udid = info.udid
-                devices[idx].name = info.name
-                devices[idx].isPlaceholder = false
-                devices[idx].midiChannels = ChoirDevice.defaultChannelMap[slot] ?? [10]
-                devices[idx].listeningSlot = slot
+        for idx in devices.indices {
+            let slot = idx + 1
+            var device = devices[idx]
+            let previous = snapshot[idx]
+            let mapping = dict[String(slot)]
+
+            let shouldBeReal = mapping != nil || realSlots.contains(slot)
+            device.isPlaceholder = !shouldBeReal
+
+            if device.isPlaceholder {
+                // Preserve any staging metadata but clear network identifiers.
+                device.ip = ""
+                device.udid = ""
+                device.name = previous.name
+                device.midiChannels = previous.midiChannels
+                device.listeningSlot = previous.listeningSlot
+            } else {
+                device.listeningSlot = slot
+                device.midiChannels = ChoirDevice.defaultChannelMap[slot] ?? previous.midiChannels
+                if let mapping {
+                    device.ip = mapping.ip
+                    device.udid = mapping.udid
+                    device.name = mapping.name
+                } else {
+                    device.ip = previous.ip
+                    device.udid = previous.udid
+                    device.name = previous.name
+                }
             }
+
+            devices[idx] = device
         }
 
         updateAnyTorchOn()
@@ -1205,7 +1223,7 @@ extension ConsoleState {
         for slot in 1...devices.count {
             let idx = slot - 1
             let lastSeen = lastHello[slot]
-            if let lastSeen, now.timeIntervalSince(lastSeen) <= 5 {
+            if let lastSeen, now.timeIntervalSince(lastSeen) <= 12 {
                 if statuses[idx] == .lostConnection {
                     statuses[idx] = .live
                 }
@@ -1217,7 +1235,7 @@ extension ConsoleState {
             }
 
             let lastProbe = lastHelloProbe[slot] ?? .distantPast
-            if now.timeIntervalSince(lastProbe) >= 10 {
+            if now.timeIntervalSince(lastProbe) >= 15 {
                 lastHelloProbe[slot] = now
                 Task.detached { [weak self] in
                     guard let self = self else { return }

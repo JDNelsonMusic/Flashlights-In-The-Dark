@@ -1,5 +1,7 @@
 import 'dart:io' show Platform;
 import 'dart:async' show Timer, unawaited;
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:audio_session/audio_session.dart' as audio_session;
 import 'package:flutter/material.dart';
@@ -50,18 +52,21 @@ Future<void> _bootstrapNative() async {
   // 3. Configure the audio session so primer tones play even in silent mode.
   try {
     final session = await audio_session.AudioSession.instance;
-    final iosOptions = audio_session.AVAudioSessionCategoryOptions.defaultToSpeaker |
+    final iosOptions =
+        audio_session.AVAudioSessionCategoryOptions.defaultToSpeaker |
         audio_session.AVAudioSessionCategoryOptions.mixWithOthers;
     await session.configure(
       audio_session.AudioSessionConfiguration(
-        avAudioSessionCategory: audio_session.AVAudioSessionCategory.playAndRecord,
+        avAudioSessionCategory:
+            audio_session.AVAudioSessionCategory.playAndRecord,
         avAudioSessionCategoryOptions: iosOptions,
         avAudioSessionMode: audio_session.AVAudioSessionMode.defaultMode,
         androidAudioAttributes: audio_session.AndroidAudioAttributes(
-          contentType: audio_session.AndroidAudioContentType.music,
-          usage: audio_session.AndroidAudioUsage.media,
+          contentType: audio_session.AndroidAudioContentType.sonification,
+          usage: audio_session.AndroidAudioUsage.assistanceSonification,
         ),
-        androidAudioFocusGainType: audio_session.AndroidAudioFocusGainType.gain,
+        androidAudioFocusGainType:
+            audio_session.AndroidAudioFocusGainType.gainTransientMayDuck,
         androidWillPauseWhenDucked: false,
       ),
     );
@@ -72,9 +77,337 @@ Future<void> _bootstrapNative() async {
 
   // 4. Warm up primer tone library so all audio buffers are ready before use.
   try {
-    await NativeAudio.preloadPrimerLibrary();
+    await NativeAudio.ensureInitialized();
   } catch (e) {
     debugPrint('[Bootstrap] primer preload failed: $e');
+  }
+}
+
+class _HeaderSection extends StatelessWidget {
+  const _HeaderSection({
+    required this.platform,
+    required this.onTitleTap,
+    required this.onSlotSelected,
+  });
+
+  final String platform;
+  final VoidCallback onTitleTap;
+  final Future<void> Function(int) onSlotSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return ValueListenableBuilder<int>(
+      valueListenable: client.myIndex,
+      builder: (context, myIndex, _) {
+        final slotColor = kSlotOutlineColors[myIndex] ?? Colors.white70;
+        return _GlassPanel(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: onTitleTap,
+                child: Text(
+                  'Flashlights In The Dark',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              ValueListenableBuilder<bool>(
+                valueListenable: client.connected,
+                builder: (context, connected, _) {
+                  final status = connected ? 'Connected' : 'Searching…';
+                  return Text(
+                    '$kAppVersion · $platform · $status',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.white70,
+                      letterSpacing: 0.2,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              ValueListenableBuilder<bool>(
+                valueListenable: client.connected,
+                builder: (context, connected, _) {
+                  final statusAccent =
+                      connected
+                          ? const Color(0xFF06D6A0)
+                          : const Color(0xFFFFA630);
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _InfoPill(
+                        icon: Icons.person_rounded,
+                        label: 'Singer #$myIndex',
+                        accent: slotColor,
+                      ),
+                      _SlotSelectorPill(
+                        currentSlot: myIndex,
+                        accent: slotColor,
+                        onSelect: onSlotSelected,
+                      ),
+                      _InfoPill(
+                        icon:
+                            connected
+                                ? Icons.check_circle_rounded
+                                : Icons.wifi_tethering_error_rounded,
+                        label: connected ? 'Connected' : 'Searching…',
+                        accent: statusAccent,
+                        muted: !connected,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SlotSelectorPill extends StatelessWidget {
+  const _SlotSelectorPill({
+    required this.currentSlot,
+    required this.accent,
+    required this.onSelect,
+  });
+
+  final int currentSlot;
+  final Color accent;
+  final Future<void> Function(int) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final slots = client.availableSlots;
+    final slotLabel =
+        client.colorForSlot(currentSlot)?.displayName ?? 'Unassigned';
+    return PopupMenuButton<int>(
+      onSelected: (slot) => unawaited(onSelect(slot)),
+      color: Colors.black.withValues(alpha: 0.9),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      itemBuilder: (context) {
+        return slots
+            .map(
+              (slot) => PopupMenuItem<int>(
+                value: slot,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: kSlotOutlineColors[slot] ?? Colors.white54,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Slot $slot · ${client.colorForSlot(slot)?.displayName ?? 'Unassigned'}',
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList();
+      },
+      child: _InfoPill(
+        icon: Icons.apps_rounded,
+        label: 'Slot $currentSlot · $slotLabel',
+        accent: accent,
+        trailing: const Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: Colors.white,
+          size: 18,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({
+    required this.icon,
+    required this.label,
+    required this.accent,
+    this.trailing,
+    this.muted = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color accent;
+  final Widget? trailing;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayColor = muted ? Colors.white70 : Colors.white;
+    final highlight = accent.withValues(alpha: muted ? 0.35 : 0.6);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: muted ? 0.04 : 0.08),
+        border: Border.all(color: highlight),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: displayColor),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: displayColor,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 6), trailing!],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusTile extends StatelessWidget {
+  const _StatusTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.active,
+    required this.activeColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool active;
+  final Color activeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final iconBackground =
+        active
+            ? activeColor.withValues(alpha: 0.35)
+            : Colors.white.withValues(alpha: 0.08);
+    return _GlassPanel(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: iconBackground,
+              boxShadow:
+                  active
+                      ? [
+                        BoxShadow(
+                          color: activeColor.withValues(alpha: 0.35),
+                          blurRadius: 22,
+                          offset: const Offset(0, 10),
+                        ),
+                      ]
+                      : null,
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassPanel extends StatelessWidget {
+  const _GlassPanel({required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(24);
+    return ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: padding ?? const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.12),
+                Colors.white.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _FooterNote extends StatelessWidget {
+  const _FooterNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'By Jon D. Nelson',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'In collaboration with the Philharmonic Chorus of Madison',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: Colors.white38),
+        ),
+      ],
+    );
   }
 }
 
@@ -95,12 +428,30 @@ class FlashlightsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final baseTheme = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+    );
     return MaterialApp(
       title: 'Flashlights Client',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(
-        useMaterial3: true,
-      ).copyWith(scaffoldBackgroundColor: const Color(0xFF120012)),
+      theme: baseTheme.copyWith(
+        scaffoldBackgroundColor: Colors.transparent,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8053FF),
+          brightness: Brightness.dark,
+        ),
+        textTheme: baseTheme.textTheme.apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
+        ),
+        sliderTheme: baseTheme.sliderTheme.copyWith(
+          activeTrackColor: const Color(0xFFB987FF),
+          thumbColor: const Color(0xFFB987FF),
+          overlayColor: const Color(0xFFB987FF).withValues(alpha: 0.18),
+          trackHeight: 4.5,
+        ),
+      ),
       home: const Bootstrap(),
     );
   }
@@ -163,9 +514,9 @@ class _BootstrapState extends State<Bootstrap> {
     }
   }
 
-  Future<void> _updateBrightness(double delta) async {
+  Future<void> _setBrightness(double target) async {
     final current = client.brightness.value;
-    final clamped = (current + delta).clamp(0.0, 1.0).toDouble();
+    final clamped = target.clamp(0.0, 1.0).toDouble();
     if ((clamped - current).abs() < 0.001) {
       return;
     }
@@ -186,6 +537,17 @@ class _BootstrapState extends State<Bootstrap> {
     ]);
   }
 
+  Future<void> _updateBrightness(double delta) {
+    final target = (client.brightness.value + delta).clamp(0.0, 1.0).toDouble();
+    return _setBrightness(target);
+  }
+
+  Future<void> _handleSlotSelected(int newSlot) async {
+    client.myIndex.value = newSlot;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('lastSlot', newSlot);
+  }
+
   @override
   Widget build(BuildContext context) {
     final platform =
@@ -199,185 +561,194 @@ class _BootstrapState extends State<Bootstrap> {
       autofocus: true,
       onKey: _handleKeyEvent,
       child: Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: _handleTitleTap,
-                          child: const Text(
-                            'Flashlights In The Dark',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: client.connected,
-                          builder: (context, connected, _) {
-                            final status =
-                                connected ? 'Connected' : 'Searching…';
-                            return Text(
-                              '$kAppVersion – $platform – $status',
-                              textAlign: TextAlign.center,
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1C0531), Color(0xFF0B0626), Color(0xFF011734)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                ListView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
+                  children: [
+                    _HeaderSection(
+                      platform: platform,
+                      onTitleTap: _handleTitleTap,
+                      onSlotSelected: _handleSlotSelected,
+                    ),
+                    const SizedBox(height: 24),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: client.flashOn,
+                      builder: (context, flashOn, _) {
+                        return ValueListenableBuilder<bool>(
+                          valueListenable: client.audioPlaying,
+                          builder: (context, playing, _) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: _StatusTile(
+                                    icon:
+                                        flashOn
+                                            ? Icons.bolt_rounded
+                                            : Icons.bolt_outlined,
+                                    title: 'Flashlight',
+                                    subtitle:
+                                        flashOn
+                                            ? 'Torch active'
+                                            : 'Awaiting cue',
+                                    active: flashOn,
+                                    activeColor: const Color(0xFFFFD166),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _StatusTile(
+                                    icon:
+                                        playing
+                                            ? Icons.music_note_rounded
+                                            : Icons.music_off_rounded,
+                                    title: 'Primer',
+                                    subtitle:
+                                        playing
+                                            ? 'Playing locally'
+                                            : 'Standing by',
+                                    active: playing,
+                                    activeColor: const Color(0xFF06D6A0),
+                                  ),
+                                ),
+                              ],
                             );
                           },
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ValueListenableBuilder<int>(
-                            valueListenable: client.myIndex,
-                            builder: (context, myIndex, _) {
-                              final color = kSlotOutlineColors[myIndex];
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: color ?? Colors.transparent,
-                                    width: 3,
+                    const SizedBox(height: 20),
+                    ValueListenableBuilder<int>(
+                      valueListenable: client.myIndex,
+                      builder: (context, myIndex, _) {
+                        if (myIndex != 5) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          children: [
+                            _GlassPanel(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Tap Trigger',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      onPressed: () {
+                                        flosc.OscListener.instance.sendCustom(
+                                          '/tap',
+                                          [],
+                                        );
+                                      },
+                                      style: FilledButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        textStyle: const TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      child: const Text('TAP'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      },
+                    ),
+                    ValueListenableBuilder<double>(
+                      valueListenable: client.brightness,
+                      builder: (context, brightness, _) {
+                        final slotColor =
+                            kSlotOutlineColors[client.myIndex.value] ??
+                            Colors.white70;
+                        return _GlassPanel(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Torch Brightness',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 12),
+                              SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  activeTrackColor: slotColor,
+                                  thumbColor: slotColor,
+                                  overlayColor: slotColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  inactiveTrackColor: Colors.white24,
                                 ),
-                                child: Text(
-                                  'Singer #$myIndex',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          // Override slot dropdown
-                          ValueListenableBuilder<int>(
-                            valueListenable: client.myIndex,
-                            builder: (context, myIndex, _) {
-                              final slots = client.availableSlots;
-                              if (slots.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-                              final hasSlot = slots.contains(myIndex);
-                              final currentValue =
-                                  hasSlot ? myIndex : slots.first;
-                              final dropdownItems =
-                                  slots.map((slot) {
-                                    final color = client.colorForSlot(slot);
-                                    final label =
-                                        color?.displayName ?? 'Unassigned';
-                                    return DropdownMenuItem<int>(
-                                      value: slot,
-                                      child: Text('Slot $slot · $label'),
-                                    );
-                                  }).toList();
-                              return DropdownButton<int>(
-                                value: currentValue,
-                                items: dropdownItems,
-                                onChanged: (newSlot) async {
-                                  if (newSlot != null) {
-                                    client.myIndex.value = newSlot;
-                                    final prefs =
-                                        await SharedPreferences.getInstance();
-                                    await prefs.setInt('lastSlot', newSlot);
-                                  }
-                                },
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          ValueListenableBuilder<bool>(
-                            valueListenable: client.flashOn,
-                            builder: (context, flashOn, _) {
-                              return Icon(
-                                flashOn ? Icons.flash_on : Icons.flash_off,
-                                color: flashOn ? Colors.yellow : Colors.grey,
-                                size: 48,
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          ValueListenableBuilder<bool>(
-                            valueListenable: client.audioPlaying,
-                            builder: (context, playing, _) {
-                              return Icon(
-                                playing ? Icons.music_note : Icons.music_off,
-                                color: playing ? Colors.green : Colors.grey,
-                                size: 48,
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          ValueListenableBuilder<int>(
-                            valueListenable: client.myIndex,
-                            builder: (context, myIndex, _) {
-                              if (myIndex == 5) {
-                                return ElevatedButton(
-                                  onPressed: () {
-                                    flosc.OscListener.instance.sendCustom(
-                                      '/tap',
-                                      [],
-                                    );
+                                child: Slider(
+                                  value: brightness.clamp(0.0, 1.0),
+                                  min: 0.0,
+                                  max: 1.0,
+                                  onChanged: (value) {
+                                    client.brightness.value = value;
                                   },
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                      horizontal: 32.0,
-                                    ),
-                                    child: Text(
-                                      'TAP',
-                                      style: TextStyle(fontSize: 32),
-                                    ),
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
+                                  onChangeEnd:
+                                      (value) =>
+                                          unawaited(_setBrightness(value)),
+                                ),
+                              ),
+                              Text(
+                                '${(brightness * 100).round()}% intensity',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: Colors.white70),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 32),
-                          const PracticeEventStrip(),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      'By Jon D. Nelson\nIn collaboration with the Philharmonic Chorus of Madison',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                ],
-              ),
-              if (_showDebugOverlay)
-                Positioned.fill(
-                  child: DebugOverlay(
-                    onClose: () {
-                      setState(() {
-                        _showDebugOverlay = false;
-                      });
-                    },
-                    onSendHello:
-                        () =>
-                            flosc.OscListener.instance.sendCustom('/hello', []),
-                  ),
+                    const SizedBox(height: 28),
+                    const PracticeEventStrip(),
+                    const SizedBox(height: 36),
+                    const _FooterNote(),
+                  ],
                 ),
-            ],
+                if (_showDebugOverlay)
+                  Positioned.fill(
+                    child: DebugOverlay(
+                      onClose: () {
+                        setState(() {
+                          _showDebugOverlay = false;
+                        });
+                      },
+                      onSendHello:
+                          () => flosc.OscListener.instance.sendCustom(
+                            '/hello',
+                            [],
+                          ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -396,6 +767,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   static const double _kItemWidth = 120.0;
   static const double _kCurrentWidth = 240.0;
   static const double _kSpacing = 12.0;
+  static const double _kListHeight = 320.0;
 
   final ScrollController _controller = ScrollController();
 
@@ -421,8 +793,11 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
 
     final beforeWidth = i * (_kItemWidth + _kSpacing);
     final viewport = _controller.position.viewportDimension;
-    final target = (beforeWidth - (viewport - _kCurrentWidth) / 2)
-        .clamp(0.0, _controller.position.maxScrollExtent);
+    final padding = math.max(0.0, (viewport - _kCurrentWidth) / 2);
+    final target = (beforeWidth - padding).clamp(
+      0.0,
+      _controller.position.maxScrollExtent,
+    );
 
     _controller.animateTo(
       target,
@@ -437,16 +812,15 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
       valueListenable: client.eventRecipes,
       builder: (context, events, _) {
         if (events.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(16),
-            ),
+          return _GlassPanel(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
                 SizedBox(width: 12),
                 Text('Loading event timeline…'),
               ],
@@ -455,58 +829,84 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
         }
         return ValueListenableBuilder<int>(
           valueListenable: client.practiceEventIndex,
-          builder: (context, index, __) {
+          builder: (context, index, _) {
             final clampedIndex = index.clamp(0, events.length - 1);
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white.withOpacity(0.08),
-              ),
+            final mediaHeight = MediaQuery.of(context).size.height;
+            final listHeight = math.min(_kListHeight, mediaHeight * 0.45);
+            return _GlassPanel(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Text('Event Practice', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Event Practice',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
                       const Spacer(),
-                      Text('Slide or tap · Trigger plays locally', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Slide or tap · Trigger plays locally',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      controller: _controller,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: events.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: _kSpacing),
-                      itemBuilder: (context, i) {
-                        final event = events[i];
-                        final isCurrent = i == clampedIndex;
-                        final slot = client.myIndex.value;
-                        final assignment = client.assignmentForSlot(event, slot);
-                        return SizedBox(
-                          width: isCurrent ? _kCurrentWidth : _kItemWidth,
-                          child: _PracticeEventCard(
-                            event: event,
-                            isCurrent: isCurrent,
-                            assignment: assignment,
-                            onTap: () => client.setPracticeEventIndex(i),
-                            onPlay: assignment == null
-                                ? null
-                                : () => unawaited(
-                                      flosc.OscListener.instance.playLocalPrimer(
-                                        assignment.sample,
-                                        1.0,
-                                      ),
-                                    ),
-                            onPrev: () => client.movePracticeEvent(-1),
-                            onNext: () => client.movePracticeEvent(1),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final horizontalPadding = math.max(
+                        0.0,
+                        (constraints.maxWidth - _kCurrentWidth) / 2,
+                      );
+                      return SizedBox(
+                        height: listHeight,
+                        child: ListView.separated(
+                          controller: _controller,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: horizontalPadding,
                           ),
-                        );
-                      },
-                    ),
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: events.length,
+                          clipBehavior: Clip.none,
+                          separatorBuilder:
+                              (_, _) => const SizedBox(width: _kSpacing),
+                          itemBuilder: (context, i) {
+                            final event = events[i];
+                            final isCurrent = i == clampedIndex;
+                            final slot = client.myIndex.value;
+                            final assignment = client.assignmentForSlot(
+                              event,
+                              slot,
+                            );
+                            return SizedBox(
+                              width: isCurrent ? _kCurrentWidth : _kItemWidth,
+                              child: _PracticeEventCard(
+                                event: event,
+                                isCurrent: isCurrent,
+                                assignment: assignment,
+                                onTap: () => client.setPracticeEventIndex(i),
+                                onPlay:
+                                    assignment == null
+                                        ? null
+                                        : () => unawaited(
+                                          flosc.OscListener.instance
+                                              .playLocalPrimer(
+                                                assignment.sample,
+                                                1.0,
+                                              ),
+                                        ),
+                                onPrev: () => client.movePracticeEvent(-1),
+                                onNext: () => client.movePracticeEvent(1),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -537,9 +937,10 @@ class _PracticeEventCard extends StatelessWidget {
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
-  static const double _previewWidth = 120.0;
-  static const double _currentWidth = 240.0;
-  static const double _currentHeight = 228.0;
+  static const double _previewWidth = 110.0;
+  static const double _currentWidth = 220.0;
+  static const double _previewHeight = 220.0;
+  static const double _currentHeight = 320.0;
 
   @override
   Widget build(BuildContext context) {
@@ -549,58 +950,118 @@ class _PracticeEventCard extends StatelessWidget {
     final primerLabel = sampleName.isEmpty ? '—' : sampleName.split('/').last;
     final noteLabel = assignment?.note ?? '—';
 
+    final beatText = _normalisedBeat(position);
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     final width = isCurrent ? _currentWidth : _previewWidth;
-    final height = isCurrent ? _currentHeight : null;
-    final background = isCurrent
-        ? Colors.white.withOpacity(0.16)
-        : Colors.white.withOpacity(0.08);
+    final targetHeight = isCurrent ? _currentHeight : _previewHeight;
+    final gradientColors =
+        isCurrent
+            ? [
+              Colors.white.withValues(alpha: 0.22),
+              Colors.white.withValues(alpha: 0.06),
+            ]
+            : [
+              Colors.white.withValues(alpha: 0.10),
+              Colors.white.withValues(alpha: 0.02),
+            ];
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       width: width,
-      height: height,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: background,
-        border: Border.all(
-          color: Colors.white.withOpacity(isCurrent ? 0.35 : 0.12),
-          width: 1.2,
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isCurrent ? 0.42 : 0.14),
+          width: isCurrent ? 1.3 : 1.0,
+        ),
+        boxShadow:
+            isCurrent
+                ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 22,
+                    offset: const Offset(0, 12),
+                  ),
+                ]
+                : null,
       ),
+      constraints: BoxConstraints(minHeight: targetHeight),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Text('#${event.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Event #${event.id}',
+                  style: textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const Spacer(),
                 if (isCurrent) ...[
-                  IconButton(icon: const Icon(Icons.chevron_left), onPressed: onPrev),
-                  IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),
+                  IconButton.filledTonal(
+                    onPressed: onPrev,
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filledTonal(
+                    onPressed: onNext,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ],
               ],
             ),
-            const SizedBox(height: 4),
-            Text('M$measureText', style: Theme.of(context).textTheme.bodySmall),
-            Text(position, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(
+              'Measure $measureText',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              'Beat $beatText',
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             if (isCurrent) ...[
-              const SizedBox(height: 12),
-              Text('Note: $noteLabel'),
-              Text('Primer: $primerLabel'),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: onPlay,
-                icon: const Icon(Icons.play_arrow),
-                label: Text(
-                  assignment == null ? 'No primer available' : 'Trigger $primerLabel',
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  minimumSize: const Size.fromHeight(36),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  _EventDetailChip(label: 'Note: $noteLabel'),
+                  _EventDetailChip(label: 'Primer: $primerLabel'),
+                ],
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onPlay,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: Text(
+                    assignment == null ? 'No primer available' : 'Play primer',
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.18),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
               ),
             ],
@@ -609,6 +1070,36 @@ class _PracticeEventCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EventDetailChip extends StatelessWidget {
+  const _EventDetailChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+    );
+  }
+}
+
+String _normalisedBeat(String rawPosition) {
+  if (rawPosition.isEmpty) {
+    return '—';
+  }
+  final match = RegExp(r'(\d+)').firstMatch(rawPosition);
+  if (match != null) {
+    return match.group(1) ?? rawPosition;
+  }
+  return rawPosition;
 }
 
 class DebugOverlay extends StatelessWidget {
@@ -677,6 +1168,35 @@ class DebugOverlay extends StatelessWidget {
                       'Audio playing: $playing',
                       style: const TextStyle(color: Colors.white70),
                     ),
+              ),
+              Builder(
+                builder: (context) {
+                  final ready = NativeAudio.isReady;
+                  final error = NativeAudio.lastInitError;
+                  final snapshot = NativeAudio.lastInitSnapshot;
+                  final status = snapshot != null
+                      ? (snapshot['status'] ?? (ready ? 'ok' : 'pending'))
+                      : (ready ? 'ok' : 'pending');
+                  final bufferCount = snapshot != null
+                      ? (snapshot['count'] ?? snapshot['sounds'])
+                      : null;
+                  final failed = snapshot?['failed'];
+                  final failedCountRaw = snapshot?['failedCount'];
+                  final failedCount = failedCountRaw is num
+                      ? failedCountRaw.toInt()
+                      : failed is List
+                          ? failed.length
+                          : 0;
+                  final detail = error != null
+                      ? 'error: $error'
+                      : 'status: $status, buffers: ${bufferCount ?? 'n/a'}, failed: $failedCount';
+                  return Text(
+                    'Audio engine: ${ready ? 'ready' : 'not ready'} ($detail)',
+                    style: TextStyle(
+                      color: error != null ? Colors.redAccent : Colors.white70,
+                    ),
+                  );
+                },
               ),
               ValueListenableBuilder<double>(
                 valueListenable: client.clockOffsetMs,
