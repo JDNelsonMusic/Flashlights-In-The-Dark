@@ -806,6 +806,32 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
     );
   }
 
+  Future<void> _handlePlayRequest(List<EventRecipe> events, int index) async {
+    if (events.isEmpty) return;
+    final clampedIndex = index.clamp(0, events.length - 1);
+    if (client.practiceEventIndex.value != clampedIndex) {
+      client.setPracticeEventIndex(clampedIndex);
+    }
+
+    final event = events[clampedIndex];
+    final slot = client.myIndex.value;
+    final assignment = client.assignmentForSlot(event, slot);
+    if (assignment != null) {
+      try {
+        await flosc.OscListener.instance.playLocalPrimer(
+          assignment.sample,
+          1.0,
+        );
+      } catch (e) {
+        debugPrint('[Practice] primer playback failed: $e');
+      }
+    }
+
+    if (clampedIndex < events.length - 1) {
+      client.movePracticeEvent(1);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<EventRecipe>>(
@@ -890,15 +916,9 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                 assignment: assignment,
                                 onTap: () => client.setPracticeEventIndex(i),
                                 onPlay:
-                                    assignment == null
-                                        ? null
-                                        : () => unawaited(
-                                          flosc.OscListener.instance
-                                              .playLocalPrimer(
-                                                assignment.sample,
-                                                1.0,
-                                              ),
-                                        ),
+                                    () => unawaited(
+                                      _handlePlayRequest(events, i),
+                                    ),
                                 onPrev: () => client.movePracticeEvent(-1),
                                 onNext: () => client.movePracticeEvent(1),
                               ),
@@ -933,7 +953,7 @@ class _PracticeEventCard extends StatelessWidget {
   final bool isCurrent;
   final PrimerAssignment? assignment;
   final VoidCallback onTap;
-  final VoidCallback? onPlay;
+  final VoidCallback onPlay;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
@@ -953,6 +973,7 @@ class _PracticeEventCard extends StatelessWidget {
     final beatText = _normalisedBeat(position);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final hasPrimer = sampleName.isNotEmpty;
 
     final width = isCurrent ? _currentWidth : _previewWidth;
     final targetHeight = isCurrent ? _currentHeight : _previewHeight;
@@ -966,6 +987,51 @@ class _PracticeEventCard extends StatelessWidget {
               Colors.white.withValues(alpha: 0.10),
               Colors.white.withValues(alpha: 0.02),
             ];
+
+    Widget buildPlayButton() {
+      if (isCurrent) {
+        return SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: onPlay,
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: Text(hasPrimer ? 'Play primer' : 'Advance'),
+            style: FilledButton.styleFrom(
+              backgroundColor:
+                  hasPrimer
+                      ? Colors.white.withValues(alpha: 0.18)
+                      : Colors.white.withValues(alpha: 0.08),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+      }
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.tonalIcon(
+          onPressed: onPlay,
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text(hasPrimer ? 'Play' : 'Next'),
+          style: FilledButton.styleFrom(
+            backgroundColor:
+                hasPrimer
+                    ? Colors.white.withValues(alpha: 0.16)
+                    : Colors.white.withValues(alpha: 0.06),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      );
+    }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -1038,8 +1104,8 @@ class _PracticeEventCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const SizedBox(height: 8),
             if (isCurrent) ...[
-              const SizedBox(height: 14),
               Wrap(
                 spacing: 12,
                 runSpacing: 8,
@@ -1048,23 +1114,16 @@ class _PracticeEventCard extends StatelessWidget {
                   _EventDetailChip(label: 'Primer: $primerLabel'),
                 ],
               ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onPlay,
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: Text(
-                    assignment == null ? 'No primer available' : 'Play primer',
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.18),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
+              const SizedBox(height: 12),
+            ] else if (!hasPrimer) ...[
+              Text(
+                'No primer for your slot',
+                style: textTheme.labelSmall?.copyWith(color: Colors.white38),
               ),
+              const SizedBox(height: 12),
             ],
+            const Spacer(),
+            buildPlayButton(),
           ],
         ),
       ),
@@ -1115,7 +1174,7 @@ class DebugOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withOpacity(0.85),
+      color: Colors.black.withValues(alpha: 0.85),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -1174,22 +1233,26 @@ class DebugOverlay extends StatelessWidget {
                   final ready = NativeAudio.isReady;
                   final error = NativeAudio.lastInitError;
                   final snapshot = NativeAudio.lastInitSnapshot;
-                  final status = snapshot != null
-                      ? (snapshot['status'] ?? (ready ? 'ok' : 'pending'))
-                      : (ready ? 'ok' : 'pending');
-                  final bufferCount = snapshot != null
-                      ? (snapshot['count'] ?? snapshot['sounds'])
-                      : null;
+                  final status =
+                      snapshot != null
+                          ? (snapshot['status'] ?? (ready ? 'ok' : 'pending'))
+                          : (ready ? 'ok' : 'pending');
+                  final bufferCount =
+                      snapshot != null
+                          ? (snapshot['count'] ?? snapshot['sounds'])
+                          : null;
                   final failed = snapshot?['failed'];
                   final failedCountRaw = snapshot?['failedCount'];
-                  final failedCount = failedCountRaw is num
-                      ? failedCountRaw.toInt()
-                      : failed is List
+                  final failedCount =
+                      failedCountRaw is num
+                          ? failedCountRaw.toInt()
+                          : failed is List
                           ? failed.length
                           : 0;
-                  final detail = error != null
-                      ? 'error: $error'
-                      : 'status: $status, buffers: ${bufferCount ?? 'n/a'}, failed: $failedCount';
+                  final detail =
+                      error != null
+                          ? 'error: $error'
+                          : 'status: $status, buffers: ${bufferCount ?? 'n/a'}, failed: $failedCount';
                   return Text(
                     'Audio engine: ${ready ? 'ready' : 'not ready'} ($detail)',
                     style: TextStyle(
