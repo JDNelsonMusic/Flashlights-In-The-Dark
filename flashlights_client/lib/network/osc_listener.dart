@@ -18,6 +18,7 @@ import '../services/mic_input.dart';
 import '../native_audio.dart';
 
 import '../model/client_state.dart';
+import '../model/event_recipe.dart';
 
 /// Native channel to control torch brightness.
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
@@ -273,6 +274,41 @@ class OscListener {
           } catch (e) {
             print('[OSC] Torch error: $e');
             client.flashOn.value = true;
+          }
+        }
+        break;
+
+      case '/event/trigger':
+        final msg = EventTrigger.fromOsc(m);
+        if (msg != null && msg.index == myIndex) {
+          await client.ensureEventRecipesLoaded();
+          final events = client.eventRecipes.value;
+          EventRecipe? event;
+          for (final candidate in events) {
+            if (candidate.id == msg.eventId) {
+              event = candidate;
+              break;
+            }
+          }
+          if (event != null) {
+            final assignment = client.assignmentForSlot(event, myIndex);
+            if (assignment != null) {
+              final sample = assignment.sample;
+              const gain = 1.0;
+              final nowMs =
+                  DateTime.now().millisecondsSinceEpoch.toDouble();
+              final startAt = msg.startAtMs ?? nowMs;
+              final delayMs =
+                  (startAt - nowMs).clamp(0, double.infinity).toInt();
+              unawaited(Future.delayed(Duration(milliseconds: delayMs), () async {
+                await _playPrimer(sample, gain, sendAck: true);
+              }));
+            } else {
+              debugPrint(
+                  '[OSC] No primer assignment for event ${msg.eventId} slot $myIndex');
+            }
+          } else {
+            debugPrint('[OSC] Unknown event ID ${msg.eventId}');
           }
         }
         break;

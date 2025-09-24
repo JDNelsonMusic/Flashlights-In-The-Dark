@@ -126,11 +126,7 @@ class ClientState {
 
   bool shouldHandleIndex(int messageIndex, {int? slotOverride}) {
     final slot = slotOverride ?? myIndex.value;
-    if (messageIndex == slot) {
-      return true;
-    }
-    final color = colorForSlot(slot);
-    return color != null && messageIndex == color.groupIndex;
+    return messageIndex == slot;
   }
 
   void movePracticeEvent(int delta) {

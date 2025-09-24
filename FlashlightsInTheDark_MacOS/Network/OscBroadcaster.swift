@@ -156,14 +156,28 @@ public actor OscBroadcaster {
     /// Attempt to send an OSC message directly to the slot's last-known IP,
     /// falling back to broadcast if no address is available.
     public func send(_ osc: OSCMessage, toSlot slot: Int) async throws {
+        var delivered = false
+
         if let ip = dynamicIPs[slot], !ip.isEmpty {
-            try await sendUnicast(osc, toIP: ip)
-            return
+            do {
+                try await sendUnicast(osc, toIP: ip)
+                delivered = true
+            } catch {
+                print("⚠️ Unicast to slot \(slot) via dynamic IP \(ip) failed: \(error.localizedDescription)")
+            }
         }
-        if let info = slotInfos[slot], !info.ip.isEmpty {
-            try await sendUnicast(osc, toIP: info.ip)
-            return
+
+        if !delivered, let info = slotInfos[slot], !info.ip.isEmpty {
+            do {
+                try await sendUnicast(osc, toIP: info.ip)
+                delivered = true
+            } catch {
+                print("⚠️ Unicast to slot \(slot) via mapped IP \(info.ip) failed: \(error.localizedDescription)")
+            }
         }
+
+        // Always broadcast as a safety net so devices still hear the cue if
+        // their current IP isn't known. Clients filter by index, so duplicates are fine.
         try await send(osc)
     }
 

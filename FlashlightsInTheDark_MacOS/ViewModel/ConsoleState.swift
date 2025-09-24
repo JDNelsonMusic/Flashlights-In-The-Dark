@@ -1355,7 +1355,7 @@ extension ConsoleState {
         if !event.primerAssignments.isEmpty {
             primerAudioEngine.play(assignments: event.primerAssignments, startAt: startAtMs)
         }
-        await sendPrimerAssignments(for: event, startAtMs: startAtMs)
+        await sendEventTriggers(for: event, startAtMs: startAtMs)
         let measureText = event.measure.map { "M\($0)" } ?? "M?"
         let beatText = event.position ?? "?"
         await MainActor.run {
@@ -1363,39 +1363,28 @@ extension ConsoleState {
         }
     }
 
-    private func sendPrimerAssignments(for event: EventRecipe, startAtMs: Double) async {
-        guard !event.primerAssignments.isEmpty else { return }
-        guard isBroadcasting else { return }
+    private func sendEventTriggers(for event: EventRecipe, startAtMs: Double) async {
+        guard !event.primerAssignments.isEmpty, isBroadcasting else { return }
         do {
             let broadcaster = try await broadcasterTask.value
-            // Send all primer triggers concurrently instead of sequentially.
-            // We build a list of async tasks (one per slot and color) and then await them together.
             try await withThrowingTaskGroup(of: Void.self) { group in
-                for (color, assignment) in event.primerAssignments {
-                    guard let fileName = assignment.oscFileName else { continue }
-                    var targets = Set(slots(for: color))
-                    // Include the group index so colour-only listeners also trigger
-                    targets.insert(color.groupIndex)
-                    guard !targets.isEmpty else { continue }
-                    for slot in targets {
-                        let message = AudioPlay(index: Int32(slot), file: fileName, gain: 1.0, startAtMs: startAtMs)
-                        let osc = message.encode()
-                        // Create two concurrent tasks: one directed to the slot and one broadcast
+                for color in event.primerAssignments.keys {
+                    let targetSlots = slots(for: color)
+                    guard !targetSlots.isEmpty else { continue }
+                    for slot in targetSlots {
+                        let msg = EventTrigger(index: Int32(slot),
+                                               eventId: Int32(event.id),
+                                               startAtMs: startAtMs).encode()
                         group.addTask {
-                            try await broadcaster.send(osc, toSlot: slot)
-                        }
-                        group.addTask {
-                            try await broadcaster.send(osc)
+                            try await broadcaster.send(msg, toSlot: slot)
                         }
                     }
                 }
-                // Wait for all sends to complete
                 try await group.waitForAll()
             }
-            // Update log once at the end
-            if let first = event.primerAssignments.first, let fileName = first.value.oscFileName {
+            if let fileName = event.primerAssignments.first?.value.oscFileName {
                 await MainActor.run {
-                    self.lastLog = "▶︎ Sent primers for Event #\(event.id) (\(fileName))"
+                    self.lastLog = "▶︎ Sent event triggers for Event #\(event.id) (\(fileName))"
                 }
             }
         } catch {

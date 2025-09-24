@@ -6,6 +6,7 @@ public enum OscAddress: String {
     case flashOff  = "/flash/off"
     case audioPlay = "/audio/play"
     case audioStop = "/audio/stop"
+    case eventTrigger = "/event/trigger"
     case micRecord = "/mic/record"
     case sync      = "/sync"
     case tap       = "/tap"
@@ -119,6 +120,49 @@ public struct AudioPlay: OscCodable {
             OSCAddressPattern(Self.address.rawValue),
             values: values
         )
+    }
+}
+
+// MARK: – EventTrigger -------------------------------------------------------
+
+public struct EventTrigger: OscCodable {
+    public static let address: OscAddress = .eventTrigger
+    public let index: Int32
+    public let eventId: Int32
+    public let startAtMs: Double?
+
+    public init(index: Int32, eventId: Int32, startAtMs: Double? = nil) {
+        self.index = index
+        self.eventId = eventId
+        self.startAtMs = startAtMs
+    }
+
+    public init?(from message: OSCMessage) {
+        guard message.addressPattern == OSCAddressPattern(Self.address.rawValue),
+              let idx = message.values.int32(at: 0),
+              let evt = message.values.int32(at: 1)
+        else { return nil }
+        let start: Double?
+        if message.values.count >= 3 {
+            if let raw64 = message.values.float64(at: 2) {
+                start = Double(raw64)
+            } else if let raw32 = message.values.float32(at: 2) {
+                start = Double(raw32)
+            } else {
+                start = nil
+            }
+        } else {
+            start = nil
+        }
+        self.init(index: idx, eventId: evt, startAtMs: start)
+    }
+
+    public func encode() -> OSCMessage {
+        var vals: [any OSCValue] = [index, eventId]
+        if let s = startAtMs {
+            vals.append(Float64(s))
+        }
+        return OSCMessage(OSCAddressPattern(Self.address.rawValue), values: vals)
     }
 }
 

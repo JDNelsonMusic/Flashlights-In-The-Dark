@@ -1,4 +1,4 @@
-/// OSC message definitions for Flutter
+// OSC message definitions for Flutter
 import 'osc_packet.dart';
 
 enum OscAddress {
@@ -6,6 +6,7 @@ enum OscAddress {
   flashOff('/flash/off'),
   audioPlay('/audio/play'),
   audioStop('/audio/stop'),
+  eventTrigger('/event/trigger'),
   hello('/hello'),
   discover('/discover'),
   ping('/ping'),
@@ -116,6 +117,43 @@ class AudioPlay implements OscCodable {
         }
       }
       return AudioPlay(arg0, arg1, arg2.toDouble(), start);
+    }
+    return null;
+  }
+}
+
+class EventTrigger implements OscCodable {
+  final int index;
+  final int eventId;
+  final double? startAtMs;
+
+  EventTrigger(this.index, this.eventId, [this.startAtMs]);
+
+  @override
+  OscAddress get address => OscAddress.eventTrigger;
+
+  @override
+  OSCMessage toOsc() {
+    final args = <Object>[index, eventId];
+    final start = startAtMs;
+    if (start != null) args.add(start);
+    return OSCMessage(address.value, arguments: args);
+  }
+
+  static EventTrigger? fromOsc(OSCMessage message) {
+    if (message.address != OscAddress.eventTrigger.value ||
+        message.arguments.length < 2) {
+      return null;
+    }
+    final arg0 = message.arguments[0];
+    final arg1 = message.arguments[1];
+    if (arg0 is int && arg1 is int) {
+      double? start;
+      if (message.arguments.length >= 3) {
+        final arg2 = message.arguments[2];
+        if (arg2 is num) start = arg2.toDouble();
+      }
+      return EventTrigger(arg0, arg1, start);
     }
     return null;
   }

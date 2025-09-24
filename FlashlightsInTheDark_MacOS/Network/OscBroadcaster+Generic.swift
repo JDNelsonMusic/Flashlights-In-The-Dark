@@ -23,14 +23,6 @@ public extension OscBroadcaster {
     }
     private func directedOrBroadcast(slot: Int32, osc: OSCMessage) async throws {
         let s = Int(slot)
-        if let ip = dynamicIPs[s] ?? slotInfos[s]?.ip {
-            var buf = channel.allocator.buffer(capacity: try osc.rawData().count)
-            buf.writeBytes(try osc.rawData())
-            let addr = try SocketAddress(ipAddress: ip, port: port)
-            try await channel.writeAndFlush(AddressedEnvelope(remoteAddress: addr, data: buf))
-            print("→ directed \(slot) @ \(ip)")
-        } else {
-            try await send(osc)
-        }
+        try await send(osc, toSlot: s)
     }
 }
