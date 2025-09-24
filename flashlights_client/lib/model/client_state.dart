@@ -3,6 +3,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flashlights_client/model/event_recipe.dart';
 import 'package:flashlights_client/network/osc_packet.dart';
 
+class PrimerColorPlacement {
+  const PrimerColorPlacement({required this.staffIndex, required this.slots});
+
+  final int staffIndex;
+  final List<int> slots;
+}
+
+const Map<PrimerColor, PrimerColorPlacement> kPrimerColorPlacements = {
+  PrimerColor.blue: PrimerColorPlacement(staffIndex: 4, slots: [1, 2, 3]),
+  PrimerColor.red: PrimerColorPlacement(staffIndex: 5, slots: [4, 5, 6]),
+  PrimerColor.green: PrimerColorPlacement(staffIndex: 6, slots: [7, 8, 9]),
+  PrimerColor.purple: PrimerColorPlacement(staffIndex: 7, slots: [10, 11, 12]),
+  PrimerColor.yellow: PrimerColorPlacement(staffIndex: 8, slots: [13, 14, 15]),
+  PrimerColor.pink: PrimerColorPlacement(staffIndex: 9, slots: [16, 17, 18]),
+  PrimerColor.orange: PrimerColorPlacement(staffIndex: 10, slots: [19, 20, 21]),
+  PrimerColor.magenta: PrimerColorPlacement(staffIndex: 11, slots: [22, 23, 24]),
+  PrimerColor.cyan: PrimerColorPlacement(staffIndex: 12, slots: [25, 26, 27]),
+};
+
 /// Global client state, holds the dynamic slot and clock offset.
 class ClientState {
   ClientState()
@@ -99,6 +118,36 @@ class ClientState {
   List<int> get availableSlots => _availableSlots;
 
   PrimerColor? colorForSlot(int slot) => _slotColorMap[slot];
+
+  PrimerColorPlacement? practicePlacementForColor(PrimerColor color) =>
+      kPrimerColorPlacements[color];
+
+  List<int> practiceSlotsForColor(PrimerColor color) {
+    final placement = kPrimerColorPlacements[color];
+    if (placement == null) {
+      return const [];
+    }
+    return List<int>.unmodifiable(placement.slots);
+  }
+
+  int? practiceStaffIndexForColor(PrimerColor color) =>
+      kPrimerColorPlacements[color]?.staffIndex;
+
+  int? practiceSlotNumberForSlot(int slot) {
+    final color = colorForSlot(slot);
+    if (color == null) {
+      return null;
+    }
+    final groupSlots = defaultGroups[color];
+    if (groupSlots == null) {
+      return null;
+    }
+    final index = groupSlots.indexOf(slot);
+    if (index == -1) {
+      return null;
+    }
+    return (color.groupIndex - 1) * 3 + index + 1;
+  }
 
   PrimerColor? colorForGroupIndex(int index) {
     if (index < 1 || index > PrimerColor.values.length) {

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>OSMD Practice View</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        overflow: hidden;
+      }
+
+      #osmd {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      #osmd svg {
+        width: 100% !important;
+        height: auto !important;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.7.7/build/opensheetmusicdisplay.min.js"></script>
+  </head>
+  <body>
+    <div id="osmd"></div>
+    <script>
+      let osmd;
+
+      async function initOSMD(xmlString) {
+        if (!osmd) {
+          osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('osmd', {
+            backend: 'svg',
+            autoResize: false,
+            drawTitle: false,
+            drawSubtitle: false,
+            drawPartNames: false,
+            drawingParameters: 'compacttight',
+          });
+        }
+
+        await osmd.load(xmlString);
+        await renderWindow(1);
+      }
+
+      async function renderWindow(measureNumber) {
+        if (!osmd) {
+          return;
+        }
+        const from = Math.max(1, measureNumber - 1);
+        const to = Math.max(from, measureNumber + 1);
+        osmd.setOptions({
+          drawFromMeasureNumber: from,
+          drawUpToMeasureNumber: to,
+        });
+        await osmd.render();
+      }
+
+      function handleMessage(event) {
+        if (!event || !event.data) {
+          return;
+        }
+
+        let message;
+        try {
+          message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        } catch (err) {
+          console.error('Unable to parse message', err);
+          return;
+        }
+
+        if (message?.type === 'init' && message.xml) {
+          initOSMD(message.xml);
+        } else if (message?.type === 'window' && typeof message.measure === 'number') {
+          renderWindow(message.measure);
+        }
+      }
+
+      window.addEventListener('message', handleMessage);
+      // Support for Flutter WebView's initial message via postMessage on the iframe.
+      window.handleFlutterMessage = handleMessage;
+    </script>
+  </body>
+</html>

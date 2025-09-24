@@ -22,6 +22,7 @@ import 'model/client_state.dart';
 import 'model/event_recipe.dart';
 // Removed PrimerToneLibrary; native audio handles asset lookup.
 import 'native_audio.dart';
+import 'widgets/event_practice_osmd.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
@@ -770,6 +771,9 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   static const double _kListHeight = 320.0;
 
   final ScrollController _controller = ScrollController();
+  final GlobalKey<EventPracticeOSMDState> _osmdKey =
+      GlobalKey<EventPracticeOSMDState>();
+  int? _lastRenderedMeasure;
 
   @override
   void initState() {
@@ -859,6 +863,14 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
             final clampedIndex = index.clamp(0, events.length - 1);
             final mediaHeight = MediaQuery.of(context).size.height;
             final listHeight = math.min(_kListHeight, mediaHeight * 0.45);
+            final currentEvent = events[clampedIndex];
+            final measure = currentEvent.measure;
+            if (measure != null && measure > 0 && measure != _lastRenderedMeasure) {
+              _lastRenderedMeasure = measure;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _osmdKey.currentState?.setMeasure(measure);
+              });
+            }
             return _GlassPanel(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
               child: Column(
@@ -908,12 +920,26 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                               event,
                               slot,
                             );
+                            final primerColor = client.colorForSlot(slot);
+                            final practiceSlots = primerColor == null
+                                ? const <int>[]
+                                : client.practiceSlotsForColor(primerColor);
+                            final staffIndex = primerColor == null
+                                ? null
+                                : client.practiceStaffIndexForColor(primerColor);
+                            final practiceSlotNumber =
+                                client.practiceSlotNumberForSlot(slot);
                             return SizedBox(
                               width: isCurrent ? _kCurrentWidth : _kItemWidth,
                               child: _PracticeEventCard(
                                 event: event,
                                 isCurrent: isCurrent,
                                 assignment: assignment,
+                                primerColor: primerColor,
+                                practiceSlots: practiceSlots,
+                                practiceStaffIndex: staffIndex,
+                                practiceSlotNumber: practiceSlotNumber,
+                                osmdKey: isCurrent ? _osmdKey : null,
                                 onTap: () => client.setPracticeEventIndex(i),
                                 onPlay:
                                     () => unawaited(
@@ -943,6 +969,11 @@ class _PracticeEventCard extends StatelessWidget {
     required this.event,
     required this.isCurrent,
     required this.assignment,
+    required this.practiceSlots,
+    this.primerColor,
+    this.practiceStaffIndex,
+    this.practiceSlotNumber,
+    this.osmdKey,
     required this.onTap,
     required this.onPlay,
     required this.onPrev,
@@ -952,6 +983,11 @@ class _PracticeEventCard extends StatelessWidget {
   final EventRecipe event;
   final bool isCurrent;
   final PrimerAssignment? assignment;
+  final PrimerColor? primerColor;
+  final List<int> practiceSlots;
+  final int? practiceStaffIndex;
+  final int? practiceSlotNumber;
+  final GlobalKey<EventPracticeOSMDState>? osmdKey;
   final VoidCallback onTap;
   final VoidCallback onPlay;
   final VoidCallback onPrev;
@@ -961,6 +997,29 @@ class _PracticeEventCard extends StatelessWidget {
   static const double _currentWidth = 220.0;
   static const double _previewHeight = 220.0;
   static const double _currentHeight = 320.0;
+
+  static Color _colorForPrimer(PrimerColor color) {
+    switch (color) {
+      case PrimerColor.blue:
+        return SlotColors.royalBlue;
+      case PrimerColor.red:
+        return SlotColors.brightRed;
+      case PrimerColor.green:
+        return SlotColors.slotGreen;
+      case PrimerColor.purple:
+        return SlotColors.slotPurple;
+      case PrimerColor.yellow:
+        return SlotColors.slotYellow;
+      case PrimerColor.pink:
+        return SlotColors.lightRose;
+      case PrimerColor.orange:
+        return SlotColors.slotOrange;
+      case PrimerColor.magenta:
+        return SlotColors.hotMagenta;
+      case PrimerColor.cyan:
+        return SlotColors.skyBlue;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -974,6 +1033,8 @@ class _PracticeEventCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final hasPrimer = sampleName.isNotEmpty;
+    final primerAccent =
+        primerColor != null ? _colorForPrimer(primerColor!) : null;
 
     final width = isCurrent ? _currentWidth : _previewWidth;
     final targetHeight = isCurrent ? _currentHeight : _previewHeight;
@@ -1115,6 +1176,27 @@ class _PracticeEventCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
+              _PrimerInfoSection(
+                primerColor: primerColor,
+                practiceSlots: practiceSlots,
+                practiceStaffIndex: practiceStaffIndex,
+                practiceSlotNumber: practiceSlotNumber,
+                accent: primerAccent,
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 200,
+                child:
+                    osmdKey != null
+                        ? EventPracticeOSMD(key: osmdKey)
+                        : const Center(
+                            child: SizedBox.square(
+                              dimension: 28,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+              ),
+              const SizedBox(height: 12),
             ] else if (!hasPrimer) ...[
               Text(
                 'No primer for your slot',
@@ -1126,6 +1208,90 @@ class _PracticeEventCard extends StatelessWidget {
             buildPlayButton(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PrimerInfoSection extends StatelessWidget {
+  const _PrimerInfoSection({
+    required this.primerColor,
+    required this.practiceSlots,
+    required this.practiceStaffIndex,
+    required this.practiceSlotNumber,
+    required this.accent,
+  });
+
+  final PrimerColor? primerColor;
+  final List<int> practiceSlots;
+  final int? practiceStaffIndex;
+  final int? practiceSlotNumber;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final groupIndex = primerColor?.groupIndex;
+    final colorName = primerColor?.displayName ?? 'Unassigned';
+    final groupLabel =
+        groupIndex != null ? 'Group $groupIndex · $colorName' : colorName;
+    final staffLabel =
+        practiceStaffIndex != null ? 'Staff ${practiceStaffIndex}' : 'Staff —';
+    final slotsLabel =
+        practiceSlots.isEmpty ? 'Slots —' : 'Slots ${practiceSlots.join(', ')}';
+    final youLabel =
+        practiceSlotNumber != null ? 'You → ${practiceSlotNumber!.toString().padLeft(2, '0')}' : null;
+    final swatchColor = accent ?? Colors.white.withValues(alpha: 0.3);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: swatchColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  groupLabel,
+                  style: textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Text(staffLabel, style: textTheme.bodySmall),
+                    Text(slotsLabel, style: textTheme.bodySmall),
+                    if (youLabel != null)
+                      Text(
+                        youLabel,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
