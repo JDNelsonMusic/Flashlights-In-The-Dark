@@ -35,6 +35,7 @@ flutter:
     - assets/event_recipes.json
     - assets/FlashlightsInTheDark_SingerScore23.musicxml
     - assets/osmd_view.html
+    - assets/opensheetmusicdisplay.min.js
     # Primer tone library (explicit listing avoids wildcard bundling gaps on iOS)
     - available-sounds/primerTones/Long50.mp3
     - available-sounds/primerTones/Long51.mp3

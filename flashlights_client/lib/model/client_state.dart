@@ -11,15 +11,15 @@ class PrimerColorPlacement {
 }
 
 const Map<PrimerColor, PrimerColorPlacement> kPrimerColorPlacements = {
-  PrimerColor.blue: PrimerColorPlacement(staffIndex: 4, slots: [1, 2, 3]),
-  PrimerColor.red: PrimerColorPlacement(staffIndex: 5, slots: [4, 5, 6]),
-  PrimerColor.green: PrimerColorPlacement(staffIndex: 6, slots: [7, 8, 9]),
-  PrimerColor.purple: PrimerColorPlacement(staffIndex: 7, slots: [10, 11, 12]),
-  PrimerColor.yellow: PrimerColorPlacement(staffIndex: 8, slots: [13, 14, 15]),
-  PrimerColor.pink: PrimerColorPlacement(staffIndex: 9, slots: [16, 17, 18]),
-  PrimerColor.orange: PrimerColorPlacement(staffIndex: 10, slots: [19, 20, 21]),
-  PrimerColor.magenta: PrimerColorPlacement(staffIndex: 11, slots: [22, 23, 24]),
-  PrimerColor.cyan: PrimerColorPlacement(staffIndex: 12, slots: [25, 26, 27]),
+  PrimerColor.green: PrimerColorPlacement(staffIndex: 4, slots: [16, 29, 44]),
+  PrimerColor.magenta: PrimerColorPlacement(staffIndex: 5, slots: [12, 24, 25]),
+  PrimerColor.orange: PrimerColorPlacement(staffIndex: 6, slots: [23, 38, 51]),
+  PrimerColor.blue: PrimerColorPlacement(staffIndex: 7, slots: [27, 41, 42]),
+  PrimerColor.red: PrimerColorPlacement(staffIndex: 8, slots: [1, 14, 15]),
+  PrimerColor.cyan: PrimerColorPlacement(staffIndex: 9, slots: [40, 53, 54]),
+  PrimerColor.yellow: PrimerColorPlacement(staffIndex: 10, slots: [7, 19, 34]),
+  PrimerColor.pink: PrimerColorPlacement(staffIndex: 11, slots: [9, 20, 21]),
+  PrimerColor.purple: PrimerColorPlacement(staffIndex: 12, slots: [3, 4, 18]),
 };
 
 /// Global client state, holds the dynamic slot and clock offset.

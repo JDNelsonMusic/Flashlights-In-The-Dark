@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,8 +13,9 @@
       body {
         margin: 0;
         padding: 0;
-        background-color: transparent;
+        background-color: #f1f3f6;
         overflow: hidden;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
 
       #osmd {
@@ -22,47 +24,145 @@
         justify-content: center;
         width: 100%;
         height: 100%;
+        background-color: #f1f3f6;
+        border-radius: 12px;
+        box-sizing: border-box;
+        padding: 12px;
       }
 
       #osmd svg {
-        width: 100% !important;
+        width: auto !important;
         height: auto !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+
+      #osmd canvas {
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+
+      #osmd svg * {
+        fill: #000000 !important;
+        stroke: #000000 !important;
+      }
+
+      #osmd svg text {
+        fill: #000000 !important;
+      }
+
+      #osmd svg [fill="none"] {
+        stroke: #000000 !important;
+      }
+
+      #osmd svg [stroke="none"] {
+        fill: #000000 !important;
+      }
+
+      #osmd svg [style*="#0C7F79"],
+      #osmd svg [style*="#0c7f79"],
+      #osmd svg [fill="#0C7F79"],
+      #osmd svg [fill="#0c7f79"],
+      #osmd svg [data-primer-highlight="true"] {
+        fill: #0C7F79 !important;
+        stroke: #95FFE3 !important;
+        filter:
+          drop-shadow(0 0 4px rgba(149, 255, 227, 0.75))
+          drop-shadow(0 0 9px rgba(111, 255, 211, 0.45));
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.7.7/build/opensheetmusicdisplay.min.js"></script>
+    <script src="opensheetmusicdisplay.min.js"></script>
   </head>
   <body>
-    <div id="osmd"></div>
+    <div id="osmd" class="osmd-auto-width"></div>
     <script>
       let osmd;
 
+      function postToFlutter(message) {
+        try {
+          const payload = typeof message === 'string' ? message : JSON.stringify(message);
+          if (window.FlutterOSMD && window.FlutterOSMD.postMessage) {
+            window.FlutterOSMD.postMessage(payload);
+          }
+        } catch (err) {
+          console.error('postToFlutter failed', err);
+        }
+      }
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        postToFlutter({ type: 'error', message, source, lineno, colno, detail: error ? String(error.stack || error) : null });
+      };
+
       async function initOSMD(xmlString) {
+        if (typeof opensheetmusicdisplay === 'undefined') {
+          postToFlutter({ type: 'error', phase: 'init', detail: 'opensheetmusicdisplay bundle unavailable' });
+          return;
+        }
         if (!osmd) {
-          osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('osmd', {
-            backend: 'svg',
-            autoResize: false,
-            drawTitle: false,
-            drawSubtitle: false,
-            drawPartNames: false,
-            drawingParameters: 'compacttight',
-          });
+          try {
+            osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('osmd', {
+              backend: 'svg',
+              autoResize: false,
+              drawTitle: false,
+              drawSubtitle: false,
+              drawPartNames: false,
+              drawingParameters: 'compacttight',
+              renderSingleHorizontalLine: true,
+            });
+            osmd.EngravingRules.RenderSingleHorizontalLine = true;
+          } catch (err) {
+            console.error('OSMD ctor failed', err);
+            postToFlutter({ type: 'error', phase: 'ctor', detail: String(err && err.stack ? err.stack : err) });
+            return;
+          }
         }
 
-        await osmd.load(xmlString);
-        await renderWindow(1);
+        try {
+          await osmd.load(xmlString);
+          if (osmd.EngravingRules) {
+            osmd.EngravingRules.RenderSingleHorizontalLine = true;
+          }
+          await renderWindow(1);
+          postToFlutter('ready');
+        } catch (err) {
+          console.error('OSMD load failed', err);
+          postToFlutter({ type: 'error', phase: 'load', detail: String(err && err.stack ? err.stack : err) });
+        }
       }
 
       async function renderWindow(measureNumber) {
         if (!osmd) {
           return;
         }
-        const from = Math.max(1, measureNumber - 1);
-        const to = Math.max(from, measureNumber + 1);
-        osmd.setOptions({
-          drawFromMeasureNumber: from,
-          drawUpToMeasureNumber: to,
-        });
-        await osmd.render();
+        try {
+          let from = Math.max(1, measureNumber - 1);
+          let to = measureNumber + 1;
+          if (to - from < 2) {
+            to = from + 2;
+          }
+          if (osmd.sheet && osmd.sheet.SourceMeasures && osmd.sheet.SourceMeasures.length) {
+            const maxMeasure = osmd.sheet.SourceMeasures.length;
+            if (to > maxMeasure) {
+              to = maxMeasure;
+              from = Math.max(1, to - 2);
+            }
+          }
+          osmd.setOptions({
+            drawFromMeasureNumber: from,
+            drawUpToMeasureNumber: to,
+            renderSingleHorizontalLine: true,
+          });
+          if (osmd.EngravingRules) {
+            osmd.EngravingRules.RenderSingleHorizontalLine = true;
+          }
+          await osmd.render();
+          postToFlutter({ type: 'window-rendered', from, to });
+        } catch (err) {
+          console.error('OSMD render failed', err);
+          postToFlutter({ type: 'error', phase: 'render', detail: String(err && err.stack ? err.stack : err) });
+        }
       }
 
       function handleMessage(event) {
@@ -86,7 +186,6 @@
       }
 
       window.addEventListener('message', handleMessage);
-      // Support for Flutter WebView's initial message via postMessage on the iframe.
       window.handleFlutterMessage = handleMessage;
     </script>
   </body>

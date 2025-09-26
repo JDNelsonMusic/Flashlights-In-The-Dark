@@ -1,10 +1,11 @@
+
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import 'package:flashlights_client/model/event_recipe.dart';
 import 'package:flashlights_client/utils/music_xml_utils.dart';
 
 class EventPracticeOSMD extends StatefulWidget {
@@ -16,8 +17,19 @@ class EventPracticeOSMD extends StatefulWidget {
 
 class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   WebViewController? _controller;
+  bool _controllerReady = false;
   bool _initialised = false;
-  String? _lastInitPayload;
+  bool _applyingContext = false;
+  bool _contextUpdateQueued = false;
+  String? _error;
+  Map<String, dynamic>? _lastInitMessage;
+
+  PrimerColor? _currentColor;
+  PrimerColor? _pendingColor;
+  int? _pendingMeasure;
+  String? _pendingNote;
+  String? _pendingHighlightSignature;
+  String? _currentHighlightSignature;
 
   @override
   void initState() {
@@ -27,11 +39,54 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
 
   Future<void> _bootstrap() async {
     try {
-      final trimmedXml = await loadTrimmedMusicXML();
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(const Color(0x00000000))
         ..enableZoom(false);
+
+      controller.addJavaScriptChannel(
+        'FlutterOSMD',
+        onMessageReceived: (message) {
+          final raw = message.message;
+          debugPrint('[EventPracticeOSMD][JS] $raw');
+          dynamic decoded;
+          try {
+            decoded = jsonDecode(raw);
+          } catch (_) {
+            decoded = raw;
+          }
+
+          void markReady() {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              _initialised = true;
+              _error = null;
+            });
+            _flushPendingWindow();
+          }
+
+          if (decoded is String && decoded == 'ready') {
+            markReady();
+          } else if (decoded is Map<String, dynamic>) {
+            final type = decoded['type'];
+            if (type == 'window-rendered') {
+              markReady();
+            } else if (type == 'error') {
+              final detail = decoded['detail'] ?? decoded['message'];
+              final detailText = detail == null ? 'unknown' : detail.toString();
+              debugPrint('[EventPracticeOSMD][JS][error] $detailText');
+              if (mounted) {
+                setState(() {
+                  _error = detailText;
+                  _initialised = false;
+                });
+              }
+            }
+          }
+        },
+      );
 
       final pageLoaded = Completer<void>();
       controller.setNavigationDelegate(
@@ -41,55 +96,201 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
               pageLoaded.complete();
             }
           },
+          onWebResourceError: (error) {
+            debugPrint('[EventPracticeOSMD] web error: ${error.description}');
+            if (mounted) {
+              setState(() {
+                _error = error.description;
+                _initialised = false;
+              });
+            }
+          },
         ),
       );
 
       await controller.loadFlutterAsset('assets/osmd_view.html');
-      await pageLoaded.future;
+      try {
+        await pageLoaded.future.timeout(const Duration(seconds: 2));
+      } on TimeoutException {
+        debugPrint('[EventPracticeOSMD] page load timed out; continuing');
+      }
 
       _controller = controller;
-      await _sendInit(trimmedXml);
-
-      if (mounted) {
-        setState(() {
-          _initialised = true;
-        });
-      }
+      _controllerReady = true;
+      await _applyPendingContext();
     } catch (error, stackTrace) {
       debugPrint('[EventPracticeOSMD] init failed: $error\n$stackTrace');
       if (mounted) {
         setState(() {
           _initialised = false;
+          _error = error.toString();
         });
       }
     }
   }
 
-  Future<void> _sendInit(String xml) async {
-    if (_controller == null) {
+  Future<void> updatePracticeContext({
+    PrimerColor? color,
+    int? measure,
+    String? note,
+  }) async {
+    _pendingColor = color;
+    if (measure != null) {
+      _pendingMeasure = measure;
+    }
+    if (note != null) {
+      final trimmed = note.trim();
+      _pendingNote = trimmed.isEmpty ? null : trimmed;
+    } else {
+      _pendingNote = null;
+    }
+    _pendingHighlightSignature =
+        _composeHighlightSignature(_pendingMeasure, _pendingNote);
+    await _applyPendingContext();
+  }
+
+  Future<void> clearScore({String? message}) async {
+    _pendingColor = null;
+    _currentColor = null;
+    _pendingMeasure = null;
+    _pendingNote = null;
+    _pendingHighlightSignature = null;
+    _currentHighlightSignature = null;
+    if (mounted) {
+      setState(() {
+        _initialised = false;
+        _error = message ?? 'No music assigned to your slot yet';
+      });
+    }
+  }
+
+  Future<void> _applyPendingContext() async {
+    if (!_controllerReady) {
       return;
     }
-    final payload = jsonEncode({'type': 'init', 'xml': xml});
-    _lastInitPayload = payload;
-    await _controller!.runJavaScript('window.postMessage($payload, "*");');
+    if (_applyingContext) {
+      if (!_contextUpdateQueued) {
+        _contextUpdateQueued = true;
+        scheduleMicrotask(() {
+          _contextUpdateQueued = false;
+          _applyPendingContext();
+        });
+      }
+      return;
+    }
+    final color = _pendingColor;
+    final measure = _pendingMeasure;
+    final note = _pendingNote;
+    final highlightSignature = _pendingHighlightSignature;
+    if (color == null) {
+      _pendingHighlightSignature = null;
+      _currentHighlightSignature = null;
+      _pendingNote = null;
+      if (mounted) {
+        setState(() {
+          _initialised = false;
+          _error = 'Select a slot to view the score';
+        });
+      }
+      return;
+    }
+
+    _applyingContext = true;
+    try {
+      if (_currentColor != color ||
+          !_initialised ||
+          _currentHighlightSignature != highlightSignature) {
+        final xml = await loadTrimmedMusicXML(
+          forColor: color,
+          highlightMeasure: measure,
+          highlightNote: note,
+        );
+        _initialised = false;
+        await _sendInit(xml);
+        _currentColor = color;
+        _currentHighlightSignature = highlightSignature;
+      }
+      if (_initialised) {
+        _flushPendingWindow();
+      }
+    } on Object catch (error, stackTrace) {
+      debugPrint('[EventPracticeOSMD] context apply failed: $error\n$stackTrace');
+      if (mounted) {
+        setState(() {
+          _initialised = false;
+          _error = error.toString();
+        });
+      }
+    } finally {
+      _applyingContext = false;
+    }
+  }
+
+  String? _composeHighlightSignature(int? measure, String? note) {
+    if (measure == null) {
+      return null;
+    }
+    final trimmed = note?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return '$measure|${trimmed.toUpperCase()}';
+  }
+
+  void _flushPendingWindow() {
+    final measure = _pendingMeasure;
+    if (!_initialised || measure == null) {
+      return;
+    }
+    setMeasure(measure);
+  }
+
+  Future<void> _sendPayload(Map<String, dynamic> message) async {
+    final controller = _controller;
+    if (controller == null) {
+      return;
+    }
+    final payload = jsonEncode(message);
+    final script = '''
+      (function() {
+        const message = $payload;
+        try {
+          if (typeof window.handleFlutterMessage === "function") {
+            window.handleFlutterMessage({ data: message });
+          } else if (typeof window.postMessage === "function") {
+            window.postMessage(message, "*");
+          }
+        } catch (error) {
+          console.error("Flutter->OSMD postMessage failed", error);
+        }
+      })();
+    ''';
+    await controller.runJavaScript(script);
+  }
+
+  Future<void> _sendInit(String xml) async {
+    final message = {'type': 'init', 'xml': xml};
+    _lastInitMessage = Map<String, dynamic>.from(message);
+    await _sendPayload(message);
   }
 
   void setMeasure(int measureNumber) {
-    if (_controller == null || measureNumber <= 0) {
+    if (measureNumber <= 0) {
       return;
     }
-    final payload = jsonEncode({'type': 'window', 'measure': measureNumber});
-    unawaited(_controller!.runJavaScript('window.postMessage($payload, "*");'));
+    _pendingMeasure = measureNumber;
+    unawaited(_sendPayload({'type': 'window', 'measure': measureNumber}));
   }
 
-  /// Attempts to reload the score if the WebView loses state (e.g., app resume).
   Future<void> reload() async {
-    final controller = _controller;
-    final initPayload = _lastInitPayload;
-    if (controller == null || initPayload == null) {
+    final message = _lastInitMessage;
+    if (message == null) {
       return;
     }
-    await controller.runJavaScript('window.postMessage($initPayload, "*");');
+    await _sendPayload(message);
+    if (_pendingMeasure != null) {
+      setMeasure(_pendingMeasure!);
+    }
   }
 
   @override
@@ -110,14 +311,26 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
           child: WebViewWidget(controller: controller),
         ),
         if (!_initialised)
-          const Positioned.fill(
+          Positioned.fill(
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Colors.black54),
+              decoration: const BoxDecoration(color: Colors.black54),
               child: Center(
-                child: SizedBox.square(
-                  dimension: 32,
-                  child: CircularProgressIndicator(strokeWidth: 2.4),
-                ),
+                child: _error != null
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Score unavailable\n\n${_error!}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.redAccent.shade100,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.square(
+                        dimension: 32,
+                        child: CircularProgressIndicator(strokeWidth: 2.4),
+                      ),
               ),
             ),
           ),

@@ -768,12 +768,15 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   static const double _kItemWidth = 120.0;
   static const double _kCurrentWidth = 240.0;
   static const double _kSpacing = 12.0;
-  static const double _kListHeight = 320.0;
+  static const double _kListHeight = 280.0;
+  static const double _kScoreHeight = 220.0;
 
   final ScrollController _controller = ScrollController();
   final GlobalKey<EventPracticeOSMDState> _osmdKey =
       GlobalKey<EventPracticeOSMDState>();
   int? _lastRenderedMeasure;
+  PrimerColor? _lastRenderedColor;
+  String? _lastRenderedNote;
 
   @override
   void initState() {
@@ -862,13 +865,46 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
           builder: (context, index, _) {
             final clampedIndex = index.clamp(0, events.length - 1);
             final mediaHeight = MediaQuery.of(context).size.height;
-            final listHeight = math.min(_kListHeight, mediaHeight * 0.45);
+            final listHeight = math.min(_kListHeight, mediaHeight * 0.4);
+            final slotForScore = client.myIndex.value;
+            final primerColorForScore = client.colorForSlot(slotForScore);
             final currentEvent = events[clampedIndex];
+            final assignmentForScore =
+                client.assignmentForSlot(currentEvent, slotForScore);
+            final rawNoteForScore = assignmentForScore?.note?.trim();
+            final noteForScore =
+                rawNoteForScore == null || rawNoteForScore.isEmpty
+                    ? null
+                    : rawNoteForScore;
             final measure = currentEvent.measure;
-            if (measure != null && measure > 0 && measure != _lastRenderedMeasure) {
-              _lastRenderedMeasure = measure;
+            if (measure != null && measure > 0) {
+              final shouldUpdateScore =
+                  measure != _lastRenderedMeasure ||
+                  primerColorForScore != _lastRenderedColor ||
+                  noteForScore != _lastRenderedNote;
+              if (shouldUpdateScore) {
+                _lastRenderedMeasure = measure;
+                _lastRenderedColor = primerColorForScore;
+                _lastRenderedNote = noteForScore;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  final color = primerColorForScore;
+                  if (color != null) {
+                    _osmdKey.currentState?.updatePracticeContext(
+                      color: color,
+                      measure: measure,
+                      note: noteForScore,
+                    );
+                  } else {
+                    _osmdKey.currentState?.clearScore();
+                  }
+                });
+              }
+            } else if (_lastRenderedMeasure != null || _lastRenderedColor != null) {
+              _lastRenderedMeasure = null;
+              _lastRenderedColor = null;
+              _lastRenderedNote = null;
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                _osmdKey.currentState?.setMeasure(measure);
+                _osmdKey.currentState?.clearScore();
               });
             }
             return _GlassPanel(
@@ -899,58 +935,74 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         0.0,
                         (constraints.maxWidth - _kCurrentWidth) / 2,
                       );
-                      return SizedBox(
-                        height: listHeight,
-                        child: ListView.separated(
-                          controller: _controller,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: horizontalPadding,
-                          ),
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: events.length,
-                          clipBehavior: Clip.none,
-                          separatorBuilder:
-                              (_, _) => const SizedBox(width: _kSpacing),
-                          itemBuilder: (context, i) {
-                            final event = events[i];
-                            final isCurrent = i == clampedIndex;
-                            final slot = client.myIndex.value;
-                            final assignment = client.assignmentForSlot(
-                              event,
-                              slot,
-                            );
-                            final primerColor = client.colorForSlot(slot);
-                            final practiceSlots = primerColor == null
-                                ? const <int>[]
-                                : client.practiceSlotsForColor(primerColor);
-                            final staffIndex = primerColor == null
-                                ? null
-                                : client.practiceStaffIndexForColor(primerColor);
-                            final practiceSlotNumber =
-                                client.practiceSlotNumberForSlot(slot);
-                            return SizedBox(
-                              width: isCurrent ? _kCurrentWidth : _kItemWidth,
-                              child: _PracticeEventCard(
-                                event: event,
-                                isCurrent: isCurrent,
-                                assignment: assignment,
-                                primerColor: primerColor,
-                                practiceSlots: practiceSlots,
-                                practiceStaffIndex: staffIndex,
-                                practiceSlotNumber: practiceSlotNumber,
-                                osmdKey: isCurrent ? _osmdKey : null,
-                                onTap: () => client.setPracticeEventIndex(i),
-                                onPlay:
-                                    () => unawaited(
-                                      _handlePlayRequest(events, i),
-                                    ),
-                                onPrev: () => client.movePracticeEvent(-1),
-                                onNext: () => client.movePracticeEvent(1),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: listHeight,
+                            child: ListView.separated(
+                              controller: _controller,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
                               ),
-                            );
-                          },
-                        ),
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: events.length,
+                              clipBehavior: Clip.none,
+                              separatorBuilder:
+                                  (_, _) => const SizedBox(width: _kSpacing),
+                              itemBuilder: (context, i) {
+                                final event = events[i];
+                                final isCurrent = i == clampedIndex;
+                                final slot = slotForScore;
+                                final assignment = client.assignmentForSlot(
+                                  event,
+                                  slot,
+                                );
+                                final primerColor = primerColorForScore;
+                                final practiceSlots = primerColor == null
+                                    ? const <int>[]
+                                    : client.practiceSlotsForColor(primerColor);
+                                final staffIndex = primerColor == null
+                                    ? null
+                                    : client.practiceStaffIndexForColor(primerColor);
+                                final practiceSlotNumber =
+                                    client.practiceSlotNumberForSlot(slot);
+                                return SizedBox(
+                                  width: isCurrent ? _kCurrentWidth : _kItemWidth,
+                                  child: _PracticeEventCard(
+                                    event: event,
+                                    isCurrent: isCurrent,
+                                    assignment: assignment,
+                                    primerColor: primerColor,
+                                    practiceSlots: practiceSlots,
+                                    practiceStaffIndex: staffIndex,
+                                    practiceSlotNumber: practiceSlotNumber,
+                                    onTap: () => client.setPracticeEventIndex(i),
+                                    onPlay:
+                                        () => unawaited(
+                                          _handlePlayRequest(events, i),
+                                        ),
+                                    onPrev: () => client.movePracticeEvent(-1),
+                                    onNext: () => client.movePracticeEvent(1),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: constraints.maxWidth,
+                            child: _GlassPanel(
+                              padding: const EdgeInsets.all(12),
+                              child: SizedBox(
+                                height: math.min(_kScoreHeight, mediaHeight * 0.3),
+                                width: double.infinity,
+                                child: EventPracticeOSMD(key: _osmdKey),
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -973,7 +1025,6 @@ class _PracticeEventCard extends StatelessWidget {
     this.primerColor,
     this.practiceStaffIndex,
     this.practiceSlotNumber,
-    this.osmdKey,
     required this.onTap,
     required this.onPlay,
     required this.onPrev,
@@ -987,7 +1038,6 @@ class _PracticeEventCard extends StatelessWidget {
   final List<int> practiceSlots;
   final int? practiceStaffIndex;
   final int? practiceSlotNumber;
-  final GlobalKey<EventPracticeOSMDState>? osmdKey;
   final VoidCallback onTap;
   final VoidCallback onPlay;
   final VoidCallback onPrev;
@@ -996,7 +1046,7 @@ class _PracticeEventCard extends StatelessWidget {
   static const double _previewWidth = 110.0;
   static const double _currentWidth = 220.0;
   static const double _previewHeight = 220.0;
-  static const double _currentHeight = 320.0;
+  static const double _currentHeight = 340.0;
 
   static Color _colorForPrimer(PrimerColor color) {
     switch (color) {
@@ -1098,7 +1148,8 @@ class _PracticeEventCard extends StatelessWidget {
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
       width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      constraints: BoxConstraints(minHeight: targetHeight),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
@@ -1121,7 +1172,6 @@ class _PracticeEventCard extends StatelessWidget {
                 ]
                 : null,
       ),
-      constraints: BoxConstraints(minHeight: targetHeight),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
@@ -1168,14 +1218,14 @@ class _PracticeEventCard extends StatelessWidget {
             const SizedBox(height: 8),
             if (isCurrent) ...[
               Wrap(
-                spacing: 12,
-                runSpacing: 8,
+                spacing: 8,
+                runSpacing: 6,
                 children: [
                   _EventDetailChip(label: 'Note: $noteLabel'),
                   _EventDetailChip(label: 'Primer: $primerLabel'),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _PrimerInfoSection(
                 primerColor: primerColor,
                 practiceSlots: practiceSlots,
@@ -1183,26 +1233,13 @@ class _PracticeEventCard extends StatelessWidget {
                 practiceSlotNumber: practiceSlotNumber,
                 accent: primerAccent,
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 200,
-                child:
-                    osmdKey != null
-                        ? EventPracticeOSMD(key: osmdKey)
-                        : const Center(
-                            child: SizedBox.square(
-                              dimension: 28,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ] else if (!hasPrimer) ...[
               Text(
                 'No primer for your slot',
                 style: textTheme.labelSmall?.copyWith(color: Colors.white38),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
             const Spacer(),
             buildPlayButton(),
@@ -1236,7 +1273,7 @@ class _PrimerInfoSection extends StatelessWidget {
     final groupLabel =
         groupIndex != null ? 'Group $groupIndex · $colorName' : colorName;
     final staffLabel =
-        practiceStaffIndex != null ? 'Staff ${practiceStaffIndex}' : 'Staff —';
+        practiceStaffIndex != null ? 'Staff $practiceStaffIndex' : 'Staff —';
     final slotsLabel =
         practiceSlots.isEmpty ? 'Slots —' : 'Slots ${practiceSlots.join(', ')}';
     final youLabel =
