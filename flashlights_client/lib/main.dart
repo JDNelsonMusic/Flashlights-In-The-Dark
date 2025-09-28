@@ -575,24 +575,29 @@ class _BootstrapState extends State<Bootstrap> {
               children: [
                 ListView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
+                  padding: const EdgeInsets.only(top: 24, bottom: 36),
                   children: [
-                    _HeaderSection(
-                      platform: platform,
-                      onTitleTap: _handleTitleTap,
-                      onSlotSelected: _handleSlotSelected,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _HeaderSection(
+                        platform: platform,
+                        onTitleTap: _handleTitleTap,
+                        onSlotSelected: _handleSlotSelected,
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: client.flashOn,
-                      builder: (context, flashOn, _) {
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: client.audioPlaying,
-                          builder: (context, playing, _) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: _StatusTile(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: client.flashOn,
+                        builder: (context, flashOn, _) {
+                          return ValueListenableBuilder<bool>(
+                            valueListenable: client.audioPlaying,
+                            builder: (context, playing, _) {
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: _StatusTile(
                                     icon:
                                         flashOn
                                             ? Icons.bolt_rounded
@@ -622,115 +627,125 @@ class _BootstrapState extends State<Bootstrap> {
                                     activeColor: const Color(0xFF06D6A0),
                                   ),
                                 ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 20),
-                    ValueListenableBuilder<int>(
-                      valueListenable: client.myIndex,
-                      builder: (context, myIndex, _) {
-                        if (myIndex != 5) {
-                          return const SizedBox.shrink();
-                        }
-                        return Column(
-                          children: [
-                            _GlassPanel(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Tap Trigger',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: () {
-                                        flosc.OscListener.instance.sendCustom(
-                                          '/tap',
-                                          [],
-                                        );
-                                      },
-                                      style: FilledButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                        ),
-                                        textStyle: const TextStyle(
-                                          fontSize: 26,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      child: const Text('TAP'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
-                      },
-                    ),
-                    ValueListenableBuilder<double>(
-                      valueListenable: client.brightness,
-                      builder: (context, brightness, _) {
-                        final slotColor =
-                            kSlotOutlineColors[client.myIndex.value] ??
-                            Colors.white70;
-                        return _GlassPanel(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: client.myIndex,
+                        builder: (context, myIndex, _) {
+                          if (myIndex != 5) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
                             children: [
-                              Text(
-                                'Torch Brightness',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 12),
-                              SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  activeTrackColor: slotColor,
-                                  thumbColor: slotColor,
-                                  overlayColor: slotColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  inactiveTrackColor: Colors.white24,
+                              _GlassPanel(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Tap Trigger',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: FilledButton(
+                                        onPressed: () {
+                                          flosc.OscListener.instance.sendCustom(
+                                            '/tap',
+                                            [],
+                                          );
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        child: const Text('TAP'),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                child: Slider(
-                                  value: brightness.clamp(0.0, 1.0),
-                                  min: 0.0,
-                                  max: 1.0,
-                                  onChanged: (value) {
-                                    client.brightness.value = value;
-                                  },
-                                  onChangeEnd:
-                                      (value) =>
-                                          unawaited(_setBrightness(value)),
-                                ),
                               ),
-                              Text(
-                                '${(brightness * 100).round()}% intensity',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.white70),
-                              ),
+                              const SizedBox(height: 20),
                             ],
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: client.brightness,
+                        builder: (context, brightness, _) {
+                          final slotColor =
+                              kSlotOutlineColors[client.myIndex.value] ??
+                              Colors.white70;
+                          return _GlassPanel(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Torch Brightness',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                const SizedBox(height: 12),
+                                SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    activeTrackColor: slotColor,
+                                    thumbColor: slotColor,
+                                    overlayColor: slotColor.withValues(
+                                      alpha: 0.12,
+                                    ),
+                                    inactiveTrackColor: Colors.white24,
+                                  ),
+                                  child: Slider(
+                                    value: brightness.clamp(0.0, 1.0),
+                                    min: 0.0,
+                                    max: 1.0,
+                                    onChanged: (value) {
+                                      client.brightness.value = value;
+                                    },
+                                    onChangeEnd:
+                                        (value) =>
+                                            unawaited(_setBrightness(value)),
+                                  ),
+                                ),
+                                Text(
+                                  '${(brightness * 100).round()}% intensity',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 28),
                     const PracticeEventStrip(),
                     const SizedBox(height: 36),
-                    const _FooterNote(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const _FooterNote(),
+                    ),
                   ],
                 ),
                 if (_showDebugOverlay)
@@ -768,8 +783,8 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   static const double _kItemWidth = 120.0;
   static const double _kCurrentWidth = 240.0;
   static const double _kSpacing = 12.0;
-  static const double _kListHeight = 280.0;
-  static const double _kScoreHeight = 220.0;
+  static const double _kListHeight = 440.0;
+  static const double _kScoreHeight = 190.0;
 
   final ScrollController _controller = ScrollController();
   final GlobalKey<EventPracticeOSMDState> _osmdKey =
@@ -865,7 +880,9 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
           builder: (context, index, _) {
             final clampedIndex = index.clamp(0, events.length - 1);
             final mediaHeight = MediaQuery.of(context).size.height;
-            final listHeight = math.min(_kListHeight, mediaHeight * 0.4);
+            final minListHeight = _PracticeEventCard._currentHeight + 32;
+            final targetListHeight = math.min(_kListHeight, mediaHeight * 0.48);
+            final listHeight = math.max(minListHeight, targetListHeight);
             final slotForScore = client.myIndex.value;
             final primerColorForScore = client.colorForSlot(slotForScore);
             final currentEvent = events[clampedIndex];
@@ -876,6 +893,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                 rawNoteForScore == null || rawNoteForScore.isEmpty
                     ? null
                     : rawNoteForScore;
+            const horizontalInset = 20.0;
             final measure = currentEvent.measure;
             if (measure != null && measure > 0) {
               final shouldUpdateScore =
@@ -908,95 +926,111 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
               });
             }
             return _GlassPanel(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              padding: const EdgeInsets.fromLTRB(0, 20, 0, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Event Practice',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Slide or tap · Trigger plays locally',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
-                      ),
-                    ],
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: horizontalInset),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Event Practice',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Slide or tap · Trigger plays locally',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.white70),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
                   LayoutBuilder(
                     builder: (context, constraints) {
+                      final contentWidth = math.max(
+                        0.0,
+                        constraints.maxWidth - horizontalInset * 2,
+                      );
                       final horizontalPadding = math.max(
                         0.0,
-                        (constraints.maxWidth - _kCurrentWidth) / 2,
+                        (contentWidth - _kCurrentWidth) / 2,
                       );
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SizedBox(
-                            height: listHeight,
-                            child: ListView.separated(
-                              controller: _controller,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: horizontalPadding,
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: horizontalInset),
+                            child: SizedBox(
+                              height: listHeight,
+                              child: ListView.separated(
+                                controller: _controller,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: horizontalPadding,
+                                ),
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: events.length,
+                                clipBehavior: Clip.none,
+                                separatorBuilder:
+                                    (_, _) => const SizedBox(width: _kSpacing),
+                                itemBuilder: (context, i) {
+                                  final event = events[i];
+                                  final isCurrent = i == clampedIndex;
+                                  final slot = slotForScore;
+                                  final assignment = client.assignmentForSlot(
+                                    event,
+                                    slot,
+                                  );
+                                  final primerColor = primerColorForScore;
+                                  final practiceSlots = primerColor == null
+                                      ? const <int>[]
+                                      : client.practiceSlotsForColor(primerColor);
+                                  final staffIndex = primerColor == null
+                                      ? null
+                                      : client.practiceStaffIndexForColor(primerColor);
+                                  final practiceSlotNumber =
+                                      client.practiceSlotNumberForSlot(slot);
+                                  return SizedBox(
+                                    width:
+                                        isCurrent ? _kCurrentWidth : _kItemWidth,
+                                    child: _PracticeEventCard(
+                                      event: event,
+                                      isCurrent: isCurrent,
+                                      assignment: assignment,
+                                      primerColor: primerColor,
+                                      practiceSlots: practiceSlots,
+                                      practiceStaffIndex: staffIndex,
+                                      practiceSlotNumber: practiceSlotNumber,
+                                      onTap: () => client.setPracticeEventIndex(i),
+                                      onPlay:
+                                          () => unawaited(
+                                            _handlePlayRequest(events, i),
+                                          ),
+                                      onPrev: () => client.movePracticeEvent(-1),
+                                      onNext: () => client.movePracticeEvent(1),
+                                    ),
+                                  );
+                                },
                               ),
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: events.length,
-                              clipBehavior: Clip.none,
-                              separatorBuilder:
-                                  (_, _) => const SizedBox(width: _kSpacing),
-                              itemBuilder: (context, i) {
-                                final event = events[i];
-                                final isCurrent = i == clampedIndex;
-                                final slot = slotForScore;
-                                final assignment = client.assignmentForSlot(
-                                  event,
-                                  slot,
-                                );
-                                final primerColor = primerColorForScore;
-                                final practiceSlots = primerColor == null
-                                    ? const <int>[]
-                                    : client.practiceSlotsForColor(primerColor);
-                                final staffIndex = primerColor == null
-                                    ? null
-                                    : client.practiceStaffIndexForColor(primerColor);
-                                final practiceSlotNumber =
-                                    client.practiceSlotNumberForSlot(slot);
-                                return SizedBox(
-                                  width: isCurrent ? _kCurrentWidth : _kItemWidth,
-                                  child: _PracticeEventCard(
-                                    event: event,
-                                    isCurrent: isCurrent,
-                                    assignment: assignment,
-                                    primerColor: primerColor,
-                                    practiceSlots: practiceSlots,
-                                    practiceStaffIndex: staffIndex,
-                                    practiceSlotNumber: practiceSlotNumber,
-                                    onTap: () => client.setPracticeEventIndex(i),
-                                    onPlay:
-                                        () => unawaited(
-                                          _handlePlayRequest(events, i),
-                                        ),
-                                    onPrev: () => client.movePracticeEvent(-1),
-                                    onNext: () => client.movePracticeEvent(1),
-                                  ),
-                                );
-                              },
                             ),
                           ),
                           const SizedBox(height: 12),
                           SizedBox(
                             width: constraints.maxWidth,
                             child: _GlassPanel(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
                               child: SizedBox(
-                                height: math.min(_kScoreHeight, mediaHeight * 0.3),
+                                height: math.min(_kScoreHeight, mediaHeight * 0.26),
                                 width: double.infinity,
                                 child: EventPracticeOSMD(key: _osmdKey),
                               ),
@@ -1045,8 +1079,8 @@ class _PracticeEventCard extends StatelessWidget {
 
   static const double _previewWidth = 110.0;
   static const double _currentWidth = 220.0;
-  static const double _previewHeight = 220.0;
-  static const double _currentHeight = 340.0;
+  static const double _previewHeight = 250.0;
+  static const double _currentHeight = 380.0;
 
   static Color _colorForPrimer(PrimerColor color) {
     switch (color) {

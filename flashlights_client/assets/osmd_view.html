@@ -25,9 +25,9 @@
         width: 100%;
         height: 100%;
         background-color: #f1f3f6;
-        border-radius: 12px;
+        border-radius: 10px;
         box-sizing: border-box;
-        padding: 12px;
+        padding: 8px;
       }
 
       #osmd svg {
@@ -79,6 +79,222 @@
     <div id="osmd" class="osmd-auto-width"></div>
     <script>
       let osmd;
+      const BASE_ZOOM = 0.9;
+      const MIN_ZOOM = 0.25;
+      const MAX_LAYOUT_ITERATIONS = 8;
+      const HIGHLIGHT_COLOR = '#0C7F79';
+
+      function applyEngravingPreferences() {
+        if (!osmd || !osmd.EngravingRules) {
+          return;
+        }
+        const rules = osmd.EngravingRules;
+        rules.RenderSingleHorizontalLine = true;
+        if (Object.prototype.hasOwnProperty.call(rules, 'NewSystemFromXML')) {
+          rules.NewSystemFromXML = false;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'PageWidth')) {
+          rules.PageWidth = 4800;
+          rules.PageLeftMargin = 0;
+          rules.PageRightMargin = 0;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'PageTopMargin')) {
+          rules.PageTopMargin = 0;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'PageBottomMargin')) {
+          rules.PageBottomMargin = 0;
+        }
+      }
+
+      function getHostWidth(container) {
+        if (!container) {
+          return 0;
+        }
+        const host = container.parentElement;
+        const hostWidth = host && host.clientWidth ? host.clientWidth : container.clientWidth;
+        return Math.max(240, (hostWidth || 0) - 16);
+      }
+
+      function getContentBox(element) {
+        try {
+          const box = element.getBBox();
+          if (
+            box &&
+            Number.isFinite(box.width) &&
+            box.width > 0 &&
+            Number.isFinite(box.height) &&
+            box.height > 0
+          ) {
+            return { width: box.width, height: box.height };
+          }
+        } catch (_) {
+          // ignored
+        }
+        const rect = element.getBoundingClientRect();
+        return {
+          width: rect?.width && rect.width > 0 ? rect.width : 1200,
+          height: rect?.height && rect.height > 0 ? rect.height : 320,
+        };
+      }
+
+      function makeSvgResponsive(svg, width, height) {
+        if (!width || !height) {
+          return;
+        }
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = 'auto';
+        svg.style.maxWidth = '100%';
+        svg.style.transform = 'none';
+        svg.style.transformOrigin = 'top left';
+        svg.style.display = 'block';
+      }
+
+      function countSystems(svg) {
+        const systems = svg.querySelectorAll('g.system');
+        if (systems.length > 0) {
+          return systems.length;
+        }
+        return svg.querySelectorAll('g[id^="System"], g[id*="System"]').length;
+      }
+
+      async function renderMeasures(from, to) {
+        if (!osmd) {
+          return;
+        }
+        const container = document.getElementById('osmd');
+        if (!container) {
+          applyEngravingPreferences();
+          osmd.setOptions({
+            drawFromMeasureNumber: from,
+            drawUpToMeasureNumber: to,
+            renderSingleHorizontalLine: true,
+          });
+          osmd.zoom = BASE_ZOOM;
+          await osmd.render();
+          return;
+        }
+
+        container.style.minHeight = '0';
+        container.style.height = 'auto';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+
+        const targetWidth = getHostWidth(container);
+        let zoom = BASE_ZOOM;
+        let lastWidth = Infinity;
+
+        for (let attempt = 0; attempt < MAX_LAYOUT_ITERATIONS; attempt += 1) {
+          osmd.setOptions({
+            drawFromMeasureNumber: from,
+            drawUpToMeasureNumber: to,
+            renderSingleHorizontalLine: true,
+          });
+          osmd.zoom = Math.max(MIN_ZOOM, zoom);
+          applyEngravingPreferences();
+          await osmd.render();
+
+          const svg = container.querySelector('svg');
+          if (!svg) {
+            continue;
+          }
+
+          const { width, height } = getContentBox(svg);
+          makeSvgResponsive(svg, width, height);
+
+          const systemCount = countSystems(svg);
+          const fitsWidth = width <= targetWidth * 0.98;
+
+          if (systemCount <= 1 && fitsWidth) {
+            container.style.minHeight = `${Math.max(height, 140)}px`;
+            tintHighlightedStems();
+            return;
+          }
+
+          if (Math.abs(width - lastWidth) < 0.5 && zoom <= MIN_ZOOM + 0.01) {
+            break;
+          }
+
+          lastWidth = width;
+          const widthScale = targetWidth / Math.max(width, 1);
+          const adjustedScale = Math.min(widthScale * 0.97, 0.9);
+          const nextZoom = Math.max(MIN_ZOOM, zoom * adjustedScale);
+
+          if (Math.abs(nextZoom - zoom) < 0.005) {
+            if (zoom <= MIN_ZOOM + 0.01) {
+              break;
+            }
+            zoom = Math.max(MIN_ZOOM, zoom - 0.05);
+          } else {
+            zoom = nextZoom;
+          }
+        }
+
+        tintHighlightedStems();
+      }
+
+      function tintHighlightedStems() {
+        const container = document.getElementById('osmd');
+        if (!container) {
+          return;
+        }
+
+        function closestWithClass(node, className) {
+          let current = node;
+          while (current && current !== container) {
+            if (current.classList && current.classList.contains(className)) {
+              return current;
+            }
+            current = current.parentElement;
+          }
+          return null;
+        }
+
+        const highlighted = container.querySelectorAll('[data-primer-highlight="true"]');
+        highlighted.forEach((element) => {
+          const staveNote = closestWithClass(element, 'vf-stavenote');
+          if (!staveNote) {
+            return;
+          }
+
+          const stemGroups = staveNote.querySelectorAll('.vf-stem, g[class*="vf-stem"]');
+          stemGroups.forEach((stemGroup) => {
+            stemGroup.setAttribute('data-primer-highlight', 'true');
+            stemGroup.querySelectorAll('path, line, polygon, rect').forEach((segment) => {
+              applyHighlightColor(segment);
+            });
+          });
+        });
+      }
+
+      function applyHighlightColor(segment) {
+        const style = segment.getAttribute('style');
+        if (style) {
+          let updatedStyle = style;
+          if (/stroke\s*:/i.test(updatedStyle)) {
+            updatedStyle = updatedStyle.replace(/stroke\s*:[^;]+/gi, `stroke:${HIGHLIGHT_COLOR}`);
+          } else {
+            updatedStyle += `;stroke:${HIGHLIGHT_COLOR}`;
+          }
+          if (/fill\s*:\s*none/i.test(style)) {
+            updatedStyle = updatedStyle.replace(/fill\s*:\s*none/gi, 'fill:none');
+          } else if (/fill\s*:/i.test(updatedStyle)) {
+            updatedStyle = updatedStyle.replace(/fill\s*:[^;]+/gi, `fill:${HIGHLIGHT_COLOR}`);
+          }
+          if (updatedStyle !== style) {
+            segment.setAttribute('style', updatedStyle);
+          }
+        }
+
+        segment.setAttribute('stroke', HIGHLIGHT_COLOR);
+        const fillAttr = segment.getAttribute('fill');
+        if (fillAttr && fillAttr.toLowerCase() !== 'none') {
+          segment.setAttribute('fill', HIGHLIGHT_COLOR);
+        }
+        segment.setAttribute('data-primer-highlight', 'true');
+      }
 
       function postToFlutter(message) {
         try {
@@ -110,8 +326,9 @@
               drawPartNames: false,
               drawingParameters: 'compacttight',
               renderSingleHorizontalLine: true,
+              newSystemFromXML: false,
             });
-            osmd.EngravingRules.RenderSingleHorizontalLine = true;
+            applyEngravingPreferences();
           } catch (err) {
             console.error('OSMD ctor failed', err);
             postToFlutter({ type: 'error', phase: 'ctor', detail: String(err && err.stack ? err.stack : err) });
@@ -121,9 +338,8 @@
 
         try {
           await osmd.load(xmlString);
-          if (osmd.EngravingRules) {
-            osmd.EngravingRules.RenderSingleHorizontalLine = true;
-          }
+          osmd.zoom = BASE_ZOOM;
+          applyEngravingPreferences();
           await renderWindow(1);
           postToFlutter('ready');
         } catch (err) {
@@ -149,15 +365,7 @@
               from = Math.max(1, to - 2);
             }
           }
-          osmd.setOptions({
-            drawFromMeasureNumber: from,
-            drawUpToMeasureNumber: to,
-            renderSingleHorizontalLine: true,
-          });
-          if (osmd.EngravingRules) {
-            osmd.EngravingRules.RenderSingleHorizontalLine = true;
-          }
-          await osmd.render();
+          await renderMeasures(from, to);
           postToFlutter({ type: 'window-rendered', from, to });
         } catch (err) {
           console.error('OSMD render failed', err);

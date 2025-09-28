@@ -150,10 +150,17 @@ void _applyPrimerHighlight(
   required _ParsedPitch pitch,
 }) {
   final root = document.rootElement;
+  final targetMeasures = <int>{
+    measureNumber,
+  };
+  if (measureNumber > 1) {
+    targetMeasures.add(measureNumber - 1);
+  }
+  targetMeasures.add(measureNumber + 1);
   for (final part in root.findElements('part')) {
     for (final measure in part.findElements('measure')) {
       final parsedNumber = _parseMeasureNumber(measure.getAttribute('number'));
-      if (parsedNumber == null || parsedNumber != measureNumber) {
+      if (parsedNumber == null || !targetMeasures.contains(parsedNumber)) {
         continue;
       }
       for (final note in measure.findElements('note')) {
@@ -185,12 +192,31 @@ void _setNoteHighlight(XmlElement note, {required bool isHighlighted}) {
       XmlAttribute(XmlName(_kHighlightDataAttribute), 'true'),
     );
   }
+
+  _clearStemHighlight(note);
 }
 
 void _removeHighlightAttributes(XmlElement note) {
   note.attributes.removeWhere(
     (attribute) => attribute.name.local == _kHighlightDataAttribute,
   );
+}
+
+void _clearStemHighlight(XmlElement note) {
+  for (final stem in note.findElements('stem')) {
+    stem.attributes.removeWhere(
+      (attribute) {
+        final name = attribute.name.local;
+        if (name == _kHighlightDataAttribute) {
+          return true;
+        }
+        if (name == 'color') {
+          return true;
+        }
+        return false;
+      },
+    );
+  }
 }
 
 _ParsedPitch? _parseNoteLabel(String raw) {
