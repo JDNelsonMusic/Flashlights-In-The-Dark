@@ -1,8 +1,8 @@
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:flashlights_client/model/event_recipe.dart';
@@ -28,42 +28,8 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   PrimerColor? _pendingColor;
   int? _pendingMeasure;
   String? _pendingNote;
-  String? _currentContextKey;
-  String? _svgMarkup;
-
-  void _markReady() {
-    debugPrint('[EventPracticeOSMD] markReady()');
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _initialised = true;
-      _error = null;
-    });
-  }
-
-  String _sanitizeSvgMarkup(String raw) {
-    var output = raw.trim();
-    if (!output.startsWith('<svg')) {
-      return output;
-    }
-    if (!output.contains('xmlns=')) {
-      output = output.replaceFirst(
-        '<svg',
-        '<svg xmlns="http://www.w3.org/2000/svg"',
-      );
-    }
-    if (!output.contains('xmlns:xlink')) {
-      output = output.replaceFirst(
-        '<svg',
-        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"',
-      );
-    }
-    if (!output.startsWith('<?xml')) {
-      output = '<?xml version="1.0" encoding="UTF-8"?>' + output;
-    }
-    return output;
-  }
+  String? _pendingHighlightSignature;
+  String? _currentHighlightSignature;
 
   @override
   void initState() {
@@ -73,68 +39,49 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
 
   Future<void> _bootstrap() async {
     try {
-      final controller =
-          WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..enableZoom(false);
-
-      try {
-        controller.setBackgroundColor(const Color(0x00000000));
-      } on UnimplementedError catch (error, stackTrace) {
-        debugPrint(
-          '[EventPracticeOSMD] transparent background unsupported: $error\n$stackTrace',
-        );
-      }
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(const Color(0x00000000))
+        ..enableZoom(false);
 
       controller.addJavaScriptChannel(
         'FlutterOSMD',
         onMessageReceived: (message) {
+          final raw = message.message;
+          debugPrint('[EventPracticeOSMD][JS] $raw');
           dynamic decoded;
           try {
-            decoded = jsonDecode(message.message);
+            decoded = jsonDecode(raw);
           } catch (_) {
-            decoded = message.message;
+            decoded = raw;
           }
 
-          if (decoded is String) {
-            if (decoded == 'ready') {
-              _markReady();
-            }
-            return;
-          }
-
-          if (decoded is Map<String, dynamic>) {
-            final type = decoded['type'];
-            if (type == 'rendered') {
-              final svg = decoded['svg'];
-              if (svg is String && svg.isNotEmpty) {
-                final previewLength = svg.length > 120 ? 120 : svg.length;
-                final preview = svg.substring(0, previewLength);
-                debugPrint(
-                  '[EventPracticeOSMD] received svg snippet len=${svg.length} preview=$preview',
-                );
-                final sanitized = _sanitizeSvgMarkup(svg);
-                setState(() {
-                  _svgMarkup = sanitized;
-                });
-              }
-              _markReady();
+          void markReady() {
+            if (!mounted) {
               return;
             }
-            if (type == 'error') {
+            setState(() {
+              _initialised = true;
+              _error = null;
+            });
+            _flushPendingWindow();
+          }
+
+          if (decoded is String && decoded == 'ready') {
+            markReady();
+          } else if (decoded is Map<String, dynamic>) {
+            final type = decoded['type'];
+            if (type == 'window-rendered') {
+              markReady();
+            } else if (type == 'error') {
               final detail = decoded['detail'] ?? decoded['message'];
               final detailText = detail == null ? 'unknown' : detail.toString();
               debugPrint('[EventPracticeOSMD][JS][error] $detailText');
               if (mounted) {
                 setState(() {
-                  _initialised = false;
                   _error = detailText;
+                  _initialised = false;
                 });
-              }
-            } else if (type == 'log') {
-              final logMessage = decoded['message'];
-              if (logMessage != null) {
-                debugPrint('[EventPracticeOSMD][JS] $logMessage');
               }
             }
           }
@@ -150,9 +97,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
             }
           },
           onWebResourceError: (error) {
-            debugPrint(
-              '[EventPracticeOSMD] web error: code=${error.errorCode} type=${error.errorType} description=${error.description}',
-            );
+            debugPrint('[EventPracticeOSMD] web error: ${error.description}');
             if (mounted) {
               setState(() {
                 _error = error.description;
@@ -189,17 +134,18 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     int? measure,
     String? note,
   }) async {
-    debugPrint(
-      '[EventPracticeOSMD] updatePracticeContext color=${color?.name ?? 'null'} measure=${measure ?? 'null'} note=${note ?? 'null'}',
-    );
     _pendingColor = color;
-    _pendingMeasure = measure;
+    if (measure != null) {
+      _pendingMeasure = measure;
+    }
     if (note != null) {
       final trimmed = note.trim();
       _pendingNote = trimmed.isEmpty ? null : trimmed;
     } else {
       _pendingNote = null;
     }
+    _pendingHighlightSignature =
+        _composeHighlightSignature(_pendingMeasure, _pendingNote);
     await _applyPendingContext();
   }
 
@@ -208,8 +154,8 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _currentColor = null;
     _pendingMeasure = null;
     _pendingNote = null;
-    _currentContextKey = null;
-    _svgMarkup = null;
+    _pendingHighlightSignature = null;
+    _currentHighlightSignature = null;
     if (mounted) {
       setState(() {
         _initialised = false;
@@ -232,15 +178,14 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       }
       return;
     }
-
     final color = _pendingColor;
     final measure = _pendingMeasure;
     final note = _pendingNote;
-    final contextKey = _composeContextKey(measure, note);
-
+    final highlightSignature = _pendingHighlightSignature;
     if (color == null) {
-      _currentContextKey = null;
-      _svgMarkup = null;
+      _pendingHighlightSignature = null;
+      _currentHighlightSignature = null;
+      _pendingNote = null;
       if (mounted) {
         setState(() {
           _initialised = false;
@@ -250,68 +195,54 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       return;
     }
 
-    if (measure == null || measure <= 0) {
-      _currentContextKey = null;
-      _svgMarkup = null;
-      if (mounted) {
-        setState(() {
-          _initialised = false;
-          _error = 'Score unavailable for this event';
-        });
-      }
-      return;
-    }
-
     _applyingContext = true;
     try {
       if (_currentColor != color ||
-          _currentContextKey != contextKey ||
-          !_initialised) {
-        final trimmed = await loadTrimmedMusicXML(
+          !_initialised ||
+          _currentHighlightSignature != highlightSignature) {
+        final xml = await loadTrimmedMusicXML(
           forColor: color,
           highlightMeasure: measure,
           highlightNote: note,
         );
-        debugPrint(
-          '[EventPracticeOSMD] sending init payload ${trimmed.windowStart}-${trimmed.windowEnd}',
-        );
-        if (mounted) {
-          setState(() {
-            _initialised = false;
-            _error = null;
-            _svgMarkup = null;
-          });
-        } else {
-          _initialised = false;
-          _error = null;
-          _svgMarkup = null;
-        }
-        await _sendInit(trimmed);
+        _initialised = false;
+        await _sendInit(xml);
         _currentColor = color;
-        _currentContextKey = contextKey;
+        _currentHighlightSignature = highlightSignature;
+      }
+      if (_initialised) {
+        _flushPendingWindow();
       }
     } on Object catch (error, stackTrace) {
-      debugPrint(
-        '[EventPracticeOSMD] context apply failed: $error\n$stackTrace',
-      );
+      debugPrint('[EventPracticeOSMD] context apply failed: $error\n$stackTrace');
       if (mounted) {
         setState(() {
           _initialised = false;
           _error = error.toString();
         });
-      } else {
-        _initialised = false;
-        _error = error.toString();
       }
     } finally {
       _applyingContext = false;
     }
   }
 
-  String _composeContextKey(int? measure, String? note) {
-    final measurePart = measure == null ? 'null' : measure.toString();
-    final notePart = note == null ? '' : note.trim().toUpperCase();
-    return '$measurePart|$notePart';
+  String? _composeHighlightSignature(int? measure, String? note) {
+    if (measure == null) {
+      return null;
+    }
+    final trimmed = note?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return '$measure|${trimmed.toUpperCase()}';
+  }
+
+  void _flushPendingWindow() {
+    final measure = _pendingMeasure;
+    if (!_initialised || measure == null) {
+      return;
+    }
+    setMeasure(measure);
   }
 
   Future<void> _sendPayload(Map<String, dynamic> message) async {
@@ -337,14 +268,18 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     await controller.runJavaScript(script);
   }
 
-  Future<void> _sendInit(TrimmedMusicXmlResult payload) async {
-    final message = {
-      'type': 'init',
-      'xml': payload.xml,
-      'meta': payload.toMetaJson(),
-    };
+  Future<void> _sendInit(String xml) async {
+    final message = {'type': 'init', 'xml': xml};
     _lastInitMessage = Map<String, dynamic>.from(message);
     await _sendPayload(message);
+  }
+
+  void setMeasure(int measureNumber) {
+    if (measureNumber <= 0) {
+      return;
+    }
+    _pendingMeasure = measureNumber;
+    unawaited(_sendPayload({'type': 'window', 'measure': measureNumber}));
   }
 
   Future<void> reload() async {
@@ -353,6 +288,9 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       return;
     }
     await _sendPayload(message);
+    if (_pendingMeasure != null) {
+      setMeasure(_pendingMeasure!);
+    }
   }
 
   @override
@@ -368,51 +306,31 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     }
     return Stack(
       children: [
-        Offstage(
-          offstage: true,
-          child: SizedBox(
-            width: 1,
-            height: 1,
-            child: WebViewWidget(controller: controller),
-          ),
-        ),
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(color: Colors.transparent),
-            child:
-                _svgMarkup != null
-                    ? SvgPicture.string(
-                      _svgMarkup!,
-                      key: ValueKey(_svgMarkup),
-                      fit: BoxFit.contain,
-                      allowDrawingOutsideViewBox: true,
-                    )
-                    : const SizedBox.expand(),
-          ),
+          child: WebViewWidget(controller: controller),
         ),
         if (!_initialised)
           Positioned.fill(
             child: DecoratedBox(
               decoration: const BoxDecoration(color: Colors.black54),
               child: Center(
-                child:
-                    _error != null
-                        ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Score unavailable\n\n${_error!}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.redAccent.shade100,
-                              fontWeight: FontWeight.w600,
-                            ),
+                child: _error != null
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Score unavailable\n\n${_error!}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.redAccent.shade100,
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
-                        : const SizedBox.square(
-                          dimension: 32,
-                          child: CircularProgressIndicator(strokeWidth: 2.4),
                         ),
+                      )
+                    : const SizedBox.square(
+                        dimension: 32,
+                        child: CircularProgressIndicator(strokeWidth: 2.4),
+                      ),
               ),
             ),
           ),
