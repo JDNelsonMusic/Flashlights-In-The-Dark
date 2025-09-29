@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -80,9 +79,42 @@
     <script>
       let osmd;
       const BASE_ZOOM = 0.9;
-      const MIN_ZOOM = 0.25;
-      const MAX_LAYOUT_ITERATIONS = 8;
       const HIGHLIGHT_COLOR = '#0C7F79';
+
+      function stringifyError(err) {
+        if (!err) {
+          return 'Unknown error';
+        }
+        if (typeof err === 'string') {
+          return err;
+        }
+        if (err.stack) {
+          return String(err.stack);
+        }
+        if (err.message) {
+          return String(err.message);
+        }
+        try {
+          return JSON.stringify(err);
+        } catch (_) {
+          return String(err);
+        }
+      }
+
+      function postToFlutter(message) {
+        try {
+          const payload = typeof message === 'string' ? message : JSON.stringify(message);
+          if (window.FlutterOSMD && window.FlutterOSMD.postMessage) {
+            window.FlutterOSMD.postMessage(payload);
+          }
+        } catch (err) {
+          console.error('postToFlutter failed', err);
+        }
+      }
+
+      function logToFlutter(message) {
+        postToFlutter({ type: 'log', message });
+      }
 
       function applyEngravingPreferences() {
         if (!osmd || !osmd.EngravingRules) {
@@ -90,12 +122,27 @@
         }
         const rules = osmd.EngravingRules;
         rules.RenderSingleHorizontalLine = true;
-        if (Object.prototype.hasOwnProperty.call(rules, 'NewSystemFromXML')) {
-          rules.NewSystemFromXML = false;
+        if (Object.prototype.hasOwnProperty.call(rules, 'RenderSingleHorizontalStaffline')) {
+          rules.RenderSingleHorizontalStaffline = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'RenderXMeasuresPerLineAkaSystem')) {
+          rules.RenderXMeasuresPerLineAkaSystem = 3;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'LastSystemMaxScalingFactor')) {
+          rules.LastSystemMaxScalingFactor = 1;
+        }
+        if (rules.PageFormat && typeof rules.PageFormat === 'object') {
+          if (Object.prototype.hasOwnProperty.call(rules.PageFormat, 'Width')) {
+            rules.PageFormat.Width = 8000;
+          }
         }
         if (Object.prototype.hasOwnProperty.call(rules, 'PageWidth')) {
-          rules.PageWidth = 4800;
+          rules.PageWidth = 8000;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'PageLeftMargin')) {
           rules.PageLeftMargin = 0;
+        }
+        if (Object.prototype.hasOwnProperty.call(rules, 'PageRightMargin')) {
           rules.PageRightMargin = 0;
         }
         if (Object.prototype.hasOwnProperty.call(rules, 'PageTopMargin')) {
@@ -104,15 +151,6 @@
         if (Object.prototype.hasOwnProperty.call(rules, 'PageBottomMargin')) {
           rules.PageBottomMargin = 0;
         }
-      }
-
-      function getHostWidth(container) {
-        if (!container) {
-          return 0;
-        }
-        const host = container.parentElement;
-        const hostWidth = host && host.clientWidth ? host.clientWidth : container.clientWidth;
-        return Math.max(240, (hostWidth || 0) - 16);
       }
 
       function getContentBox(element) {
@@ -150,89 +188,6 @@
         svg.style.transform = 'none';
         svg.style.transformOrigin = 'top left';
         svg.style.display = 'block';
-      }
-
-      function countSystems(svg) {
-        const systems = svg.querySelectorAll('g.system');
-        if (systems.length > 0) {
-          return systems.length;
-        }
-        return svg.querySelectorAll('g[id^="System"], g[id*="System"]').length;
-      }
-
-      async function renderMeasures(from, to) {
-        if (!osmd) {
-          return;
-        }
-        const container = document.getElementById('osmd');
-        if (!container) {
-          applyEngravingPreferences();
-          osmd.setOptions({
-            drawFromMeasureNumber: from,
-            drawUpToMeasureNumber: to,
-            renderSingleHorizontalLine: true,
-          });
-          osmd.zoom = BASE_ZOOM;
-          await osmd.render();
-          return;
-        }
-
-        container.style.minHeight = '0';
-        container.style.height = 'auto';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'center';
-
-        const targetWidth = getHostWidth(container);
-        let zoom = BASE_ZOOM;
-        let lastWidth = Infinity;
-
-        for (let attempt = 0; attempt < MAX_LAYOUT_ITERATIONS; attempt += 1) {
-          osmd.setOptions({
-            drawFromMeasureNumber: from,
-            drawUpToMeasureNumber: to,
-            renderSingleHorizontalLine: true,
-          });
-          osmd.zoom = Math.max(MIN_ZOOM, zoom);
-          applyEngravingPreferences();
-          await osmd.render();
-
-          const svg = container.querySelector('svg');
-          if (!svg) {
-            continue;
-          }
-
-          const { width, height } = getContentBox(svg);
-          makeSvgResponsive(svg, width, height);
-
-          const systemCount = countSystems(svg);
-          const fitsWidth = width <= targetWidth * 0.98;
-
-          if (systemCount <= 1 && fitsWidth) {
-            container.style.minHeight = `${Math.max(height, 140)}px`;
-            tintHighlightedStems();
-            return;
-          }
-
-          if (Math.abs(width - lastWidth) < 0.5 && zoom <= MIN_ZOOM + 0.01) {
-            break;
-          }
-
-          lastWidth = width;
-          const widthScale = targetWidth / Math.max(width, 1);
-          const adjustedScale = Math.min(widthScale * 0.97, 0.9);
-          const nextZoom = Math.max(MIN_ZOOM, zoom * adjustedScale);
-
-          if (Math.abs(nextZoom - zoom) < 0.005) {
-            if (zoom <= MIN_ZOOM + 0.01) {
-              break;
-            }
-            zoom = Math.max(MIN_ZOOM, zoom - 0.05);
-          } else {
-            zoom = nextZoom;
-          }
-        }
-
-        tintHighlightedStems();
       }
 
       function tintHighlightedStems() {
@@ -296,26 +251,21 @@
         segment.setAttribute('data-primer-highlight', 'true');
       }
 
-      function postToFlutter(message) {
-        try {
-          const payload = typeof message === 'string' ? message : JSON.stringify(message);
-          if (window.FlutterOSMD && window.FlutterOSMD.postMessage) {
-            window.FlutterOSMD.postMessage(payload);
-          }
-        } catch (err) {
-          console.error('postToFlutter failed', err);
-        }
-      }
-
       window.onerror = function(message, source, lineno, colno, error) {
-        postToFlutter({ type: 'error', message, source, lineno, colno, detail: error ? String(error.stack || error) : null });
+        postToFlutter({ type: 'error', message, source, lineno, colno, detail: error ? stringifyError(error) : null });
       };
 
-      async function initOSMD(xmlString) {
+      async function initOSMD(message) {
         if (typeof opensheetmusicdisplay === 'undefined') {
           postToFlutter({ type: 'error', phase: 'init', detail: 'opensheetmusicdisplay bundle unavailable' });
           return;
         }
+        const xmlString = message && typeof message.xml === 'string' ? message.xml : null;
+        if (!xmlString || xmlString.length === 0) {
+          postToFlutter({ type: 'error', phase: 'init', detail: 'Missing MusicXML payload' });
+          return;
+        }
+        logToFlutter(`initOSMD: xml length=${xmlString.length}`);
         if (!osmd) {
           try {
             osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('osmd', {
@@ -328,48 +278,63 @@
               renderSingleHorizontalLine: true,
               newSystemFromXML: false,
             });
-            applyEngravingPreferences();
+            logToFlutter('OSMD instance created');
           } catch (err) {
             console.error('OSMD ctor failed', err);
-            postToFlutter({ type: 'error', phase: 'ctor', detail: String(err && err.stack ? err.stack : err) });
+            postToFlutter({ type: 'error', phase: 'ctor', detail: stringifyError(err) });
             return;
           }
         }
 
         try {
+          osmd.setOptions({
+            renderSingleHorizontalStaffline: true,
+            renderSingleHorizontalLine: true,
+            drawPartNames: false,
+            newSystemFromXML: false,
+          });
+          applyEngravingPreferences();
+          logToFlutter('Loading XML…');
           await osmd.load(xmlString);
+          logToFlutter(`Loaded sheet: measures=${osmd.sheet?.SourceMeasures?.length ?? 'unknown'}`);
           osmd.zoom = BASE_ZOOM;
           applyEngravingPreferences();
-          await renderWindow(1);
+          await osmd.render();
+          logToFlutter('Render complete');
+
+          const container = document.getElementById('osmd');
+          let widthLabel = null;
+          let heightLabel = null;
+          let svgMarkup = null;
+          if (container) {
+            container.style.minHeight = '0';
+            container.style.height = 'auto';
+            const svg = container.querySelector('svg');
+            if (svg) {
+              const box = getContentBox(svg);
+              const width = box.width;
+              const height = box.height;
+              makeSvgResponsive(svg, width, height);
+              const numericHeight = typeof height === 'number' ? height : Number(height) || 0;
+              container.style.minHeight = `${Math.max(numericHeight, 140)}px`;
+              widthLabel = typeof width === 'number' ? width.toFixed(2) : width;
+              heightLabel = typeof height === 'number' ? height.toFixed(2) : height;
+              svgMarkup = svg.outerHTML;
+              logToFlutter(`SVG ready width=${widthLabel}, height=${heightLabel}`);
+            } else {
+              logToFlutter('SVG element missing after render');
+            }
+          } else {
+            logToFlutter('Container missing after render');
+          }
+
+          tintHighlightedStems();
+          logToFlutter('Highlights applied');
+          postToFlutter({ type: 'rendered', width: widthLabel, height: heightLabel, svg: svgMarkup });
           postToFlutter('ready');
         } catch (err) {
-          console.error('OSMD load failed', err);
-          postToFlutter({ type: 'error', phase: 'load', detail: String(err && err.stack ? err.stack : err) });
-        }
-      }
-
-      async function renderWindow(measureNumber) {
-        if (!osmd) {
-          return;
-        }
-        try {
-          let from = Math.max(1, measureNumber - 1);
-          let to = measureNumber + 1;
-          if (to - from < 2) {
-            to = from + 2;
-          }
-          if (osmd.sheet && osmd.sheet.SourceMeasures && osmd.sheet.SourceMeasures.length) {
-            const maxMeasure = osmd.sheet.SourceMeasures.length;
-            if (to > maxMeasure) {
-              to = maxMeasure;
-              from = Math.max(1, to - 2);
-            }
-          }
-          await renderMeasures(from, to);
-          postToFlutter({ type: 'window-rendered', from, to });
-        } catch (err) {
-          console.error('OSMD render failed', err);
-          postToFlutter({ type: 'error', phase: 'render', detail: String(err && err.stack ? err.stack : err) });
+          console.error('OSMD load/render failed', err);
+          postToFlutter({ type: 'error', phase: 'render', detail: stringifyError(err) });
         }
       }
 
@@ -383,18 +348,18 @@
           message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         } catch (err) {
           console.error('Unable to parse message', err);
+          postToFlutter({ type: 'error', phase: 'parse', detail: stringifyError(err) });
           return;
         }
 
         if (message?.type === 'init' && message.xml) {
-          initOSMD(message.xml);
-        } else if (message?.type === 'window' && typeof message.measure === 'number') {
-          renderWindow(message.measure);
+          initOSMD(message);
         }
       }
 
       window.addEventListener('message', handleMessage);
       window.handleFlutterMessage = handleMessage;
+      logToFlutter('OSMD bridge initialised');
     </script>
   </body>
 </html>

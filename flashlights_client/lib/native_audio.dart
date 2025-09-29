@@ -9,14 +9,28 @@ import 'package:flutter/services.dart';
 class NativeAudio {
   NativeAudio._();
 
-  static const MethodChannel _channel =
-      MethodChannel('ai.keex.flashlights/audioNative');
+  static const MethodChannel _channel = MethodChannel(
+    'ai.keex.flashlights/audioNative',
+  );
 
   static Completer<void>? _readyCompleter;
   static bool _initialising = false;
   static Map<String, dynamic>? _lastInitSnapshot;
   static Object? _lastInitError;
   static Timer? _retryTimer;
+
+  static bool get _isSupportedPlatform {
+    if (kIsWeb) {
+      return false;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return true;
+      default:
+        return false;
+    }
+  }
 
   /// Returns whether the native layer reports the primer library as prepared.
   static bool get isReady => _readyCompleter?.isCompleted ?? false;
@@ -29,6 +43,10 @@ class NativeAudio {
 
   /// Ensures the native audio engine has loaded every primer tone into memory.
   static Future<void> ensureInitialized() {
+    if (!_isSupportedPlatform) {
+      final ready = _readyCompleter ??= Completer<void>()..complete();
+      return ready.future;
+    }
     final completer = _readyCompleter ??= Completer<void>();
     if (completer.isCompleted) {
       return completer.future;
@@ -49,7 +67,8 @@ class NativeAudio {
             final status = snapshot['status'] as String?;
             final count = snapshot['count'] ?? snapshot['sounds'];
             debugPrint(
-                '[NativeAudio] Primer library ready (${count ?? 'n/a'} assets, status=${status ?? 'unknown'})');
+              '[NativeAudio] Primer library ready (${count ?? 'n/a'} assets, status=${status ?? 'unknown'})',
+            );
 
             if (status == 'failed') {
               throw PlatformException(
@@ -93,14 +112,14 @@ class NativeAudio {
   static Future<Map<String, dynamic>> _primeAssets() async {
     final manifestJson = await rootBundle.loadString('AssetManifest.json');
     final Map<String, dynamic> decoded = jsonDecode(manifestJson);
-    final primerAssets = decoded.keys
-        .where((key) => key.startsWith('available-sounds/primerTones/'))
-        .where((key) => key.toLowerCase().endsWith('.mp3'))
-        .toList()
-      ..sort();
-    final canonical = primerAssets
-        .map((asset) => _canonicalFileName(asset))
-        .toList();
+    final primerAssets =
+        decoded.keys
+            .where((key) => key.startsWith('available-sounds/primerTones/'))
+            .where((key) => key.toLowerCase().endsWith('.mp3'))
+            .toList()
+          ..sort();
+    final canonical =
+        primerAssets.map((asset) => _canonicalFileName(asset)).toList();
 
     return <String, dynamic>{
       'assets': primerAssets,
@@ -115,7 +134,9 @@ class NativeAudio {
     await ensureInitialized();
     final canonical = _canonicalFileName(fileName);
     if (canonical.isEmpty) {
-      debugPrint('[NativeAudio] Ignoring empty primer tone request for "$fileName"');
+      debugPrint(
+        '[NativeAudio] Ignoring empty primer tone request for "$fileName"',
+      );
       return;
     }
     final payload = <String, dynamic>{
@@ -134,8 +155,9 @@ class NativeAudio {
   /// Requests a fresh diagnostics snapshot from the native layer.
   static Future<Map<String, dynamic>?> diagnostics() async {
     try {
-      final payload =
-          await _channel.invokeMapMethod<String, dynamic>('diagnostics');
+      final payload = await _channel.invokeMapMethod<String, dynamic>(
+        'diagnostics',
+      );
       return payload == null
           ? null
           : Map<String, dynamic>.unmodifiable(payload);
