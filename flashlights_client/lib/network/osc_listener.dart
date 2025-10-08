@@ -58,17 +58,52 @@ class OscListener {
   Timer? _helloTimer;
   Duration _currentHelloInterval = _fastHelloInterval;
   int _playbackToken = 0;
+  final Map<String, Timer> _primerDedupTimers = {};
+  static const Duration _primerDedupHold = Duration(seconds: 5);
   StreamSubscription<List<int>>? _micSubscription;
   final MicInput _mic = MicInputStub();
   bool _running = false;
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
 
+  void _registerPrimerKey(String key) {
+    _primerDedupTimers[key]?.cancel();
+    _primerDedupTimers[key] = Timer(_primerDedupHold, () {
+      _primerDedupTimers.remove(key);
+    });
+  }
+
+  bool _shouldSkipPrimer(String? key) {
+    if (key == null) {
+      return false;
+    }
+    _primerDedupTimers.removeWhere((k, timer) {
+      final active = timer.isActive;
+      if (!active) {
+        timer.cancel();
+      }
+      return !active;
+    });
+    final existing = _primerDedupTimers[key];
+    if (existing != null && existing.isActive) {
+      return true;
+    }
+    return false;
+  }
+
   Future<void> _playPrimer(
     String fileName,
     double gain, {
     bool sendAck = false,
+    String? dedupeKey,
   }) async {
+    if (_shouldSkipPrimer(dedupeKey)) {
+      debugPrint('[OSC] Skipping duplicate primer request for $dedupeKey');
+      if (sendAck) {
+        _sendAck();
+      }
+      return;
+    }
     try {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
@@ -78,13 +113,21 @@ class OscListener {
 
       await NativeAudio.playPrimerTone(fileName, volume);
 
-      debugPrint('[OSC] Native playback invoked: ${fileName.trim()} @ vol=$volume');
+      if (dedupeKey != null) {
+        _registerPrimerKey(dedupeKey);
+      }
+
+      debugPrint(
+        '[OSC] Native playback invoked: ${fileName.trim()} @ vol=$volume',
+      );
       client.audioPlaying.value = true;
-      unawaited(Future<void>.delayed(const Duration(seconds: 2), () {
-        if (_playbackToken == playbackToken) {
-          client.audioPlaying.value = false;
-        }
-      }));
+      unawaited(
+        Future<void>.delayed(const Duration(seconds: 2), () {
+          if (_playbackToken == playbackToken) {
+            client.audioPlaying.value = false;
+          }
+        }),
+      );
     } catch (e) {
       debugPrint('[OSC] Native playback failed for $fileName: $e');
       client.audioPlaying.value = false;
@@ -227,8 +270,11 @@ class OscListener {
 
   Future<void> _dispatch(OSCMessage m) async {
     final myIndex = client.myIndex.value;
-    final isSelfHello = m.address == '/hello' && m.arguments.isNotEmpty &&
-        m.arguments[0] is int && m.arguments[0] == myIndex &&
+    final isSelfHello =
+        m.address == '/hello' &&
+        m.arguments.isNotEmpty &&
+        m.arguments[0] is int &&
+        m.arguments[0] == myIndex &&
         (m.arguments.length < 2 ||
             (m.arguments[1] is String && m.arguments[1] == client.udid));
     if (!isSelfHello) {
@@ -295,17 +341,25 @@ class OscListener {
             if (assignment != null) {
               final sample = assignment.sample;
               const gain = 1.0;
-              final nowMs =
-                  DateTime.now().millisecondsSinceEpoch.toDouble();
+              final nowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
               final startAt = msg.startAtMs ?? nowMs;
               final delayMs =
                   (startAt - nowMs).clamp(0, double.infinity).toInt();
-              unawaited(Future.delayed(Duration(milliseconds: delayMs), () async {
-                await _playPrimer(sample, gain, sendAck: true);
-              }));
+              final dedupeKey = 'event:${msg.eventId}:slot=$myIndex';
+              unawaited(
+                Future.delayed(Duration(milliseconds: delayMs), () async {
+                  await _playPrimer(
+                    sample,
+                    gain,
+                    sendAck: true,
+                    dedupeKey: dedupeKey,
+                  );
+                }),
+              );
             } else {
               debugPrint(
-                  '[OSC] No primer assignment for event ${msg.eventId} slot $myIndex');
+                '[OSC] No primer assignment for event ${msg.eventId} slot $myIndex',
+              );
             }
           } else {
             debugPrint('[OSC] Unknown event ID ${msg.eventId}');

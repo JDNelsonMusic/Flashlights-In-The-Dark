@@ -37,6 +37,29 @@ extension PrimerColorDisplay on PrimerColor {
     }
   }
 
+  String get voicePart {
+    switch (this) {
+      case PrimerColor.green:
+        return 'S3';
+      case PrimerColor.magenta:
+        return 'S4';
+      case PrimerColor.orange:
+        return 'S5';
+      case PrimerColor.blue:
+        return 'A3';
+      case PrimerColor.red:
+        return 'A4';
+      case PrimerColor.cyan:
+        return 'A5';
+      case PrimerColor.yellow:
+        return 'T2';
+      case PrimerColor.pink:
+        return 'B2';
+      case PrimerColor.purple:
+        return 'B3';
+    }
+  }
+
   int get groupIndex {
     switch (this) {
       case PrimerColor.blue:
@@ -95,6 +118,34 @@ class PrimerAssignment {
   String get normalizedSample => sample.trim();
 }
 
+String? _canonicalPrimerSample(String? raw) {
+  if (raw == null) {
+    return null;
+  }
+  var value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  if (value.startsWith('./')) {
+    value = value.substring(2);
+  }
+  const prefix = 'primerTones/';
+  if (value.toLowerCase().startsWith(prefix.toLowerCase())) {
+    value = value.substring(prefix.length);
+  }
+  var fileName = value;
+  final lower = fileName.toLowerCase();
+  if (lower.startsWith('short')) {
+    fileName = 'Short${lower.substring(5)}';
+  } else if (lower.startsWith('long')) {
+    fileName = 'Long${lower.substring(4)}';
+  }
+  if (!fileName.toLowerCase().endsWith('.mp3')) {
+    fileName = '$fileName.mp3';
+  }
+  return '$prefix$fileName';
+}
+
 class EventRecipe {
   EventRecipe({
     required this.id,
@@ -115,8 +166,8 @@ class EventRecipe {
       primerJson.forEach((key, value) {
         final color = primerColorFromString(key);
         if (color != null && value is Map<String, dynamic>) {
-          final sample = value['sample'] as String?;
-          final note = value['note'] as String?;
+          final sample = _canonicalPrimerSample(value['sample'] as String?);
+          final note = (value['note'] as String?)?.trim();
           if (sample != null && sample.isNotEmpty) {
             primer[color] = PrimerAssignment(sample: sample, note: note);
           }

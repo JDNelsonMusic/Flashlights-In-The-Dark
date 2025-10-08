@@ -23,7 +23,7 @@ struct MenuCommands: Commands {
                 state.triggerCurrentEvent()
             }
             .keyboardShortcut(.space, modifiers: [])
-            Button("Previous Event") {
+    ("Previous Event") {
                 state.moveToPreviousEvent()
             }
             .keyboardShortcut(.leftArrow, modifiers: [])

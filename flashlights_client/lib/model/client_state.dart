@@ -90,6 +90,36 @@ class ClientState {
     PrimerColor.cyan: [40, 53, 54],
   };
 
+  static const Map<int, String> slotSingerNames = {
+    1: 'Amber',
+    3: 'Fred',
+    4: 'Brock',
+    7: 'Anton',
+    9: 'Bob D.',
+    12: 'Izzy',
+    14: 'Miranda',
+    15: 'Susan',
+    16: 'Abby C.',
+    18: 'Cory',
+    19: 'Ash',
+    20: 'Andy L.',
+    21: 'Ken C.',
+    23: 'Sydney F.',
+    24: 'Jennie',
+    25: 'Jessie S.',
+    27: 'Kelly W.',
+    29: 'Abigail B.',
+    34: 'Josh B.',
+    38: 'Amani',
+    40: 'Kelsey',
+    41: 'Molly',
+    42: 'Heidi BB',
+    44: 'Nicole',
+    51: 'Phoebe',
+    53: 'Sam',
+    54: 'Lissa',
+  };
+
   static const int _initialSlot = int.fromEnvironment('SLOT', defaultValue: 1);
 
   static Map<int, PrimerColor> _buildSlotColorMap() {
@@ -118,6 +148,8 @@ class ClientState {
   List<int> get availableSlots => _availableSlots;
 
   PrimerColor? colorForSlot(int slot) => _slotColorMap[slot];
+
+  String? singerNameForSlot(int slot) => slotSingerNames[slot];
 
   PrimerColorPlacement? practicePlacementForColor(PrimerColor color) =>
       kPrimerColorPlacements[color];

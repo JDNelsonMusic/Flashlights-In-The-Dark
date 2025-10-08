@@ -18,6 +18,7 @@ import kotlin.math.roundToInt
 import android.util.Log
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.content.res.AssetFileDescriptor
 import org.json.JSONObject
 import java.io.File
@@ -184,8 +185,9 @@ private class PrimerToneManager(context: Context) {
         .setMaxStreams(MAX_SOUND_STREAMS)
         .setAudioAttributes(
             AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                // Treat primers as media so they play even if the device is in vibrate mode.
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build()
         )
         .build()
@@ -195,11 +197,14 @@ private class PrimerToneManager(context: Context) {
     private val durationsMs: MutableMap<String, Long> = mutableMapOf()
     private val activeStreams = Collections.synchronizedSet(mutableSetOf<Int>())
     private val cleanupTasks = ConcurrentHashMap<Int, Runnable>()
+    private val streamCanonical = ConcurrentHashMap<Int, String>()
     private var totalBytes: Long = 0
     private var totalDurationMs: Long = 0
     private var initialised = false
     private var initialising = false
     private val pendingCallbacks = mutableListOf<(Result<Map<String, Any?>>) -> Unit>()
+    private var lastCanonical: String? = null
+    private var lastPlaybackStartedAtMs: Long = 0L
 
     fun initialize(callback: (Result<Map<String, Any?>>) -> Unit) {
         val startInitialisation: Boolean
@@ -259,10 +264,16 @@ private class PrimerToneManager(context: Context) {
         }
 
         activeStreams.add(streamId)
+        streamCanonical[streamId] = canonical
+        synchronized(lock) {
+            lastCanonical = canonical
+            lastPlaybackStartedAtMs = SystemClock.elapsedRealtime()
+        }
         val cleanupDelay = if (duration > 0) duration + STREAM_CLEANUP_PADDING_MS else DEFAULT_STREAM_DURATION_MS
         val cleanup = Runnable {
             activeStreams.remove(streamId)
             cleanupTasks.remove(streamId)
+            streamCanonical.remove(streamId)
         }
         cleanupTasks[streamId] = cleanup
         handler.postDelayed(cleanup, cleanupDelay)
@@ -275,6 +286,9 @@ private class PrimerToneManager(context: Context) {
             activeStreams.clear()
             cleanupTasks.values.forEach { handler.removeCallbacks(it) }
             cleanupTasks.clear()
+            streamCanonical.clear()
+            lastCanonical = null
+            lastPlaybackStartedAtMs = 0L
         }
         toStop.forEach { soundPool.stop(it) }
         soundPool.autoPause()
@@ -288,9 +302,12 @@ private class PrimerToneManager(context: Context) {
             cleanupTasks.values.forEach { handler.removeCallbacks(it) }
             cleanupTasks.clear()
             activeStreams.clear()
+            streamCanonical.clear()
             pendingCallbacks.clear()
             initialised = false
             initialising = false
+            lastCanonical = null
+            lastPlaybackStartedAtMs = 0L
         }
         soundPool.release()
         executor.shutdownNow()
@@ -304,6 +321,12 @@ private class PrimerToneManager(context: Context) {
                 durationsMs.clear()
                 totalBytes = 0
                 totalDurationMs = 0
+                activeStreams.clear()
+                cleanupTasks.values.forEach { handler.removeCallbacks(it) }
+                cleanupTasks.clear()
+                streamCanonical.clear()
+                lastCanonical = null
+                lastPlaybackStartedAtMs = 0L
             }
             return diagnosticsLocked()
         }
@@ -349,6 +372,9 @@ private class PrimerToneManager(context: Context) {
             activeStreams.clear()
             cleanupTasks.values.forEach { handler.removeCallbacks(it) }
             cleanupTasks.clear()
+            streamCanonical.clear()
+            lastCanonical = null
+            lastPlaybackStartedAtMs = 0L
 
             for (spec in pending) {
                 val status = loadStatuses[spec.soundId]
@@ -378,7 +404,10 @@ private class PrimerToneManager(context: Context) {
             "activeStreams" to activeStreams.size,
             "totalDurationMs" to totalDurationMs,
             "totalBytes" to totalBytes,
-            "maxStreams" to MAX_SOUND_STREAMS
+            "maxStreams" to MAX_SOUND_STREAMS,
+            "lastCanonical" to lastCanonical,
+            "lastPlaybackStartedAtMs" to lastPlaybackStartedAtMs,
+            "concurrentStreamLimit" to MAX_SOUND_STREAMS
         )
     }
 

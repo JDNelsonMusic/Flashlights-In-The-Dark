@@ -129,7 +129,9 @@ struct EventTriggerStrip: View {
     private func nextEvents() -> [EventRecipe] {
         guard !state.eventRecipes.isEmpty else { return [] }
         let end = min(state.eventRecipes.count, state.currentEventIndex + previewCount + 1)
-        let slice = state.eventRecipes[(state.currentEventIndex + 1)..<end]
+        let start = min(max(state.currentEventIndex + 1, 0), end)
+        guard start < end else { return [] }
+        let slice = state.eventRecipes[start..<end]
         return Array(slice)
     }
 

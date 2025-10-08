@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flashlights_client/network/osc_listener.dart' as flosc;
 import 'package:flashlights_client/network/osc_packet.dart';
@@ -102,6 +103,9 @@ class _HeaderSection extends StatelessWidget {
       valueListenable: client.myIndex,
       builder: (context, myIndex, _) {
         final slotColor = kSlotOutlineColors[myIndex] ?? Colors.white70;
+        final singerName = client.singerNameForSlot(myIndex);
+        final singerLabel =
+            singerName ?? (myIndex == 0 ? 'Unassigned' : 'Slot $myIndex');
         return _GlassPanel(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
           child: Column(
@@ -145,7 +149,7 @@ class _HeaderSection extends StatelessWidget {
                     children: [
                       _InfoPill(
                         icon: Icons.person_rounded,
-                        label: 'Singer #$myIndex',
+                        label: 'Singer: $singerLabel',
                         accent: slotColor,
                       ),
                       _SlotSelectorPill(
@@ -188,41 +192,59 @@ class _SlotSelectorPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final slots = client.availableSlots;
+    final currentColor = client.colorForSlot(currentSlot);
     final slotLabel =
-        client.colorForSlot(currentSlot)?.displayName ?? 'Unassigned';
+        currentColor == null
+            ? 'Unassigned'
+            : '${currentColor.displayName} (${currentColor.voicePart})';
+    final singerName = client.singerNameForSlot(currentSlot);
+    final isUnassigned = currentSlot == 0;
+    final pillLabel =
+        isUnassigned
+            ? 'Select slot'
+            : singerName == null
+            ? 'Slot $currentSlot · $slotLabel'
+            : '$singerName · Slot $currentSlot · $slotLabel';
     return PopupMenuButton<int>(
       onSelected: (slot) => unawaited(onSelect(slot)),
       color: Colors.black.withValues(alpha: 0.9),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       itemBuilder: (context) {
-        return slots
-            .map(
-              (slot) => PopupMenuItem<int>(
-                value: slot,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: kSlotOutlineColors[slot] ?? Colors.white54,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Slot $slot · ${client.colorForSlot(slot)?.displayName ?? 'Unassigned'}',
-                    ),
-                  ],
+        return slots.map((slot) {
+          final color = client.colorForSlot(slot);
+          final colorLabel = color?.displayName ?? 'Unassigned';
+          final voiceLabel = color?.voicePart;
+          final description =
+              voiceLabel == null ? colorLabel : '$colorLabel ($voiceLabel)';
+          final name = client.singerNameForSlot(slot);
+          final segments = <String>['Slot $slot'];
+          if (name != null) {
+            segments.add(name);
+          }
+          segments.add(description);
+          return PopupMenuItem<int>(
+            value: slot,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: kSlotOutlineColors[slot] ?? Colors.white54,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-            )
-            .toList();
+                const SizedBox(width: 8),
+                Text(segments.join(' · ')),
+              ],
+            ),
+          );
+        }).toList();
       },
       child: _InfoPill(
         icon: Icons.apps_rounded,
-        label: 'Slot $currentSlot · $slotLabel',
+        label: pillLabel,
         accent: accent,
         trailing: const Icon(
           Icons.keyboard_arrow_down_rounded,
@@ -412,6 +434,28 @@ class _FooterNote extends StatelessWidget {
   }
 }
 
+class _ChecklistItem extends StatelessWidget {
+  const _ChecklistItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: Colors.white70);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.white70),
+        const SizedBox(width: 10),
+        Expanded(child: Text(label, style: textStyle)),
+      ],
+    );
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _bootstrapNative();
@@ -470,6 +514,13 @@ class _BootstrapState extends State<Bootstrap> {
   bool _showDebugOverlay = false;
   int _titleTapCount = 0;
   Timer? _tapResetTimer;
+  static final Uri _resourceUri = Uri.parse('https://simphoni.ai/flashlights');
+  static final Uri _githubRepoUri = Uri.parse(
+    'https://github.com/JDNelsonMusic/Flashlights-In-The-Dark',
+  );
+  static final Uri _supportEmailUri = Uri.parse(
+    'mailto:jdnelsonmusic@gmail.com?subject=Flashlights%20Client%20Feedback',
+  );
 
   @override
   void initState() {
@@ -512,6 +563,39 @@ class _BootstrapState extends State<Bootstrap> {
       unawaited(_updateBrightness(0.1));
     } else if (key == LogicalKeyboardKey.audioVolumeDown) {
       unawaited(_updateBrightness(-0.1));
+    }
+  }
+
+  Future<void> _openResourceLink() async {
+    final launched = await launchUrl(
+      _resourceUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open simphoni.ai/flashlights')),
+      );
+    }
+  }
+
+  Future<void> _openGithubRepo() async {
+    final launched = await launchUrl(
+      _githubRepoUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open GitHub repository')),
+      );
+    }
+  }
+
+  Future<void> _openSupportEmail() async {
+    final launched = await launchUrl(_supportEmailUri);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No email app available')));
     }
   }
 
@@ -585,7 +669,121 @@ class _BootstrapState extends State<Bootstrap> {
                         onSlotSelected: _handleSlotSelected,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _GlassPanel(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tap the Slot button above to activate your assigned number so the system knows where you are seated in the choir.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.wifi_protected_setup_rounded,
+                                  color: Colors.white70,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Jon triggers every cue over the network during rehearsals and performances, so you can keep the app hands-free. The built-in practice controls are just there to let you preview your part on your own time.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Practice resources',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: _openResourceLink,
+                              icon: const Icon(Icons.open_in_new_rounded),
+                              label: const Text('simphoni.ai/flashlights'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Resource page with practice guidance, schedules, and materials for every choir member.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Don't know your slot number? Tap simphoni.ai/flashlights, open the Documentation tab, and the first graphic shows every assignment.",
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _GlassPanel(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Before rehearsal',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 12),
+                            const _ChecklistItem(
+                              icon: Icons.check_circle_outline_rounded,
+                              label:
+                                  'Confirm your slot matches your assigned number and color for this seating.',
+                            ),
+                            const SizedBox(height: 10),
+                            const _ChecklistItem(
+                              icon: Icons.volume_up_rounded,
+                              label:
+                                  'Set device volume to 100% and make sure mute / silent switches are off.',
+                            ),
+                            const SizedBox(height: 10),
+                            const _ChecklistItem(
+                              icon: Icons.battery_charging_full_rounded,
+                              label:
+                                  'Charge fully before call time and keep a cable or battery pack in your folder.',
+                            ),
+                            const SizedBox(height: 10),
+                            const _ChecklistItem(
+                              icon: Icons.do_not_disturb_on_rounded,
+                              label:
+                                  'Enable Do Not Disturb or Focus mode so alerts stay quiet once the run begins.',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: ValueListenableBuilder<bool>(
@@ -598,40 +796,84 @@ class _BootstrapState extends State<Bootstrap> {
                                 children: [
                                   Expanded(
                                     child: _StatusTile(
-                                    icon:
-                                        flashOn
-                                            ? Icons.bolt_rounded
-                                            : Icons.bolt_outlined,
-                                    title: 'Flashlight',
-                                    subtitle:
-                                        flashOn
-                                            ? 'Torch active'
-                                            : 'Awaiting cue',
-                                    active: flashOn,
-                                    activeColor: const Color(0xFFFFD166),
+                                      icon:
+                                          flashOn
+                                              ? Icons.bolt_rounded
+                                              : Icons.bolt_outlined,
+                                      title: 'Flashlight',
+                                      subtitle:
+                                          flashOn
+                                              ? 'Torch active'
+                                              : 'Awaiting cue',
+                                      active: flashOn,
+                                      activeColor: const Color(0xFFFFD166),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _StatusTile(
-                                    icon:
-                                        playing
-                                            ? Icons.music_note_rounded
-                                            : Icons.music_off_rounded,
-                                    title: 'Primer',
-                                    subtitle:
-                                        playing
-                                            ? 'Playing locally'
-                                            : 'Standing by',
-                                    active: playing,
-                                    activeColor: const Color(0xFF06D6A0),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _StatusTile(
+                                      icon:
+                                          playing
+                                              ? Icons.music_note_rounded
+                                              : Icons.music_off_rounded,
+                                      title: 'Primer',
+                                      subtitle:
+                                          playing
+                                              ? 'Playing locally'
+                                              : 'Standing by',
+                                      active: playing,
+                                      activeColor: const Color(0xFF06D6A0),
+                                    ),
                                   ),
-                                ),
                                 ],
                               );
                             },
                           );
                         },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _GlassPanel(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.router_rounded,
+                                  color: Colors.white70,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Jon is providing the offline router, which has been modded for this project. The full-stack is designed for this piece to minimize audience-facing risks.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'We have several rehearsals to shake out bugs, which is a rare luxury for tech-forward premieres these days; your patience with the process is greatly appreciated!',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Thank you for being part of this beta run. Please reach out to Jon with any concerns, tech questions, or score corrections so we can adjust quickly. It's a real treat to explore this project with you.",
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -652,10 +894,11 @@ class _BootstrapState extends State<Bootstrap> {
                                   children: [
                                     Text(
                                       'Tap Trigger',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(fontWeight: FontWeight.w600),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     SizedBox(
@@ -741,6 +984,91 @@ class _BootstrapState extends State<Bootstrap> {
                     ),
                     const SizedBox(height: 28),
                     const PracticeEventStrip(),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        "The TEAL note is what you're tapping to trigger :)",
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _GlassPanel(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.music_note_outlined,
+                                  color: Colors.white70,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Heads up: some Event Practice music segments still render with glitches while OSMD interprets the MusicXML score.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'If you enjoy tinkering with web canvases or MusicXML and want to help smooth out the viewer, Jon would love to collaborate.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 8,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: _openGithubRepo,
+                                  icon: const Icon(Icons.code_rounded),
+                                  label: const Text('Request GitHub access'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: _openSupportEmail,
+                                  icon: const Icon(Icons.mail_outline_rounded),
+                                  label: const Text('Email Jon'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Tap GitHub to request repo access or email Jon directly with questions, corrections, or ideas. Collaboration is always welcome.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 36),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -886,8 +1214,10 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
             final slotForScore = client.myIndex.value;
             final primerColorForScore = client.colorForSlot(slotForScore);
             final currentEvent = events[clampedIndex];
-            final assignmentForScore =
-                client.assignmentForSlot(currentEvent, slotForScore);
+            final assignmentForScore = client.assignmentForSlot(
+              currentEvent,
+              slotForScore,
+            );
             final rawNoteForScore = assignmentForScore?.note?.trim();
             final noteForScore =
                 rawNoteForScore == null || rawNoteForScore.isEmpty
@@ -917,7 +1247,8 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                   }
                 });
               }
-            } else if (_lastRenderedMeasure != null || _lastRenderedColor != null) {
+            } else if (_lastRenderedMeasure != null ||
+                _lastRenderedColor != null) {
               _lastRenderedMeasure = null;
               _lastRenderedColor = null;
               _lastRenderedNote = null;
@@ -942,10 +1273,34 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         const Spacer(),
                         Text(
                           'Slide or tap · Trigger plays locally',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalInset,
+                      8,
+                      horizontalInset,
+                      0,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          size: 18,
+                          color: Colors.white70,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Highlighted notes show the staged primer tone—tap "Play primer" to hear that exact pitch queued for your part.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.white70),
+                          ),
                         ),
                       ],
                     ),
@@ -965,8 +1320,9 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding:
-                                EdgeInsets.symmetric(horizontal: horizontalInset),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalInset,
+                            ),
                             child: SizedBox(
                               height: listHeight,
                               child: ListView.separated(
@@ -989,17 +1345,25 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                     slot,
                                   );
                                   final primerColor = primerColorForScore;
-                                  final practiceSlots = primerColor == null
-                                      ? const <int>[]
-                                      : client.practiceSlotsForColor(primerColor);
-                                  final staffIndex = primerColor == null
-                                      ? null
-                                      : client.practiceStaffIndexForColor(primerColor);
-                                  final practiceSlotNumber =
-                                      client.practiceSlotNumberForSlot(slot);
+                                  final practiceSlots =
+                                      primerColor == null
+                                          ? const <int>[]
+                                          : client.practiceSlotsForColor(
+                                            primerColor,
+                                          );
+                                  final staffIndex =
+                                      primerColor == null
+                                          ? null
+                                          : client.practiceStaffIndexForColor(
+                                            primerColor,
+                                          );
+                                  final practiceSlotNumber = client
+                                      .practiceSlotNumberForSlot(slot);
                                   return SizedBox(
                                     width:
-                                        isCurrent ? _kCurrentWidth : _kItemWidth,
+                                        isCurrent
+                                            ? _kCurrentWidth
+                                            : _kItemWidth,
                                     child: _PracticeEventCard(
                                       event: event,
                                       isCurrent: isCurrent,
@@ -1008,12 +1372,14 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                       practiceSlots: practiceSlots,
                                       practiceStaffIndex: staffIndex,
                                       practiceSlotNumber: practiceSlotNumber,
-                                      onTap: () => client.setPracticeEventIndex(i),
+                                      onTap:
+                                          () => client.setPracticeEventIndex(i),
                                       onPlay:
                                           () => unawaited(
                                             _handlePlayRequest(events, i),
                                           ),
-                                      onPrev: () => client.movePracticeEvent(-1),
+                                      onPrev:
+                                          () => client.movePracticeEvent(-1),
                                       onNext: () => client.movePracticeEvent(1),
                                     ),
                                   );
@@ -1030,7 +1396,10 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                 vertical: 10,
                               ),
                               child: SizedBox(
-                                height: math.min(_kScoreHeight, mediaHeight * 0.26),
+                                height: math.min(
+                                  _kScoreHeight,
+                                  mediaHeight * 0.26,
+                                ),
                                 width: double.infinity,
                                 child: EventPracticeOSMD(key: _osmdKey),
                               ),
@@ -1311,7 +1680,9 @@ class _PrimerInfoSection extends StatelessWidget {
     final slotsLabel =
         practiceSlots.isEmpty ? 'Slots —' : 'Slots ${practiceSlots.join(', ')}';
     final youLabel =
-        practiceSlotNumber != null ? 'You → ${practiceSlotNumber!.toString().padLeft(2, '0')}' : null;
+        practiceSlotNumber != null
+            ? 'You → ${practiceSlotNumber!.toString().padLeft(2, '0')}'
+            : null;
     final swatchColor = accent ?? Colors.white.withValues(alpha: 0.3);
 
     return Container(

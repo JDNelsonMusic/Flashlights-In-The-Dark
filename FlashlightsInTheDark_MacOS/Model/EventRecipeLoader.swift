@@ -29,9 +29,55 @@ struct EventRecipeLoader {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
             let bundle = try decoder.decode(EventRecipeBundle.self, from: data)
-            return bundle.events
+            return bundle.events.map(sanitizeEvent)
         } catch {
             throw EventRecipeLoaderError.decodingFailed
         }
+    }
+
+    private func sanitizeEvent(_ event: EventRecipe) -> EventRecipe {
+        var cleaned: [PrimerColor: PrimerAssignment] = [:]
+        for (color, assignment) in event.primerAssignments {
+            guard let rawSample = assignment.oscFileName,
+                  let canonicalSample = canonicalSamplePath(for: rawSample) else { continue }
+            let trimmedNote = assignment.note?.trimmingCharacters(in: .whitespacesAndNewlines)
+            cleaned[color] = PrimerAssignment(sample: canonicalSample, note: trimmedNote)
+        }
+        return EventRecipe(
+            id: event.id,
+            measure: event.measure,
+            position: event.position,
+            primerAssignments: cleaned
+        )
+    }
+
+    private func canonicalSamplePath(for raw: String) -> String? {
+        var value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+
+        if value.hasPrefix("./") {
+            value.removeFirst(2)
+        }
+
+        let prefix = "primerTones/"
+        if value.lowercased().hasPrefix(prefix.lowercased()) {
+            value.removeFirst(prefix.count)
+        }
+
+        var fileName = value
+        let lower = fileName.lowercased()
+        if lower.hasPrefix("short") {
+            let suffix = lower.dropFirst("short".count)
+            fileName = "Short" + suffix
+        } else if lower.hasPrefix("long") {
+            let suffix = lower.dropFirst("long".count)
+            fileName = "Long" + suffix
+        }
+
+        if !fileName.lowercased().hasSuffix(".mp3") {
+            fileName += ".mp3"
+        }
+
+        return prefix + fileName
     }
 }

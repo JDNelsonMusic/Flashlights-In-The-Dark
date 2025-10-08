@@ -74,7 +74,11 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var midiLog: [String] = []
 
     // Event timeline & audio routing
-    @Published public private(set) var eventRecipes: [EventRecipe] = []
+    @Published public private(set) var eventRecipes: [EventRecipe] = [] {
+        didSet {
+            clampCurrentEventIndex()
+        }
+    }
     @Published public var currentEventIndex: Int = 0
     @Published public var lastTriggeredEventID: Int?
     @Published public private(set) var audioOutputDevices: [AudioDeviceInfo] = []
@@ -96,7 +100,12 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var triggeredSlots: Set<Int> = []
 
     /// Members for dynamic groups 1-9
-    @Published public var groupMembers: [Int: [Int]] = [:]
+    @Published public var groupMembers: [Int: [Int]] = [:] {
+        didSet {
+            guard !isApplyingGroupSanitization else { return }
+            sanitizeGroupMembers()
+        }
+    }
 
     /// Default slot group mapping for primer tones
     private let defaultGroups: [Int: [Int]] = [
@@ -110,6 +119,41 @@ public final class ConsoleState: ObservableObject, Sendable {
         8: [12, 24, 25],
         9: [40, 53, 54]
     ]
+
+    private lazy var canonicalSlots: Set<Int> = {
+        Set(defaultGroups.values.flatMap { $0 })
+    }()
+    private var isApplyingGroupSanitization = false
+
+    private func resetGroupMembersToDefault() {
+        groupMembers = defaultGroups
+    }
+
+    private func sanitizeGroupMembers() {
+        let currentGroups = groupMembers
+        let sanitized = defaultGroups
+
+        if sanitized != currentGroups {
+            print("[ConsoleState] Normalised group membership to canonical slot mapping")
+            isApplyingGroupSanitization = true
+            groupMembers = sanitized
+            isApplyingGroupSanitization = false
+        }
+    }
+
+    private func clampCurrentEventIndex() {
+        let boundedIndex: Int
+        if eventRecipes.isEmpty {
+            boundedIndex = 0
+        } else {
+            let upperBound = eventRecipes.count - 1
+            let lowerBound = 0
+            boundedIndex = min(max(currentEventIndex, lowerBound), upperBound)
+        }
+        if boundedIndex != currentEventIndex {
+            currentEventIndex = boundedIndex
+        }
+    }
 
     // MARK: – Init
     public init() {
@@ -160,7 +204,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         midi.setChannel(outputChannel)
 
         refreshMidiDevices()
-        groupMembers = defaultGroups
+        resetGroupMembersToDefault()
         loadEventRecipes()
         refreshAudioOutputs()
         let audioEngine = primerAudioEngine
@@ -558,11 +602,12 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
 
     private func updateDevices(from dict: [String: ConsoleSlotInfo]) {
-        let maxSlot = max(dict.keys.compactMap { Int($0) }.max() ?? 0, devices.count)
+        let canonical = canonicalSlots
+        let maxSlot = max(canonical.max() ?? devices.count, devices.count)
 
         if maxSlot > devices.count {
             for slot in (devices.count + 1)...maxSlot {
-                let isKnownReal = ChoirDevice.defaultChannelMap.keys.contains(slot)
+                let isKnownReal = canonical.contains(slot)
                 let dev = ChoirDevice(
                     id: slot - 1,
                     udid: "",
@@ -576,7 +621,6 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
 
         let snapshot = devices
-        let realSlots = Set(ChoirDevice.defaultChannelMap.keys)
 
         for idx in devices.indices {
             let slot = idx + 1
@@ -584,37 +628,39 @@ public final class ConsoleState: ObservableObject, Sendable {
             let previous = snapshot[idx]
             let mapping = dict[String(slot)]
 
-            let shouldBeReal = mapping != nil || realSlots.contains(slot)
-            device.isPlaceholder = !shouldBeReal
-
-            if device.isPlaceholder {
-                // Preserve any staging metadata but clear network identifiers.
+            if !canonical.contains(slot) {
+                if mapping != nil {
+                    print("[ConsoleState] Ignoring mapping entry for placeholder slot #\(slot)")
+                }
+                device.isPlaceholder = true
                 device.ip = ""
                 device.udid = ""
                 device.name = previous.name
                 device.midiChannels = previous.midiChannels
                 device.listeningSlot = previous.listeningSlot
+                devices[idx] = device
+                continue
+            }
+
+            device.isPlaceholder = false
+            device.listeningSlot = slot
+            device.midiChannels = ChoirDevice.defaultChannelMap[slot] ?? previous.midiChannels
+
+            if let mapping {
+                device.ip = mapping.ip
+                device.udid = mapping.udid
+                device.name = mapping.name
             } else {
-                device.listeningSlot = slot
-                device.midiChannels = ChoirDevice.defaultChannelMap[slot] ?? previous.midiChannels
-                if let mapping {
-                    device.ip = mapping.ip
-                    device.udid = mapping.udid
-                    device.name = mapping.name
-                } else {
-                    device.ip = previous.ip
-                    device.udid = previous.udid
-                    device.name = previous.name
-                }
+                device.ip = previous.ip
+                device.udid = previous.udid
+                device.name = previous.name
             }
 
             devices[idx] = device
         }
 
         updateAnyTorchOn()
-
-        groupMembers = defaultGroups
-        print("[ConsoleState] groupMembers: \(defaultGroups)")
+        sanitizeGroupMembers()
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
     public func stopSound(device: ChoirDevice) {

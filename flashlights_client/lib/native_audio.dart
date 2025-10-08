@@ -139,6 +139,7 @@ class NativeAudio {
       );
       return;
     }
+
     final payload = <String, dynamic>{
       'fileName': canonical,
       'volume': volume.clamp(0.0, 1.0),

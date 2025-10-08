@@ -1,7 +1,7 @@
-
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -30,6 +30,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   String? _pendingNote;
   String? _pendingHighlightSignature;
   String? _currentHighlightSignature;
+  int _windowRenderedLogCount = 0;
 
   @override
   void initState() {
@@ -39,16 +40,16 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
 
   Future<void> _bootstrap() async {
     try {
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(const Color(0x00000000))
-        ..enableZoom(false);
+      final controller =
+          WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setBackgroundColor(const Color(0x00000000))
+            ..enableZoom(false);
 
       controller.addJavaScriptChannel(
         'FlutterOSMD',
         onMessageReceived: (message) {
           final raw = message.message;
-          debugPrint('[EventPracticeOSMD][JS] $raw');
           dynamic decoded;
           try {
             decoded = jsonDecode(raw);
@@ -67,13 +68,35 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
             _flushPendingWindow();
           }
 
+          void logVerbose(String text) {
+            if (kDebugMode) {
+              debugPrint(text);
+            }
+          }
+
           if (decoded is String && decoded == 'ready') {
+            logVerbose('[EventPracticeOSMD][JS] $decoded');
             markReady();
-          } else if (decoded is Map<String, dynamic>) {
+            return;
+          }
+
+          if (decoded is Map<String, dynamic>) {
             final type = decoded['type'];
             if (type == 'window-rendered') {
+              _windowRenderedLogCount += 1;
+              if (kDebugMode) {
+                if (_windowRenderedLogCount <= 3) {
+                  debugPrint('[EventPracticeOSMD][JS] $raw');
+                } else if (_windowRenderedLogCount == 4) {
+                  debugPrint(
+                    '[EventPracticeOSMD][JS] window-rendered continuing; suppressing further logs',
+                  );
+                }
+              }
               markReady();
-            } else if (type == 'error') {
+              return;
+            }
+            if (type == 'error') {
               final detail = decoded['detail'] ?? decoded['message'];
               final detailText = detail == null ? 'unknown' : detail.toString();
               debugPrint('[EventPracticeOSMD][JS][error] $detailText');
@@ -83,8 +106,13 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
                   _initialised = false;
                 });
               }
+              return;
             }
+            logVerbose('[EventPracticeOSMD][JS] $raw');
+            return;
           }
+
+          logVerbose('[EventPracticeOSMD][JS] $raw');
         },
       );
 
@@ -144,8 +172,10 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     } else {
       _pendingNote = null;
     }
-    _pendingHighlightSignature =
-        _composeHighlightSignature(_pendingMeasure, _pendingNote);
+    _pendingHighlightSignature = _composeHighlightSignature(
+      _pendingMeasure,
+      _pendingNote,
+    );
     await _applyPendingContext();
   }
 
@@ -156,6 +186,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _pendingNote = null;
     _pendingHighlightSignature = null;
     _currentHighlightSignature = null;
+    _windowRenderedLogCount = 0;
     if (mounted) {
       setState(() {
         _initialised = false;
@@ -214,7 +245,9 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
         _flushPendingWindow();
       }
     } on Object catch (error, stackTrace) {
-      debugPrint('[EventPracticeOSMD] context apply failed: $error\n$stackTrace');
+      debugPrint(
+        '[EventPracticeOSMD] context apply failed: $error\n$stackTrace',
+      );
       if (mounted) {
         setState(() {
           _initialised = false;
@@ -269,6 +302,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   }
 
   Future<void> _sendInit(String xml) async {
+    _windowRenderedLogCount = 0;
     final message = {'type': 'init', 'xml': xml};
     _lastInitMessage = Map<String, dynamic>.from(message);
     await _sendPayload(message);
@@ -315,22 +349,23 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
             child: DecoratedBox(
               decoration: const BoxDecoration(color: Colors.black54),
               child: Center(
-                child: _error != null
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'Score unavailable\n\n${_error!}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.redAccent.shade100,
-                            fontWeight: FontWeight.w600,
+                child:
+                    _error != null
+                        ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'Score unavailable\n\n${_error!}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.redAccent.shade100,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
+                        )
+                        : const SizedBox.square(
+                          dimension: 32,
+                          child: CircularProgressIndicator(strokeWidth: 2.4),
                         ),
-                      )
-                    : const SizedBox.square(
-                        dimension: 32,
-                        child: CircularProgressIndicator(strokeWidth: 2.4),
-                      ),
               ),
             ),
           ),

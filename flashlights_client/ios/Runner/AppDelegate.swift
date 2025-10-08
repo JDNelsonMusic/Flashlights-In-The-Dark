@@ -179,6 +179,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
   private var idlePlayers: [String: [AVAudioPlayer]] = [:]
   private var activePlayers: [ObjectIdentifier: AVAudioPlayer] = [:]
   private var playerCanonical: [ObjectIdentifier: String] = [:]
+  private var currentCanonical: String?
+  private var lastCanonical: String?
+  private var lastPlaybackStartedAtMs: Double = 0
   private var initialised = false
   private var totalBufferDuration: TimeInterval = 0
   private var totalBufferBytes: Int = 0
@@ -210,6 +213,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
         self.idlePlayers.removeAll(keepingCapacity: true)
         self.activePlayers.removeAll(keepingCapacity: true)
         self.playerCanonical.removeAll(keepingCapacity: true)
+        self.currentCanonical = nil
+        self.lastCanonical = nil
+        self.lastPlaybackStartedAtMs = 0
         self.totalBufferDuration = 0
         self.totalBufferBytes = 0
         self.requestedAssets = manifest.count
@@ -301,6 +307,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
         let identifier = ObjectIdentifier(player)
         self.activePlayers[identifier] = player
         self.playerCanonical[identifier] = canonical
+        self.currentCanonical = canonical
+        self.lastCanonical = canonical
+        self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
 
         DispatchQueue.main.async {
           player.currentTime = 0
@@ -321,14 +330,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
 
   func stopAll() {
     queue.async {
-      for (identifier, player) in self.activePlayers {
-        player.stop()
-        player.currentTime = 0
-        if let canonical = self.playerCanonical[identifier] {
-          self.enqueueIdle(player, canonical: canonical)
-        }
-      }
-      self.activePlayers.removeAll(keepingCapacity: true)
+      self.stopActivePlayersLocked()
+      self.lastCanonical = nil
+      self.lastPlaybackStartedAtMs = 0
 
       for (_, players) in self.idlePlayers {
         for player in players {
@@ -357,6 +361,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       if !canonical.isEmpty {
         self.enqueueIdle(player, canonical: canonical)
       }
+      if self.activePlayers.isEmpty {
+        self.currentCanonical = nil
+      }
     }
   }
 
@@ -367,6 +374,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       self.activePlayers.removeValue(forKey: identifier)
       self.playerCanonical.removeValue(forKey: identifier)
       NSLog("[PrimerAudioEngine] Decode error for \(canonical): \(String(describing: error))")
+      if self.activePlayers.isEmpty {
+        self.currentCanonical = nil
+      }
     }
   }
 
@@ -382,7 +392,10 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       "bufferBytes": totalBufferBytes,
       "initialiseDurationMs": lastInitialisationMs,
       "requested": requestedAssets,
-      "failedCount": lastFailures.count
+      "failedCount": lastFailures.count,
+      "currentCanonical": currentCanonical ?? NSNull(),
+      "lastCanonical": lastCanonical ?? NSNull(),
+      "lastPlaybackStartedAtMs": lastPlaybackStartedAtMs
     ]
     if !lastFailures.isEmpty {
       payload["failed"] = lastFailures
@@ -471,6 +484,21 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
     var players = idlePlayers[canonical, default: []]
     players.append(player)
     idlePlayers[canonical] = players
+  }
+
+  /// Stops any active players and returns them to the idle pool. Must be called on `queue`.
+  private func stopActivePlayersLocked() {
+    if activePlayers.isEmpty { return }
+    for (identifier, player) in activePlayers {
+      player.stop()
+      player.currentTime = 0
+      player.prepareToPlay()
+      if let canonical = playerCanonical[identifier] {
+        enqueueIdle(player, canonical: canonical)
+      }
+    }
+    activePlayers.removeAll(keepingCapacity: true)
+    currentCanonical = nil
   }
 
   private func locateAssetURL(assetKey: String, canonical: String) -> URL? {
