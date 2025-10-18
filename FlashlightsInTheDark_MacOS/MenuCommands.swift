@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MenuCommands: Commands {
-    @EnvironmentObject var state: ConsoleState
+    let state: ConsoleState
 
     var body: some Commands {
         CommandGroup(replacing: .saveItem) {
@@ -23,7 +23,7 @@ struct MenuCommands: Commands {
                 state.triggerCurrentEvent()
             }
             .keyboardShortcut(.space, modifiers: [])
-    ("Previous Event") {
+            Button("Previous Event") {
                 state.moveToPreviousEvent()
             }
             .keyboardShortcut(.leftArrow, modifiers: [])

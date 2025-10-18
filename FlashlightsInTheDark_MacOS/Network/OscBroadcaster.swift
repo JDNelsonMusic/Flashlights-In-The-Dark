@@ -15,6 +15,9 @@ import Darwin
 import NIOPosix
 import OSCKit          // OSCMessage, OSCAddressPattern
 import SystemConfiguration
+#if canImport(Network)
+import Network
+#endif
 
 /// Broadcasts OSC messages over UDP to all detected local-network broadcast
 /// addresses. Designed for lightweight one-way cues.
@@ -25,6 +28,26 @@ struct SlotInfo: Codable {
     let name: String
 }
 
+#if canImport(Network)
+/// Lightweight wrapper around NWPathMonitor so we can observe interface changes.
+final class InterfaceChangeMonitor {
+    private let monitor: NWPathMonitor
+    private let queue: DispatchQueue
+
+    init(onChange: @escaping (NWPath) -> Void) {
+        self.monitor = NWPathMonitor()
+        self.queue = DispatchQueue(label: "ai.keex.flashlights.osc.interface-monitor")
+        monitor.pathUpdateHandler = onChange
+        monitor.start(queue: queue)
+    }
+
+    func cancel() {
+        monitor.cancel()
+    }
+}
+extension InterfaceChangeMonitor: @unchecked Sendable {}
+#endif
+
 public actor OscBroadcaster {
     // MARK: - Slot mapping (IP, UDID, singer name)  –––––––––––––––––––––––––––––
     let slotInfos: [Int: SlotInfo]
@@ -32,14 +55,20 @@ public actor OscBroadcaster {
     // --------------------------------------------------------------------
     // MARK: - Stored properties
     // --------------------------------------------------------------------
-    let channel: Channel
+    private(set) var channel: Channel
     let port: Int
-    let broadcastAddrs: [SocketAddress]
+    private(set) var broadcastAddrs: [SocketAddress]
+    private let eventLoopGroup: MultiThreadedEventLoopGroup
+    private let ownsEventLoopGroup: Bool
     private var helloHandler: ((Int, String, String?) -> Void)?
     private var ackHandler: ((Int) -> Void)?
     private var tapHandler: (() -> Void)?
     /// Runtime IPs learned from /hello announcements (slot -> ip)
     var dynamicIPs: [Int: String] = [:]
+#if canImport(Network)
+    private var interfaceMonitor: InterfaceChangeMonitor?
+    private var lastPathSignature: String?
+#endif
 
     // --------------------------------------------------------------------
     // MARK: - Initialisation
@@ -47,9 +76,18 @@ public actor OscBroadcaster {
     public init(
         port: Int = 9000,
         routingFile: URL = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json")!,
-        eventLoopGroup: MultiThreadedEventLoopGroup = .init(numberOfThreads: 1)
+        eventLoopGroup: MultiThreadedEventLoopGroup? = nil
     ) async throws {
+        let resolvedGroup: MultiThreadedEventLoopGroup
+        if let eventLoopGroup {
+            resolvedGroup = eventLoopGroup
+            self.ownsEventLoopGroup = false
+        } else {
+            resolvedGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+            self.ownsEventLoopGroup = true
+        }
         self.port = port
+        self.eventLoopGroup = resolvedGroup
         // load slot mapping once at launch
         if
             let data = try? Data(contentsOf: routingFile),
@@ -66,28 +104,22 @@ public actor OscBroadcaster {
             print("⚠️  No flash_ip+udid_map.json found – falling back to pure broadcast.")
         }
 
-        // Datagram bootstrap with broadcast privileges.
-        let bootstrap = DatagramBootstrap(group: eventLoopGroup)
-            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEPORT), value: 1)
-            .channelOption(ChannelOptions.socketOption(.so_broadcast), value: 1)
-
-        // Bind to *all* interfaces on the chosen port.
-        self.channel = try await bootstrap
-            .bind(host: "0.0.0.0", port: port)
-            .get()
-
-        // Initialise **all** stored properties *before* we capture `self`
-        // inside any pipeline handler, otherwise Swift’s definite-initialisation
-        // rules complain that “self is used before all stored properties
-        // are initialised”.
+        let boundChannel = try await OscBroadcaster.makeChannel(on: port, group: resolvedGroup)
+        self.channel = boundChannel
         self.broadcastAddrs = OscBroadcaster.gatherBroadcastAddrs(port: port)
 
-        // Now that every property is set, it’s safe to reference `self`.
         try await self.channel.pipeline
             .addHandler(HelloDatagramHandler(owner: self))
 
-        print("UDP broadcaster ready on 0.0.0.0:\(port) ✅")
+#if canImport(Network)
+        self.interfaceMonitor = InterfaceChangeMonitor { [weak actor = self] path in
+            Task {
+                await actor?.handleNetworkPathUpdate(path)
+            }
+        }
+#endif
+
+        print("UDP broadcaster ready on 0.0.0.0:\(port) ✅ – broadcast targets: \(describeBroadcastTargets(broadcastAddrs))")
     }
 
     // --------------------------------------------------------------------
@@ -250,12 +282,143 @@ public actor OscBroadcaster {
         }
     }
 
+    /// Force the broadcaster to rebind its UDP socket and recalculate broadcast targets.
+    public func refreshNetworkInterfaces(reason: String = "manual request") async {
+        await refreshBindings(reason: reason)
+    }
+
+    private static func makeChannel(on port: Int, group: MultiThreadedEventLoopGroup) async throws -> Channel {
+        try await DatagramBootstrap(group: group)
+            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEPORT), value: 1)
+            .channelOption(ChannelOptions.socketOption(.so_broadcast), value: 1)
+            .bind(host: "0.0.0.0", port: port)
+            .get()
+    }
+
+    private func refreshBindings(reason: String) async {
+        var candidate: Channel?
+        do {
+            candidate = try await OscBroadcaster.makeChannel(on: port, group: eventLoopGroup)
+            guard let newChannel = candidate else { return }
+            try await newChannel.pipeline.addHandler(HelloDatagramHandler(owner: self))
+
+            let previousAddrs = broadcastAddrs
+            let previousDesc = describeBroadcastTargets(previousAddrs)
+
+            let newAddrs = OscBroadcaster.gatherBroadcastAddrs(port: port)
+            let oldChannel = channel
+            channel = newChannel
+            broadcastAddrs = newAddrs
+
+            do {
+                try await oldChannel.close()
+            } catch {
+                print("⚠️ Failed to close old UDP channel during refresh: \(error)")
+            }
+
+            do {
+                try await announceSelf()
+            } catch {
+                print("⚠️ announceSelf after refresh failed: \(error)")
+            }
+
+            do {
+                try await discoverKnownDevices()
+            } catch {
+                print("⚠️ discoverKnownDevices after refresh failed: \(error)")
+            }
+
+            let updatedDesc = describeBroadcastTargets(newAddrs)
+            if previousDesc != updatedDesc {
+                print("[OscBroadcaster] Broadcast targets updated: \(previousDesc) → \(updatedDesc)")
+            } else {
+                print("[OscBroadcaster] Broadcast targets unchanged (\(updatedDesc))")
+            }
+            print("[OscBroadcaster] Refreshed UDP socket (\(reason)).")
+        } catch {
+            if let candidate {
+                Task { try? await candidate.close() }
+            }
+            print("⚠️ OscBroadcaster refresh failed (\(reason)): \(error)")
+        }
+    }
+
+    private func describeBroadcastTargets(_ addrs: [SocketAddress]) -> String {
+        guard !addrs.isEmpty else { return "none" }
+        return addrs.map { address in
+            if let ip = address.ipAddress {
+                return ip
+            }
+            return address.description
+        }.joined(separator: ", ")
+    }
+#if canImport(Network)
+    private func handleNetworkPathUpdate(_ path: NWPath) async {
+        let interfaceSummary = path.availableInterfaces
+            .map { describe(interface: $0) }
+            .sorted()
+            .joined(separator: ", ")
+        let statusDescription = describe(pathStatus: path.status)
+        let signature = "\(statusDescription)|\(interfaceSummary)"
+
+        if lastPathSignature == signature {
+            return
+        }
+        lastPathSignature = signature
+
+        let reason: String
+        if interfaceSummary.isEmpty {
+            reason = "network path \(statusDescription)"
+        } else {
+            reason = "network path \(statusDescription) [\(interfaceSummary)]"
+        }
+        await refreshBindings(reason: reason)
+    }
+
+    private func describe(pathStatus: NWPath.Status) -> String {
+        switch pathStatus {
+        case .satisfied: return "satisfied"
+        case .unsatisfied: return "unsatisfied"
+        case .requiresConnection: return "requiresConnection"
+        @unknown default: return "unknown"
+        }
+    }
+
+    private func describe(interface: NWInterface) -> String {
+        let typeDescription: String
+        switch interface.type {
+        case .wifi: typeDescription = "wifi"
+        case .wiredEthernet: typeDescription = "ethernet"
+        case .cellular: typeDescription = "cellular"
+        case .loopback: typeDescription = "loopback"
+        case .other: typeDescription = "other"
+        @unknown default: typeDescription = "unknown"
+        }
+        return "\(typeDescription):\(interface.name)"
+    }
+#endif
+
     // --------------------------------------------------------------------
     // MARK: - De-initialisation
     // --------------------------------------------------------------------
     deinit {
+#if canImport(Network)
+        interfaceMonitor?.cancel()
+#endif
         let ch = channel   // capture the channel (avoid capturing `self`)
-        Task { try? await ch.close() }
+        let ownsGroup = ownsEventLoopGroup
+        let group = eventLoopGroup
+        Task {
+            try? await ch.close()
+            if ownsGroup {
+                group.shutdownGracefully { error in
+                    if let error {
+                        print("⚠️ Failed to shutdown eventLoopGroup: \(error)")
+                    }
+                }
+            }
+        }
     }
 
     func emitHello(slot: Int, ip: String, udid: String?) {

@@ -232,6 +232,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var lastHelloProbe: [Int: Date] = [:]
 
     private var sessionURL: URL?
+    /// Monotonic per-slot counter so flashlight retries abandon stale intents.
+    private var torchIntentGeneration: [Int: Int] = [:]
 
     @Published public var isBroadcasting: Bool = false
     /// True whenever any connected device currently has its torch on.
@@ -340,29 +342,74 @@ public final class ConsoleState: ObservableObject, Sendable {
         triggeredSlots.remove(slot)
     }
 
-    /// Send a flashlight-on command and retry once if not acknowledged.
-    private func reliableFlashOn(slot: Int) {
+    private func nextTorchGeneration(for slot: Int) -> Int {
+        let next = (torchIntentGeneration[slot] ?? 0) &+ 1
+        torchIntentGeneration[slot] = next
+        return next
+    }
+
+    private func torchIntentMatches(slot: Int, generation: Int, expectsOn: Bool) -> Bool {
+        guard torchIntentGeneration[slot] == generation,
+              slot >= 0,
+              slot < devices.count else { return false }
+        return devices[slot].torchOn == expectsOn
+    }
+
+    /// Send a flashlight-on command and retry once if not acknowledged, but abort if intent changes.
+    private func reliableFlashOn(slot: Int, generation: Int) {
         Task.detached { [weak self] in
             guard let self = self else { return }
             let slotNum = slot + 1
             do {
                 let osc = try await self.broadcasterTask.value
+                let shouldSend = await MainActor.run {
+                    self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true)
+                }
+                guard shouldSend else { return }
                 try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
                 await MainActor.run {
+                    guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true) else { return }
                     self.lastLog = "/flash/on [\(slotNum), 1] (sent)"
                     self.glow(slot: slotNum)
                 }
                 await self.midi.sendControlChange(UInt8(slotNum), value: 127)
                 try await Task.sleep(nanoseconds: 100_000_000)
-                let lastAck = await MainActor.run { self.lastAckTimes[slotNum] }
-                if Date().timeIntervalSince(lastAck ?? .distantPast) > 0.1 {
+                let retryState = await MainActor.run { () -> (Bool, Date?) in
+                    (self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true),
+                     self.lastAckTimes[slotNum])
+                }
+                guard retryState.0 else { return }
+                if Date().timeIntervalSince(retryState.1 ?? .distantPast) > 0.1 {
                     try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
                     await MainActor.run {
+                        guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true) else { return }
                         self.lastLog = "⚠️ Re-sent /flash/on to \(slotNum) (no ack)"
                     }
                 }
             } catch {
                 print("Error in reliableFlashOn(\(slotNum)): \(error)")
+            }
+        }
+    }
+
+    private func sendFlashOff(slot: Int, generation: Int) {
+        Task.detached { [weak self] in
+            guard let self = self else { return }
+            let slotNum = slot + 1
+            do {
+                let osc = try await self.broadcasterTask.value
+                let shouldSend = await MainActor.run {
+                    self.torchIntentMatches(slot: slot, generation: generation, expectsOn: false)
+                }
+                guard shouldSend else { return }
+                try await osc.send(FlashOff(index: Int32(slotNum)))
+                await MainActor.run {
+                    guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: false) else { return }
+                    self.lastLog = "/flash/off [\(slotNum)]"
+                }
+                await self.midi.sendControlChange(UInt8(slotNum), value: 0)
+            } catch {
+                print("Error sending FlashOff for slot \(slot + 1): \(error)")
             }
         }
     }
@@ -380,24 +427,15 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
         guard !devices[idx].isPlaceholder else { return devices }
         objectWillChange.send()
-        devices[idx].torchOn.toggle()
-        let isOn = devices[idx].torchOn
-        if isOn {
-            reliableFlashOn(slot: id)
+        let newState = !devices[idx].torchOn
+        let generation = nextTorchGeneration(for: id)
+        devices[idx].torchOn = newState
+        if newState {
+            reliableFlashOn(slot: id, generation: generation)
         } else {
-            Task.detached { [weak self] in
-                guard let self = self else { return }
-                do {
-                    let osc = try await self.broadcasterTask.value
-                    try await osc.send(FlashOff(index: Int32(id + 1)))
-                    await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
-                    await self.midi.sendControlChange(UInt8(id + 1), value: 0)
-                } catch {
-                    print("Error toggling torch for slot \(id + 1): \(error)")
-                }
-            }
+            sendFlashOff(slot: id, generation: generation)
         }
-        print("[ConsoleState] Torch toggled on #\(id) ⇒ \(devices[idx].torchOn)")
+        print("[ConsoleState] Torch toggled on #\(id) ⇒ \(newState)")
         updateAnyTorchOn()
         return devices
     }
@@ -407,8 +445,9 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
+        let generation = nextTorchGeneration(for: id)
         devices[idx].torchOn = true
-        reliableFlashOn(slot: id)
+        reliableFlashOn(slot: id, generation: generation)
         updateAnyTorchOn()
     }
     /// Directly flash off a specific lamp slot and update state.
@@ -416,18 +455,9 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
+        let generation = nextTorchGeneration(for: id)
         devices[idx].torchOn = false
-        Task.detached { [weak self] in
-            guard let self = self else { return }
-            do {
-                let osc = try await self.broadcasterTask.value
-                try await osc.send(FlashOff(index: Int32(id + 1)))
-                await MainActor.run { self.lastLog = "/flash/off [\(id + 1)]" }
-                await self.midi.sendControlChange(UInt8(id + 1), value: 0)
-            } catch {
-                print("Error sending FlashOff for slot \(id + 1): \(error)")
-            }
-        }
+        sendFlashOff(slot: id, generation: generation)
         updateAnyTorchOn()
     }
 

@@ -28,7 +28,7 @@ struct FlashlightsInTheDarkApp: App {
         }
         .environmentObject(state)
         .commands {
-            MenuCommands()
+            MenuCommands(state: state)
         }
     }
 }
