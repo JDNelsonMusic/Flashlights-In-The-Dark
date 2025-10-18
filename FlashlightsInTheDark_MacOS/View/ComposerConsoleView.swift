@@ -486,9 +486,9 @@ struct ComposerConsoleView: View {
                             handleTypingKeyUp(char)
                         }
                     },
-                    onSpecialKeyDown: { key in
+                    onSpecialKeyDown: { event in
                         Task { @MainActor in
-                            handleSpecialKeyDown(key)
+                            handleSpecialKeyDown(event)
                         }
                     }
                 )
@@ -588,12 +588,22 @@ struct ComposerConsoleView: View {
     }
 
     @MainActor
-    private func handleSpecialKeyDown(_ key: NSEvent.SpecialKey) {
+    private func handleSpecialKeyDown(_ event: NSEvent) {
+        guard let key = event.specialKey else { return }
+        let modifiers = event.modifierFlags
         switch key {
         case .leftArrow:
-            state.moveToPreviousEvent()
+            if modifiers.contains(.shift) {
+                state.moveEvents(by: -10)
+            } else {
+                state.moveToPreviousEvent()
+            }
         case .rightArrow:
-            state.moveToNextEvent()
+            if modifiers.contains(.shift) {
+                state.moveEvents(by: 10)
+            } else {
+                state.moveToNextEvent()
+            }
         default:
             break
         }
@@ -782,8 +792,8 @@ struct ComposerConsoleView: View {
         var isEnabled: Bool
         var onKeyDown: (Character) -> Void
         var onKeyUp: (Character) -> Void
-        var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)? = nil
-        var onSpecialKeyUp: ((NSEvent.SpecialKey) -> Void)? = nil
+        var onSpecialKeyDown: ((NSEvent) -> Void)? = nil
+        var onSpecialKeyUp: ((NSEvent) -> Void)? = nil
         
         func makeNSView(context: Context) -> KeyCaptureNSView {
             let view = KeyCaptureNSView()
@@ -812,8 +822,8 @@ struct ComposerConsoleView: View {
         }
         var onKeyDown: ((Character) -> Void)?
         var onKeyUp: ((Character) -> Void)?
-        var onSpecialKeyDown: ((NSEvent.SpecialKey) -> Void)?
-        var onSpecialKeyUp: ((NSEvent.SpecialKey) -> Void)?
+        var onSpecialKeyDown: ((NSEvent) -> Void)?
+        var onSpecialKeyUp: ((NSEvent) -> Void)?
         
         override var acceptsFirstResponder: Bool { isEnabled }
         override func resignFirstResponder() -> Bool { true }
@@ -830,8 +840,8 @@ struct ComposerConsoleView: View {
                 nextResponder?.keyDown(with: event)
                 return
             }
-            if let special = event.specialKey {
-                onSpecialKeyDown?(special)
+            if event.specialKey != nil {
+                onSpecialKeyDown?(event)
                 _ = window?.makeFirstResponder(self)
                 return
             }
@@ -846,8 +856,8 @@ struct ComposerConsoleView: View {
                 nextResponder?.keyUp(with: event)
                 return
             }
-            if let special = event.specialKey {
-                onSpecialKeyUp?(special)
+            if event.specialKey != nil {
+                onSpecialKeyUp?(event)
                 _ = window?.makeFirstResponder(self)
                 return
             }

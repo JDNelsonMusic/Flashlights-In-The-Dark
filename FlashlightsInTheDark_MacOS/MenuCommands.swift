@@ -31,6 +31,15 @@ struct MenuCommands: Commands {
                 state.moveToNextEvent()
             }
             .keyboardShortcut(.rightArrow, modifiers: [])
+            Divider()
+            Button("Jump Back 10 Events") {
+                state.moveEvents(by: -10)
+            }
+            .keyboardShortcut(.leftArrow, modifiers: [.shift])
+            Button("Jump Ahead 10 Events") {
+                state.moveEvents(by: 10)
+            }
+            .keyboardShortcut(.rightArrow, modifiers: [.shift])
         }
     }
 }

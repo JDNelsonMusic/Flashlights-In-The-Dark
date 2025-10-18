@@ -28,7 +28,7 @@ struct EventTriggerStrip: View {
                 Spacer(minLength: 12)
                 VStack(alignment: .trailing, spacing: 4) {
                     HStack(spacing: 8) {
-                        TextField("Jump to event or measure…", text: $jumpQuery)
+                        TextField("Jump to event #…", text: $jumpQuery)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 220)
                             .onSubmit(handleQuickJump)
@@ -137,7 +137,7 @@ struct EventTriggerStrip: View {
 
     private var instructionText: String {
         if currentEvent() != nil {
-            return "← / → to cue · Space to trigger"
+            return "←/→ cue · Shift+←/Shift+→ skip 10 · Space trigger"
         }
         return "Load event recipes to enable triggers"
     }
@@ -173,65 +173,12 @@ struct EventTriggerStrip: View {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        let normalized = trimmed.replacingOccurrences(of: "#", with: "")
+        let digitsOnly = trimmed
+            .replacingOccurrences(of: "#", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let eventID = Int(normalized) {
-            if let idx = state.eventRecipes.firstIndex(where: { $0.id == eventID }) {
-                return idx
-            }
-        }
-
-        let measureIndex = resolveMeasureQuery(from: normalized)
-        if let measureIndex {
-            return measureIndex
-        }
-
-        // Fallback: search by position string fragment
-        let lowerFragment = normalized.lowercased()
-        if let idx = state.eventRecipes.firstIndex(where: { recipe in
-            recipe.position?.lowercased().contains(lowerFragment) == true
-        }) {
-            return idx
-        }
-
-        return nil
-    }
-
-    private func resolveMeasureQuery(from raw: String) -> Int? {
-        var query = raw.lowercased()
-        if query.hasPrefix("measure") {
-            query.removeFirst("measure".count)
-        } else if query.hasPrefix("m") {
-            query.removeFirst()
-        }
-        query = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return nil }
-
-        var beatFragment: String?
-        var measureString = query
-
-        if let separatorIndex = query.firstIndex(where: { $0 == "." || $0 == " " || $0 == "-" }) {
-            measureString = String(query[..<separatorIndex])
-            let remainder = String(query[separatorIndex...]).trimmingCharacters(in: CharacterSet(charactersIn: " .-"))
-            if !remainder.isEmpty {
-                beatFragment = remainder
-            }
-        }
-
-        guard let measure = Int(measureString) else { return nil }
-
-        let matching = state.eventRecipes.enumerated().filter { $0.element.measure == measure }
-
-        guard !matching.isEmpty else { return nil }
-
-        if let beatFragment, !beatFragment.isEmpty {
-            let loweredFragment = beatFragment.replacingOccurrences(of: "of", with: " of ").lowercased()
-            if let match = matching.first(where: { $0.element.position?.lowercased().contains(loweredFragment) == true }) {
-                return match.offset
-            }
-        }
-
-        return matching.first?.offset
+        guard let eventID = Int(digitsOnly) else { return nil }
+        return state.eventRecipes.firstIndex(where: { $0.id == eventID })
     }
 }
 

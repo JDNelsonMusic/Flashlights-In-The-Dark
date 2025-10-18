@@ -1511,15 +1511,18 @@ extension ConsoleState {
     }
 
     public func moveToNextEvent() {
-        guard !eventRecipes.isEmpty else { return }
-        let nextIndex = min(currentEventIndex + 1, eventRecipes.count - 1)
-        currentEventIndex = nextIndex
+        moveEvents(by: 1)
     }
 
     public func moveToPreviousEvent() {
-        guard !eventRecipes.isEmpty else { return }
-        let prevIndex = max(currentEventIndex - 1, 0)
-        currentEventIndex = prevIndex
+        moveEvents(by: -1)
+    }
+
+    public func moveEvents(by offset: Int) {
+        guard !eventRecipes.isEmpty, offset != 0 else { return }
+        let target = currentEventIndex + offset
+        let clamped = min(max(target, 0), eventRecipes.count - 1)
+        currentEventIndex = clamped
     }
 
     public func focusOnEvent(id: Int) {
