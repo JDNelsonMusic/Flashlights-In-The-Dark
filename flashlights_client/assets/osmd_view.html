@@ -79,6 +79,348 @@
     <div id="osmd" class="osmd-auto-width"></div>
     <script>
       let osmd;
+      let activeInitChunks = null;
+      let cachedBaseXml = null;
+      let cachedBaseContext = null;
+      let pendingHighlightRequest = null;
+      let latestContextSequence = -1;
+      let renderToken = 0;
+
+      const DEFAULT_NOTE_COLOR = '#000000';
+      const HIGHLIGHT_NOTE_COLOR = '#0C7F79';
+      const HIGHLIGHT_DATA_ATTRIBUTE = 'data-primer-highlight';
+
+      function normalizeContext(value) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+
+      function shouldIgnoreContext(context) {
+        if (context === null || context === undefined) {
+          return false;
+        }
+        return context < latestContextSequence;
+      }
+
+      function noteContext(context) {
+        if (context === null || context === undefined) {
+          return;
+        }
+        if (context > latestContextSequence) {
+          latestContextSequence = context;
+        }
+      }
+
+      function normaliseInitId(rawId) {
+        if (rawId === null || rawId === undefined) {
+          return null;
+        }
+        return String(rawId);
+      }
+
+      function resetInitChunks(rawId, rawContext) {
+        const id = normaliseInitId(rawId);
+        const context = normalizeContext(rawContext);
+        if (shouldIgnoreContext(context)) {
+          return;
+        }
+        noteContext(context);
+        if (!id) {
+          activeInitChunks = null;
+          return;
+        }
+        activeInitChunks = { id, total: null, chunks: [], context };
+      }
+
+      function ensureInitState(rawId, rawContext) {
+        const id = normaliseInitId(rawId);
+        const context = normalizeContext(rawContext);
+        if (!id) {
+          return null;
+        }
+        if (shouldIgnoreContext(context)) {
+          return null;
+        }
+        noteContext(context);
+        if (!activeInitChunks || activeInitChunks.id !== id) {
+          activeInitChunks = { id, total: null, chunks: [], context };
+        } else if (context !== null) {
+          activeInitChunks.context = context;
+        }
+        return activeInitChunks;
+      }
+
+      function handleInitChunk(message) {
+        const state = ensureInitState(message?.id, message?.context);
+        if (!state) {
+          return;
+        }
+        const context = state.context ?? normalizeContext(message?.context);
+        if (shouldIgnoreContext(context)) {
+          return;
+        }
+        const index = Number(message.index);
+        const chunk = typeof message.chunk === 'string' ? message.chunk : null;
+        if (!Number.isFinite(index) || index < 0 || !chunk) {
+          return;
+        }
+        const total = Number(message.total);
+        if (Number.isFinite(total) && total > 0) {
+          if (!state.total || total > state.total) {
+            const previous = Array.isArray(state.chunks) ? state.chunks.slice() : [];
+            state.total = total;
+            state.chunks = new Array(total);
+            for (let i = 0; i < previous.length && i < total; i += 1) {
+              state.chunks[i] = previous[i];
+            }
+          }
+        }
+        if (!Array.isArray(state.chunks) || !state.chunks.length) {
+          state.chunks = [];
+        }
+        state.chunks[index] = chunk;
+      }
+
+      function finaliseInitChunks(rawId, rawContext) {
+        const current = normaliseInitId(rawId) ?? (activeInitChunks ? activeInitChunks.id : null);
+        if (!current || !activeInitChunks || activeInitChunks.id !== current) {
+          return;
+        }
+        const state = activeInitChunks;
+        const context = state.context ?? normalizeContext(rawContext);
+        if (shouldIgnoreContext(context)) {
+          return;
+        }
+        if (context !== null) {
+          state.context = context;
+          noteContext(context);
+        }
+        const total = Number(state.total ?? (Array.isArray(state.chunks) ? state.chunks.length : 0));
+        if (!Number.isFinite(total) || total <= 0) {
+          return;
+        }
+        if (!Array.isArray(state.chunks) || state.chunks.length < total) {
+          postToFlutter({ type: 'error', phase: 'chunk', detail: `OSMD chunk buffer incomplete (${state.chunks?.length || 0}/${total})` });
+          return;
+        }
+        for (let i = 0; i < total; i += 1) {
+          if (typeof state.chunks[i] !== 'string') {
+            console.warn('OSMD init chunk missing', i, 'of', total);
+            postToFlutter({ type: 'error', phase: 'chunk', detail: `Missing OSMD init chunk ${i} of ${total}` });
+            return;
+          }
+        }
+        const xml = state.chunks.join('');
+        activeInitChunks = null;
+        cachedBaseXml = xml;
+        cachedBaseContext = state.context ?? latestContextSequence;
+        maybeRenderHighlight();
+      }
+
+      function maybeRenderHighlight() {
+        if (!cachedBaseXml) {
+          return;
+        }
+        let request = null;
+        if (pendingHighlightRequest) {
+          request = { ...pendingHighlightRequest };
+          if (request.context === null || request.context === undefined) {
+            request.context = cachedBaseContext ?? latestContextSequence;
+          }
+        } else {
+          request = { context: cachedBaseContext ?? latestContextSequence, measure: null, note: null };
+        }
+        if (request && request.context !== null && cachedBaseContext !== null && request.context !== cachedBaseContext) {
+          return;
+        }
+        renderHighlightFromCache(request);
+      }
+
+      async function renderHighlightFromCache(request) {
+        if (!cachedBaseXml) {
+          return;
+        }
+        const effectiveRequest = request || { context: cachedBaseContext ?? latestContextSequence, measure: null, note: null };
+        const xml = buildXmlForHighlight(cachedBaseXml, effectiveRequest);
+        if (!xml) {
+          return;
+        }
+        const token = ++renderToken;
+        try {
+          await initOSMD(xml);
+        } catch (err) {
+          console.error('OSMD highlight render failed', err);
+          postToFlutter({ type: 'error', phase: 'highlight-render', detail: String(err && err.stack ? err.stack : err) });
+        } finally {
+          if (token !== renderToken) {
+            return;
+          }
+        }
+      }
+
+      function buildXmlForHighlight(baseXml, request) {
+        if (!baseXml) {
+          return null;
+        }
+        const noteLabel = typeof request?.note === 'string' ? request.note.trim() : '';
+        const measureValue = Number(request?.measure);
+        const measureNumber = Number.isFinite(measureValue) && measureValue > 0 ? measureValue : null;
+        if (!noteLabel) {
+          return baseXml;
+        }
+        if (!measureNumber) {
+          return baseXml;
+        }
+        const parsedPitch = parseNoteLabel(noteLabel);
+        if (!parsedPitch) {
+          return baseXml;
+        }
+        try {
+          const parser = new DOMParser();
+          const document = parser.parseFromString(baseXml, 'application/xml');
+          const parserIssues = document.getElementsByTagName('parsererror');
+          if (parserIssues && parserIssues.length > 0) {
+            console.warn('OSMD highlight xml parse error');
+            return baseXml;
+          }
+          applyPrimerHighlight(document, measureNumber, parsedPitch);
+          const serializer = new XMLSerializer();
+          return serializer.serializeToString(document);
+        } catch (err) {
+          console.error('OSMD highlight xml build failed', err);
+          return baseXml;
+        }
+      }
+
+      function parseNoteLabel(raw) {
+        if (!raw || typeof raw !== 'string') {
+          return null;
+        }
+        const match = /^([A-Ga-g])(bb|##|b|#)?(\d+)$/.exec(raw.trim());
+        if (!match) {
+          return null;
+        }
+        const step = match[1].toUpperCase();
+        const accidental = match[2] || null;
+        const octave = Number(match[3]);
+        if (!Number.isFinite(octave)) {
+          return null;
+        }
+        const alter = alterFromAccidental(accidental);
+        return { step, alter, octave };
+      }
+
+      function alterFromAccidental(accidental) {
+        switch (accidental) {
+          case 'bb':
+            return -2;
+          case 'b':
+            return -1;
+          case '#':
+            return 1;
+          case '##':
+            return 2;
+          default:
+            return 0;
+        }
+      }
+
+      function parseMeasureNumber(raw) {
+        if (!raw || typeof raw !== 'string') {
+          return null;
+        }
+        const match = /^(\d+)/.exec(raw.trim());
+        if (!match) {
+          return null;
+        }
+        const value = Number(match[1]);
+        return Number.isFinite(value) ? value : null;
+      }
+
+      function extractPitch(noteElement) {
+        if (!noteElement) {
+          return null;
+        }
+        const pitchElement = noteElement.querySelector('pitch');
+        if (!pitchElement) {
+          return null;
+        }
+        const stepNode = pitchElement.querySelector('step');
+        const octaveNode = pitchElement.querySelector('octave');
+        if (!stepNode || !octaveNode) {
+          return null;
+        }
+        const step = stepNode.textContent ? stepNode.textContent.trim().toUpperCase() : null;
+        const octaveValue = octaveNode.textContent ? Number(octaveNode.textContent.trim()) : null;
+        if (!step || !Number.isFinite(octaveValue)) {
+          return null;
+        }
+        const alterNode = pitchElement.querySelector('alter');
+        const alterValue = alterNode && alterNode.textContent ? Number(alterNode.textContent.trim()) : 0;
+        return {
+          step,
+          alter: Number.isFinite(alterValue) ? alterValue : 0,
+          octave: octaveValue,
+        };
+      }
+
+      function noteMatchesPitch(noteElement, target) {
+        if (!noteElement || !target) {
+          return false;
+        }
+        const parsed = extractPitch(noteElement);
+        if (!parsed) {
+          return false;
+        }
+        return parsed.step === target.step && parsed.alter === target.alter && parsed.octave === target.octave;
+      }
+
+      function applyPrimerHighlight(document, measureNumber, pitch) {
+        if (!document || !pitch || !Number.isFinite(measureNumber)) {
+          return;
+        }
+        const parts = document.getElementsByTagName('part');
+        for (let p = 0; p < parts.length; p += 1) {
+          const measures = parts[p].getElementsByTagName('measure');
+          for (let m = 0; m < measures.length; m += 1) {
+            const measure = measures[m];
+            const parsedNumber = parseMeasureNumber(measure.getAttribute('number'));
+            if (parsedNumber === null || parsedNumber !== measureNumber) {
+              continue;
+            }
+            const notes = measure.getElementsByTagName('note');
+            for (let n = 0; n < notes.length; n += 1) {
+              const noteElement = notes[n];
+              if (noteMatchesPitch(noteElement, pitch)) {
+                setNoteHighlight(noteElement, true);
+              }
+            }
+          }
+        }
+      }
+
+      function setNoteHighlight(noteElement, isHighlighted) {
+        if (!noteElement) {
+          return;
+        }
+        if (noteElement.querySelector('rest')) {
+          removeHighlightAttributes(noteElement);
+          return;
+        }
+        const targetColor = isHighlighted ? HIGHLIGHT_NOTE_COLOR : DEFAULT_NOTE_COLOR;
+        noteElement.setAttribute('color', targetColor);
+        removeHighlightAttributes(noteElement);
+        if (isHighlighted) {
+          noteElement.setAttribute(HIGHLIGHT_DATA_ATTRIBUTE, 'true');
+        }
+      }
+
+      function removeHighlightAttributes(noteElement) {
+        if (!noteElement) {
+          return;
+        }
+        noteElement.removeAttribute(HIGHLIGHT_DATA_ATTRIBUTE);
+      }
 
       function postToFlutter(message) {
         try {
@@ -161,6 +503,7 @@
       };
 
       async function initOSMD(xmlString) {
+        activeInitChunks = null;
         if (typeof opensheetmusicdisplay === 'undefined') {
           postToFlutter({ type: 'error', phase: 'init', detail: 'opensheetmusicdisplay bundle unavailable' });
           return;
@@ -249,6 +592,24 @@
         }
       }
 
+      function handleHighlightMessage(message) {
+        const context = normalizeContext(message?.context);
+        if (shouldIgnoreContext(context)) {
+          return;
+        }
+        if (context !== null) {
+          noteContext(context);
+        }
+        const measureValue = Number(message?.measure);
+        const noteRaw = typeof message?.note === 'string' ? message.note.trim() : null;
+        pendingHighlightRequest = {
+          context: context ?? latestContextSequence,
+          measure: Number.isFinite(measureValue) && measureValue > 0 ? measureValue : null,
+          note: noteRaw && noteRaw.length ? noteRaw : null,
+        };
+        maybeRenderHighlight();
+      }
+
       function handleMessage(event) {
         if (!event || !event.data) {
           return;
@@ -263,14 +624,30 @@
         }
 
         if (message?.type === 'init' && message.xml) {
-          initOSMD(message.xml);
+          const context = normalizeContext(message.context);
+          if (shouldIgnoreContext(context)) {
+            return;
+          }
+          noteContext(context);
+          cachedBaseXml = message.xml;
+          cachedBaseContext = context ?? latestContextSequence;
+          activeInitChunks = null;
+          maybeRenderHighlight();
         } else if (message?.type === 'window' && typeof message.measure === 'number') {
           renderWindow(message.measure);
+        } else if (message?.type === 'init-reset') {
+          resetInitChunks(message.id, message.context);
+        } else if (message?.type === 'init-chunk') {
+          handleInitChunk(message);
+        } else if (message?.type === 'init-chunk-final') {
+          finaliseInitChunks(message.id, message.context);
+        } else if (message?.type === 'highlight') {
+          handleHighlightMessage(message);
         }
       }
 
       window.addEventListener('message', handleMessage);
       window.handleFlutterMessage = handleMessage;
-    </script>    </script>
+    </script>
   </body>
 </html>

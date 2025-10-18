@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,20 @@ class EventPracticeOSMD extends StatefulWidget {
 }
 
 class EventPracticeOSMDState extends State<EventPracticeOSMD> {
+  static const int _kInitChunkThreshold = 60000;
+  static const int _kInitChunkSize = 24000;
+
   WebViewController? _controller;
   bool _controllerReady = false;
   bool _initialised = false;
   bool _applyingContext = false;
   bool _contextUpdateQueued = false;
   String? _error;
-  Map<String, dynamic>? _lastInitMessage;
+  String? _lastInitXml;
+  int _initSequence = 0;
+  int _contextSequence = 0;
+  String? _currentNoteLabel;
+  int? _currentMeasure;
 
   PrimerColor? _currentColor;
   PrimerColor? _pendingColor;
@@ -187,6 +195,9 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _pendingHighlightSignature = null;
     _currentHighlightSignature = null;
     _windowRenderedLogCount = 0;
+    _lastInitXml = null;
+    _currentNoteLabel = null;
+    _currentMeasure = null;
     if (mounted) {
       setState(() {
         _initialised = false;
@@ -226,22 +237,33 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       return;
     }
 
+    final contextSeq = ++_contextSequence;
     _applyingContext = true;
     try {
-      if (_currentColor != color ||
-          !_initialised ||
-          _currentHighlightSignature != highlightSignature) {
-        final xml = await loadTrimmedMusicXML(
-          forColor: color,
-          highlightMeasure: measure,
-          highlightNote: note,
-        );
+      final needsBase = _currentColor != color || _lastInitXml == null;
+      if (needsBase) {
+        final xml = await loadBaseTrimmedMusicXML(forColor: color);
         _initialised = false;
-        await _sendInit(xml);
+        await _sendBaseInit(xml, contextSeq: contextSeq);
         _currentColor = color;
-        _currentHighlightSignature = highlightSignature;
+        _currentHighlightSignature = null;
+        _currentNoteLabel = null;
+        _currentMeasure = null;
       }
-      if (_initialised) {
+
+      final highlightChanged =
+          needsBase || !_initialised || _currentHighlightSignature != highlightSignature;
+
+      if (highlightChanged) {
+        await _sendHighlight(
+          contextSeq: contextSeq,
+          measure: measure,
+          note: note,
+        );
+        _currentHighlightSignature = highlightSignature;
+        _currentNoteLabel = note;
+        _currentMeasure = measure;
+      } else if (_initialised) {
         _flushPendingWindow();
       }
     } on Object catch (error, stackTrace) {
@@ -301,11 +323,64 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     await controller.runJavaScript(script);
   }
 
-  Future<void> _sendInit(String xml) async {
+  Future<void> _sendBaseInit(
+    String xml, {
+    required int contextSeq,
+  }) async {
     _windowRenderedLogCount = 0;
-    final message = {'type': 'init', 'xml': xml};
-    _lastInitMessage = Map<String, dynamic>.from(message);
-    await _sendPayload(message);
+    _lastInitXml = xml;
+    if (xml.length <= _kInitChunkThreshold) {
+      await _sendPayload({'type': 'init', 'xml': xml, 'context': contextSeq});
+      return;
+    }
+    await _sendChunkedInit(
+      xml,
+      contextSeq: contextSeq,
+    );
+  }
+
+  Future<void> _sendChunkedInit(
+    String xml, {
+    required int contextSeq,
+  }) async {
+    final id = (++_initSequence).toString();
+    await _sendPayload({'type': 'init-reset', 'id': id, 'context': contextSeq});
+    final totalChunks = (xml.length / _kInitChunkSize).ceil();
+    for (var index = 0; index < totalChunks; index += 1) {
+      final start = index * _kInitChunkSize;
+      final end = math.min(xml.length, start + _kInitChunkSize);
+      final chunk = xml.substring(start, end);
+      await _sendPayload({
+        'type': 'init-chunk',
+        'id': id,
+        'index': index,
+        'total': totalChunks,
+        'chunk': chunk,
+        'context': contextSeq,
+      });
+    }
+    await _sendPayload({'type': 'init-chunk-final', 'id': id, 'context': contextSeq});
+  }
+
+  Future<void> _sendHighlight({
+    required int contextSeq,
+    int? measure,
+    String? note,
+  }) async {
+    final payload = <String, dynamic>{
+      'type': 'highlight',
+      'context': contextSeq,
+    };
+    if (measure != null && measure > 0) {
+      payload['measure'] = measure;
+    }
+    final trimmedNote = note?.trim();
+    if (trimmedNote != null && trimmedNote.isNotEmpty) {
+      payload['note'] = trimmedNote;
+    }
+    _windowRenderedLogCount = 0;
+    _initialised = false;
+    await _sendPayload(payload);
   }
 
   void setMeasure(int measureNumber) {
@@ -317,13 +392,24 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   }
 
   Future<void> reload() async {
-    final message = _lastInitMessage;
-    if (message == null) {
+    final xml = _lastInitXml;
+    if (xml == null) {
       return;
     }
-    await _sendPayload(message);
-    if (_pendingMeasure != null) {
-      setMeasure(_pendingMeasure!);
+    final measure = _pendingMeasure ?? _currentMeasure;
+    final note = _currentNoteLabel;
+    final contextSeq = ++_contextSequence;
+    await _sendBaseInit(xml, contextSeq: contextSeq);
+    await _sendHighlight(
+      contextSeq: contextSeq,
+      measure: measure,
+      note: note,
+    );
+    _currentHighlightSignature = _composeHighlightSignature(measure, note);
+    _currentNoteLabel = note;
+    _currentMeasure = measure;
+    if (measure != null) {
+      setMeasure(measure);
     }
   }
 

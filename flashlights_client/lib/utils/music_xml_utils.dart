@@ -40,7 +40,7 @@ const String _kDefaultNoteColor = '#000000';
 const String _kHighlightNoteColor = '#0C7F79';
 const String _kHighlightDataAttribute = 'data-primer-highlight';
 
-final Map<PrimerColor?, String> _cachedTrimmedXmlByColor = {};
+final Map<PrimerColor?, String> _cachedBaseXmlByColor = {};
 
 class _ParsedPitch {
   const _ParsedPitch({required this.step, required this.alter, required this.octave});
@@ -50,29 +50,8 @@ class _ParsedPitch {
   final int octave;
 }
 
-Future<String> loadTrimmedMusicXML({
-  PrimerColor? forColor,
-  int? highlightMeasure,
-  String? highlightNote,
-}) async {
-  final baseXml = await _loadBaseTrimmedMusicXML(forColor: forColor);
-
-  final parsedPitch = highlightNote == null ? null : _parseNoteLabel(highlightNote);
-  if (highlightMeasure == null || parsedPitch == null) {
-    return baseXml;
-  }
-
-  final document = XmlDocument.parse(baseXml);
-  _applyPrimerHighlight(
-    document,
-    measureNumber: highlightMeasure,
-    pitch: parsedPitch,
-  );
-  return document.toXmlString(pretty: false);
-}
-
-Future<String> _loadBaseTrimmedMusicXML({PrimerColor? forColor}) async {
-  final cached = _cachedTrimmedXmlByColor[forColor];
+Future<String> loadBaseTrimmedMusicXML({PrimerColor? forColor}) async {
+  final cached = _cachedBaseXmlByColor[forColor];
   if (cached != null) {
     return cached;
   }
@@ -122,8 +101,29 @@ Future<String> _loadBaseTrimmedMusicXML({PrimerColor? forColor}) async {
   _normaliseNoteColors(root: root, allowedPartIds: allowedPartIds);
 
   final xml = document.toXmlString(pretty: false);
-  _cachedTrimmedXmlByColor[forColor] = xml;
+  _cachedBaseXmlByColor[forColor] = xml;
   return xml;
+}
+
+Future<String> loadTrimmedMusicXML({
+  PrimerColor? forColor,
+  int? highlightMeasure,
+  String? highlightNote,
+}) async {
+  final baseXml = await loadBaseTrimmedMusicXML(forColor: forColor);
+
+  final parsedPitch = highlightNote == null ? null : _parseNoteLabel(highlightNote);
+  if (highlightMeasure == null || parsedPitch == null) {
+    return baseXml;
+  }
+
+  final document = XmlDocument.parse(baseXml);
+  _applyPrimerHighlight(
+    document,
+    measureNumber: highlightMeasure,
+    pitch: parsedPitch,
+  );
+  return document.toXmlString(pretty: false);
 }
 
 void _normaliseNoteColors({
