@@ -90,11 +90,15 @@ class _HeaderSection extends StatelessWidget {
     required this.platform,
     required this.onTitleTap,
     required this.onSlotSelected,
+    required this.onRefreshConnection,
+    required this.refreshingConnection,
   });
 
   final String platform;
   final VoidCallback onTitleTap;
   final Future<void> Function(int) onSlotSelected;
+  final VoidCallback onRefreshConnection;
+  final bool refreshingConnection;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +169,31 @@ class _HeaderSection extends StatelessWidget {
                         label: connected ? 'Connected' : 'Searching…',
                         accent: statusAccent,
                         muted: !connected,
+                      ),
+                      FilledButton.icon(
+                        key: const Key('refreshConnectionButton'),
+                        onPressed:
+                            refreshingConnection ? null : onRefreshConnection,
+                        icon:
+                            refreshingConnection
+                                ? SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                )
+                                : const Icon(Icons.refresh_rounded),
+                        label: Text(
+                          refreshingConnection
+                              ? 'Refreshing…'
+                              : 'Refresh Connection',
+                        ),
                       ),
                     ],
                   );
@@ -514,6 +543,7 @@ class _BootstrapState extends State<Bootstrap> {
   bool _showDebugOverlay = false;
   int _titleTapCount = 0;
   Timer? _tapResetTimer;
+  bool _refreshingConnection = false;
   static final Uri _resourceUri = Uri.parse('https://simphoni.ai/flashlights');
   static final Uri _githubRepoUri = Uri.parse(
     'https://github.com/JDNelsonMusic/Flashlights-In-The-Dark',
@@ -563,6 +593,34 @@ class _BootstrapState extends State<Bootstrap> {
       unawaited(_updateBrightness(0.1));
     } else if (key == LogicalKeyboardKey.audioVolumeDown) {
       unawaited(_updateBrightness(-0.1));
+    }
+  }
+
+  Future<void> _refreshConnection() async {
+    if (_refreshingConnection) return;
+    setState(() {
+      _refreshingConnection = true;
+    });
+    try {
+      await flosc.OscListener.instance.refreshConnection();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Re-sent network hello to the console.')),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Refresh failed: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _refreshingConnection = false;
+        });
+      } else {
+        _refreshingConnection = false;
+      }
     }
   }
 
@@ -667,6 +725,9 @@ class _BootstrapState extends State<Bootstrap> {
                         platform: platform,
                         onTitleTap: _handleTitleTap,
                         onSlotSelected: _handleSlotSelected,
+                        onRefreshConnection:
+                            () => unawaited(_refreshConnection()),
+                        refreshingConnection: _refreshingConnection,
                       ),
                     ),
                     const SizedBox(height: 16),

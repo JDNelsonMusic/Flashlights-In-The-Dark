@@ -48,6 +48,15 @@ OSCSocket _createBroadcastSocket({
   return socket;
 }
 
+Future<RawDatagramSocket> _bindReceiveSocket() {
+  return RawDatagramSocket.bind(
+    InternetAddress.anyIPv4,
+    _oscPort,
+    reuseAddress: true,
+    reusePort: true,
+  );
+}
+
 /// Singleton OSC listener handling flash / audio / mic / sync cues.
 class OscListener {
   OscListener._();
@@ -65,6 +74,41 @@ class OscListener {
   bool _running = false;
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
+  StreamSubscription<RawSocketEvent>? _recvSubscription;
+
+  Future<void> _rebindSockets({bool clearServerCache = false}) async {
+    _recvSubscription?.cancel();
+    _recvSubscription = null;
+    _socket?.close();
+    _socket = null;
+    _recvSocket?.close();
+    _recvSocket = null;
+
+    if (clearServerCache) {
+      _serverAddresses.clear();
+    }
+
+    _socket = _createBroadcastSocket(
+      serverAddress: InternetAddress.anyIPv4,
+      serverPort: _oscPort,
+    );
+
+    final recv = await _bindReceiveSocket();
+    recv.broadcastEnabled = true;
+    _recvSubscription = recv.listen((event) {
+      if (event == RawSocketEvent.read) {
+        final dg = recv.receive();
+        if (dg != null) {
+          _rememberServer(dg.address);
+          final msg = _parseMessage(dg.data);
+          if (msg != null) {
+            _dispatch(msg);
+          }
+        }
+      }
+    });
+    _recvSocket = recv;
+  }
 
   void _registerPrimerKey(String key) {
     _primerDedupTimers[key]?.cancel();
@@ -149,30 +193,12 @@ class OscListener {
       debugPrint('[OSC] Failed to activate audio session: $e');
     }
 
-    _socket = _createBroadcastSocket(
-      serverAddress: InternetAddress.anyIPv4,
-      serverPort: _oscPort,
-    );
-
-    _recvSocket = await RawDatagramSocket.bind(
-      InternetAddress.anyIPv4,
-      _oscPort,
-      reuseAddress: true,
-      reusePort: true,
-    );
-    _recvSocket!.broadcastEnabled = true;
-    _recvSocket!.listen((event) {
-      if (event == RawSocketEvent.read) {
-        final dg = _recvSocket!.receive();
-        if (dg != null) {
-          _rememberServer(dg.address);
-          final msg = _parseMessage(dg.data);
-          if (msg != null) {
-            _dispatch(msg);
-          }
-        }
-      }
-    });
+    try {
+      await _rebindSockets(clearServerCache: true);
+    } catch (e) {
+      _running = false;
+      rethrow;
+    }
 
     // Periodically announce our presence so servers can discover us.
     _restartHelloTimer(_fastHelloInterval);
@@ -573,6 +599,20 @@ class OscListener {
     }
   }
 
+  /// Rebinds sockets and rebroadcasts presence so the console rediscovers us.
+  Future<void> refreshConnection() async {
+    if (!_running) {
+      await start();
+      return;
+    }
+    await _rebindSockets(clearServerCache: true);
+    _disconnectTimer?.cancel();
+    client.connected.value = false;
+    _restartHelloTimer(_fastHelloInterval);
+    _sendHello();
+    debugPrint('[OSC] Connection refresh triggered by user');
+  }
+
   /// Send a typed OSC message using [OscCodable].
   void send(OscCodable message) {
     if (_socket == null) return;
@@ -591,6 +631,8 @@ class OscListener {
 
   /// Stops listening and cleans up resources.
   Future<void> stop() async {
+    await _recvSubscription?.cancel();
+    _recvSubscription = null;
     _socket?.close();
     _socket = null;
     _recvSocket?.close();
