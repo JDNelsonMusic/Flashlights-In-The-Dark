@@ -62,12 +62,6 @@
                 <string>_osc._udp</string>
         </array>
 
-	<!-- Keep audio session alive while app is in the background -->
-	<key>UIBackgroundModes</key>
-        <array>
-                <string>audio</string>
-        </array>
-
         <!-- Declare that this app does not use non-exempt encryption -->
         <key>ITSAppUsesNonExemptEncryption</key>
         <false/>

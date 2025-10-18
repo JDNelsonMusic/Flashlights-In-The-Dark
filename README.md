@@ -110,6 +110,11 @@ Qty    Item    Notes
 (opt.)    MIDI Keyboard / DAW    For live or pre-programmed cues
 
 
+### Keep iOS Devices Awake During Performances
+
+- Ask singers to enable Guided Access or temporarily disable Auto-Lock on their iPhones before lights down so the Flashlights Client stays in the foreground.
+- The iOS build no longer carries a background audio entitlement, so the app must remain active on-screen to receive cues and play its short audio stingers.
+
 
 # Software & Deployment
 

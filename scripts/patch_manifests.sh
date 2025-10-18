@@ -47,10 +47,4 @@ insert_plist_key() {
 insert_plist_key NSCameraUsageDescription '<string>Allows this app to control the flashlight.</string>'
 insert_plist_key NSMicrophoneUsageDescription '<string>Enables recording for choir synchronization.</string>'
 
-# UIBackgroundModes array
-if ! grep -q '<key>UIBackgroundModes</key>' "$PLIST"; then
-  perl -0777 -pi -e 's|</dict>|  <key>UIBackgroundModes</key>\n  <array>\n    <string>audio</string>\n  </array>\n</dict>|' "$PLIST"
-  echo "  + UIBackgroundModes → audio"
-fi
-
 echo "🎉  Manifest patching complete"
