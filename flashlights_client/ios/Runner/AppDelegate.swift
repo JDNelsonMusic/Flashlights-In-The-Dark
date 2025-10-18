@@ -120,6 +120,16 @@ import AVFoundation
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  override func applicationWillResignActive(_ application: UIApplication) {
+    primerAudio.handleAppWillResignActive()
+    super.applicationWillResignActive(application)
+  }
+
+  override func applicationDidBecomeActive(_ application: UIApplication) {
+    super.applicationDidBecomeActive(application)
+    primerAudio.handleAppDidBecomeActive()
+  }
+
   private func setTorchLevel(level: Double) {
     guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
     do {
@@ -189,6 +199,21 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
   private var requestedAssets: Int = 0
   private var lastFailures: [[String: Any]] = []
   private var currentStatus: String = "not_initialized"
+  private var sessionConfigured = false
+
+  override init() {
+    super.init()
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleSessionInterruption(_:)),
+      name: AVAudioSession.interruptionNotification,
+      object: nil
+    )
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
 
   func initialize(
     with controller: FlutterViewController,
@@ -221,6 +246,7 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
         self.requestedAssets = manifest.count
         self.lastFailures = []
         self.currentStatus = "initializing"
+        self.sessionConfigured = false
 
         var loaded = 0
         for entry in manifest {
@@ -286,9 +312,29 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       } catch {
         self.initialised = false
         self.currentStatus = "failed"
+        self.sessionConfigured = false
         DispatchQueue.main.async {
           completion(.failure(error))
         }
+      }
+    }
+  }
+
+  func handleAppWillResignActive() {
+    queue.async {
+      self.sessionConfigured = false
+      self.stopActivePlayersLocked()
+    }
+  }
+
+  func handleAppDidBecomeActive() {
+    queue.async {
+      do {
+        try self.configureSession()
+        self.stopActivePlayersLocked()
+        self.preparePlayersLocked()
+      } catch {
+        NSLog("[PrimerAudioEngine] Failed to reactivate audio session: \(error)")
       }
     }
   }
@@ -303,6 +349,9 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       }
 
       do {
+        if !self.sessionConfigured {
+          try self.configureSession()
+        }
         let player = try self.dequeuePlayer(for: canonical)
         let identifier = ObjectIdentifier(player)
         self.activePlayers[identifier] = player
@@ -415,20 +464,70 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       try? session.overrideOutputAudioPort(.speaker)
     }
 
-    if Thread.isMainThread {
-      try configure()
-    } else {
-      var thrownError: Error?
-      DispatchQueue.main.sync {
-        do {
-          try configure()
-        } catch {
-          thrownError = error
+    do {
+      if Thread.isMainThread {
+        try configure()
+      } else {
+        var thrownError: Error?
+        DispatchQueue.main.sync {
+          do {
+            try configure()
+          } catch {
+            thrownError = error
+          }
+        }
+        if let thrownError {
+          throw thrownError
         }
       }
-      if let thrownError {
-        throw thrownError
+      sessionConfigured = true
+    } catch {
+      sessionConfigured = false
+      throw error
+    }
+  }
+
+  private func preparePlayersLocked() {
+    if idlePlayers.isEmpty { return }
+    let players = idlePlayers.values.flatMap { $0 }
+    DispatchQueue.main.async {
+      for player in players {
+        player.stop()
+        player.currentTime = 0
+        player.prepareToPlay()
       }
+    }
+  }
+
+  @objc private func handleSessionInterruption(_ notification: Notification) {
+    guard
+      let info = notification.userInfo,
+      let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+      let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+    else { return }
+
+    switch type {
+    case .began:
+      queue.async {
+        self.sessionConfigured = false
+        self.stopActivePlayersLocked()
+      }
+    case .ended:
+      let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+      let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+      queue.async {
+        do {
+          try self.configureSession()
+          if options.contains(.shouldResume) {
+            self.stopActivePlayersLocked()
+          }
+          self.preparePlayersLocked()
+        } catch {
+          NSLog("[PrimerAudioEngine] Interruption resume failed: \(error)")
+        }
+      }
+    @unknown default:
+      break
     }
   }
 

@@ -538,7 +538,7 @@ class Bootstrap extends StatefulWidget {
   State<Bootstrap> createState() => _BootstrapState();
 }
 
-class _BootstrapState extends State<Bootstrap> {
+class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
   final FocusNode _keyboardFocusNode = FocusNode();
   bool _showDebugOverlay = false;
   int _titleTapCount = 0;
@@ -555,6 +555,7 @@ class _BootstrapState extends State<Bootstrap> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     flosc.OscListener.instance.start();
     unawaited(client.ensureEventRecipesLoaded());
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -568,6 +569,7 @@ class _BootstrapState extends State<Bootstrap> {
   void dispose() {
     unawaited(flosc.OscListener.instance.stop());
     _tapResetTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -621,6 +623,35 @@ class _BootstrapState extends State<Bootstrap> {
       } else {
         _refreshingConnection = false;
       }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_handleAppResumed());
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      client.audioPlaying.value = false;
+    }
+  }
+
+  Future<void> _handleAppResumed() async {
+    try {
+      final session = await audio_session.AudioSession.instance;
+      await session.setActive(true);
+    } catch (e) {
+      debugPrint('[Lifecycle] Failed to reactivate AudioSession: $e');
+    }
+    try {
+      await NativeAudio.ensureInitialized();
+    } catch (e) {
+      debugPrint('[Lifecycle] Native audio reinitialisation failed: $e');
+    }
+    try {
+      await flosc.OscListener.instance.refreshConnection();
+    } catch (e) {
+      debugPrint('[Lifecycle] OSC refresh failed: $e');
     }
   }
 
