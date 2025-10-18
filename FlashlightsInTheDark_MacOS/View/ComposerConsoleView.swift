@@ -397,7 +397,15 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.bordered)
                         .tint(.cyan)
                         .disabled(!state.isBroadcasting)
-                        
+
+                        Button("Refresh Connections") {
+                            state.refreshConnections()
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.teal)
+                        .disabled(!state.isBroadcasting)
+                        .help("Re-broadcast /discover and prompt clients to re-announce.")
+
                         // Open routing control panel
                         Button("Routing") {
                             showRouting = true

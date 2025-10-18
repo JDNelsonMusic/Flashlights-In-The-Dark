@@ -223,6 +223,11 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Last time an /ack was received from each slot.
     private var lastAckTimes: [Int: Date] = [:]
     private var heartbeatTimer: Timer?
+    private var discoveryRefreshTimer: Timer?
+    private var discoveryRefreshInFlight = false
+    private var lastDiscoveryRefresh: Date?
+    private let discoveryRefreshInterval: TimeInterval = 45
+    private let minimumDiscoveryRefreshSpacing: TimeInterval = 5
     /// When we last probed a given slot with a /discover ping.
     private var lastHelloProbe: [Int: Date] = [:]
 
@@ -1243,6 +1248,7 @@ extension ConsoleState {
             heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
                 self?.checkHeartbeats()
             }
+            scheduleDiscoveryRefreshTimer()
             print("[ConsoleState] Network stack started ✅")
         } catch let err as POSIXError where err.code == .EHOSTDOWN {
             lastLog = "⚠️ No active network interface"
@@ -1261,6 +1267,10 @@ extension ConsoleState {
         isBroadcasting = false
         heartbeatTimer?.invalidate()
         heartbeatTimer = nil
+        discoveryRefreshTimer?.invalidate()
+        discoveryRefreshTimer = nil
+        discoveryRefreshInFlight = false
+        lastDiscoveryRefresh = nil
         print("[ConsoleState] Network stack suspended 💤")
     }
 
@@ -1292,7 +1302,91 @@ extension ConsoleState {
                         print("⚠️ heartbeat probe error for slot \(slot): \(error)")
                     }
                 }
+                triggerDiscoveryRefresh(reason: .slot(slot))
             }
+        }
+    }
+
+    private func scheduleDiscoveryRefreshTimer() {
+        discoveryRefreshTimer?.invalidate()
+        let timer = Timer(timeInterval: discoveryRefreshInterval, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            self.triggerDiscoveryRefresh(reason: .periodic)
+        }
+        timer.tolerance = discoveryRefreshInterval * 0.2
+        discoveryRefreshTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private func triggerDiscoveryRefresh(reason: DiscoveryRefreshReason) {
+        if discoveryRefreshInFlight { return }
+
+        let now = Date()
+        if let last = lastDiscoveryRefresh,
+           now.timeIntervalSince(last) < minimumDiscoveryRefreshSpacing,
+           reason.shouldRespectSpacing {
+            return
+        }
+
+        discoveryRefreshInFlight = true
+        lastDiscoveryRefresh = now
+
+        if reason.shouldLog {
+            lastLog = "🔄 Refreshing connections\(reason.logSuffix)"
+        }
+
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                try await broadcaster.discoverKnownDevices()
+                await MainActor.run {
+                    if reason.shouldLog {
+                        self.lastLog = "📡 Connections refreshed\(reason.logSuffix)"
+                    }
+                    self.discoveryRefreshInFlight = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.lastLog = "⚠️ Discovery refresh failed: \(error.localizedDescription)"
+                    self.discoveryRefreshInFlight = false
+                }
+            }
+        }
+    }
+}
+
+private enum DiscoveryRefreshReason {
+    case periodic
+    case manual
+    case slot(Int)
+
+    var logSuffix: String {
+        switch self {
+        case .periodic:
+            return ""
+        case .manual:
+            return " (manual)"
+        case let .slot(slot):
+            return " · slot #\(slot)"
+        }
+    }
+
+    var shouldLog: Bool {
+        switch self {
+        case .periodic:
+            return false
+        case .manual, .slot:
+            return true
+        }
+    }
+
+    var shouldRespectSpacing: Bool {
+        switch self {
+        case .manual:
+            return false
+        case .periodic, .slot:
+            return true
         }
     }
 }
@@ -1361,6 +1455,14 @@ extension ConsoleState {
                 }
             }
         }
+    }
+
+    public func refreshConnections() {
+        guard isBroadcasting else {
+            lastLog = "⚠️ Network is paused"
+            return
+        }
+        triggerDiscoveryRefresh(reason: .manual)
     }
 
     public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {
