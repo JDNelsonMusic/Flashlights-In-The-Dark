@@ -27,6 +27,7 @@ extension DeviceStatus {
         case .lostConnection: return .orange
         }
     }
+
 }
 
 // Shared slot mapping data model for console
@@ -39,8 +40,9 @@ private struct ConsoleSlotInfo: Codable {
 
 @MainActor
 public final class ConsoleState: ObservableObject, Sendable {
-    private let broadcasterTask = Task<OscBroadcaster, Error> {
-        try await OscBroadcaster()
+    private let diagnostics = NetworkDiagnostics()
+    private lazy var broadcasterTask: Task<OscBroadcaster, Error> = Task {
+        try await OscBroadcaster(diagnostics: diagnostics)
     }
     // Track ongoing run processes to monitor connection/state
     private var runProcesses: [Int: Process] = [:]
@@ -228,6 +230,9 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var lastDiscoveryRefresh: Date?
     private let discoveryRefreshInterval: TimeInterval = 45
     private let minimumDiscoveryRefreshSpacing: TimeInterval = 5
+    private let heartbeatTimerInterval: TimeInterval = 5
+    private let heartbeatGraceInterval: TimeInterval = 18
+    private let heartbeatProbeSpacing: TimeInterval = 20
     /// When we last probed a given slot with a /discover ping.
     private var lastHelloProbe: [Int: Date] = [:]
 
@@ -1208,6 +1213,13 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func assignSlot(device: ChoirDevice, slot: Int) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
         devices[idx].listeningSlot = slot
+        Task { [diagnostics] in
+            await diagnostics.record(
+                .slotAssignmentRequested,
+                slot: slot,
+                message: "Manual slot assignment for device #\(device.id + 1)"
+            )
+        }
         Task.detached { [weak self] in
             guard let self = self else { return }
             do {
@@ -1275,7 +1287,7 @@ extension ConsoleState {
                     self?.tapReceived()
                 }
             }
-            heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+            heartbeatTimer = Timer.scheduledTimer(withTimeInterval: heartbeatTimerInterval, repeats: true) { [weak self] _ in
                 self?.checkHeartbeats()
             }
             scheduleDiscoveryRefreshTimer()
@@ -1309,19 +1321,43 @@ extension ConsoleState {
         for slot in 1...devices.count {
             let idx = slot - 1
             let lastSeen = lastHello[slot]
-            if let lastSeen, now.timeIntervalSince(lastSeen) <= 12 {
-                if statuses[idx] == .lostConnection {
-                    statuses[idx] = .live
+            if let lastSeen {
+                let gap = now.timeIntervalSince(lastSeen)
+                if gap <= heartbeatGraceInterval {
+                    if statuses[idx] == .lostConnection {
+                        statuses[idx] = .live
+                        Task { [diagnostics] in
+                            await diagnostics.record(
+                                .heartbeatRecovered,
+                                slot: slot,
+                                message: "Recovered after \(Int(gap))s gap"
+                            )
+                        }
+                    }
+                    continue
                 }
-                continue
             }
 
             if statuses[idx] != .lostConnection {
                 statuses[idx] = .lostConnection
+                let gapDescription: String
+                if let lastSeen {
+                    let gap = now.timeIntervalSince(lastSeen)
+                    gapDescription = "\(Int(gap))s without /hello"
+                } else {
+                    gapDescription = "No /hello received yet"
+                }
+                Task { [diagnostics] in
+                    await diagnostics.record(
+                        .heartbeatLost,
+                        slot: slot,
+                        message: gapDescription
+                    )
+                }
             }
 
             let lastProbe = lastHelloProbe[slot] ?? .distantPast
-            if now.timeIntervalSince(lastProbe) >= 15 {
+            if now.timeIntervalSince(lastProbe) >= heartbeatProbeSpacing {
                 lastHelloProbe[slot] = now
                 Task.detached { [weak self] in
                     guard let self = self else { return }
@@ -1363,6 +1399,12 @@ extension ConsoleState {
 
         if reason.shouldLog {
             lastLog = "🔄 Refreshing connections\(reason.logSuffix)"
+            Task { [diagnostics] in
+                await diagnostics.record(
+                    .manualRefresh,
+                    message: "Discovery refresh\(reason.logSuffix)"
+                )
+            }
         }
 
         Task.detached { [weak self] in
@@ -1376,10 +1418,44 @@ extension ConsoleState {
                     }
                     self.discoveryRefreshInFlight = false
                 }
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    message: "Discovery refresh\(reason.logSuffix) complete"
+                )
             } catch {
                 await MainActor.run {
                     self.lastLog = "⚠️ Discovery refresh failed: \(error.localizedDescription)"
                     self.discoveryRefreshInFlight = false
+                }
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    message: "Discovery refresh\(reason.logSuffix) failed: \(error.localizedDescription)"
+                )
+            }
+        }
+    }
+
+    private func performNetworkInterfaceRefresh(reason: String) {
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    message: "Network interface refresh (\(reason))"
+                )
+                await broadcaster.refreshNetworkInterfaces(reason: reason)
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    message: "Network interface refresh complete (\(reason))"
+                )
+            } catch {
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    message: "Network interface refresh failed (\(reason)): \(error.localizedDescription)"
+                )
+                await MainActor.run {
+                    self.lastLog = "⚠️ Network interface refresh failed: \(error.localizedDescription)"
                 }
             }
         }
@@ -1474,6 +1550,11 @@ extension ConsoleState {
         Task.detached { [weak self] in
             guard let self else { return }
             do {
+                await self.diagnostics.record(
+                    .manualRefresh,
+                    slot: slot,
+                    message: "Manual ping"
+                )
                 let broadcaster = try await self.broadcasterTask.value
                 await broadcaster.requestHello(forSlot: slot)
                 await MainActor.run {
@@ -1492,7 +1573,40 @@ extension ConsoleState {
             lastLog = "⚠️ Network is paused"
             return
         }
+        performNetworkInterfaceRefresh(reason: "manual UI refresh")
         triggerDiscoveryRefresh(reason: .manual)
+    }
+
+    public func exportNetworkLog() {
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                await self.diagnostics.record(
+                    .manualExport,
+                    message: "Export initiated"
+                )
+                let url = try await self.diagnostics.export()
+                await self.diagnostics.record(
+                    .manualExport,
+                    message: "Exported to \(url.lastPathComponent)"
+                )
+                await MainActor.run {
+                    self.lastLog = "📝 Network log saved to \(url.path)"
+                }
+            } catch {
+                await self.diagnostics.record(
+                    .manualExport,
+                    message: "Export failed: \(error.localizedDescription)"
+                )
+                await MainActor.run {
+                    self.lastLog = "⚠️ Log export failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    public func networkDiagnosticsSnapshot() async -> NetworkDiagnosticsSnapshot {
+        await diagnostics.snapshot()
     }
 
     public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {

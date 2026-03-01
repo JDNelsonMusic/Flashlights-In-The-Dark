@@ -1974,6 +1974,23 @@ class DebugOverlay extends StatelessWidget {
                 onPressed: onSendHello,
                 child: const Text('Send /hello'),
               ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final logJson =
+                      flosc.OscListener.instance.exportNetworkLogJson();
+                  await Clipboard.setData(ClipboardData(text: logJson));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Network log copied to clipboard'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Copy Network Log'),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Recent OSC Messages',

@@ -404,7 +404,14 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.bordered)
                         .tint(.teal)
                         .disabled(!state.isBroadcasting)
-                        .help("Re-broadcast /discover and prompt clients to re-announce.")
+                        .help("Rebinds the UDP socket and rebroadcasts /discover.")
+
+                        Button("Export Network Log") {
+                            state.exportNetworkLog()
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.purple)
+                        .help("Save a JSON log of all network activity to Documents/FlashlightsLogs.")
 
                         // Open routing control panel
                         Button("Routing") {

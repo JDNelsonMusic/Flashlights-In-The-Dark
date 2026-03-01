@@ -60,11 +60,14 @@ public actor OscBroadcaster {
     private(set) var broadcastAddrs: [SocketAddress]
     private let eventLoopGroup: MultiThreadedEventLoopGroup
     private let ownsEventLoopGroup: Bool
+    private let diagnostics: NetworkDiagnostics?
     private var helloHandler: ((Int, String, String?) -> Void)?
     private var ackHandler: ((Int) -> Void)?
     private var tapHandler: (() -> Void)?
     /// Runtime IPs learned from /hello announcements (slot -> ip)
     var dynamicIPs: [Int: String] = [:]
+    private var consecutiveBroadcastFailures: Int = 0
+    private var slotSendFailures: [Int: Int] = [:]
 #if canImport(Network)
     private var interfaceMonitor: InterfaceChangeMonitor?
     private var lastPathSignature: String?
@@ -76,6 +79,7 @@ public actor OscBroadcaster {
     public init(
         port: Int = 9000,
         routingFile: URL = Bundle.main.url(forResource: "flash_ip+udid_map", withExtension: "json")!,
+        diagnostics: NetworkDiagnostics? = nil,
         eventLoopGroup: MultiThreadedEventLoopGroup? = nil
     ) async throws {
         let resolvedGroup: MultiThreadedEventLoopGroup
@@ -88,6 +92,7 @@ public actor OscBroadcaster {
         }
         self.port = port
         self.eventLoopGroup = resolvedGroup
+        self.diagnostics = diagnostics
         // load slot mapping once at launch
         if
             let data = try? Data(contentsOf: routingFile),
@@ -111,6 +116,15 @@ public actor OscBroadcaster {
         try await self.channel.pipeline
             .addHandler(HelloDatagramHandler(owner: self))
 
+        await diagnostics?.record(
+            .broadcasterStarted,
+            message: "Bound UDP broadcaster on 0.0.0.0:\(port)"
+        )
+        await diagnostics?.record(
+            .broadcasterInterfaceRefresh,
+            message: "Initial broadcast targets: \(describeBroadcastTargets(self.broadcastAddrs))"
+        )
+
 #if canImport(Network)
         self.interfaceMonitor = InterfaceChangeMonitor { [weak actor = self] path in
             Task {
@@ -127,27 +141,79 @@ public actor OscBroadcaster {
     // --------------------------------------------------------------------
     /// Announce self to the network upon startup
     public func start() async throws {
+        await diagnostics?.record(.broadcasterAnnounced, message: "Starting network stack")
         try await announceSelf()
+        await diagnostics?.record(.broadcasterDiscover, message: "Initial discover sweep")
         try await discoverKnownDevices()
     }
     /// Broadcast a single OSC message to all detected broadcast addresses.
     public func send(_ osc: OSCMessage) async throws {
         let data = try osc.rawData()
+        await diagnostics?.record(
+            .sendQueued,
+            message: "Broadcast \(osc.addressPattern.stringValue) → \(broadcastAddrs.count) targets"
+        )
+        var anySucceeded = false
         for addr in broadcastAddrs {
             var buffer = channel.allocator.buffer(capacity: data.count)
             buffer.writeBytes(data)
             let env = AddressedEnvelope(remoteAddress: addr, data: buffer)
             do {
                 try await channel.writeAndFlush(env)
+                anySucceeded = true
+                consecutiveBroadcastFailures = 0
+                await diagnostics?.record(
+                    .sendSucceeded,
+                    ipAddress: addr.ipAddress,
+                    message: "Broadcast \(osc.addressPattern.stringValue) delivered"
+                )
             } catch let error as IOError {
                 // Ignore "Host is down" errors so the network stack can start
                 // even if no interface is currently active.
                 if error.errnoCode == EHOSTDOWN {
                     print("⚠️ sendmsg to \(addr) failed: Host is down")
+                    await diagnostics?.record(
+                        .sendFailed,
+                        ipAddress: addr.ipAddress,
+                        message: "Broadcast \(osc.addressPattern.stringValue) failed (host down)"
+                    )
                     continue
+                }
+                consecutiveBroadcastFailures &+= 1
+                await diagnostics?.record(
+                    .sendFailed,
+                    ipAddress: addr.ipAddress,
+                    message: "Broadcast \(osc.addressPattern.stringValue) failed: \(error.localizedDescription)"
+                )
+                if consecutiveBroadcastFailures >= 3 {
+                    consecutiveBroadcastFailures = 0
+                    await diagnostics?.record(
+                        .broadcasterInterfaceFailed,
+                        message: "Auto-refreshing after repeated broadcast failures"
+                    )
+                    await refreshBindings(reason: "auto-recover from broadcast send failures")
+                }
+                throw error
+            } catch {
+                consecutiveBroadcastFailures &+= 1
+                await diagnostics?.record(
+                    .sendFailed,
+                    ipAddress: addr.ipAddress,
+                    message: "Broadcast \(osc.addressPattern.stringValue) failed: \(error.localizedDescription)"
+                )
+                if consecutiveBroadcastFailures >= 3 {
+                    consecutiveBroadcastFailures = 0
+                    await diagnostics?.record(
+                        .broadcasterInterfaceFailed,
+                        message: "Auto-refreshing after repeated broadcast failures"
+                    )
+                    await refreshBindings(reason: "auto-recover from broadcast send failures (unknown)")
                 }
                 throw error
             }
+        }
+        if anySucceeded {
+            consecutiveBroadcastFailures = 0
         }
         print("→ \(osc.addressPattern.stringValue)")
     }
@@ -163,7 +229,39 @@ public actor OscBroadcaster {
         if let ip = dynamicIPs[slot] ?? slotInfos[slot]?.ip {
             let addr = try SocketAddress(ipAddress: ip, port: port)
             let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
-            try await channel.writeAndFlush(envelope)
+            await diagnostics?.record(
+                .sendQueued,
+                slot: slot,
+                ipAddress: ip,
+                message: "Unicast \(osc.addressPattern.stringValue)"
+            )
+            do {
+                try await channel.writeAndFlush(envelope)
+                slotSendFailures[slot] = nil
+                await diagnostics?.record(
+                    .sendSucceeded,
+                    slot: slot,
+                    ipAddress: ip,
+                    message: "Unicast \(osc.addressPattern.stringValue) delivered"
+                )
+            } catch {
+                slotSendFailures[slot, default: 0] += 1
+                await diagnostics?.record(
+                    .sendFailed,
+                    slot: slot,
+                    ipAddress: ip,
+                    message: "Unicast \(osc.addressPattern.stringValue) failed: \(error.localizedDescription)"
+                )
+                if slotSendFailures[slot, default: 0] >= 3 {
+                    slotSendFailures[slot] = 0
+                    await diagnostics?.record(
+                        .broadcasterInterfaceFailed,
+                        message: "Auto-refreshing after slot \(slot) repeated failures"
+                    )
+                    await refreshBindings(reason: "auto-recover from slot \(slot) send failures")
+                }
+                throw error
+            }
             print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
         } else {
             // Fallback to broadcast if mapping not found
@@ -181,7 +279,26 @@ public actor OscBroadcaster {
         buffer.writeBytes(data)
         let addr = try SocketAddress(ipAddress: ip, port: port)
         let envelope = AddressedEnvelope(remoteAddress: addr, data: buffer)
-        try await channel.writeAndFlush(envelope)
+        await diagnostics?.record(
+            .sendQueued,
+            ipAddress: ip,
+            message: "Direct \(osc.addressPattern.stringValue)"
+        )
+        do {
+            try await channel.writeAndFlush(envelope)
+            await diagnostics?.record(
+                .sendSucceeded,
+                ipAddress: ip,
+                message: "Direct \(osc.addressPattern.stringValue) delivered"
+            )
+        } catch {
+            await diagnostics?.record(
+                .sendFailed,
+                ipAddress: ip,
+                message: "Direct \(osc.addressPattern.stringValue) failed: \(error.localizedDescription)"
+            )
+            throw error
+        }
         print("→ \(osc.addressPattern.stringValue) to \(ip):\(port)")
     }
 
@@ -189,27 +306,65 @@ public actor OscBroadcaster {
     /// falling back to broadcast if no address is available.
     public func send(_ osc: OSCMessage, toSlot slot: Int) async throws {
         var delivered = false
+        await diagnostics?.record(
+            .sendQueued,
+            slot: slot,
+            message: "Routing \(osc.addressPattern.stringValue) to slot \(slot)"
+        )
 
         if let ip = dynamicIPs[slot], !ip.isEmpty {
             do {
                 try await sendUnicast(osc, toIP: ip)
+                slotSendFailures[slot] = nil
+                await diagnostics?.record(
+                    .sendSucceeded,
+                    slot: slot,
+                    ipAddress: ip,
+                    message: "Delivered via dynamic IP"
+                )
                 delivered = true
             } catch {
                 print("⚠️ Unicast to slot \(slot) via dynamic IP \(ip) failed: \(error.localizedDescription)")
+                await diagnostics?.record(
+                    .sendFailed,
+                    slot: slot,
+                    ipAddress: ip,
+                    message: "Dynamic IP send failed: \(error.localizedDescription)"
+                )
             }
         }
 
         if !delivered, let info = slotInfos[slot], !info.ip.isEmpty {
             do {
                 try await sendUnicast(osc, toIP: info.ip)
+                slotSendFailures[slot] = nil
+                await diagnostics?.record(
+                    .sendSucceeded,
+                    slot: slot,
+                    ipAddress: info.ip,
+                    message: "Delivered via mapped IP"
+                )
                 delivered = true
             } catch {
                 print("⚠️ Unicast to slot \(slot) via mapped IP \(info.ip) failed: \(error.localizedDescription)")
+                await diagnostics?.record(
+                    .sendFailed,
+                    slot: slot,
+                    ipAddress: info.ip,
+                    message: "Mapped IP send failed: \(error.localizedDescription)"
+                )
             }
         }
 
         // Always broadcast as a safety net so devices still hear the cue if
         // their current IP isn't known. Clients filter by index, so duplicates are fine.
+        if !delivered {
+            await diagnostics?.record(
+                .sendQueued,
+                slot: slot,
+                message: "Falling back to broadcast"
+            )
+        }
         try await send(osc)
     }
 
@@ -236,6 +391,10 @@ public actor OscBroadcaster {
             OSCAddressPattern("/discover"),
             values: [Int32(0)]
         )
+        await diagnostics?.record(
+            .broadcasterDiscover,
+            message: "Prompting known devices to announce"
+        )
 
         // Start with a broadcast in case IP assignments have changed. Errors
         // are already handled inside `send` so this call is best-effort.
@@ -254,6 +413,11 @@ public actor OscBroadcaster {
                 try await sendUnicast(osc, toIP: ip)
             } catch {
                 print("⚠️ Unable to deliver /discover to \(ip): \(error)")
+                await diagnostics?.record(
+                    .sendFailed,
+                    ipAddress: ip,
+                    message: "/discover failed: \(error.localizedDescription)"
+                )
             }
         }
     }
@@ -265,6 +429,11 @@ public actor OscBroadcaster {
             OSCAddressPattern("/discover"),
             values: [Int32(slot)]
         )
+        await diagnostics?.record(
+            .slotAssignmentRequested,
+            slot: slot,
+            message: "Requested /hello refresh"
+        )
 
         if let ip = dynamicIPs[slot] ?? slotInfos[slot]?.ip, !ip.isEmpty {
             do {
@@ -272,6 +441,11 @@ public actor OscBroadcaster {
                 return
             } catch {
                 print("⚠️ requestHello unicast failed for slot \(slot): \(error)")
+                await diagnostics?.record(
+                    .sendFailed,
+                    slot: slot,
+                    message: "/discover unicast failed: \(error.localizedDescription)"
+                )
             }
         }
 
@@ -279,6 +453,11 @@ public actor OscBroadcaster {
             try await send(osc)
         } catch {
             print("⚠️ requestHello broadcast failed for slot \(slot): \(error)")
+            await diagnostics?.record(
+                .sendFailed,
+                slot: slot,
+                message: "/discover broadcast failed: \(error.localizedDescription)"
+            )
         }
     }
 
@@ -299,6 +478,10 @@ public actor OscBroadcaster {
     private func refreshBindings(reason: String) async {
         var candidate: Channel?
         do {
+            await diagnostics?.record(
+                .broadcasterInterfaceRefresh,
+                message: "Refreshing UDP socket (\(reason))"
+            )
             candidate = try await OscBroadcaster.makeChannel(on: port, group: eventLoopGroup)
             guard let newChannel = candidate else { return }
             try await newChannel.pipeline.addHandler(HelloDatagramHandler(owner: self))
@@ -332,8 +515,16 @@ public actor OscBroadcaster {
             let updatedDesc = describeBroadcastTargets(newAddrs)
             if previousDesc != updatedDesc {
                 print("[OscBroadcaster] Broadcast targets updated: \(previousDesc) → \(updatedDesc)")
+                await diagnostics?.record(
+                    .broadcasterInterfaceRefresh,
+                    message: "Broadcast targets updated: \(previousDesc) → \(updatedDesc)"
+                )
             } else {
                 print("[OscBroadcaster] Broadcast targets unchanged (\(updatedDesc))")
+                await diagnostics?.record(
+                    .broadcasterInterfaceUnchanged,
+                    message: "Broadcast targets unchanged: \(updatedDesc)"
+                )
             }
             print("[OscBroadcaster] Refreshed UDP socket (\(reason)).")
         } catch {
@@ -341,6 +532,10 @@ public actor OscBroadcaster {
                 Task { try? await candidate.close() }
             }
             print("⚠️ OscBroadcaster refresh failed (\(reason)): \(error)")
+            await diagnostics?.record(
+                .broadcasterInterfaceFailed,
+                message: "Refresh failed (\(reason)): \(error.localizedDescription)"
+            )
         }
     }
 
@@ -373,6 +568,10 @@ public actor OscBroadcaster {
         } else {
             reason = "network path \(statusDescription) [\(interfaceSummary)]"
         }
+        await diagnostics?.record(
+            .broadcasterInterfaceMonitorUpdate,
+            message: reason
+        )
         await refreshBindings(reason: reason)
     }
 
@@ -421,25 +620,47 @@ public actor OscBroadcaster {
         }
     }
 
-    func emitHello(slot: Int, ip: String, udid: String?) {
+    func emitHello(slot: Int, ip: String, udid: String?) async {
         dynamicIPs[slot] = ip
+        await diagnostics?.record(
+            .helloReceived,
+            slot: slot,
+            ipAddress: ip,
+            message: udid
+        )
         // Check UDID mapping and correct slot if needed
         if let u = udid,
            let expected = slotInfos.first(where: { $0.value.udid == u })?.key,
            expected != slot {
-            Task {
+            Task { [weak actor = self] in
+                guard let actor else { return }
                 let msg = SetSlot(slot: Int32(expected)).encode()
-                try? await sendUnicast(msg, toIP: ip)
+                try? await actor.sendUnicast(msg, toIP: ip)
+                await actor.diagnostics?.record(
+                    .slotAssignmentAdjusted,
+                    slot: expected,
+                    ipAddress: ip,
+                    message: "Corrected slot from \(slot) to \(expected)"
+                )
             }
         }
         helloHandler?(slot, ip, udid)
     }
 
-    func emitAck(slot: Int) {
+    func emitAck(slot: Int) async {
+        await diagnostics?.record(
+            .ackReceived,
+            slot: slot,
+            message: "Ack received"
+        )
         ackHandler?(slot)
     }
 
-    func emitTap() {
+    func emitTap() async {
+        await diagnostics?.record(
+            .tapReceived,
+            message: "/tap received"
+        )
         tapHandler?()
     }
 }
@@ -452,6 +673,10 @@ extension OscBroadcaster {
             values: [ProcessInfo.processInfo.hostName, slotValue]
         )
         try await send(msg)
+        await diagnostics?.record(
+            .broadcasterAnnounced,
+            message: "Broadcast /hello from console host"
+        )
     }
 }
 

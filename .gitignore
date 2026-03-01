@@ -60,6 +60,12 @@ FlashlightsInTheDark_Protools-Session-OLD*/
 *.wfm
 
 # -------------------------------
+#  Local score-study assets
+# -------------------------------
+FlashlightsScoreStudyInsights/
+FlashlightsScoreStudyInsights.zip
+
+# -------------------------------
 #  Common Dev tooling
 # -------------------------------
 .vscode/
@@ -82,14 +88,3 @@ __MACOSX/
 key.properties
 flashlights_client/android/key.properties
 android/key.properties
-
-
-
-
-
-
-
-
-
-
-

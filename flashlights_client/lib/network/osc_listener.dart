@@ -29,6 +29,29 @@ const int _oscPort = 9000;
 const Duration _fastHelloInterval = Duration(seconds: 2);
 const Duration _slowHelloInterval = Duration(seconds: 10);
 
+class _NetworkEvent {
+  const _NetworkEvent({
+    required this.timestamp,
+    required this.category,
+    required this.message,
+    this.data,
+  });
+
+  final DateTime timestamp;
+  final String category;
+  final String message;
+  final Map<String, Object?>? data;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'timestamp': timestamp.toIso8601String(),
+      'category': category,
+      'message': message,
+      if (data != null) 'data': data,
+    };
+  }
+}
+
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
   required int serverPort,
@@ -75,6 +98,28 @@ class OscListener {
   Timer? _disconnectTimer;
   final Map<String, InternetAddress> _serverAddresses = {};
   StreamSubscription<RawSocketEvent>? _recvSubscription;
+  final List<_NetworkEvent> _eventLog = <_NetworkEvent>[];
+  static const int _maxLogEntries = 600;
+  final Set<String> _everSeenServers = <String>{};
+  Completer<void>? _rebindCompleter;
+  DateTime? _lastRebindTime;
+
+  void _record(String category, String message, [Map<String, Object?>? data]) {
+    final event = _NetworkEvent(
+      timestamp: DateTime.now().toUtc(),
+      category: category,
+      message: message,
+      data: data == null ? null : Map<String, Object?>.unmodifiable(data),
+    );
+    _eventLog.add(event);
+    if (_eventLog.length > _maxLogEntries) {
+      _eventLog.removeRange(0, _eventLog.length - _maxLogEntries);
+    }
+    if (kDebugMode) {
+      final suffix = data == null ? '' : ' $data';
+      debugPrint('[OSC][$category] $message$suffix');
+    }
+  }
 
   Future<void> _rebindSockets({bool clearServerCache = false}) async {
     _recvSubscription?.cancel();
@@ -95,19 +140,94 @@ class OscListener {
 
     final recv = await _bindReceiveSocket();
     recv.broadcastEnabled = true;
-    _recvSubscription = recv.listen((event) {
-      if (event == RawSocketEvent.read) {
-        final dg = recv.receive();
-        if (dg != null) {
-          _rememberServer(dg.address);
-          final msg = _parseMessage(dg.data);
-          if (msg != null) {
-            _dispatch(msg);
+    _recvSubscription = recv.listen(
+      (event) {
+        if (event == RawSocketEvent.read) {
+          final dg = recv.receive();
+          if (dg != null) {
+            _rememberServer(dg.address);
+            final msg = _parseMessage(dg.data);
+            if (msg != null) {
+              _dispatch(msg);
+            }
+          }
+        } else if (event == RawSocketEvent.closed ||
+            event == RawSocketEvent.readClosed) {
+          _record('socket', 'Receive socket closed', <String, Object?>{'event': '$event'});
+          unawaited(
+            _scheduleRebind(reason: 'recv socket closed', clearServerCache: false),
+          );
+        }
+      },
+      onError: (Object error, StackTrace stack) {
+        _record(
+          'socket',
+          'Receive socket error',
+          <String, Object?>{'error': error.toString()},
+        );
+        unawaited(
+          _scheduleRebind(reason: 'recv socket error', clearServerCache: false),
+        );
+      },
+      onDone: () {
+        _record('socket', 'Receive socket done');
+        unawaited(
+          _scheduleRebind(reason: 'recv socket done', clearServerCache: false),
+        );
+      },
+    );
+    _recvSocket = recv;
+  }
+
+  Future<void> _scheduleRebind({
+    required String reason,
+    bool clearServerCache = false,
+  }) {
+    if (_rebindCompleter != null) {
+      _record('rebind', 'Rebind already in flight ($reason)');
+      return _rebindCompleter!.future;
+    }
+    final completer = Completer<void>();
+    _rebindCompleter = completer;
+
+    () async {
+      try {
+        final now = DateTime.now();
+        final last = _lastRebindTime;
+        if (last != null) {
+          final diff = now.difference(last);
+          const minSpacing = Duration(milliseconds: 600);
+          if (diff < minSpacing) {
+            await Future<void>.delayed(minSpacing - diff);
           }
         }
+        _record(
+          'rebind',
+          'Rebinding sockets',
+          <String, Object?>{'reason': reason, 'clearCache': clearServerCache},
+        );
+        await _rebindSockets(clearServerCache: clearServerCache);
+        _lastRebindTime = DateTime.now();
+        _record('rebind', 'Rebind complete', <String, Object?>{'reason': reason});
+        if (_running) {
+          _sendHello();
+        }
+        completer.complete();
+      } catch (e, st) {
+        _record(
+          'rebind',
+          'Rebind failed',
+          <String, Object?>{'reason': reason, 'error': e.toString()},
+        );
+        if (!completer.isCompleted) {
+          completer.completeError(e, st);
+        }
+      } finally {
+        _rebindCompleter = null;
       }
-    });
-    _recvSocket = recv;
+    }();
+
+    return completer.future;
   }
 
   void _registerPrimerKey(String key) {
@@ -185,6 +305,7 @@ class OscListener {
   Future<void> start() async {
     if (_running) return;
     _running = true;
+    _record('lifecycle', 'OSC listener starting');
 
     try {
       final session = await audio_session.AudioSession.instance;
@@ -194,7 +315,7 @@ class OscListener {
     }
 
     try {
-      await _rebindSockets(clearServerCache: true);
+      await _scheduleRebind(reason: 'startup', clearServerCache: true);
     } catch (e) {
       _running = false;
       rethrow;
@@ -204,6 +325,7 @@ class OscListener {
     _restartHelloTimer(_fastHelloInterval);
     _sendHello();
 
+    _record('lifecycle', 'Listening on 0.0.0.0:$_oscPort');
     print('[OSC] Listening on 0.0.0.0:9000');
   }
 
@@ -491,7 +613,12 @@ class OscListener {
     if (address.isLoopback) return;
     final key = address.address;
     if (key.isEmpty) return;
+    final existing = _serverAddresses[key];
     _serverAddresses[key] = address;
+    if (existing == null) {
+      _everSeenServers.add(key);
+      _record('server', 'Discovered console', <String, Object?>{'ip': key});
+    }
   }
 
   Future<void> _sendToServers(OSCMessage msg) async {
@@ -501,6 +628,11 @@ class OscListener {
         await _socket!.sendTo(msg, dest: entry, port: _oscPort);
       } catch (e) {
         debugPrint('[OSC] Unicast send error to ${entry.address}: $e');
+        _record(
+          'send',
+          'Unicast send error',
+          <String, Object?>{'ip': entry.address, 'error': e.toString()},
+        );
       }
     }
   }
@@ -522,12 +654,22 @@ class OscListener {
       arguments: [client.myIndex.value, client.udid],
     );
 
+    _record(
+      'hello',
+      'Broadcasting /hello',
+      <String, Object?>{'knownServers': _serverAddresses.length},
+    );
     // Primary broadcast via the socket’s predefined destination.
     try {
       _socket!.send(msg);
     } catch (e) {
       // Log but do not crash; we fall back to per‑interface broadcasts below.
       print('[OSC] Primary broadcast failed: $e');
+      _record(
+        'hello',
+        'Primary broadcast failed',
+        <String, Object?>{'error': e.toString()},
+      );
     }
 
     // Target any known servers directly first so they hear us even if broadcasts
@@ -565,16 +707,26 @@ class OscListener {
   void _sendAck() {
     if (_socket == null) return;
     final msg = OSCMessage('/ack', arguments: [client.myIndex.value]);
+    _record('ack', 'Sending /ack', <String, Object?>{'slot': client.myIndex.value});
     try {
       _socket!.send(msg);
       unawaited(_sendToServers(msg));
     } catch (e) {
       print('[OSC] Ack send error: $e');
+      _record(
+        'ack',
+        'Ack send error',
+        <String, Object?>{'error': e.toString()},
+      );
     }
   }
 
   void _markConnected() {
+    final wasConnected = client.connected.value;
     client.connected.value = true;
+    if (!wasConnected) {
+      _record('connectivity', 'Connected');
+    }
     _disconnectTimer?.cancel();
     if (_currentHelloInterval != _slowHelloInterval) {
       _restartHelloTimer(_slowHelloInterval);
@@ -584,6 +736,7 @@ class OscListener {
       if (_currentHelloInterval != _fastHelloInterval) {
         _restartHelloTimer(_fastHelloInterval);
       }
+      _record('connectivity', 'Connection timed out');
     });
   }
 
@@ -605,7 +758,8 @@ class OscListener {
       await start();
       return;
     }
-    await _rebindSockets(clearServerCache: true);
+    _record('manual', 'Manual refresh requested');
+    await _scheduleRebind(reason: 'manual refresh', clearServerCache: false);
     _disconnectTimer?.cancel();
     client.connected.value = false;
     _restartHelloTimer(_fastHelloInterval);
@@ -623,6 +777,20 @@ class OscListener {
     } catch (e) {
       print('[OSC] send error: $e');
     }
+  }
+
+  Map<String, Object?> networkDiagnosticsSnapshot() {
+    return <String, Object?>{
+      'generatedAt': DateTime.now().toUtc().toIso8601String(),
+      'knownServers': _serverAddresses.keys.toList(growable: false),
+      'everSeenServers': _everSeenServers.toList(growable: false),
+      'helloIntervalSeconds': _currentHelloInterval.inSeconds,
+      'events': _eventLog.map((e) => e.toJson()).toList(growable: false),
+    };
+  }
+
+  String exportNetworkLogJson() {
+    return jsonEncode(networkDiagnosticsSnapshot());
   }
 
   /* -------------------------------------------------------------------- */
@@ -665,5 +833,6 @@ class OscListener {
     client.connected.value = false;
 
     print('[OSC] Listener stopped');
+    _record('lifecycle', 'Listener stopped');
   }
 }
