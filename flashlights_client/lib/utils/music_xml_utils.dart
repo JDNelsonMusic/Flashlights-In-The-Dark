@@ -1,10 +1,10 @@
-
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:xml/xml.dart';
 
 import 'package:flashlights_client/model/event_recipe.dart';
 
-const String _kScoreAssetPath = 'assets/FlashlightsInTheDark_SingerScore23.musicxml';
+const String _kScoreAssetPath =
+    'assets/FlashlightsInTheDark_SingerScore23.musicxml';
 
 const Set<String> _kLightChorusPartIds = {
   'P4', // Soprano 3
@@ -43,7 +43,11 @@ const String _kHighlightDataAttribute = 'data-primer-highlight';
 final Map<PrimerColor?, String> _cachedBaseXmlByColor = {};
 
 class _ParsedPitch {
-  const _ParsedPitch({required this.step, required this.alter, required this.octave});
+  const _ParsedPitch({
+    required this.step,
+    required this.alter,
+    required this.octave,
+  });
 
   final String step;
   final int alter;
@@ -112,7 +116,8 @@ Future<String> loadTrimmedMusicXML({
 }) async {
   final baseXml = await loadBaseTrimmedMusicXML(forColor: forColor);
 
-  final parsedPitch = highlightNote == null ? null : _parseNoteLabel(highlightNote);
+  final parsedPitch =
+      highlightNote == null ? null : _parseNoteLabel(highlightNote);
   if (highlightMeasure == null || parsedPitch == null) {
     return baseXml;
   }

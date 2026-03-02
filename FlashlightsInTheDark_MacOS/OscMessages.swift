@@ -7,11 +7,17 @@ public enum OscAddress: String {
     case audioPlay = "/audio/play"
     case audioStop = "/audio/stop"
     case eventTrigger = "/event/trigger"
+    case panicAllStop = "/panic/all-stop"
     case micRecord = "/mic/record"
     case sync      = "/sync"
     case tap       = "/tap"
     /// Dynamically assign the listening slot on a client
     case setSlot   = "/set-slot"
+}
+
+public enum ConcertProtocol {
+    public static let version: Int32 = 2
+    public static let expectedDeviceCount: Int = 28
 }
 
 public protocol OscCodable {
@@ -270,6 +276,21 @@ public struct SetSlot: OscCodable {
 /// Simple tap/cue message from a proxy device
 public struct Tap: OscCodable {
     public static let address: OscAddress = .tap
+
+    public init() {}
+
+    public init?(from message: OSCMessage) {
+        guard message.addressPattern == OSCAddressPattern(Self.address.rawValue) else { return nil }
+        self.init()
+    }
+
+    public func encode() -> OSCMessage {
+        OSCMessage(OSCAddressPattern(Self.address.rawValue), values: [])
+    }
+}
+
+public struct PanicAllStop: OscCodable {
+    public static let address: OscAddress = .panicAllStop
 
     public init() {}
 

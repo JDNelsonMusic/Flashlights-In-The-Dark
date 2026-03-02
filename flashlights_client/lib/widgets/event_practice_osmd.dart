@@ -252,7 +252,9 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       }
 
       final highlightChanged =
-          needsBase || !_initialised || _currentHighlightSignature != highlightSignature;
+          needsBase ||
+          !_initialised ||
+          _currentHighlightSignature != highlightSignature;
 
       if (highlightChanged) {
         await _sendHighlight(
@@ -323,26 +325,17 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     await controller.runJavaScript(script);
   }
 
-  Future<void> _sendBaseInit(
-    String xml, {
-    required int contextSeq,
-  }) async {
+  Future<void> _sendBaseInit(String xml, {required int contextSeq}) async {
     _windowRenderedLogCount = 0;
     _lastInitXml = xml;
     if (xml.length <= _kInitChunkThreshold) {
       await _sendPayload({'type': 'init', 'xml': xml, 'context': contextSeq});
       return;
     }
-    await _sendChunkedInit(
-      xml,
-      contextSeq: contextSeq,
-    );
+    await _sendChunkedInit(xml, contextSeq: contextSeq);
   }
 
-  Future<void> _sendChunkedInit(
-    String xml, {
-    required int contextSeq,
-  }) async {
+  Future<void> _sendChunkedInit(String xml, {required int contextSeq}) async {
     final id = (++_initSequence).toString();
     await _sendPayload({'type': 'init-reset', 'id': id, 'context': contextSeq});
     final totalChunks = (xml.length / _kInitChunkSize).ceil();
@@ -359,7 +352,11 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
         'context': contextSeq,
       });
     }
-    await _sendPayload({'type': 'init-chunk-final', 'id': id, 'context': contextSeq});
+    await _sendPayload({
+      'type': 'init-chunk-final',
+      'id': id,
+      'context': contextSeq,
+    });
   }
 
   Future<void> _sendHighlight({
@@ -400,11 +397,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     final note = _currentNoteLabel;
     final contextSeq = ++_contextSequence;
     await _sendBaseInit(xml, contextSeq: contextSeq);
-    await _sendHighlight(
-      contextSeq: contextSeq,
-      measure: measure,
-      note: note,
-    );
+    await _sendHighlight(contextSeq: contextSeq, measure: measure, note: note);
     _currentHighlightSignature = _composeHighlightSignature(measure, note);
     _currentNoteLabel = note;
     _currentMeasure = measure;

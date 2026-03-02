@@ -14,9 +14,10 @@ class OSCMessage {
 
   List<int> _stringBytes(String s) {
     final bytes = utf8.encode(s);
-    final padded = BytesBuilder()
-      ..add(bytes)
-      ..addByte(0);
+    final padded =
+        BytesBuilder()
+          ..add(bytes)
+          ..addByte(0);
     final pad = (4 - (bytes.length + 1) % 4) % 4;
     if (pad > 0) padded.add(List.filled(pad, 0));
     return padded.toBytes();

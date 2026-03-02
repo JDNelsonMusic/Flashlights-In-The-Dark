@@ -27,7 +27,7 @@ class ClientState {
   ClientState()
     : myIndex = ValueNotifier<int>(_initialSlot),
       myColor = ValueNotifier<PrimerColor?>(_slotColorMap[_initialSlot]),
-      udid = const String.fromEnvironment('UDID', defaultValue: 'unknown'),
+      deviceId = ValueNotifier<String>('unknown'),
       clockOffsetMs = ValueNotifier<double>(0.0),
       flashOn = ValueNotifier<bool>(false),
       audioPlaying = ValueNotifier<bool>(false),
@@ -48,8 +48,8 @@ class ClientState {
   /// Convenience notifier for the currently selected colour group.
   final ValueNotifier<PrimerColor?> myColor;
 
-  /// Unique device identifier used for slot verification.
-  final String udid;
+  /// Persistent app-generated device identity used at runtime.
+  final ValueNotifier<String> deviceId;
 
   /// Rolling average clock offset from /sync (ms).
   final ValueNotifier<double> clockOffsetMs;
@@ -94,6 +94,7 @@ class ClientState {
     1: 'Amber',
     3: 'Fred',
     4: 'Brock',
+    5: 'Proxy',
     7: 'Anton',
     9: 'Bob D.',
     12: 'Izzy',
@@ -122,6 +123,38 @@ class ClientState {
 
   static const int _initialSlot = int.fromEnvironment('SLOT', defaultValue: 1);
 
+  // One source of truth for the expected live-performance slots.
+  static const List<int> performanceSlots = <int>[
+    1,
+    3,
+    4,
+    5,
+    7,
+    9,
+    12,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    21,
+    23,
+    24,
+    25,
+    27,
+    29,
+    34,
+    38,
+    40,
+    41,
+    42,
+    44,
+    51,
+    53,
+    54,
+  ];
+
   static Map<int, PrimerColor> _buildSlotColorMap() {
     final slots = <int, PrimerColor>{};
     for (final entry in defaultGroups.entries) {
@@ -133,11 +166,7 @@ class ClientState {
   }
 
   static List<int> _buildAvailableSlots() {
-    final slotSet = <int>{};
-    for (final slots in defaultGroups.values) {
-      slotSet.addAll(slots);
-    }
-    final ordered = slotSet.toList()..sort();
+    final ordered = performanceSlots.toList()..sort();
     return List.unmodifiable(ordered);
   }
 
@@ -231,6 +260,11 @@ class ClientState {
     final events = eventRecipes.value;
     if (index < 0 || index >= events.length) return null;
     return events[index];
+  }
+
+  void setDeviceId(String id) {
+    if (id.trim().isEmpty) return;
+    deviceId.value = id.trim();
   }
 }
 

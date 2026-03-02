@@ -7,6 +7,9 @@ struct ComposerConsoleView: View {
     private var anyTorchOn: Bool {
         state.devices.contains { $0.torchOn }
     }
+    private var preflightLabel: String {
+        "\(state.connectedPerformanceDeviceCount)/\(state.expectedDeviceCount) connected"
+    }
     @State private var showRouting: Bool = false
 
     // Strobe effect state
@@ -355,7 +358,44 @@ struct ComposerConsoleView: View {
                         }
                         .buttonStyle(.bordered)
                         .tint(.blue)
-                        
+
+                        Text(preflightLabel)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(state.canArmStrict ? Color.green.opacity(0.2) : Color.orange.opacity(0.25))
+                            .clipShape(Capsule())
+
+                        Text("PPS \(state.packetRatePerSecond, specifier: "%.1f")")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text("Unknown \(state.unknownSenderEvents)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                        Button(state.isArmed ? "DISARM" : "ARM") {
+                            if state.isArmed {
+                                state.disarmConcertMode()
+                            } else {
+                                _ = state.armConcertMode()
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(state.isArmed ? .red : (state.canArmStrict ? .green : .orange))
+
+                        Button("ARM Override") {
+                            _ = state.armConcertMode(override: true)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.orange)
+                        .disabled(state.isArmed || state.canArmStrict)
+
+                        Button("PANIC") {
+                            state.panicAllStop()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+
                         Spacer(minLength: 20)
                         Button(anyTorchOn ? "All Off" : "All On") {
                             state.toggleAllTorches()
@@ -420,6 +460,12 @@ struct ComposerConsoleView: View {
                         .buttonStyle(.bordered)
                         .tint(.blue)
                         .disabled(!state.isBroadcasting)
+                    }
+
+                    if let warning = state.preflightWarning {
+                        Text("⚠️ \(warning)")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
                     }
 
                     // Heading

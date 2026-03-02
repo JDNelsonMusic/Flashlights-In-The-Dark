@@ -7,7 +7,7 @@ public struct ChoirDevice: Codable, Identifiable, Sendable {
     public var micActive: Bool
     /// Whether this slot represents a real device or a placeholder
     public var isPlaceholder: Bool
-    /// The iOS device UDID used by `flutter run -d <UDID>`.
+    /// Persistent app-generated device identifier reported in /hello.
     public var udid: String
     /// Singer's name, from slot mapping JSON.
     public var name: String
@@ -55,7 +55,8 @@ extension ChoirDevice {
         9: [10, 6, 13, 14], 20: [10, 6, 13, 14], 21: [10, 6, 13, 14],
         23: [10, 7, 15, 16], 38: [10, 7, 15, 16], 51: [10, 7, 15, 16],
         12: [10, 8, 15, 16], 24: [10, 8, 15, 16], 25: [10, 8, 15, 16],
-        40: [10, 9, 15, 16], 53: [10, 9, 15, 16], 54: [10, 9, 15, 16]
+        40: [10, 9, 15, 16], 53: [10, 9, 15, 16], 54: [10, 9, 15, 16],
+        5: [10]
     ]
 
     /// Attempt to load a channel map from a JSON file. The JSON should be a

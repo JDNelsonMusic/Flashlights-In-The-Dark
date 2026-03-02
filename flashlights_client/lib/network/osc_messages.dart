@@ -1,12 +1,16 @@
 // OSC message definitions for Flutter
 import 'osc_packet.dart';
 
+const int kConcertProtocolVersion = 2;
+const int kExpectedDeviceCount = 28;
+
 enum OscAddress {
   flashOn('/flash/on'),
   flashOff('/flash/off'),
   audioPlay('/audio/play'),
   audioStop('/audio/stop'),
   eventTrigger('/event/trigger'),
+  panicAllStop('/panic/all-stop'),
   hello('/hello'),
   discover('/discover'),
   ping('/ping'),

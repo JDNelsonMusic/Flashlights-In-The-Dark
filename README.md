@@ -1,8 +1,15 @@
 # Flashlights In The Dark
 
-## Last updated July 12th 2025
+## Last updated March 2nd 2026
 
 A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-based control system
+
+## Concert Hardening (2026)
+
+- Reliability runbook: [CONCERT_READINESS.md](CONCERT_READINESS.md)
+- One-command verification: `scripts/verify.sh`
+- Soak simulator: `scripts/soak_sim.sh` and `tools/concert_sim.py`
+- Legacy onboarding scripts in `scripts/` are deprecated for normal deployment; use TestFlight (iOS) and Play Store (Android).
 
 
 # Table of Contents
@@ -127,27 +134,12 @@ Qty    Item    Notes
 
 </details> <details> <summary><strong>Android On-Boarding</strong></summary>
 
-bash
-
-```bash
-# install prerequisites (Flutter SDK and Android platform tools)
-brew bundle --file=scripts/Brewfile    # installs adb via platform-tools
-flutter --version && adb version
-
-# configure Flutter project for iOS/Android builds
-scripts/setup_platforms.sh
-
-# apply required permissions to AndroidManifest.xml
-scripts/patch_manifests.sh
-
-# build the APK and deploy to all connected Android phones
-scripts/choir_onboard.sh
-```
-
-1. Enable **Developer Options** and **USB debugging** on each phone.
-2. Connect all devices via USB; the script installs the APK automatically.
-3. Disconnect the cables and join each phone to the closed performance Wi‑Fi network.
+1. Distribute the Android client through **Play Store** (internal testing or production rollout).
+2. Confirm each singer installs the same build version before rehearsal.
+3. Join all phones to the closed performance Wi‑Fi network.
 4. Launch the Flashlights Client and confirm the status reads `Connected · Singer #X`.
+
+Legacy USB onboarding helpers (`scripts/choir_onboard.sh`) are deprecated and retained only for historical/debug scenarios.
 
 </details>
 
@@ -215,7 +207,7 @@ Reserve extra rehearsal time with phones in hand.
 Dim venue lights sufficiently for flashlight effects.
 Enable Do Not Disturb & Guided Access / Screen On on all phones.
 Charge devices (or supply battery packs) before each run-through.
-Have a tech lead familiar with Apple provisioning & Wi-Fi troubleshooting.
+Have a tech lead familiar with TestFlight/Play Store rollout and Wi-Fi troubleshooting.
 
 # **Provide audience advisories if using rapid strobe patterns.**
 
@@ -231,7 +223,7 @@ flashlights-in-the-dark/
 ├── flashlights_client/        # Flutter mobile app
 ├── FlashlightsInTheDark_MacOS/  # Swift-based conductor console
 ├── scripts/
-│   ├── choir_onboard.sh       # Android deployment & device mapping helper
+│   ├── choir_onboard.sh       # deprecated legacy Android onboarding helper
 │   ├── Brewfile               # Homebrew dependencies
 │   └── …                      # misc. debugging helpers
 ├── docs/
@@ -283,7 +275,7 @@ Flashlights In The Dark is a nine-minute electro-acoustic composition that integ
 
 ## Flashlights In The Dark consists of several interconnected components:
 
-Conductor’s Computer (Mac): A macOS laptop or desktop running the Flashlights In The Dark control software. This application is the “brain” of the system – it sends out cues to all smartphones, controls timing, and optionally responds to MIDI input. We recommend using a Mac for compatibility with the provided provisioning and networking tools.
+Conductor’s Computer (Mac): A macOS laptop or desktop running the Flashlights In The Dark control software. This application is the “brain” of the system – it sends out cues to all smartphones, controls timing, and optionally responds to MIDI input. We recommend using a Mac for compatibility with the networking and diagnostics tools.
 
 Smartphone Clients (Singers’ Devices): Each participating singer carries a smartphone (iOS or Android) with the Flashlights Client app installed. This custom app listens for commands from the conductor’s computer over a dedicated Wi-Fi network. When it receives a command, it can turn the phone’s flashlight (torch) on/off, play back audio samples through the phone’s speaker, or even briefly access the microphone. Both iPhones and Android phones are supported, and they can be used together in the same performance.
 
@@ -352,7 +344,7 @@ Smartphones: 28 smartphones (the exact number can be adjusted, but the compositi
 
 iPhones: Ideally running iOS 16 or later for best compatibility. The Flashlights Client is distributed via TestFlight. Each singer should provide their Apple ID so you can invite them to the testing group and they can install the app from TestFlight.
 
-Android phones: Running Android 10 or later. The app can be installed via an APK file. Developer mode and USB debugging should be enabled to allow our deployment script to install the app. After installation, the app does not require any special debug mode.
+Android phones: Running Android 10 or later. The app is distributed via Play Store (internal testing or production rollout). USB debugging is not part of normal deployment.
 
 It’s fine to mix iPhones and Androids in the ensemble. The app is cross-platform and will behave the same way on both.
 
@@ -380,13 +372,13 @@ For iOS devices, distribute the app via **TestFlight**:
 
 This approach eliminates the need for local device registration or Fastlane scripts.
 
-For Android devices, the same script will detect devices via adb and install the pre-built APK to each one. Ensure Android phones have file transfer or debugging mode on and are connected via USB.
+For Android devices, use Play Store distribution so every phone gets the same signed build.
 
-The script also maintains a JSON map of devices (flash_ip+udid_map.json), recording each device’s unique ID (UDID for iOS or a MAC address for Android) and assigned slot number. This mapping ensures that the system knows which singer/device corresponds to which slot ID (so cues are sent to the correct phone). After onboarding, this map file should be saved (committed in version control) so that reconnections or app restarts can remember the assignment.
+Runtime identity now comes from a persistent app-generated `deviceId` sent in `/hello` and `/ack`; concert routing does not depend on iOS UDID availability.
 
-For MIDI integration, you can optionally include a channel_map.json file alongside the Mac app. This JSON lists each slot number and the MIDI channels it should respond to. When present, the app loads this file on launch and overrides the compiled defaults, making it easy to tweak channel assignments without rebuilding.
+For MIDI integration, you can optionally include a `channel_map.json` file alongside the Mac app. This JSON lists each slot number and the MIDI channels it should respond to. When present, the app loads this file on launch and overrides the compiled defaults, making it easy to tweak channel assignments without rebuilding.
 
-Alternatively: If the above automation is not feasible, you can manually install the app on each phone (for iOS, via TestFlight or Configurator, and for Android, by sending the APK). In that case, you’d manually maintain the device-to-slot assignments in the JSON file or in the app UI (our app allows a manual override of its slot number if needed). However, using the provided tools is highly recommended for efficiency, especially with many devices.
+Legacy automation scripts are retained in `scripts/` but are deprecated for normal concert deployment.
 
 Rehearsal and Configuration: Once all devices are on the network and the app is running, do a thorough test:
 

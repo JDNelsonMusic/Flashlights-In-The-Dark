@@ -485,10 +485,36 @@ class _ChecklistItem extends StatelessWidget {
   }
 }
 
+String _generateDeviceId() {
+  final random = math.Random.secure();
+  const alphabet = '0123456789abcdef';
+  String segment(int len) {
+    final b = StringBuffer();
+    for (var i = 0; i < len; i++) {
+      b.write(alphabet[random.nextInt(alphabet.length)]);
+    }
+    return b.toString();
+  }
+
+  return '${segment(8)}-${segment(4)}-4${segment(3)}-a${segment(3)}-${segment(12)}';
+}
+
+Future<String> _ensurePersistentDeviceId(SharedPreferences prefs) async {
+  final existing = prefs.getString('deviceId')?.trim() ?? '';
+  if (existing.isNotEmpty) {
+    return existing;
+  }
+  final generated = _generateDeviceId();
+  await prefs.setString('deviceId', generated);
+  return generated;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _bootstrapNative();
   final prefs = await SharedPreferences.getInstance();
+  final deviceId = await _ensurePersistentDeviceId(prefs);
+  client.setDeviceId(deviceId);
   final savedSlot = prefs.getInt('lastSlot');
   if (savedSlot != null && savedSlot != 0) {
     client.myIndex.value = savedSlot;
@@ -588,8 +614,8 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     }
   }
 
-  void _handleKeyEvent(RawKeyEvent event) {
-    if (event is! RawKeyDownEvent) return;
+  void _handleKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) return;
     final key = event.logicalKey;
     if (key == LogicalKeyboardKey.audioVolumeUp) {
       unawaited(_updateBrightness(0.1));
@@ -696,7 +722,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     }
     client.brightness.value = clamped;
     try {
-      await ScreenBrightness.instance.setScreenBrightness(clamped);
+      await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
     } catch (e) {
       debugPrint('[UI] Screen brightness set failed: $e');
     }
@@ -730,10 +756,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
             : Platform.isAndroid
             ? 'Android'
             : 'Unknown';
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: _keyboardFocusNode,
       autofocus: true,
-      onKey: _handleKeyEvent,
+      onKeyEvent: _handleKeyEvent,
       child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
@@ -1904,6 +1930,14 @@ class DebugOverlay extends StatelessWidget {
                       style: const TextStyle(color: Colors.white70),
                     ),
               ),
+              ValueListenableBuilder<String>(
+                valueListenable: client.deviceId,
+                builder:
+                    (context, deviceId, _) => Text(
+                      'Device ID: $deviceId',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+              ),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
                 builder:
@@ -1969,6 +2003,25 @@ class DebugOverlay extends StatelessWidget {
                       style: const TextStyle(color: Colors.white70),
                     ),
               ),
+              Builder(
+                builder: (context) {
+                  final snapshot =
+                      flosc.OscListener.instance.networkDiagnosticsSnapshot();
+                  final trustedIp = snapshot['trustedConductorIp'] as String?;
+                  final showSessionId = snapshot['showSessionId'] as String?;
+                  final protocolVersion = snapshot['protocolVersion'];
+                  final unknown = snapshot['unknownSenderCount'];
+                  final duplicates = snapshot['duplicatesDropped'];
+                  final outOfOrder = snapshot['outOfOrderDropped'];
+                  final mismatches = snapshot['protocolMismatchCount'];
+                  return Text(
+                    'Trusted: ${trustedIp ?? 'none'} · Session: ${showSessionId ?? 'none'} · v$protocolVersion\\n'
+                    'Unknown senders: $unknown · Duplicates dropped: $duplicates · '
+                    'Out-of-order dropped: $outOfOrder · Protocol mismatches: $mismatches',
+                    style: const TextStyle(color: Colors.white70),
+                  );
+                },
+              ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: onSendHello,
@@ -1990,6 +2043,52 @@ class DebugOverlay extends StatelessWidget {
                   }
                 },
                 child: const Text('Copy Network Log'),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Recent Network Events',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 150,
+                child: Builder(
+                  builder: (context) {
+                    final snapshot =
+                        flosc.OscListener.instance.networkDiagnosticsSnapshot();
+                    final rawEvents =
+                        (snapshot['events'] as List<dynamic>? ??
+                                const <dynamic>[])
+                            .cast<Map<String, dynamic>>();
+                    if (rawEvents.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No network events yet.',
+                          style: TextStyle(color: Colors.white54),
+                        ),
+                      );
+                    }
+                    final events = rawEvents.reversed.take(20).toList();
+                    return ListView.builder(
+                      itemCount: events.length,
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        final category = event['category'] ?? 'event';
+                        final message = event['message'] ?? '';
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Text(
+                            '[$category] $message',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 12),
               const Text(

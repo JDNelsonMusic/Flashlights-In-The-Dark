@@ -94,7 +94,7 @@ struct RoutingView: View {
     private var controlPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                TextField("Search by name, slot, UDID, or IP", text: $filterText)
+                TextField("Search by name, slot, device ID, or IP", text: $filterText)
                     .textFieldStyle(.roundedBorder)
                     .frame(minWidth: 260, maxWidth: 320)
 
@@ -124,6 +124,20 @@ struct RoutingView: View {
                 Text("Showing \(filteredDevices.count) of \(state.devices.count) devices")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+
+            Text("Preflight: \(state.connectedPerformanceDeviceCount)/\(state.expectedDeviceCount) connected · Unknown senders: \(state.unknownSenderEvents) · Send failures: \(state.totalSendFailures) · PPS \(state.packetRatePerSecond, specifier: "%.1f")")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if !state.interfaceHealthSummary.isEmpty {
+                Text(
+                    state.interfaceHealthSummary
+                        .map { "\($0.name) \($0.sendSuccessCount)/\($0.sendFailureCount)" }
+                        .joined(separator: " · ")
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             }
         }
     }
@@ -210,7 +224,7 @@ private struct DeviceCard: View {
                         .font(.caption)
                 }
                 if !device.udid.isEmpty {
-                    Label(device.udid, systemImage: "iphone")
+                    Label("Device ID \(device.udid)", systemImage: "iphone")
                         .font(.caption)
                         .textSelection(.enabled)
                 }

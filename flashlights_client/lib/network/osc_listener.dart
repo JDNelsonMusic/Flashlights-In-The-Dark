@@ -1,33 +1,30 @@
-// Copyright © 2025.  MIT‑licensed.
-// Improved version generated 2025‑07‑11.
-// This file supersedes the former merge‑conflicted osc_listener.dart.
+// Copyright © 2025.  MIT-licensed.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audio_session/audio_session.dart' as audio_session;
-import 'osc_packet.dart';
-import 'osc_messages.dart';
-import 'package:torch_light/torch_light.dart';
-import 'package:screen_brightness/screen_brightness.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-
-import '../services/mic_input.dart';
-import '../native_audio.dart';
+import 'package:flutter/services.dart';
+import 'package:screen_brightness/screen_brightness.dart';
+import 'package:torch_light/torch_light.dart';
 
 import '../model/client_state.dart';
 import '../model/event_recipe.dart';
+import '../native_audio.dart';
+import '../services/mic_input.dart';
+import 'osc_messages.dart';
+import 'osc_packet.dart';
 
-/// Native channel to control torch brightness.
 const MethodChannel _torchChannel = MethodChannel('ai.keex.flashlights/torch');
 const bool kEnableMic = false;
-
-/// Helper that creates a UDP‑broadcast‑enabled [OSCSocket].
 const int _oscPort = 9000;
 const Duration _fastHelloInterval = Duration(seconds: 2);
 const Duration _slowHelloInterval = Duration(seconds: 10);
+const Duration _conductorTimeout = Duration(seconds: 8);
+const Duration _watchdogTick = Duration(seconds: 1);
 
 class _NetworkEvent {
   const _NetworkEvent({
@@ -52,19 +49,79 @@ class _NetworkEvent {
   }
 }
 
+class _InboundDatagram {
+  const _InboundDatagram({
+    required this.message,
+    required this.address,
+    required this.port,
+  });
+
+  final OSCMessage message;
+  final InternetAddress address;
+  final int port;
+}
+
+class _CueEnvelope {
+  const _CueEnvelope({
+    required this.slot,
+    required this.protocolVersion,
+    required this.showSessionId,
+    required this.seq,
+    required this.cueId,
+    required this.sentAtMs,
+    required this.payload,
+  });
+
+  final int slot;
+  final int protocolVersion;
+  final String showSessionId;
+  final int seq;
+  final String cueId;
+  final int sentAtMs;
+  final List<Object> payload;
+
+  static _CueEnvelope? fromOsc(OSCMessage message) {
+    final args = message.arguments;
+    if (args.length < 6) return null;
+
+    final slot = args[0];
+    final protocolVersion = args[1];
+    final showSessionId = args[2];
+    final seq = args[3];
+    final cueId = args[4];
+    final sentAtMs = args[5];
+
+    if (slot is! int ||
+        protocolVersion is! int ||
+        showSessionId is! String ||
+        seq is! int ||
+        cueId is! String ||
+        sentAtMs is! int) {
+      return null;
+    }
+
+    return _CueEnvelope(
+      slot: slot,
+      protocolVersion: protocolVersion,
+      showSessionId: showSessionId,
+      seq: seq,
+      cueId: cueId,
+      sentAtMs: sentAtMs,
+      payload: args.length > 6 ? args.sublist(6) : const <Object>[],
+    );
+  }
+}
+
 OSCSocket _createBroadcastSocket({
   required InternetAddress serverAddress,
   required int serverPort,
 }) {
-  // Pre‑define the broadcast target so [OSCSocket.send] can be called with
-  // *only* the OSC message (send(msg)).
   final socket = OSCSocket(
     serverAddress: serverAddress,
     serverPort: serverPort,
     destination: InternetAddress('255.255.255.255'),
     destinationPort: serverPort,
   );
-  // Best‑effort: create the socket immediately and allow broadcasting.
   socket.bind().then((_) {
     socket.rawSocket?.broadcastEnabled = true;
   });
@@ -80,29 +137,49 @@ Future<RawDatagramSocket> _bindReceiveSocket() {
   );
 }
 
-/// Singleton OSC listener handling flash / audio / mic / sync cues.
 class OscListener {
   OscListener._();
   static final OscListener instance = OscListener._();
 
   OSCSocket? _socket;
   RawDatagramSocket? _recvSocket;
-  Timer? _helloTimer;
-  Duration _currentHelloInterval = _fastHelloInterval;
-  int _playbackToken = 0;
-  final Map<String, Timer> _primerDedupTimers = {};
-  static const Duration _primerDedupHold = Duration(seconds: 5);
+  StreamSubscription<RawSocketEvent>? _recvSubscription;
   StreamSubscription<List<int>>? _micSubscription;
+
   final MicInput _mic = MicInputStub();
   bool _running = false;
+
+  Timer? _helloTimer;
+  Duration _currentHelloInterval = _fastHelloInterval;
   Timer? _disconnectTimer;
-  final Map<String, InternetAddress> _serverAddresses = {};
-  StreamSubscription<RawSocketEvent>? _recvSubscription;
-  final List<_NetworkEvent> _eventLog = <_NetworkEvent>[];
-  static const int _maxLogEntries = 600;
-  final Set<String> _everSeenServers = <String>{};
+  Timer? _conductorWatchdog;
+
   Completer<void>? _rebindCompleter;
   DateTime? _lastRebindTime;
+
+  Future<void> _dispatchQueue = Future<void>.value();
+  int _playbackToken = 0;
+  final Map<String, Timer> _primerDedupTimers = <String, Timer>{};
+  static const Duration _primerDedupHold = Duration(seconds: 5);
+
+  final List<_NetworkEvent> _eventLog = <_NetworkEvent>[];
+  static const int _maxLogEntries = 600;
+
+  InternetAddress? _trustedConductorAddress;
+  int? _trustedConductorPort;
+  String? _lockedShowSessionId;
+  DateTime? _lastConductorHeartbeat;
+
+  int _unknownSenderCount = 0;
+  int _protocolMismatchCount = 0;
+  int _duplicatesDropped = 0;
+  int _outOfOrderDropped = 0;
+
+  int _lastProcessedSeq = -1;
+  final LinkedHashMap<String, DateTime> _recentCueIds =
+      LinkedHashMap<String, DateTime>();
+  static const Duration _cueIdTtl = Duration(minutes: 3);
+  static const int _maxCueIdCacheSize = 4096;
 
   void _record(String category, String message, [Map<String, Object?>? data]) {
     final event = _NetworkEvent(
@@ -115,23 +192,108 @@ class OscListener {
     if (_eventLog.length > _maxLogEntries) {
       _eventLog.removeRange(0, _eventLog.length - _maxLogEntries);
     }
+
     if (kDebugMode) {
       final suffix = data == null ? '' : ' $data';
       debugPrint('[OSC][$category] $message$suffix');
     }
   }
 
-  Future<void> _rebindSockets({bool clearServerCache = false}) async {
-    _recvSubscription?.cancel();
+  void _resetCueOrderingState() {
+    _lastProcessedSeq = -1;
+    _recentCueIds.clear();
+  }
+
+  void _unlockConductor({required String reason}) {
+    final hadLock = _trustedConductorAddress != null;
+    _trustedConductorAddress = null;
+    _trustedConductorPort = null;
+    _lockedShowSessionId = null;
+    _lastConductorHeartbeat = null;
+    _resetCueOrderingState();
+
+    if (hadLock) {
+      _record('pairing', 'Unlocked conductor', <String, Object?>{
+        'reason': reason,
+      });
+    }
+
+    client.connected.value = false;
+    if (_running) {
+      _restartHelloTimer(_fastHelloInterval);
+    }
+  }
+
+  void _lockConductor(InternetAddress address, int port, String showSessionId) {
+    _trustedConductorAddress = address;
+    _trustedConductorPort = port;
+    _lockedShowSessionId = showSessionId;
+    _resetCueOrderingState();
+    _record('pairing', 'Locked conductor endpoint', <String, Object?>{
+      'ip': address.address,
+      'port': port,
+      'showSessionId': showSessionId,
+    });
+    _markConductorHeartbeat();
+  }
+
+  bool _isTrustedSender(_InboundDatagram datagram) {
+    final trustedAddress = _trustedConductorAddress;
+    final trustedPort = _trustedConductorPort;
+    if (trustedAddress == null || trustedPort == null) return false;
+    return datagram.address.address == trustedAddress.address &&
+        datagram.port == trustedPort;
+  }
+
+  bool _recordUnknownSender(_InboundDatagram datagram, String reason) {
+    _unknownSenderCount += 1;
+    _record(
+      'security',
+      'Dropped message from untrusted sender',
+      <String, Object?>{
+        'reason': reason,
+        'ip': datagram.address.address,
+        'port': datagram.port,
+        'address': datagram.message.address,
+      },
+    );
+    return false;
+  }
+
+  void _markConductorHeartbeat() {
+    _lastConductorHeartbeat = DateTime.now().toUtc();
+    if (!client.connected.value) {
+      client.connected.value = true;
+      _record('connectivity', 'Connected to trusted conductor');
+    }
+    _disconnectTimer?.cancel();
+    _disconnectTimer = Timer(_conductorTimeout, () {
+      _unlockConductor(reason: 'conductor heartbeat timeout');
+    });
+
+    if (_currentHelloInterval != _slowHelloInterval) {
+      _restartHelloTimer(_slowHelloInterval);
+    }
+  }
+
+  void _startConductorWatchdog() {
+    _conductorWatchdog?.cancel();
+    _conductorWatchdog = Timer.periodic(_watchdogTick, (_) {
+      final last = _lastConductorHeartbeat;
+      if (last == null) return;
+      if (DateTime.now().toUtc().difference(last) > _conductorTimeout) {
+        _unlockConductor(reason: 'watchdog timeout');
+      }
+    });
+  }
+
+  Future<void> _rebindSockets() async {
+    await _recvSubscription?.cancel();
     _recvSubscription = null;
     _socket?.close();
     _socket = null;
     _recvSocket?.close();
     _recvSocket = null;
-
-    if (clearServerCache) {
-      _serverAddresses.clear();
-    }
 
     _socket = _createBroadcastSocket(
       serverAddress: InternetAddress.anyIPv4,
@@ -144,49 +306,47 @@ class OscListener {
       (event) {
         if (event == RawSocketEvent.read) {
           final dg = recv.receive();
-          if (dg != null) {
-            _rememberServer(dg.address);
-            final msg = _parseMessage(dg.data);
-            if (msg != null) {
-              _dispatch(msg);
-            }
-          }
-        } else if (event == RawSocketEvent.closed ||
-            event == RawSocketEvent.readClosed) {
-          _record('socket', 'Receive socket closed', <String, Object?>{'event': '$event'});
-          unawaited(
-            _scheduleRebind(reason: 'recv socket closed', clearServerCache: false),
+          if (dg == null) return;
+          final parsed = _parseMessage(dg.data);
+          if (parsed == null) return;
+          _enqueueDispatch(
+            _InboundDatagram(
+              message: parsed,
+              address: dg.address,
+              port: dg.port,
+            ),
           );
+          return;
+        }
+
+        if (event == RawSocketEvent.closed ||
+            event == RawSocketEvent.readClosed) {
+          _record('socket', 'Receive socket closed', <String, Object?>{
+            'event': '$event',
+          });
+          unawaited(_scheduleRebind(reason: 'recv socket closed'));
         }
       },
       onError: (Object error, StackTrace stack) {
-        _record(
-          'socket',
-          'Receive socket error',
-          <String, Object?>{'error': error.toString()},
-        );
-        unawaited(
-          _scheduleRebind(reason: 'recv socket error', clearServerCache: false),
-        );
+        _record('socket', 'Receive socket error', <String, Object?>{
+          'error': error.toString(),
+        });
+        unawaited(_scheduleRebind(reason: 'recv socket error'));
       },
       onDone: () {
         _record('socket', 'Receive socket done');
-        unawaited(
-          _scheduleRebind(reason: 'recv socket done', clearServerCache: false),
-        );
+        unawaited(_scheduleRebind(reason: 'recv socket done'));
       },
     );
     _recvSocket = recv;
   }
 
-  Future<void> _scheduleRebind({
-    required String reason,
-    bool clearServerCache = false,
-  }) {
+  Future<void> _scheduleRebind({required String reason}) {
     if (_rebindCompleter != null) {
       _record('rebind', 'Rebind already in flight ($reason)');
       return _rebindCompleter!.future;
     }
+
     final completer = Completer<void>();
     _rebindCompleter = completer;
 
@@ -195,30 +355,32 @@ class OscListener {
         final now = DateTime.now();
         final last = _lastRebindTime;
         if (last != null) {
-          final diff = now.difference(last);
           const minSpacing = Duration(milliseconds: 600);
+          final diff = now.difference(last);
           if (diff < minSpacing) {
             await Future<void>.delayed(minSpacing - diff);
           }
         }
-        _record(
-          'rebind',
-          'Rebinding sockets',
-          <String, Object?>{'reason': reason, 'clearCache': clearServerCache},
-        );
-        await _rebindSockets(clearServerCache: clearServerCache);
+
+        _record('rebind', 'Rebinding sockets', <String, Object?>{
+          'reason': reason,
+        });
+        await _rebindSockets();
         _lastRebindTime = DateTime.now();
-        _record('rebind', 'Rebind complete', <String, Object?>{'reason': reason});
+        _record('rebind', 'Rebind complete', <String, Object?>{
+          'reason': reason,
+        });
+
         if (_running) {
           _sendHello();
         }
+
         completer.complete();
       } catch (e, st) {
-        _record(
-          'rebind',
-          'Rebind failed',
-          <String, Object?>{'reason': reason, 'error': e.toString()},
-        );
+        _record('rebind', 'Rebind failed', <String, Object?>{
+          'reason': reason,
+          'error': e.toString(),
+        });
         if (!completer.isCompleted) {
           completer.completeError(e, st);
         }
@@ -230,6 +392,42 @@ class OscListener {
     return completer.future;
   }
 
+  void _sendBestEffort(
+    OSCMessage msg, {
+    InternetAddress? destination,
+    int port = _oscPort,
+    required String category,
+  }) {
+    final socket = _socket;
+    if (socket == null) return;
+
+    Future<int> sendFuture;
+    if (destination == null) {
+      sendFuture = socket.send(msg);
+    } else {
+      sendFuture = socket.sendTo(msg, dest: destination, port: port);
+    }
+
+    unawaited(
+      sendFuture.catchError((Object error) {
+        _record(category, 'Send failed', <String, Object?>{
+          'error': error.toString(),
+        });
+        return 0;
+      }),
+    );
+  }
+
+  void _enqueueDispatch(_InboundDatagram datagram) {
+    _dispatchQueue = _dispatchQueue.then((_) => _dispatch(datagram)).catchError(
+      (Object error, StackTrace stack) {
+        _record('dispatch', 'Dispatch error', <String, Object?>{
+          'error': error.toString(),
+        });
+      },
+    );
+  }
+
   void _registerPrimerKey(String key) {
     _primerDedupTimers[key]?.cancel();
     _primerDedupTimers[key] = Timer(_primerDedupHold, () {
@@ -238,16 +436,14 @@ class OscListener {
   }
 
   bool _shouldSkipPrimer(String? key) {
-    if (key == null) {
-      return false;
-    }
-    _primerDedupTimers.removeWhere((k, timer) {
+    if (key == null) return false;
+
+    _primerDedupTimers.removeWhere((entryKey, timer) {
       final active = timer.isActive;
-      if (!active) {
-        timer.cancel();
-      }
+      if (!active) timer.cancel();
       return !active;
     });
+
     final existing = _primerDedupTimers[key];
     if (existing != null && existing.isActive) {
       return true;
@@ -255,35 +451,120 @@ class OscListener {
     return false;
   }
 
+  bool _isDuplicateCueId(String cueId, DateTime now) {
+    _recentCueIds.removeWhere(
+      (_, timestamp) => now.difference(timestamp) > _cueIdTtl,
+    );
+
+    if (_recentCueIds.containsKey(cueId)) {
+      return true;
+    }
+
+    _recentCueIds[cueId] = now;
+    while (_recentCueIds.length > _maxCueIdCacheSize) {
+      _recentCueIds.remove(_recentCueIds.keys.first);
+    }
+    return false;
+  }
+
+  bool _validateEnvelope(
+    _CueEnvelope envelope,
+    _InboundDatagram datagram, {
+    required bool requiresSlot,
+  }) {
+    if (envelope.protocolVersion != kConcertProtocolVersion) {
+      _protocolMismatchCount += 1;
+      _record(
+        'protocol',
+        'Dropped cue due to protocol mismatch',
+        <String, Object?>{
+          'expected': kConcertProtocolVersion,
+          'received': envelope.protocolVersion,
+          'cueId': envelope.cueId,
+        },
+      );
+      return false;
+    }
+
+    final lockedSession = _lockedShowSessionId;
+    if (lockedSession == null || lockedSession != envelope.showSessionId) {
+      _record(
+        'protocol',
+        'Dropped cue due to showSessionId mismatch',
+        <String, Object?>{
+          'expected': lockedSession,
+          'received': envelope.showSessionId,
+          'cueId': envelope.cueId,
+        },
+      );
+      return false;
+    }
+
+    if (requiresSlot && envelope.slot != client.myIndex.value) {
+      return false;
+    }
+
+    final now = DateTime.now().toUtc();
+    if (_isDuplicateCueId(envelope.cueId, now)) {
+      _duplicatesDropped += 1;
+      _record('dedupe', 'Dropped duplicate cue', <String, Object?>{
+        'cueId': envelope.cueId,
+        'seq': envelope.seq,
+      });
+      return false;
+    }
+
+    if (_lastProcessedSeq >= 0 && envelope.seq <= _lastProcessedSeq) {
+      _outOfOrderDropped += 1;
+      _record('ordering', 'Dropped out-of-order cue', <String, Object?>{
+        'cueId': envelope.cueId,
+        'seq': envelope.seq,
+        'lastSeq': _lastProcessedSeq,
+      });
+      return false;
+    }
+
+    _lastProcessedSeq = envelope.seq;
+    _markConductorHeartbeat();
+
+    _record('cue', 'Accepted cue', <String, Object?>{
+      'address': datagram.message.address,
+      'cueId': envelope.cueId,
+      'seq': envelope.seq,
+    });
+    return true;
+  }
+
   Future<void> _playPrimer(
     String fileName,
     double gain, {
     bool sendAck = false,
     String? dedupeKey,
+    String? cueId,
+    int? seq,
   }) async {
     if (_shouldSkipPrimer(dedupeKey)) {
-      debugPrint('[OSC] Skipping duplicate primer request for $dedupeKey');
+      _record('dedupe', 'Skipping duplicate primer request', <String, Object?>{
+        'key': dedupeKey,
+      });
       if (sendAck) {
-        _sendAck();
+        _sendAck(cueId: cueId, seq: seq);
       }
       return;
     }
+
     try {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
 
       final volume = gain.clamp(0.0, 1.0).toDouble();
       final playbackToken = ++_playbackToken;
-
       await NativeAudio.playPrimerTone(fileName, volume);
 
       if (dedupeKey != null) {
         _registerPrimerKey(dedupeKey);
       }
 
-      debugPrint(
-        '[OSC] Native playback invoked: ${fileName.trim()} @ vol=$volume',
-      );
       client.audioPlaying.value = true;
       unawaited(
         Future<void>.delayed(const Duration(seconds: 2), () {
@@ -293,15 +574,17 @@ class OscListener {
         }),
       );
     } catch (e) {
-      debugPrint('[OSC] Native playback failed for $fileName: $e');
+      _record('audio', 'Native playback failed', <String, Object?>{
+        'error': e.toString(),
+      });
       client.audioPlaying.value = false;
     }
+
     if (sendAck) {
-      _sendAck();
+      _sendAck(cueId: cueId, seq: seq);
     }
   }
 
-  /// Starts listening on UDP port 9000 (idempotent).
   Future<void> start() async {
     if (_running) return;
     _running = true;
@@ -311,58 +594,61 @@ class OscListener {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
     } catch (e) {
-      debugPrint('[OSC] Failed to activate audio session: $e');
+      _record('audio', 'Failed to activate audio session', <String, Object?>{
+        'error': e.toString(),
+      });
     }
 
     try {
-      await _scheduleRebind(reason: 'startup', clearServerCache: true);
+      await _scheduleRebind(reason: 'startup');
     } catch (e) {
       _running = false;
       rethrow;
     }
 
-    // Periodically announce our presence so servers can discover us.
+    _startConductorWatchdog();
     _restartHelloTimer(_fastHelloInterval);
     _sendHello();
-
     _record('lifecycle', 'Listening on 0.0.0.0:$_oscPort');
-    print('[OSC] Listening on 0.0.0.0:9000');
   }
 
-  /// Minimal OSC parser for the small subset of messages we use.
   OSCMessage? _parseMessage(Uint8List data) {
     int idx = 0;
     final zero = data.indexOf(0, idx);
     if (zero == -1) return null;
+
     final address = utf8.decode(data.sublist(0, zero));
     idx = (zero + 4) & ~3;
-    if (idx >= data.length || data[idx] != 44) return null; // ','
+    if (idx >= data.length || data[idx] != 44) return null;
+
     final tagEnd = data.indexOf(0, idx);
     if (tagEnd == -1) return null;
+
     final tags = utf8.decode(data.sublist(idx + 1, tagEnd));
     idx = (tagEnd + 4) & ~3;
+
     final args = <Object>[];
-    final bd = ByteData.sublistView(data);
-    for (final t in tags.split('')) {
-      switch (t) {
+    final byteData = ByteData.sublistView(data);
+    for (final tag in tags.split('')) {
+      switch (tag) {
         case 'i':
           if (idx + 4 > data.length) return null;
-          args.add(bd.getInt32(idx, Endian.big));
+          args.add(byteData.getInt32(idx, Endian.big));
           idx += 4;
           break;
         case 'h':
           if (idx + 8 > data.length) return null;
-          args.add(bd.getInt64(idx, Endian.big));
+          args.add(byteData.getInt64(idx, Endian.big));
           idx += 8;
           break;
         case 'f':
           if (idx + 4 > data.length) return null;
-          args.add(bd.getFloat32(idx, Endian.big));
+          args.add(byteData.getFloat32(idx, Endian.big));
           idx += 4;
           break;
         case 'd':
           if (idx + 8 > data.length) return null;
-          args.add(bd.getFloat64(idx, Endian.big));
+          args.add(byteData.getFloat64(idx, Endian.big));
           idx += 8;
           break;
         case 's':
@@ -373,29 +659,24 @@ class OscListener {
           break;
         case 't':
           if (idx + 8 > data.length) return null;
-          final hi = bd.getUint32(idx, Endian.big);
-          final lo = bd.getUint32(idx + 4, Endian.big);
+          final hi = byteData.getUint32(idx, Endian.big);
+          final lo = byteData.getUint32(idx + 4, Endian.big);
           args.add((BigInt.from(hi) << 32) | BigInt.from(lo));
           idx += 8;
           break;
         default:
-          return null; // unsupported
+          return null;
       }
     }
-    // Explicitly cast the dynamic list to the non-nullable
-    // type expected by the OSCMessage constructor.
+
     return OSCMessage(address, arguments: List<Object>.from(args));
   }
 
-  /// Sets the torch brightness on the native side. Falls back to
-  /// [TorchLight.enableTorch]/[TorchLight.disableTorch] if the platform
-  /// channel isn't implemented (older Android versions).
   Future<void> _setTorchLevel(double level) async {
     try {
       await _torchChannel.invokeMethod('setTorchLevel', level);
       client.flashOn.value = level > 0;
     } on MissingPluginException {
-      // Older Android versions: only on/off available via TorchLight.
       if (level > 0) {
         await TorchLight.enableTorch();
         client.flashOn.value = true;
@@ -404,237 +685,394 @@ class OscListener {
         client.flashOn.value = false;
       }
     } catch (e) {
-      print('[OSC] Torch error: $e');
+      _record('torch', 'Torch command failed', <String, Object?>{
+        'error': e.toString(),
+      });
       client.flashOn.value = false;
     }
   }
 
-  /// Public helper so UI elements can adjust the torch directly.
   Future<void> setTorchLevel(double level) => _setTorchLevel(level);
 
-  /* -------------------------------------------------------------------- */
-  /*                               Dispatcher                             */
-  /* -------------------------------------------------------------------- */
+  bool _tryHandleConductorHello(_InboundDatagram datagram) {
+    final message = datagram.message;
+    if (message.address != '/hello') return false;
 
-  Future<void> _dispatch(OSCMessage m) async {
-    final myIndex = client.myIndex.value;
-    final isSelfHello =
-        m.address == '/hello' &&
-        m.arguments.isNotEmpty &&
-        m.arguments[0] is int &&
-        m.arguments[0] == myIndex &&
-        (m.arguments.length < 2 ||
-            (m.arguments[1] is String && m.arguments[1] == client.udid));
-    if (!isSelfHello) {
-      debugPrint('📲 OSC <<< ${m.address}  ${m.arguments}');
+    final args = message.arguments;
+    if (args.length < 3) return false;
+    if (args[0] != 'conductor') return false;
+
+    final protocol = args[1];
+    final showSessionId = args[2];
+    if (protocol is! int || showSessionId is! String || showSessionId.isEmpty) {
+      return false;
     }
 
-    final List<OSCMessage> updatedMessages = List<OSCMessage>.from(
-      client.recentMessages.value,
-    )..add(m);
-    if (updatedMessages.length > 10) {
-      updatedMessages.removeRange(0, updatedMessages.length - 10);
+    if (protocol != kConcertProtocolVersion) {
+      _protocolMismatchCount += 1;
+      _record(
+        'protocol',
+        'Ignored conductor hello due to protocol mismatch',
+        <String, Object?>{
+          'expected': kConcertProtocolVersion,
+          'received': protocol,
+          'ip': datagram.address.address,
+        },
+      );
+      return true;
+    }
+
+    final trusted = _trustedConductorAddress;
+    final trustedPort = _trustedConductorPort;
+    final isCurrentTrusted =
+        trusted != null &&
+        trustedPort != null &&
+        trusted.address == datagram.address.address &&
+        trustedPort == datagram.port;
+
+    if (trusted == null || trustedPort == null) {
+      _lockConductor(datagram.address, datagram.port, showSessionId);
+      _sendHello();
+      return true;
+    }
+
+    if (!isCurrentTrusted) {
+      _recordUnknownSender(
+        datagram,
+        'different conductor endpoint while locked',
+      );
+      return true;
+    }
+
+    if (_lockedShowSessionId != showSessionId) {
+      _record(
+        'pairing',
+        'Trusted conductor started new session; relocking',
+        <String, Object?>{
+          'oldSessionId': _lockedShowSessionId,
+          'newSessionId': showSessionId,
+        },
+      );
+      _lockConductor(datagram.address, datagram.port, showSessionId);
+    } else {
+      _markConductorHeartbeat();
+    }
+
+    return true;
+  }
+
+  Future<void> _dispatch(_InboundDatagram datagram) async {
+    final message = datagram.message;
+
+    final updatedMessages = List<OSCMessage>.from(client.recentMessages.value)
+      ..add(message);
+    if (updatedMessages.length > 20) {
+      updatedMessages.removeRange(0, updatedMessages.length - 20);
     }
     client.recentMessages.value = updatedMessages;
 
-    switch (m.address) {
-      case '/flash/on':
-        final msg = FlashOn.fromOsc(m);
-        if (msg != null && msg.index == myIndex) {
-          final intensity = msg.intensity;
-          try {
-            final clamped = intensity.clamp(0.0, 1.0).toDouble();
-            if ((client.brightness.value - clamped).abs() > 0.01) {
-              client.brightness.value = clamped;
-              await ScreenBrightness.instance.setScreenBrightness(clamped);
-            }
-            await _setTorchLevel(clamped);
-            _sendAck();
-          } catch (e) {
-            print('[OSC] Torch error: $e');
-            client.flashOn.value = false;
-          }
-        }
-        break;
-
-      case '/flash/off':
-        final msg = FlashOff.fromOsc(m);
-        if (msg != null && msg.index == myIndex) {
-          try {
-            await _setTorchLevel(0);
-            client.brightness.value = 0;
-            await ScreenBrightness.instance.setScreenBrightness(0);
-            _sendAck();
-          } catch (e) {
-            print('[OSC] Torch error: $e');
-            client.flashOn.value = true;
-          }
-        }
-        break;
-
-      case '/event/trigger':
-        final msg = EventTrigger.fromOsc(m);
-        if (msg != null && msg.index == myIndex) {
-          await client.ensureEventRecipesLoaded();
-          final events = client.eventRecipes.value;
-          EventRecipe? event;
-          for (final candidate in events) {
-            if (candidate.id == msg.eventId) {
-              event = candidate;
-              break;
-            }
-          }
-          if (event != null) {
-            final assignment = client.assignmentForSlot(event, myIndex);
-            if (assignment != null) {
-              final sample = assignment.sample;
-              const gain = 1.0;
-              final nowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
-              final startAt = msg.startAtMs ?? nowMs;
-              final delayMs =
-                  (startAt - nowMs).clamp(0, double.infinity).toInt();
-              final dedupeKey = 'event:${msg.eventId}:slot=$myIndex';
-              unawaited(
-                Future.delayed(Duration(milliseconds: delayMs), () async {
-                  await _playPrimer(
-                    sample,
-                    gain,
-                    sendAck: true,
-                    dedupeKey: dedupeKey,
-                  );
-                }),
-              );
-            } else {
-              debugPrint(
-                '[OSC] No primer assignment for event ${msg.eventId} slot $myIndex',
-              );
-            }
-          } else {
-            debugPrint('[OSC] Unknown event ID ${msg.eventId}');
-          }
-        }
-        break;
-
-      case '/audio/play':
-        final msg = AudioPlay.fromOsc(m);
-        if (msg != null &&
-            client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
-          final fileName = msg.file;
-          final gain = msg.gain;
-          await _playPrimer(fileName, gain, sendAck: true);
-        }
-        break;
-
-      case '/audio/stop':
-        final msg = AudioStop.fromOsc(m);
-        if (msg != null &&
-            client.shouldHandleIndex(msg.index, slotOverride: myIndex)) {
-          _playbackToken++;
-          try {
-            await NativeAudio.stopPrimerTone();
-          } catch (e) {
-            debugPrint('[OSC] Native stop failed: $e');
-          }
-          client.audioPlaying.value = false;
-          _sendAck();
-        }
-        break;
-
-      // Dynamic slot assignment.
-      case '/set-slot':
-        final newSlot =
-            m.arguments.isNotEmpty ? (m.arguments[0] as int) : myIndex;
-        if (newSlot != client.myIndex.value) {
-          client.myIndex.value = newSlot;
-          print('[OSC] Updated listening slot to $newSlot');
-          _sendAck();
-          _sendHello();
-        }
-        break;
-
-      case '/sync':
-        // Clock syncing disabled: acknowledge reachability but ignore timestamp data.
-        _markConnected();
-        if (client.clockOffsetMs.value != 0) {
-          client.clockOffsetMs.value = 0;
-        }
-        break;
-
-      case '/hello':
-        _markConnected();
-        break;
-
-      case '/discover':
-      case '/ping':
-        _markConnected();
-        _sendHello();
-        break;
-
-      case '/mic/record':
-        final msg = MicRecord.fromOsc(m);
-        if (msg != null && msg.index == myIndex) {
-          if (!kEnableMic) {
-            print('[OSC] Mic disabled (stub).');
-            _sendAck();
-            break;
-          }
-          final durationSec = msg.maxDuration;
-          print('[OSC] Starting mic recording (stub) for $durationSec s');
-          final audioStream = _mic.start(sampleRate: 44100);
-          _micSubscription?.cancel();
-          _micSubscription = audioStream.listen((_) {});
-          client.recording.value = true;
-          Timer(Duration(milliseconds: (durationSec * 1000).toInt()), () async {
-            await _micSubscription?.cancel();
-            _micSubscription = null;
-            await _mic.stop();
-            client.recording.value = false;
-            print('[OSC] Mic recording of $durationSec s completed (stub)');
-          });
-          _sendAck();
-        }
-        break;
+    if (_tryHandleConductorHello(datagram)) {
+      return;
     }
 
-    // Close the dispatcher function after handling all cases.
+    final trustedSender = _isTrustedSender(datagram);
+    if (!trustedSender) {
+      _recordUnknownSender(datagram, 'sender is not trusted conductor');
+      return;
+    }
+
+    if (message.address == '/discover' || message.address == '/ping') {
+      _markConductorHeartbeat();
+      _sendHello();
+      return;
+    }
+
+    if (message.address == '/sync') {
+      _markConductorHeartbeat();
+      if (client.clockOffsetMs.value != 0) {
+        client.clockOffsetMs.value = 0;
+      }
+      return;
+    }
+
+    if (message.address == OscAddress.panicAllStop.value) {
+      final envelope = _CueEnvelope.fromOsc(message);
+      if (envelope != null) {
+        if (!_validateEnvelope(envelope, datagram, requiresSlot: false)) {
+          return;
+        }
+        _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+      } else {
+        _markConductorHeartbeat();
+      }
+
+      await _setTorchLevel(0);
+      client.brightness.value = 0;
+      try {
+        await ScreenBrightness.instance.setApplicationScreenBrightness(0);
+      } catch (_) {
+        // best-effort
+      }
+      _playbackToken++;
+      try {
+        await NativeAudio.stopPrimerTone();
+      } catch (_) {
+        // best-effort
+      }
+      client.audioPlaying.value = false;
+      return;
+    }
+
+    switch (message.address) {
+      case '/flash/on':
+        await _handleFlashOn(datagram);
+        break;
+      case '/flash/off':
+        await _handleFlashOff(datagram);
+        break;
+      case '/event/trigger':
+        await _handleEventTrigger(datagram);
+        break;
+      case '/audio/play':
+        await _handleAudioPlay(datagram);
+        break;
+      case '/audio/stop':
+        await _handleAudioStop(datagram);
+        break;
+      case '/set-slot':
+        await _handleSetSlot(datagram);
+        break;
+      case '/mic/record':
+        await _handleMicRecord(datagram);
+        break;
+      default:
+        _record('dispatch', 'Ignored unsupported address', <String, Object?>{
+          'address': message.address,
+        });
+        break;
+    }
+  }
+
+  Future<void> _handleFlashOn(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+    if (envelope.payload.isEmpty || envelope.payload[0] is! num) {
+      return;
+    }
+
+    final intensity = (envelope.payload[0] as num).toDouble();
+    try {
+      final clamped = intensity.clamp(0.0, 1.0).toDouble();
+      if ((client.brightness.value - clamped).abs() > 0.01) {
+        client.brightness.value = clamped;
+        await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
+      }
+      await _setTorchLevel(clamped);
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+    } catch (e) {
+      _record('torch', 'Torch cue failed', <String, Object?>{
+        'error': e.toString(),
+      });
+      client.flashOn.value = false;
+    }
+  }
+
+  Future<void> _handleFlashOff(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+
+    try {
+      await _setTorchLevel(0);
+      client.brightness.value = 0;
+      await ScreenBrightness.instance.setApplicationScreenBrightness(0);
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+    } catch (e) {
+      _record('torch', 'Torch off cue failed', <String, Object?>{
+        'error': e.toString(),
+      });
+      client.flashOn.value = true;
+    }
+  }
+
+  Future<void> _handleEventTrigger(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+
+    if (envelope.payload.isEmpty || envelope.payload[0] is! int) {
+      return;
+    }
+
+    final eventId = envelope.payload[0] as int;
+    double? startAtMs;
+    if (envelope.payload.length >= 2 && envelope.payload[1] is num) {
+      startAtMs = (envelope.payload[1] as num).toDouble();
+    }
+
+    await client.ensureEventRecipesLoaded();
+    final events = client.eventRecipes.value;
+
+    EventRecipe? event;
+    for (final candidate in events) {
+      if (candidate.id == eventId) {
+        event = candidate;
+        break;
+      }
+    }
+
+    if (event == null) {
+      _record('event', 'Unknown event ID', <String, Object?>{
+        'eventId': eventId,
+      });
+      return;
+    }
+
+    final slot = client.myIndex.value;
+    final assignment = client.assignmentForSlot(event, slot);
+    if (assignment == null) {
+      _record('event', 'No assignment for slot', <String, Object?>{
+        'eventId': eventId,
+        'slot': slot,
+      });
+      return;
+    }
+
+    final nowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
+    final startAt = startAtMs ?? nowMs;
+    final delayMs = (startAt - nowMs).clamp(0, double.infinity).toInt();
+    final dedupeKey = 'event:$eventId:slot=$slot';
+
+    unawaited(
+      Future<void>.delayed(Duration(milliseconds: delayMs), () async {
+        await _playPrimer(
+          assignment.sample,
+          1.0,
+          sendAck: true,
+          dedupeKey: dedupeKey,
+          cueId: envelope.cueId,
+          seq: envelope.seq,
+        );
+      }),
+    );
+  }
+
+  Future<void> _handleAudioPlay(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+
+    if (envelope.payload.length < 2) {
+      return;
+    }
+
+    final file = envelope.payload[0];
+    final gain = envelope.payload[1];
+    if (file is! String || gain is! num) {
+      return;
+    }
+
+    await _playPrimer(
+      file,
+      gain.toDouble(),
+      sendAck: true,
+      cueId: envelope.cueId,
+      seq: envelope.seq,
+    );
+  }
+
+  Future<void> _handleAudioStop(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+
+    _playbackToken++;
+    try {
+      await NativeAudio.stopPrimerTone();
+    } catch (e) {
+      _record('audio', 'Native stop failed', <String, Object?>{
+        'error': e.toString(),
+      });
+    }
+    client.audioPlaying.value = false;
+    _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+  }
+
+  Future<void> _handleSetSlot(_InboundDatagram datagram) async {
+    final args = datagram.message.arguments;
+    if (args.isEmpty || args[0] is! int) {
+      return;
+    }
+
+    final newSlot = args[0] as int;
+    if (newSlot != client.myIndex.value) {
+      client.myIndex.value = newSlot;
+      _record('slot', 'Updated listening slot', <String, Object?>{
+        'slot': newSlot,
+      });
+      _sendAck();
+      _sendHello();
+    }
+  }
+
+  Future<void> _handleMicRecord(_InboundDatagram datagram) async {
+    final envelope = _CueEnvelope.fromOsc(datagram.message);
+    if (envelope == null) {
+      return;
+    }
+    if (!_validateEnvelope(envelope, datagram, requiresSlot: true)) {
+      return;
+    }
+
+    if (envelope.payload.isEmpty || envelope.payload[0] is! num) {
+      return;
+    }
+
+    final durationSec = (envelope.payload[0] as num).toDouble();
+    if (!kEnableMic) {
+      _record('mic', 'Mic disabled (stub)');
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+      return;
+    }
+
+    final audioStream = _mic.start(sampleRate: 44100);
+    await _micSubscription?.cancel();
+    _micSubscription = audioStream.listen((_) {});
+    client.recording.value = true;
+
+    Timer(Duration(milliseconds: (durationSec * 1000).toInt()), () async {
+      await _micSubscription?.cancel();
+      _micSubscription = null;
+      await _mic.stop();
+      client.recording.value = false;
+    });
+
+    _sendAck(cueId: envelope.cueId, seq: envelope.seq);
   }
 
   Future<void> playLocalPrimer(String fileName, double gain) async {
     await _playPrimer(fileName, gain, sendAck: false);
-  }
-
-  /* -------------------------------------------------------------------- */
-  /*                         Discovery / Heart‑beat                        */
-  /* -------------------------------------------------------------------- */
-
-  /// Broadcast a `/hello` so servers can discover this client.
-  void _rememberServer(InternetAddress address) {
-    if (address.type != InternetAddressType.IPv4) return;
-    if (address.isLoopback) return;
-    final key = address.address;
-    if (key.isEmpty) return;
-    final existing = _serverAddresses[key];
-    _serverAddresses[key] = address;
-    if (existing == null) {
-      _everSeenServers.add(key);
-      _record('server', 'Discovered console', <String, Object?>{'ip': key});
-    }
-  }
-
-  Future<void> _sendToServers(OSCMessage msg) async {
-    if (_socket == null || _serverAddresses.isEmpty) return;
-    for (final entry in _serverAddresses.values) {
-      try {
-        await _socket!.sendTo(msg, dest: entry, port: _oscPort);
-      } catch (e) {
-        debugPrint('[OSC] Unicast send error to ${entry.address}: $e');
-        _record(
-          'send',
-          'Unicast send error',
-          <String, Object?>{'ip': entry.address, 'error': e.toString()},
-        );
-      }
-    }
   }
 
   void _restartHelloTimer(Duration interval) {
@@ -647,143 +1085,126 @@ class OscListener {
   }
 
   void _sendHello() {
-    if (_socket == null) return;
+    final socket = _socket;
+    if (socket == null) return;
 
     final msg = OSCMessage(
       '/hello',
-      arguments: [client.myIndex.value, client.udid],
+      arguments: <Object>[
+        client.myIndex.value,
+        client.deviceId.value,
+        kConcertProtocolVersion,
+        _lockedShowSessionId ?? '',
+      ],
     );
 
-    _record(
-      'hello',
-      'Broadcasting /hello',
-      <String, Object?>{'knownServers': _serverAddresses.length},
+    final conductor = _trustedConductorAddress;
+    final conductorPort = _trustedConductorPort;
+    if (conductor != null && conductorPort != null) {
+      _sendBestEffort(
+        msg,
+        destination: conductor,
+        port: conductorPort,
+        category: 'hello',
+      );
+      _record('hello', 'Sent /hello to trusted conductor', <String, Object?>{
+        'ip': conductor.address,
+        'port': conductorPort,
+      });
+      return;
+    }
+
+    _sendBestEffort(msg, category: 'hello');
+    _record('hello', 'Broadcasting /hello while unpaired');
+  }
+
+  void _sendAck({String? cueId, int? seq}) {
+    final msg = OSCMessage(
+      '/ack',
+      arguments: <Object>[
+        client.myIndex.value,
+        client.deviceId.value,
+        cueId ?? '',
+        seq ?? -1,
+        _lockedShowSessionId ?? '',
+        kConcertProtocolVersion,
+      ],
     );
-    // Primary broadcast via the socket’s predefined destination.
-    try {
-      _socket!.send(msg);
-    } catch (e) {
-      // Log but do not crash; we fall back to per‑interface broadcasts below.
-      print('[OSC] Primary broadcast failed: $e');
-      _record(
-        'hello',
-        'Primary broadcast failed',
-        <String, Object?>{'error': e.toString()},
+
+    final conductor = _trustedConductorAddress;
+    final conductorPort = _trustedConductorPort;
+    if (conductor != null && conductorPort != null) {
+      _sendBestEffort(
+        msg,
+        destination: conductor,
+        port: conductorPort,
+        category: 'ack',
       );
-    }
-
-    // Target any known servers directly first so they hear us even if broadcasts
-    // are filtered by the network.
-    unawaited(_sendToServers(msg));
-
-    // Secondary: per‑interface subnet broadcast for routers that
-    // ignore 255.255.255.255. Best‑effort only – errors intentionally ignored.
-    NetworkInterface.list(
-      type: InternetAddressType.IPv4,
-      includeLoopback: false,
-    ).then((interfaces) {
-      for (final iface in interfaces) {
-        for (final addr in iface.addresses) {
-          final parts = addr.address.split('.');
-          if (parts.length == 4) {
-            parts[3] = '255';
-            final bcast = InternetAddress(parts.join('.'));
-
-            RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
-                .then((raw) {
-                  raw.broadcastEnabled = true;
-                  raw.send(msg.toBytes(), bcast, _oscPort);
-                  raw.close();
-                })
-                .catchError((_) {
-                  /* ignore */
-                });
-          }
-        }
-      }
-    });
-  }
-
-  void _sendAck() {
-    if (_socket == null) return;
-    final msg = OSCMessage('/ack', arguments: [client.myIndex.value]);
-    _record('ack', 'Sending /ack', <String, Object?>{'slot': client.myIndex.value});
-    try {
-      _socket!.send(msg);
-      unawaited(_sendToServers(msg));
-    } catch (e) {
-      print('[OSC] Ack send error: $e');
-      _record(
-        'ack',
-        'Ack send error',
-        <String, Object?>{'error': e.toString()},
-      );
+    } else {
+      _sendBestEffort(msg, category: 'ack');
     }
   }
 
-  void _markConnected() {
-    final wasConnected = client.connected.value;
-    client.connected.value = true;
-    if (!wasConnected) {
-      _record('connectivity', 'Connected');
-    }
-    _disconnectTimer?.cancel();
-    if (_currentHelloInterval != _slowHelloInterval) {
-      _restartHelloTimer(_slowHelloInterval);
-    }
-    _disconnectTimer = Timer(const Duration(seconds: 2), () {
-      client.connected.value = false;
-      if (_currentHelloInterval != _fastHelloInterval) {
-        _restartHelloTimer(_fastHelloInterval);
-      }
-      _record('connectivity', 'Connection timed out');
-    });
-  }
-
-  /// Send a custom OSC message to the server. Best effort only.
   void sendCustom(String address, List<Object> args) {
-    if (_socket == null) return;
     final msg = OSCMessage(address, arguments: args);
-    try {
-      _socket!.send(msg);
-      unawaited(_sendToServers(msg));
-    } catch (e) {
-      print('[OSC] sendCustom error: $e');
+    final conductor = _trustedConductorAddress;
+    final conductorPort = _trustedConductorPort;
+
+    if (conductor != null && conductorPort != null) {
+      _sendBestEffort(
+        msg,
+        destination: conductor,
+        port: conductorPort,
+        category: 'custom',
+      );
+      return;
     }
+
+    _sendBestEffort(msg, category: 'custom');
   }
 
-  /// Rebinds sockets and rebroadcasts presence so the console rediscovers us.
   Future<void> refreshConnection() async {
     if (!_running) {
       await start();
       return;
     }
+
     _record('manual', 'Manual refresh requested');
-    await _scheduleRebind(reason: 'manual refresh', clearServerCache: false);
-    _disconnectTimer?.cancel();
-    client.connected.value = false;
-    _restartHelloTimer(_fastHelloInterval);
+    _unlockConductor(reason: 'manual refresh');
+    await _scheduleRebind(reason: 'manual refresh');
     _sendHello();
-    debugPrint('[OSC] Connection refresh triggered by user');
   }
 
-  /// Send a typed OSC message using [OscCodable].
   void send(OscCodable message) {
-    if (_socket == null) return;
-    try {
-      final osc = message.toOsc();
-      _socket!.send(osc);
-      unawaited(_sendToServers(osc));
-    } catch (e) {
-      print('[OSC] send error: $e');
+    final osc = message.toOsc();
+    final conductor = _trustedConductorAddress;
+    final conductorPort = _trustedConductorPort;
+
+    if (conductor != null && conductorPort != null) {
+      _sendBestEffort(
+        osc,
+        destination: conductor,
+        port: conductorPort,
+        category: 'typed-send',
+      );
+      return;
     }
+
+    _sendBestEffort(osc, category: 'typed-send');
   }
 
   Map<String, Object?> networkDiagnosticsSnapshot() {
     return <String, Object?>{
       'generatedAt': DateTime.now().toUtc().toIso8601String(),
-      'knownServers': _serverAddresses.keys.toList(growable: false),
-      'everSeenServers': _everSeenServers.toList(growable: false),
+      'trustedConductorIp': _trustedConductorAddress?.address,
+      'trustedConductorPort': _trustedConductorPort,
+      'showSessionId': _lockedShowSessionId,
+      'protocolVersion': kConcertProtocolVersion,
+      'unknownSenderCount': _unknownSenderCount,
+      'protocolMismatchCount': _protocolMismatchCount,
+      'duplicatesDropped': _duplicatesDropped,
+      'outOfOrderDropped': _outOfOrderDropped,
+      'lastProcessedSeq': _lastProcessedSeq,
       'helloIntervalSeconds': _currentHelloInterval.inSeconds,
       'events': _eventLog.map((e) => e.toJson()).toList(growable: false),
     };
@@ -793,46 +1214,39 @@ class OscListener {
     return jsonEncode(networkDiagnosticsSnapshot());
   }
 
-  /* -------------------------------------------------------------------- */
-  /*                               Teardown                                */
-  /* -------------------------------------------------------------------- */
-
-  /// Stops listening and cleans up resources.
   Future<void> stop() async {
     await _recvSubscription?.cancel();
     _recvSubscription = null;
+
     _socket?.close();
     _socket = null;
     _recvSocket?.close();
     _recvSocket = null;
 
-    // Cancel any mic recording.
     await _micSubscription?.cancel();
     _micSubscription = null;
     client.recording.value = false;
 
     try {
       await NativeAudio.stopPrimerTone();
-    } catch (e) {
-      debugPrint('[OSC] Failed to stop native primer playback: $e');
+    } catch (_) {
+      // best-effort
     }
     client.audioPlaying.value = false;
     _running = false;
 
-    // Reset screen brightness to default and clear brightness state.
     try {
-      await ScreenBrightness.instance.resetScreenBrightness();
+      await ScreenBrightness.instance.resetApplicationScreenBrightness();
       client.brightness.value = 0;
     } catch (_) {
-      // Ignore if the platform doesn’t support brightness reset.
+      // best-effort
     }
 
-    // Cancel timers and update connection state.
     _disconnectTimer?.cancel();
     _helloTimer?.cancel();
-    client.connected.value = false;
+    _conductorWatchdog?.cancel();
+    _unlockConductor(reason: 'listener stopped');
 
-    print('[OSC] Listener stopped');
     _record('lifecycle', 'Listener stopped');
   }
 }

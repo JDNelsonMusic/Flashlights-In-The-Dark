@@ -21,6 +21,11 @@ public enum NetworkEventKind: String, Codable, Sendable {
     case manualExport
     case slotAssignmentAdjusted
     case slotAssignmentRequested
+    case unknownSender
+    case protocolMismatch
+    case cueDroppedDuplicate
+    case cueDroppedOutOfOrder
+    case cueRouteSelected
 }
 
 /// A single network event captured during a rehearsal session.
@@ -30,19 +35,28 @@ public struct NetworkLogEvent: Codable, Sendable {
     public let slot: Int?
     public let ipAddress: String?
     public let message: String?
+    public let route: String?
+    public let cueId: String?
+    public let interfaceName: String?
 
     public init(
         timestamp: Date = Date(),
         kind: NetworkEventKind,
         slot: Int? = nil,
         ipAddress: String? = nil,
-        message: String? = nil
+        message: String? = nil,
+        route: String? = nil,
+        cueId: String? = nil,
+        interfaceName: String? = nil
     ) {
         self.timestamp = timestamp
         self.kind = kind
         self.slot = slot
         self.ipAddress = ipAddress
         self.message = message
+        self.route = route
+        self.cueId = cueId
+        self.interfaceName = interfaceName
     }
 }
 
@@ -57,11 +71,26 @@ public struct NetworkDiagnosticsSnapshot: Codable, Sendable {
         public let lastAck: Date?
     }
 
+    public struct InterfaceSummary: Codable, Sendable {
+        public let name: String
+        public let sendSuccessCount: Int
+        public let sendFailureCount: Int
+    }
+
     public let generatedAt: Date
     public let events: [NetworkLogEvent]
     public let slotSummaries: [SlotSummary]
+    public let interfaceSummaries: [InterfaceSummary]
     public let totalEvents: Int
     public let uniqueSlots: [Int]
+    public let totalSendQueued: Int
+    public let totalSendSucceeded: Int
+    public let totalSendFailed: Int
+    public let unknownSenderCount: Int
+    public let cueDroppedDuplicateCount: Int
+    public let cueDroppedOutOfOrderCount: Int
+    public let protocolMismatchCount: Int
+    public let packetsPerSecond: Double
 }
 
 /// Actor that captures networking diagnostics and can export the session.
@@ -73,6 +102,8 @@ public actor NetworkDiagnostics {
     private var sendFailureCount: [Int: Int] = [:]
     private var lastHello: [Int: Date] = [:]
     private var lastAck: [Int: Date] = [:]
+    private var interfaceSendSuccess: [String: Int] = [:]
+    private var interfaceSendFailure: [String: Int] = [:]
 
     public init(maxEvents: Int = 4000) {
         self.maxEvents = maxEvents
@@ -82,14 +113,20 @@ public actor NetworkDiagnostics {
         _ kind: NetworkEventKind,
         slot: Int? = nil,
         ipAddress: String? = nil,
-        message: String? = nil
+        message: String? = nil,
+        route: String? = nil,
+        cueId: String? = nil,
+        interfaceName: String? = nil
     ) {
         let event = NetworkLogEvent(
             timestamp: Date(),
             kind: kind,
             slot: slot,
             ipAddress: ipAddress,
-            message: message
+            message: message,
+            route: route,
+            cueId: cueId,
+            interfaceName: interfaceName
         )
 
         if events.count >= maxEvents {
@@ -107,6 +144,17 @@ public actor NetworkDiagnostics {
                 lastAck[slot] = event.timestamp
             case .sendFailed:
                 sendFailureCount[slot, default: 0] += 1
+            default:
+                break
+            }
+        }
+
+        if let interfaceName {
+            switch kind {
+            case .sendSucceeded:
+                interfaceSendSuccess[interfaceName, default: 0] += 1
+            case .sendFailed:
+                interfaceSendFailure[interfaceName, default: 0] += 1
             default:
                 break
             }
@@ -130,12 +178,60 @@ public actor NetworkDiagnostics {
             )
         }
 
+        let interfaceNames = Set(interfaceSendSuccess.keys).union(interfaceSendFailure.keys).sorted()
+        let interfaces = interfaceNames.map { name in
+            NetworkDiagnosticsSnapshot.InterfaceSummary(
+                name: name,
+                sendSuccessCount: interfaceSendSuccess[name, default: 0],
+                sendFailureCount: interfaceSendFailure[name, default: 0]
+            )
+        }
+
+        let totalQueued = events.reduce(into: 0) { count, event in
+            if event.kind == .sendQueued { count += 1 }
+        }
+        let totalSucceeded = events.reduce(into: 0) { count, event in
+            if event.kind == .sendSucceeded { count += 1 }
+        }
+        let totalFailed = events.reduce(into: 0) { count, event in
+            if event.kind == .sendFailed { count += 1 }
+        }
+        let unknownSenderCount = events.reduce(into: 0) { count, event in
+            if event.kind == .unknownSender { count += 1 }
+        }
+        let duplicateDrops = events.reduce(into: 0) { count, event in
+            if event.kind == .cueDroppedDuplicate { count += 1 }
+        }
+        let outOfOrderDrops = events.reduce(into: 0) { count, event in
+            if event.kind == .cueDroppedOutOfOrder { count += 1 }
+        }
+        let protocolMismatches = events.reduce(into: 0) { count, event in
+            if event.kind == .protocolMismatch { count += 1 }
+        }
+
+        let now = Date()
+        let packetsThisSecond = events.reduce(into: 0) { count, event in
+            if (event.kind == .sendSucceeded || event.kind == .sendFailed),
+               now.timeIntervalSince(event.timestamp) <= 1 {
+                count += 1
+            }
+        }
+
         return NetworkDiagnosticsSnapshot(
-            generatedAt: Date(),
+            generatedAt: now,
             events: events,
             slotSummaries: summaries,
+            interfaceSummaries: interfaces,
             totalEvents: events.count,
-            uniqueSlots: summaries.map(\.slot)
+            uniqueSlots: summaries.map(\.slot),
+            totalSendQueued: totalQueued,
+            totalSendSucceeded: totalSucceeded,
+            totalSendFailed: totalFailed,
+            unknownSenderCount: unknownSenderCount,
+            cueDroppedDuplicateCount: duplicateDrops,
+            cueDroppedOutOfOrderCount: outOfOrderDrops,
+            protocolMismatchCount: protocolMismatches,
+            packetsPerSecond: Double(packetsThisSecond)
         )
     }
 
@@ -144,8 +240,7 @@ public actor NetworkDiagnostics {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let payload = snapshot
-        let data = try encoder.encode(payload)
+        let data = try encoder.encode(snapshot)
 
         let rootDir: URL
         if let directory {

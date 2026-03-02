@@ -122,8 +122,13 @@ public final class ConsoleState: ObservableObject, Sendable {
         9: [40, 53, 54]
     ]
 
+    private let performanceSlots: [Int] = [
+        1, 3, 4, 5, 7, 9, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
+        27, 29, 34, 38, 40, 41, 42, 44, 51, 53, 54
+    ]
+
     private lazy var canonicalSlots: Set<Int> = {
-        Set(defaultGroups.values.flatMap { $0 })
+        Set(performanceSlots)
     }()
     private var isApplyingGroupSanitization = false
 
@@ -219,6 +224,24 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
     @Published public var isKeyCaptureEnabled: Bool = true
+    @Published public private(set) var showSessionId: String = UUID().uuidString
+    @Published public private(set) var protocolVersion: Int = Int(ConcertProtocol.version)
+    @Published public var expectedDeviceCount: Int = ConcertProtocol.expectedDeviceCount
+    @Published public var isArmed: Bool = false {
+        didSet {
+            Task.detached { [weak self] in
+                guard let self else { return }
+                if let broadcaster = try? await self.broadcasterTask.value {
+                    await broadcaster.setArmed(self.isArmed)
+                }
+            }
+        }
+    }
+    @Published public var preflightWarning: String?
+    @Published public private(set) var unknownSenderEvents: Int = 0
+    @Published public private(set) var packetRatePerSecond: Double = 0
+    @Published public private(set) var totalSendFailures: Int = 0
+    @Published public private(set) var interfaceHealthSummary: [NetworkDiagnosticsSnapshot.InterfaceSummary] = []
 
     /// Last time a /hello was heard from each slot.
     private var lastHello: [Int: Date] = [:]
@@ -233,8 +256,13 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let heartbeatTimerInterval: TimeInterval = 5
     private let heartbeatGraceInterval: TimeInterval = 18
     private let heartbeatProbeSpacing: TimeInterval = 20
+    private let conductorHelloInterval: TimeInterval = 1.5
+    private let conductorHandshakeTimeout: TimeInterval = 45
     /// When we last probed a given slot with a /discover ping.
     private var lastHelloProbe: [Int: Date] = [:]
+    private var conductorHelloTimer: Timer?
+    private var conductorHelloStartedAt: Date?
+    private var metricsTimer: Timer?
 
     private var sessionURL: URL?
     /// Monotonic per-slot counter so flashlight retries abandon stale intents.
@@ -321,6 +349,14 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Recalculate `isAnyTorchOn` based on current device states.
     private func updateAnyTorchOn() {
         isAnyTorchOn = devices.contains { $0.torchOn }
+    }
+
+    private func ensureArmedForCue(_ action: String) -> Bool {
+        guard isArmed else {
+            lastLog = "⚠️ SAFE mode: arm before \(action)"
+            return false
+        }
+        return true
     }
 
     /// Make a slot glow in the UI for a short duration
@@ -429,6 +465,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     @discardableResult
     public func toggleTorch(id: Int) -> [ChoirDevice] {
+        guard ensureArmedForCue("sending cues") else { return devices }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
         guard !devices[idx].isPlaceholder else { return devices }
         objectWillChange.send()
@@ -447,6 +484,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     
     /// Directly flash on a specific lamp slot (no toggle) and update state.
     public func flashOn(id: Int) {
+        guard ensureArmedForCue("sending cues") else { return }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
@@ -457,6 +495,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     /// Directly flash off a specific lamp slot and update state.
     public func flashOff(id: Int) {
+        guard ensureArmedForCue("sending cues") else { return }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
@@ -520,6 +559,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     
     /// Trigger playback of a preloaded audio file on a specific device
     public func triggerSound(device: ChoirDevice) {
+        guard ensureArmedForCue("triggering sound") else { return }
         guard !device.isPlaceholder else { return }
 
         Task.detached { [weak self] in
@@ -547,9 +587,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                                              file: file,
                                              gain: gain,
                                              startAtMs: startAtMs)
-                    let osc = message.encode()
-                    try await oscBroadcaster.send(osc, toSlot: slotNumber)
-                    try await oscBroadcaster.send(osc)
+                    try await oscBroadcaster.send(message)
 
                     await MainActor.run {
                         self.lastLog = "/audio/play \(slotNumber) \(file)"
@@ -569,12 +607,15 @@ public final class ConsoleState: ObservableObject, Sendable {
                 // --- Cross-actor call: glow ---
                 await self.glow(slot: slotNumber)
             } catch {
-                print("Error triggering sound for slot \(device.id + 1): \(error)")
+                await MainActor.run {
+                    self.lastLog = "⚠️ Cue blocked or failed: \(error.localizedDescription)"
+                }
             }
         }
     }
     /// Play audio on all devices slots based on current activeToneSets
     public func playAllTones() {
+        guard ensureArmedForCue("triggering tones") else { return }
         for device in devices where !device.isPlaceholder {
             triggerSound(device: device)
         }
@@ -1119,6 +1160,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     @discardableResult
     public func playAll() -> [ChoirDevice] {
+        guard ensureArmedForCue("sending cues") else { return devices }
         for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = true
             Task.detached { [weak self] in
@@ -1140,17 +1182,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     public func blackoutAll() -> [ChoirDevice] {
         for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = false
-            Task.detached { [weak self] in
-                guard let self = self else { return }
-                do {
-                    let osc = try await self.broadcasterTask.value
-                    try await osc.send(FlashOff(index: Int32(idx + 1)))
-                } catch {
-                    print("Error sending FlashOff for slot \(idx + 1): \(error)")
-                }
-            }
         }
-        print("[ConsoleState] All torches turned off")
+        panicAllStop()
         updateAnyTorchOn()
         return devices
     }
@@ -1235,10 +1268,24 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Update device info when a /hello is received from a client
     @MainActor
-    func deviceDiscovered(slot: Int, ip: String, udid: String?) {
+    func deviceDiscovered(slot: Int, ip: String, deviceId: String?) {
         guard slot > 0 && slot <= devices.count else { return }
+        guard canonicalSlots.contains(slot) else {
+            Task { [diagnostics] in
+                await diagnostics.record(
+                    .unknownSender,
+                    slot: slot,
+                    ipAddress: ip,
+                    message: "Ignored /hello for non-performance slot"
+                )
+            }
+            return
+        }
         let idx = slot - 1
         devices[idx].ip = ip
+        if let deviceId, !deviceId.isEmpty {
+            devices[idx].udid = deviceId
+        }
         statuses[idx] = .live
         lastHello[slot] = Date()
         lastHelloProbe.removeValue(forKey: slot)
@@ -1264,16 +1311,15 @@ extension ConsoleState {
     public func startNetwork() async {
         guard !isBroadcasting else { return }
         isBroadcasting = true
-        lastLog = "🛰  Broadcasting on 255.255.255.255:9000"
+        showSessionId = UUID().uuidString
+        isArmed = false
+        preflightWarning = nil
+        lastLog = "🛰  Starting conductor session \(showSessionId.prefix(8))"
         do {
             let broadcaster = try await broadcasterTask.value
-            try await broadcaster.start()
-
-            // Call must be awaited because registerHelloHandler is actor-isolated.
-            // deviceDiscovered is a synchronous @MainActor method, so no `await`.
             await broadcaster.registerHelloHandler { [weak self] slot, ip, udid in
                 Task { @MainActor in
-                    self?.deviceDiscovered(slot: slot, ip: ip, udid: udid)
+                    self?.deviceDiscovered(slot: slot, ip: ip, deviceId: udid)
                 }
             }
             await broadcaster.registerAckHandler { [weak self] slot in
@@ -1287,18 +1333,26 @@ extension ConsoleState {
                     self?.tapReceived()
                 }
             }
+            await broadcaster.configureConcert(
+                showSessionId: showSessionId,
+                protocolVersion: Int32(protocolVersion),
+                expectedDeviceCount: expectedDeviceCount
+            )
+            await broadcaster.setArmed(isArmed)
+            try await broadcaster.start()
+
             heartbeatTimer = Timer.scheduledTimer(withTimeInterval: heartbeatTimerInterval, repeats: true) { [weak self] _ in
                 self?.checkHeartbeats()
             }
             scheduleDiscoveryRefreshTimer()
-            print("[ConsoleState] Network stack started ✅")
+            startConductorHelloLoop()
+            startMetricsLoop()
+            lastLog = "🛰  Session \(showSessionId.prefix(8)) live · SAFE"
         } catch let err as POSIXError where err.code == .EHOSTDOWN {
             lastLog = "⚠️ No active network interface"
-            print("^Δ startNetwork host down: \(err)")
             isBroadcasting = false
         } catch {
             lastLog = "⚠️ Network start failed: \(error)"
-            print("⚠️ startNetwork error: \(error)")
             isBroadcasting = false
         }
     }
@@ -1309,17 +1363,23 @@ extension ConsoleState {
         isBroadcasting = false
         heartbeatTimer?.invalidate()
         heartbeatTimer = nil
+        conductorHelloTimer?.invalidate()
+        conductorHelloTimer = nil
+        conductorHelloStartedAt = nil
+        metricsTimer?.invalidate()
+        metricsTimer = nil
         discoveryRefreshTimer?.invalidate()
         discoveryRefreshTimer = nil
         discoveryRefreshInFlight = false
         lastDiscoveryRefresh = nil
-        print("[ConsoleState] Network stack suspended 💤")
+        isArmed = false
     }
 
     private func checkHeartbeats() {
         let now = Date()
-        for slot in 1...devices.count {
+        for slot in performanceSlots {
             let idx = slot - 1
+            guard idx >= 0 && idx < devices.count else { continue }
             let lastSeen = lastHello[slot]
             if let lastSeen {
                 let gap = now.timeIntervalSince(lastSeen)
@@ -1365,7 +1425,11 @@ extension ConsoleState {
                         let broadcaster = try await self.broadcasterTask.value
                         await broadcaster.requestHello(forSlot: slot)
                     } catch {
-                        print("⚠️ heartbeat probe error for slot \(slot): \(error)")
+                        await self.diagnostics.record(
+                            .sendFailed,
+                            slot: slot,
+                            message: "Heartbeat probe error: \(error.localizedDescription)"
+                        )
                     }
                 }
                 triggerDiscoveryRefresh(reason: .slot(slot))
@@ -1382,6 +1446,69 @@ extension ConsoleState {
         timer.tolerance = discoveryRefreshInterval * 0.2
         discoveryRefreshTimer = timer
         RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private func startConductorHelloLoop() {
+        conductorHelloTimer?.invalidate()
+        conductorHelloStartedAt = Date()
+        sendConductorHelloTick()
+        let timer = Timer.scheduledTimer(withTimeInterval: conductorHelloInterval, repeats: true) { [weak self] _ in
+            self?.sendConductorHelloTick()
+        }
+        timer.tolerance = conductorHelloInterval * 0.2
+        conductorHelloTimer = timer
+    }
+
+    private func sendConductorHelloTick() {
+        let connected = connectedPerformanceDeviceCount
+        if connected >= expectedDeviceCount {
+            preflightWarning = nil
+        } else if let started = conductorHelloStartedAt,
+                  Date().timeIntervalSince(started) > conductorHandshakeTimeout {
+            preflightWarning = "Handshake timeout: \(connected)/\(expectedDeviceCount) connected"
+        }
+
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                try await broadcaster.broadcastConductorHello()
+            } catch {
+                await self.diagnostics.record(
+                    .sendFailed,
+                    message: "Conductor /hello failed: \(error.localizedDescription)"
+                )
+            }
+        }
+    }
+
+    private func startMetricsLoop() {
+        metricsTimer?.invalidate()
+        metricsTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.refreshMetricsSnapshot()
+        }
+        refreshMetricsSnapshot()
+    }
+
+    private func refreshMetricsSnapshot() {
+        Task.detached { [weak self] in
+            guard let self else { return }
+            let diagnosticsSnapshot = await self.diagnostics.snapshot()
+            let broadcaster = try? await self.broadcasterTask.value
+            let routeMetrics: CueSendMetricsSnapshot?
+            if let broadcaster {
+                routeMetrics = await broadcaster.metricsSnapshot()
+            } else {
+                routeMetrics = nil
+            }
+
+            await MainActor.run {
+                self.unknownSenderEvents = diagnosticsSnapshot.unknownSenderCount
+                self.totalSendFailures = diagnosticsSnapshot.totalSendFailed
+                self.packetRatePerSecond = routeMetrics?.packetsPerSecond ?? diagnosticsSnapshot.packetsPerSecond
+                self.interfaceHealthSummary = diagnosticsSnapshot.interfaceSummaries
+            }
+        }
     }
 
     private func triggerDiscoveryRefresh(reason: DiscoveryRefreshReason) {
@@ -1609,7 +1736,61 @@ extension ConsoleState {
         await diagnostics.snapshot()
     }
 
+    public var connectedPerformanceDeviceCount: Int {
+        let now = Date()
+        return performanceSlots.reduce(into: 0) { count, slot in
+            guard let last = lastHello[slot],
+                  now.timeIntervalSince(last) <= heartbeatGraceInterval else { return }
+            count += 1
+        }
+    }
+
+    public var canArmStrict: Bool {
+        connectedPerformanceDeviceCount >= expectedDeviceCount
+    }
+
+    @discardableResult
+    public func armConcertMode(override: Bool = false) -> Bool {
+        if canArmStrict || override {
+            isArmed = true
+            preflightWarning = nil
+            lastLog = "🔴 ARMED · Session \(showSessionId.prefix(8))"
+            return true
+        }
+        preflightWarning = "Preflight incomplete: \(connectedPerformanceDeviceCount)/\(expectedDeviceCount) connected"
+        lastLog = "⚠️ Cannot arm: \(connectedPerformanceDeviceCount)/\(expectedDeviceCount) connected"
+        isArmed = false
+        return false
+    }
+
+    public func disarmConcertMode() {
+        isArmed = false
+        lastLog = "🟢 SAFE · Cues blocked"
+    }
+
+    public func panicAllStop() {
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                try await broadcaster.broadcastPanicAllStop()
+                await MainActor.run {
+                    for idx in self.devices.indices where !self.devices[idx].isPlaceholder {
+                        self.devices[idx].torchOn = false
+                    }
+                    self.updateAnyTorchOn()
+                    self.lastLog = "🛑 Panic all-stop broadcast"
+                }
+            } catch {
+                await MainActor.run {
+                    self.lastLog = "⚠️ Panic all-stop failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
     public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {
+        guard ensureArmedForCue("triggering events") else { return }
         guard eventRecipes.indices.contains(currentEventIndex) else {
             lastLog = "⚠️ No event selected"
             return
@@ -1662,20 +1843,15 @@ extension ConsoleState {
         guard !event.primerAssignments.isEmpty, isBroadcasting else { return }
         do {
             let broadcaster = try await broadcasterTask.value
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for color in event.primerAssignments.keys {
-                    let targetSlots = slots(for: color)
-                    guard !targetSlots.isEmpty else { continue }
-                    for slot in targetSlots {
-                        let msg = EventTrigger(index: Int32(slot),
-                                               eventId: Int32(event.id),
-                                               startAtMs: startAtMs).encode()
-                        group.addTask {
-                            try await broadcaster.send(msg, toSlot: slot)
-                        }
-                    }
+            for color in event.primerAssignments.keys.sorted(by: { $0.groupIndex < $1.groupIndex }) {
+                let targetSlots = slots(for: color).sorted()
+                guard !targetSlots.isEmpty else { continue }
+                for slot in targetSlots {
+                    let msg = EventTrigger(index: Int32(slot),
+                                           eventId: Int32(event.id),
+                                           startAtMs: startAtMs)
+                    try await broadcaster.send(msg)
                 }
-                try await group.waitForAll()
             }
             if let fileName = event.primerAssignments.first?.value.oscFileName {
                 await MainActor.run {
