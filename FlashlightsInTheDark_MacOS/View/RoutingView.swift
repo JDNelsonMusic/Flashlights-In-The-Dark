@@ -258,7 +258,7 @@ private struct DeviceCard: View {
                 .buttonStyle(.bordered)
 
                 Button {
-                    state.triggerSound(device: device)
+                    state.triggerSound(device: device, allowWhenDisarmed: true)
                 } label: {
                     Label("Sound", systemImage: "speaker.wave.2")
                 }
@@ -266,9 +266,9 @@ private struct DeviceCard: View {
 
                 Button {
                     Task { @MainActor in
-                        state.flashOn(id: device.id)
+                        state.flashOn(id: device.id, allowWhenDisarmed: true)
                         try? await Task.sleep(nanoseconds: 350_000_000)
-                        state.flashOff(id: device.id)
+                        state.flashOff(id: device.id, allowWhenDisarmed: true)
                     }
                 } label: {
                     Label("Torch", systemImage: "flashlight.on.fill")

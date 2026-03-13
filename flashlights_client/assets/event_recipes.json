@@ -1,7 +1,7 @@
 {
-  "source": "Flashlights-ITD_EventRecipes_3.csv",
+  "source": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
   "eventCount": 192,
-  "generated": "2025-09-21",
+  "generated": "2026-03-09T22:31:13+00:00",
   "events": [
     {
       "id": 1,
@@ -13,7 +13,32 @@
       "id": 2,
       "measure": 2,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "red": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        }
+      }
     },
     {
       "id": 3,
@@ -43,6 +68,10 @@
         "cyan": {
           "sample": "primerTones/short26.mp3",
           "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         },
         "pink": {
           "sample": "primerTones/short14.mp3",
@@ -88,8 +117,12 @@
           "note": "Db4"
         },
         "pink": {
-          "sample": "primerTones/short21.mp3",
-          "note": "A3"
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
+        },
+        "purple": {
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         }
       }
     },
@@ -98,6 +131,38 @@
       "measure": 4,
       "position": "4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
         "purple": {
           "sample": "primerTones/short16.mp3",
           "note": "E3"
@@ -138,8 +203,12 @@
           "note": "Db4"
         },
         "pink": {
-          "sample": "primerTones/short21.mp3",
-          "note": "A3"
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
         }
       }
     },
@@ -147,7 +216,20 @@
       "id": 7,
       "measure": 6,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "Eb3"
+        }
+      }
     },
     {
       "id": 8,
@@ -183,12 +265,12 @@
           "note": "D3"
         },
         "pink": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
         },
         "purple": {
-          "sample": "primerTones/short1.mp3",
-          "note": "Db2"
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
         }
       }
     },
@@ -196,48 +278,61 @@
       "id": 9,
       "measure": 10,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "blue": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "red": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "cyan": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "yellow": {
+          "sample": "primerTones/short17.mp3",
+          "note": "E#3"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        }
+      }
     },
     {
       "id": 10,
       "measure": 11,
       "position": "1-of-4",
       "primer": {
-        "green": {
-          "sample": "primerTones/long97.mp3",
-          "note": "B5"
-        },
-        "magenta": {
-          "sample": "primerTones/long94.mp3",
-          "note": "Ab5"
-        },
-        "orange": {
-          "sample": "primerTones/long90.mp3",
-          "note": "E5"
-        },
         "blue": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
-        },
-        "red": {
-          "sample": "primerTones/long85.mp3",
-          "note": "B4"
-        },
-        "cyan": {
-          "sample": "primerTones/long78.mp3",
-          "note": "E4"
-        },
-        "yellow": {
-          "sample": "primerTones/long77.mp3",
-          "note": "Eb4"
-        },
-        "pink": {
           "sample": "primerTones/long73.mp3",
           "note": "B3"
         },
+        "red": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        },
+        "cyan": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        },
+        "yellow": {
+          "sample": "primerTones/long65.mp3",
+          "note": "D#3"
+        },
+        "pink": {
+          "sample": "primerTones/long65.mp3",
+          "note": "D#3"
+        },
         "purple": {
-          "sample": "primerTones/long70.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/long65.mp3",
+          "note": "D#3"
         }
       }
     },
@@ -246,13 +341,41 @@
       "measure": 11,
       "position": "4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "blue": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short27.mp3",
+          "note": "D#4"
+        },
         "pink": {
-          "sample": "primerTones/short14.mp3",
-          "note": "D3"
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
         },
         "purple": {
-          "sample": "primerTones/short2.mp3",
-          "note": "D2"
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
         }
       }
     },
@@ -261,37 +384,13 @@
       "measure": 12,
       "position": "1-of-4",
       "primer": {
-        "green": {
-          "sample": "primerTones/short46.mp3",
-          "note": "Bb5"
-        },
-        "magenta": {
-          "sample": "primerTones/short41.mp3",
-          "note": "F5"
-        },
-        "orange": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
-        },
-        "blue": {
-          "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
-        },
-        "red": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
-        },
-        "cyan": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
-        },
         "yellow": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         },
         "pink": {
-          "sample": "primerTones/short15.mp3",
-          "note": "Eb3"
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         },
         "purple": {
           "sample": "primerTones/short14.mp3",
@@ -309,20 +408,20 @@
           "note": "B5"
         },
         "magenta": {
-          "sample": "primerTones/long94.mp3",
-          "note": "Ab5"
-        },
-        "orange": {
           "sample": "primerTones/long90.mp3",
           "note": "E5"
         },
-        "blue": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
-        },
-        "red": {
+        "orange": {
           "sample": "primerTones/long85.mp3",
           "note": "B4"
+        },
+        "blue": {
+          "sample": "primerTones/long89.mp3",
+          "note": "D#5"
+        },
+        "red": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
         },
         "cyan": {
           "sample": "primerTones/long78.mp3",
@@ -330,15 +429,15 @@
         },
         "yellow": {
           "sample": "primerTones/long77.mp3",
-          "note": "Eb4"
+          "note": "D#4"
         },
         "pink": {
-          "sample": "primerTones/long73.mp3",
-          "note": "B3"
+          "sample": "primerTones/long70.mp3",
+          "note": "G#3"
         },
         "purple": {
           "sample": "primerTones/long70.mp3",
-          "note": "Ab3"
+          "note": "G#3"
         }
       }
     },
@@ -348,40 +447,40 @@
       "position": "3-of-4",
       "primer": {
         "green": {
-          "sample": "primerTones/long96.mp3",
-          "note": "Bb5"
+          "sample": "primerTones/long97.mp3",
+          "note": "B5"
         },
         "magenta": {
-          "sample": "primerTones/long95.mp3",
-          "note": "A5"
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
         },
         "orange": {
-          "sample": "primerTones/long93.mp3",
-          "note": "G5"
+          "sample": "primerTones/long85.mp3",
+          "note": "B4"
         },
         "blue": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/long89.mp3",
+          "note": "D#5"
         },
         "red": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
         },
         "cyan": {
-          "sample": "primerTones/long83.mp3",
-          "note": "A4"
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
         },
         "yellow": {
-          "sample": "primerTones/long76.mp3",
-          "note": "D4"
+          "sample": "primerTones/long77.mp3",
+          "note": "D#4"
         },
         "pink": {
-          "sample": "primerTones/long72.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/long70.mp3",
+          "note": "G#3"
         },
         "purple": {
-          "sample": "primerTones/long71.mp3",
-          "note": "A3"
+          "sample": "primerTones/long70.mp3",
+          "note": "G#3"
         }
       }
     },
@@ -399,8 +498,8 @@
           "note": "E5"
         },
         "orange": {
-          "sample": "primerTones/long87.mp3",
-          "note": "Db5"
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
         },
         "blue": {
           "sample": "primerTones/long83.mp3",
@@ -411,20 +510,20 @@
           "note": "E4"
         },
         "cyan": {
-          "sample": "primerTones/long75.mp3",
-          "note": "Db4"
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
         },
         "yellow": {
           "sample": "primerTones/long83.mp3",
           "note": "A4"
         },
         "pink": {
-          "sample": "primerTones/long78.mp3",
-          "note": "E4"
+          "sample": "primerTones/long75.mp3",
+          "note": "C#4"
         },
         "purple": {
           "sample": "primerTones/long75.mp3",
-          "note": "Db4"
+          "note": "C#4"
         }
       }
     },
@@ -442,8 +541,8 @@
           "note": "F5"
         },
         "orange": {
-          "sample": "primerTones/long88.mp3",
-          "note": "D5"
+          "sample": "primerTones/long83.mp3",
+          "note": "A4"
         },
         "blue": {
           "sample": "primerTones/long83.mp3",
@@ -454,16 +553,16 @@
           "note": "F4"
         },
         "cyan": {
-          "sample": "primerTones/long76.mp3",
-          "note": "D4"
+          "sample": "primerTones/long79.mp3",
+          "note": "F4"
         },
         "yellow": {
           "sample": "primerTones/long83.mp3",
           "note": "A4"
         },
         "pink": {
-          "sample": "primerTones/long79.mp3",
-          "note": "F4"
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
         },
         "purple": {
           "sample": "primerTones/long76.mp3",
@@ -476,6 +575,18 @@
       "measure": 16,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
         "blue": {
           "sample": "primerTones/short33.mp3",
           "note": "A4"
@@ -485,8 +596,8 @@
           "note": "F4"
         },
         "cyan": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "yellow": {
           "sample": "primerTones/short26.mp3",
@@ -497,8 +608,8 @@
           "note": "F3"
         },
         "purple": {
-          "sample": "primerTones/short14.mp3",
-          "note": "D3"
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
         }
       }
     },
@@ -507,21 +618,29 @@
       "measure": 17,
       "position": "1-of-4",
       "primer": {
+        "blue": {
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
+        },
         "red": {
           "sample": "primerTones/long80.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "cyan": {
-          "sample": "primerTones/long78.mp3",
-          "note": "E4"
+          "sample": "primerTones/long80.mp3",
+          "note": "F#4"
         },
         "yellow": {
           "sample": "primerTones/long78.mp3",
           "note": "E4"
         },
+        "pink": {
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
+        },
         "purple": {
-          "sample": "primerTones/long66.mp3",
-          "note": "E3"
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
         }
       }
     },
@@ -532,15 +651,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/long92.mp3",
-          "note": "Gb5"
+          "note": "F#5"
         },
         "magenta": {
           "sample": "primerTones/long88.mp3",
           "note": "D5"
         },
         "orange": {
-          "sample": "primerTones/long87.mp3",
-          "note": "Db5"
+          "sample": "primerTones/long88.mp3",
+          "note": "D5"
         },
         "blue": {
           "sample": "primerTones/long83.mp3",
@@ -548,23 +667,23 @@
         },
         "red": {
           "sample": "primerTones/long80.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "cyan": {
-          "sample": "primerTones/long76.mp3",
-          "note": "D4"
+          "sample": "primerTones/long80.mp3",
+          "note": "F#4"
         },
         "yellow": {
           "sample": "primerTones/long75.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "pink": {
-          "sample": "primerTones/long71.mp3",
-          "note": "A3"
+          "sample": "primerTones/long68.mp3",
+          "note": "F#3"
         },
         "purple": {
           "sample": "primerTones/long68.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         }
       }
     },
@@ -572,29 +691,56 @@
       "id": 20,
       "measure": 20,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        }
+      }
     },
     {
       "id": 21,
       "measure": 22,
       "position": "2+3/8-of-4",
-      "primer": {
-        "pink": {
-          "sample": "primerTones/long66.mp3",
-          "note": "E3"
-        }
-      }
+      "primer": {}
     },
     {
       "id": 22,
       "measure": 22,
       "position": "3-of-4",
-      "primer": {
-        "pink": {
-          "sample": "primerTones/long69.mp3",
-          "note": "G3"
-        }
-      }
+      "primer": {}
     },
     {
       "id": 23,
@@ -614,16 +760,16 @@
           "note": "G3"
         },
         "yellow": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "pink": {
           "sample": "primerTones/short19.mp3",
           "note": "G3"
         },
         "purple": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -638,23 +784,23 @@
         },
         "red": {
           "sample": "primerTones/short22.mp3",
-          "note": "G3"
+          "note": "Bb3"
         },
         "cyan": {
-          "sample": "primerTones/short19.mp3",
+          "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         },
         "yellow": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "pink": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "purple": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -668,12 +814,12 @@
           "note": "A4"
         },
         "red": {
-          "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "sample": "primerTones/short32.mp3",
+          "note": "G#4"
         },
         "cyan": {
-          "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "sample": "primerTones/short32.mp3",
+          "note": "G#4"
         },
         "yellow": {
           "sample": "primerTones/short21.mp3",
@@ -693,37 +839,36 @@
       "id": 26,
       "measure": 27,
       "position": "3-of-4",
-      "primer": {
-        "red": {
-          "sample": "primerTones/long74.mp3",
-          "note": "C4"
-        },
-        "cyan": {
-          "sample": "primerTones/long74.mp3",
-          "note": "C4"
-        },
-        "yellow": {
-          "sample": "primerTones/long74.mp3",
-          "note": "C4"
-        }
-      }
+      "primer": {}
     },
     {
       "id": 27,
       "measure": 28,
       "position": "3-of-4",
       "primer": {
+        "blue": {
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
+        },
         "red": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "cyan": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "yellow": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
+        },
+        "pink": {
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
+        },
+        "purple": {
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
         }
       }
     },
@@ -741,16 +886,16 @@
           "note": "Eb5"
         },
         "orange": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
         },
         "blue": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
         "red": {
-          "sample": "primerTones/short27.mp3",
-          "note": "Eb4"
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
         },
         "cyan": {
           "sample": "primerTones/short26.mp3",
@@ -761,8 +906,8 @@
           "note": "D4"
         },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
         },
         "purple": {
           "sample": "primerTones/short12.mp3",
@@ -780,8 +925,8 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short41.mp3",
-          "note": "F5"
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
         },
         "orange": {
           "sample": "primerTones/short40.mp3",
@@ -792,8 +937,8 @@
           "note": "D5"
         },
         "red": {
-          "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "cyan": {
           "sample": "primerTones/short29.mp3",
@@ -804,8 +949,8 @@
           "note": "F4"
         },
         "pink": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         },
         "purple": {
           "sample": "primerTones/short14.mp3",
@@ -827,8 +972,8 @@
           "note": "Eb5"
         },
         "orange": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short39.mp3",
+          "note": "Eb5"
         },
         "blue": {
           "sample": "primerTones/short36.mp3",
@@ -839,16 +984,16 @@
           "note": "Eb4"
         },
         "cyan": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
         },
         "yellow": {
           "sample": "primerTones/short26.mp3",
           "note": "D4"
         },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
         },
         "purple": {
           "sample": "primerTones/short12.mp3",
@@ -870,16 +1015,16 @@
           "note": "C5"
         },
         "orange": {
-          "sample": "primerTones/short31.mp3",
-          "note": "G4"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "blue": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
         },
         "red": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "cyan": {
           "sample": "primerTones/short19.mp3",
@@ -890,8 +1035,8 @@
           "note": "E4"
         },
         "pink": {
-          "sample": "primerTones/short19.mp3",
-          "note": "G3"
+          "sample": "primerTones/short12.mp3",
+          "note": "C3"
         },
         "purple": {
           "sample": "primerTones/short12.mp3",
@@ -909,8 +1054,8 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short42.mp3",
-          "note": "Gb5"
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
         },
         "orange": {
           "sample": "primerTones/short38.mp3",
@@ -921,8 +1066,8 @@
           "note": "G4"
         },
         "red": {
-          "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
         },
         "cyan": {
           "sample": "primerTones/short23.mp3",
@@ -930,7 +1075,15 @@
         },
         "yellow": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
+        },
+        "pink": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
+        },
+        "purple": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
         }
       }
     },
@@ -939,9 +1092,37 @@
       "measure": 35,
       "position": "2-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "cyan": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
+        },
         "pink": {
-          "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "sample": "primerTones/short11.mp3",
+          "note": "B2"
         },
         "purple": {
           "sample": "primerTones/short11.mp3",
@@ -959,8 +1140,8 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short41.mp3",
-          "note": "F5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "orange": {
           "sample": "primerTones/short36.mp3",
@@ -971,8 +1152,8 @@
           "note": "Ab4"
         },
         "red": {
-          "sample": "primerTones/short31.mp3",
-          "note": "G4"
+          "sample": "primerTones/short20.mp3",
+          "note": "Ab3"
         },
         "cyan": {
           "sample": "primerTones/short20.mp3",
@@ -987,8 +1168,8 @@
           "note": "F3"
         },
         "purple": {
-          "sample": "primerTones/short24.mp3",
-          "note": "C4"
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
         }
       }
     },
@@ -996,12 +1177,22 @@
       "id": 35,
       "measure": 37,
       "position": "4+1/2-of-4",
+      "primer": {}
+    },
+    {
+      "id": 36,
+      "measure": 38,
+      "position": "2-of-4",
       "primer": {
         "green": {
           "sample": "primerTones/short38.mp3",
           "note": "D5"
         },
         "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "orange": {
           "sample": "primerTones/short38.mp3",
           "note": "D5"
         },
@@ -1020,17 +1211,21 @@
       }
     },
     {
-      "id": 36,
+      "id": 37,
       "measure": 38,
-      "position": "2-of-4",
+      "position": "2+1/2-of-4",
       "primer": {
         "green": {
           "sample": "primerTones/short42.mp3",
-          "note": "Gb5"
+          "note": "F#5"
         },
         "magenta": {
           "sample": "primerTones/short42.mp3",
-          "note": "Gb5"
+          "note": "F#5"
+        },
+        "orange": {
+          "sample": "primerTones/short42.mp3",
+          "note": "F#5"
         },
         "blue": {
           "sample": "primerTones/short31.mp3",
@@ -1041,31 +1236,20 @@
           "note": "F4"
         },
         "cyan": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "yellow": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "pink": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
-        }
-      }
-    },
-    {
-      "id": 37,
-      "measure": 38,
-      "position": "2+1/2-of-4",
-      "primer": {
-        "green": {
-          "sample": "primerTones/short35.mp3",
-          "note": "B4"
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
         },
-        "magenta": {
-          "sample": "primerTones/short35.mp3",
-          "note": "B4"
+        "purple": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
         }
       }
     },
@@ -1075,12 +1259,55 @@
       "position": "3+1/2-of-4",
       "primer": {
         "green": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "magenta": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "orange": {
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
+        },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "pink": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
+        "purple": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        }
+      }
+    },
+    {
+      "id": 39,
+      "measure": 38,
+      "position": "4-of-4",
+      "primer": {
+        "green": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
         "magenta": {
-          "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "orange": {
           "sample": "primerTones/short34.mp3",
@@ -1097,41 +1324,6 @@
         "cyan": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
-        },
-        "yellow": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
-        },
-        "pink": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
-        },
-        "purple": {
-          "sample": "primerTones/short19.mp3",
-          "note": "G3"
-        }
-      }
-    },
-    {
-      "id": 39,
-      "measure": 38,
-      "position": "4-of-4",
-      "primer": {
-        "green": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
-        },
-        "blue": {
-          "sample": "primerTones/short31.mp3",
-          "note": "G4"
-        },
-        "yellow": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
-        },
-        "purple": {
-          "sample": "primerTones/short19.mp3",
-          "note": "G3"
         }
       }
     },
@@ -1152,6 +1344,10 @@
           "sample": "primerTones/short34.mp3",
           "note": "Bb4"
         },
+        "blue": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
         "red": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
@@ -1160,9 +1356,17 @@
           "sample": "primerTones/short29.mp3",
           "note": "F4"
         },
-        "pink": {
+        "yellow": {
           "sample": "primerTones/short26.mp3",
           "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -1171,21 +1375,41 @@
       "measure": 39,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "magenta": {
-          "sample": "primerTones/short35.mp3",
-          "note": "B4"
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "orange": {
-          "sample": "primerTones/short35.mp3",
-          "note": "B4"
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "blue": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
         },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
         "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
+        },
+        "purple": {
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
         }
       }
     },
@@ -1195,8 +1419,8 @@
       "position": "3-of-4",
       "primer": {
         "green": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "magenta": {
           "sample": "primerTones/short36.mp3",
@@ -1219,12 +1443,12 @@
           "note": "F4"
         },
         "yellow": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
-        },
-        "pink": {
           "sample": "primerTones/short24.mp3",
           "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
         },
         "purple": {
           "sample": "primerTones/short23.mp3",
@@ -1241,13 +1465,25 @@
           "sample": "primerTones/short40.mp3",
           "note": "E5"
         },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "yellow": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
         "pink": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         },
         "purple": {
-          "sample": "primerTones/short21.mp3",
-          "note": "A3"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -1259,6 +1495,26 @@
         "green": {
           "sample": "primerTones/short45.mp3",
           "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "orange": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -1267,9 +1523,13 @@
       "measure": 40,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
         "magenta": {
-          "sample": "primerTones/short44.mp3",
-          "note": "Ab5"
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
         },
         "orange": {
           "sample": "primerTones/short40.mp3",
@@ -1308,15 +1568,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "note": "C#5"
         },
         "magenta": {
           "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "note": "B#4"
         },
         "orange": {
-          "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/short36.mp3",
+          "note": "B#4"
         },
         "blue": {
           "sample": "primerTones/short25.mp3",
@@ -1351,15 +1611,58 @@
       "primer": {
         "green": {
           "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "B#4"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "B#4"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "yellow": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
+        },
+        "pink": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "purple": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        }
+      }
+    },
+    {
+      "id": 48,
+      "measure": 41,
+      "position": "4+1/2-of-4",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
         },
         "magenta": {
           "sample": "primerTones/short35.mp3",
           "note": "B4"
         },
         "orange": {
-          "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
         },
         "blue": {
           "sample": "primerTones/short25.mp3",
@@ -1388,21 +1691,21 @@
       }
     },
     {
-      "id": 48,
-      "measure": 41,
-      "position": "4+1/2-of-4",
+      "id": 49,
+      "measure": 42,
+      "position": "2-of-4",
       "primer": {
         "green": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "magenta": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "orange": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "blue": {
           "sample": "primerTones/short25.mp3",
@@ -1413,8 +1716,8 @@
           "note": "C4"
         },
         "cyan": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "yellow": {
           "sample": "primerTones/short24.mp3",
@@ -1425,17 +1728,6 @@
           "note": "Db3"
         },
         "purple": {
-          "sample": "primerTones/short5.mp3",
-          "note": "F2"
-        }
-      }
-    },
-    {
-      "id": 49,
-      "measure": 42,
-      "position": "2-of-4",
-      "primer": {
-        "pink": {
           "sample": "primerTones/short13.mp3",
           "note": "Db3"
         }
@@ -1448,31 +1740,39 @@
       "primer": {
         "green": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "magenta": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "orange": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
+        },
+        "blue": {
+          "sample": "primerTones/short25.mp3",
+          "note": "Db4"
         },
         "red": {
-          "sample": "primerTones/short23.mp3",
-          "note": "B3"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "cyan": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "yellow": {
           "sample": "primerTones/short23.mp3",
           "note": "B3"
         },
+        "pink": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
         "purple": {
-          "sample": "primerTones/short4.mp3",
-          "note": "E2"
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
         }
       }
     },
@@ -1483,27 +1783,39 @@
       "primer": {
         "green": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "magenta": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "orange": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "blue": {
-          "sample": "primerTones/short27.mp3",
-          "note": "Eb4"
-        },
-        "yellow": {
           "sample": "primerTones/short25.mp3",
           "note": "Db4"
         },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short23.mp3",
+          "note": "B3"
+        },
         "pink": {
-          "sample": "primerTones/short27.mp3",
-          "note": "Eb4"
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
+        },
+        "purple": {
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
         }
       }
     },
@@ -1513,16 +1825,16 @@
       "position": "4-of-4",
       "primer": {
         "yellow": {
-          "sample": "primerTones/short16.mp3",
-          "note": "E3"
+          "sample": "primerTones/short27.mp3",
+          "note": "D#4"
         },
         "pink": {
           "sample": "primerTones/short13.mp3",
           "note": "Db3"
         },
         "purple": {
-          "sample": "primerTones/short5.mp3",
-          "note": "F2"
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
         }
       }
     },
@@ -1533,15 +1845,15 @@
       "primer": {
         "yellow": {
           "sample": "primerTones/short14.mp3",
-          "note": "D3"
+          "note": "Ebb3"
         },
         "pink": {
           "sample": "primerTones/short13.mp3",
           "note": "Db3"
         },
         "purple": {
-          "sample": "primerTones/short5.mp3",
-          "note": "F2"
+          "sample": "primerTones/short13.mp3",
+          "note": "Db3"
         }
       }
     },
@@ -1556,15 +1868,15 @@
         },
         "magenta": {
           "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "note": "A#4"
         },
         "orange": {
           "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "note": "A#4"
         },
         "blue": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "red": {
           "sample": "primerTones/short23.mp3",
@@ -1580,11 +1892,11 @@
         },
         "pink": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "purple": {
-          "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
         }
       }
     },
@@ -1610,12 +1922,24 @@
           "note": "E4"
         },
         "red": {
-          "sample": "primerTones/short26.mp3",
-          "note": "D4"
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         },
         "cyan": {
           "sample": "primerTones/short21.mp3",
           "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        },
+        "pink": {
+          "sample": "primerTones/short1.mp3",
+          "note": "C#2"
+        },
+        "purple": {
+          "sample": "primerTones/short1.mp3",
+          "note": "C#2"
         }
       }
     },
@@ -1629,8 +1953,8 @@
           "note": "D5"
         },
         "magenta": {
-          "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "orange": {
           "sample": "primerTones/short29.mp3",
@@ -1664,8 +1988,8 @@
           "note": "F4"
         },
         "orange": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "blue": {
           "sample": "primerTones/short22.mp3",
@@ -1691,8 +2015,8 @@
           "note": "C5"
         },
         "magenta": {
-          "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
         },
         "orange": {
           "sample": "primerTones/short28.mp3",
@@ -1709,6 +2033,10 @@
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
         },
         "pink": {
           "sample": "primerTones/short4.mp3",
@@ -1730,8 +2058,8 @@
           "note": "F5"
         },
         "magenta": {
-          "sample": "primerTones/short34.mp3",
-          "note": "Bb4"
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
         },
         "orange": {
           "sample": "primerTones/short26.mp3",
@@ -1748,6 +2076,10 @@
         "cyan": {
           "sample": "primerTones/short26.mp3",
           "note": "D4"
+        },
+        "yellow": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
         },
         "pink": {
           "sample": "primerTones/short4.mp3",
@@ -1769,8 +2101,8 @@
           "note": "E5"
         },
         "magenta": {
-          "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
         },
         "orange": {
           "sample": "primerTones/short29.mp3",
@@ -1788,6 +2120,10 @@
           "sample": "primerTones/short24.mp3",
           "note": "C4"
         },
+        "yellow": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
         "pink": {
           "sample": "primerTones/short4.mp3",
           "note": "E2"
@@ -1803,6 +2139,14 @@
       "measure": 51,
       "position": "1-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "magenta": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
         "orange": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
@@ -1818,6 +2162,18 @@
         "cyan": {
           "sample": "primerTones/short21.mp3",
           "note": "A3"
+        },
+        "yellow": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "pink": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
+        },
+        "purple": {
+          "sample": "primerTones/short4.mp3",
+          "note": "E2"
         }
       }
     },
@@ -1831,8 +2187,8 @@
           "note": "G4"
         },
         "magenta": {
-          "sample": "primerTones/short31.mp3",
-          "note": "G4"
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
         },
         "orange": {
           "sample": "primerTones/short26.mp3",
@@ -1850,13 +2206,17 @@
           "sample": "primerTones/short20.mp3",
           "note": "Ab3"
         },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         },
         "purple": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         }
       }
     },
@@ -1870,8 +2230,8 @@
           "note": "F5"
         },
         "magenta": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "orange": {
           "sample": "primerTones/short34.mp3",
@@ -1889,6 +2249,10 @@
           "sample": "primerTones/short31.mp3",
           "note": "G4"
         },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
         "pink": {
           "sample": "primerTones/short10.mp3",
           "note": "Bb2"
@@ -1904,9 +2268,13 @@
       "measure": 52,
       "position": "2-of-3",
       "primer": {
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         },
         "purple": {
           "sample": "primerTones/short10.mp3",
@@ -1924,8 +2292,8 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short41.mp3",
-          "note": "F5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "orange": {
           "sample": "primerTones/short36.mp3",
@@ -1942,6 +2310,18 @@
         "cyan": {
           "sample": "primerTones/short32.mp3",
           "note": "Ab4"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         }
       }
     },
@@ -1955,8 +2335,8 @@
           "note": "A5"
         },
         "magenta": {
-          "sample": "primerTones/short44.mp3",
-          "note": "Ab5"
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
         },
         "orange": {
           "sample": "primerTones/short38.mp3",
@@ -1973,6 +2353,18 @@
         "cyan": {
           "sample": "primerTones/short35.mp3",
           "note": "B4"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         }
       }
     },
@@ -1986,8 +2378,8 @@
           "note": "Bb5"
         },
         "magenta": {
-          "sample": "primerTones/short44.mp3",
-          "note": "Ab5"
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
         },
         "orange": {
           "sample": "primerTones/short41.mp3",
@@ -2004,6 +2396,18 @@
         "cyan": {
           "sample": "primerTones/short35.mp3",
           "note": "B4"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
         }
       }
     },
@@ -2017,8 +2421,8 @@
           "note": "F4"
         },
         "magenta": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
         },
         "orange": {
           "sample": "primerTones/short28.mp3",
@@ -2029,8 +2433,8 @@
           "note": "F4"
         },
         "red": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "cyan": {
           "sample": "primerTones/short24.mp3",
@@ -2041,8 +2445,8 @@
           "note": "C4"
         },
         "pink": {
-          "sample": "primerTones/short19.mp3",
-          "note": "G3"
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         },
         "purple": {
           "sample": "primerTones/short8.mp3",
@@ -2067,13 +2471,29 @@
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
+        "blue": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
         "red": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "cyan": {
           "sample": "primerTones/short24.mp3",
           "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         }
       }
     },
@@ -2086,17 +2506,37 @@
           "sample": "primerTones/short38.mp3",
           "note": "D5"
         },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "orange": {
-          "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "blue": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
         },
         "red": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         }
       }
     },
@@ -2110,12 +2550,20 @@
           "note": "E5"
         },
         "magenta": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "blue": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
         },
         "cyan": {
           "sample": "primerTones/short24.mp3",
@@ -2126,8 +2574,8 @@
           "note": "C4"
         },
         "pink": {
-          "sample": "primerTones/short19.mp3",
-          "note": "G3"
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         },
         "purple": {
           "sample": "primerTones/short8.mp3",
@@ -2140,17 +2588,41 @@
       "measure": 55,
       "position": "1-of-3",
       "primer": {
-        "magenta": {
+        "green": {
           "sample": "primerTones/short40.mp3",
           "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "blue": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
         },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
         "cyan": {
           "sample": "primerTones/short24.mp3",
           "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         }
       }
     },
@@ -2163,6 +2635,53 @@
           "sample": "primerTones/short41.mp3",
           "note": "F5"
         },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "orange": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "cyan": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        }
+      }
+    },
+    {
+      "id": 74,
+      "measure": 55,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
         "orange": {
           "sample": "primerTones/short38.mp3",
           "note": "D5"
@@ -2174,21 +2693,22 @@
         "red": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
-        }
-      }
-    },
-    {
-      "id": 74,
-      "measure": 55,
-      "position": "2-of-3",
-      "primer": {
-        "red": {
-          "sample": "primerTones/short33.mp3",
-          "note": "A4"
         },
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         }
       }
     },
@@ -2202,12 +2722,36 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "orange": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
+        },
+        "purple": {
+          "sample": "primerTones/short8.mp3",
+          "note": "Ab2"
         }
       }
     },
@@ -2216,9 +2760,25 @@
       "measure": 55,
       "position": "3+1/2-of-3",
       "primer": {
-        "magenta": {
+        "green": {
           "sample": "primerTones/short43.mp3",
           "note": "G5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         },
         "cyan": {
           "sample": "primerTones/short33.mp3",
@@ -2235,6 +2795,10 @@
           "sample": "primerTones/short45.mp3",
           "note": "A5"
         },
+        "magenta": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
         "orange": {
           "sample": "primerTones/short43.mp3",
           "note": "G5"
@@ -2244,8 +2808,12 @@
           "note": "F5"
         },
         "red": {
-          "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         }
       }
     },
@@ -2254,9 +2822,29 @@
       "measure": 56,
       "position": "1+1/2-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
+        "orange": {
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
+        },
         "blue": {
           "sample": "primerTones/short41.mp3",
           "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         }
       }
     },
@@ -2270,16 +2858,20 @@
           "note": "B5"
         },
         "magenta": {
-          "sample": "primerTones/short45.mp3",
-          "note": "A5"
+          "sample": "primerTones/short43.mp3",
+          "note": "G5"
         },
         "orange": {
           "sample": "primerTones/short43.mp3",
           "note": "G5"
         },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "red": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         },
         "cyan": {
           "sample": "primerTones/short33.mp3",
@@ -2292,13 +2884,25 @@
       "measure": 56,
       "position": "2+1/2-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
         "magenta": {
           "sample": "primerTones/short41.mp3",
           "note": "F5"
         },
         "orange": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "red": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "cyan": {
           "sample": "primerTones/short36.mp3",
@@ -2311,9 +2915,29 @@
       "measure": 56,
       "position": "3-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "red": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "cyan": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         }
       }
     },
@@ -2322,17 +2946,29 @@
       "measure": 56,
       "position": "3+1/2-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "orange": {
-          "sample": "primerTones/short43.mp3",
-          "note": "G5"
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
         },
         "blue": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
         "red": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "cyan": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         }
       }
     },
@@ -2341,13 +2977,29 @@
       "measure": 57,
       "position": "1-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
         "magenta": {
-          "sample": "primerTones/short45.mp3",
-          "note": "A5"
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "red": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "cyan": {
-          "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         }
       }
     },
@@ -2356,13 +3008,29 @@
       "measure": 57,
       "position": "1+1/2-of-3",
       "primer": {
+        "green": {
+          "sample": "primerTones/short47.mp3",
+          "note": "B5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "blue": {
           "sample": "primerTones/short43.mp3",
           "note": "G5"
         },
         "red": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "cyan": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
         }
       }
     },
@@ -2373,15 +3041,15 @@
       "primer": {
         "yellow": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -2437,20 +3105,20 @@
           "note": "Eb4"
         },
         "cyan": {
-          "sample": "primerTones/short24.mp3",
-          "note": "C4"
+          "sample": "primerTones/short27.mp3",
+          "note": "Eb4"
         },
         "yellow": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "pink": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "purple": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         }
       }
     },
@@ -2470,6 +3138,10 @@
         "cyan": {
           "sample": "primerTones/short31.mp3",
           "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "pink": {
           "sample": "primerTones/short19.mp3",
@@ -2498,6 +3170,10 @@
           "sample": "primerTones/short34.mp3",
           "note": "Bb4"
         },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "pink": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
@@ -2515,23 +3191,27 @@
       "primer": {
         "blue": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "red": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "cyan": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
+        },
+        "yellow": {
+          "sample": "primerTones/short18.mp3",
+          "note": "F#3"
         },
         "pink": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "purple": {
           "sample": "primerTones/short18.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         }
       }
     },
@@ -2551,6 +3231,10 @@
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
         },
         "pink": {
           "sample": "primerTones/short16.mp3",
@@ -2579,6 +3263,10 @@
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "Bb2"
+        },
         "pink": {
           "sample": "primerTones/short10.mp3",
           "note": "Bb2"
@@ -2594,6 +3282,10 @@
       "measure": 62,
       "position": "3-of-3",
       "primer": {
+        "yellow": {
+          "sample": "primerTones/long71.mp3",
+          "note": "A3"
+        },
         "pink": {
           "sample": "primerTones/long71.mp3",
           "note": "A3"
@@ -2609,6 +3301,10 @@
       "measure": 63,
       "position": "3-of-3",
       "primer": {
+        "yellow": {
+          "sample": "primerTones/long61.mp3",
+          "note": "B2"
+        },
         "pink": {
           "sample": "primerTones/long61.mp3",
           "note": "B2"
@@ -2624,13 +3320,17 @@
       "measure": 65,
       "position": "2-of-3",
       "primer": {
+        "yellow": {
+          "sample": "primerTones/long60.mp3",
+          "note": "A#2"
+        },
         "pink": {
           "sample": "primerTones/long60.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         },
         "purple": {
           "sample": "primerTones/long60.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         }
       }
     },
@@ -2641,7 +3341,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short39.mp3",
-          "note": "Eb5"
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
         }
       }
     },
@@ -2652,7 +3372,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
+        },
+        "magenta": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
+        },
+        "orange": {
+          "sample": "primerTones/short30.mp3",
+          "note": "F#4"
+        },
+        "yellow": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
         }
       }
     },
@@ -2661,9 +3401,29 @@
       "measure": 67,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
         "yellow": {
           "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "note": "F#4"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
         }
       }
     },
@@ -2672,9 +3432,29 @@
       "measure": 67,
       "position": "2+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
         "yellow": {
           "sample": "primerTones/short21.mp3",
           "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
+        },
+        "purple": {
+          "sample": "primerTones/short10.mp3",
+          "note": "A#2"
         }
       }
     },
@@ -2682,7 +3462,32 @@
       "id": 101,
       "measure": 67,
       "position": "3+2/7-of-4",
-      "primer": {}
+      "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        }
+      }
     },
     {
       "id": 102,
@@ -2691,7 +3496,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
         },
         "blue": {
           "sample": "primerTones/short21.mp3",
@@ -2708,6 +3521,14 @@
         "yellow": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -2718,7 +3539,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short44.mp3",
-          "note": "Ab5"
+          "note": "G#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short44.mp3",
+          "note": "G#5"
+        },
+        "orange": {
+          "sample": "primerTones/short44.mp3",
+          "note": "G#5"
+        },
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         }
       }
     },
@@ -2729,15 +3570,39 @@
       "primer": {
         "green": {
           "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "note": "B#4"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "B#4"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "B#4"
+        },
+        "blue": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "red": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "cyan": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         },
         "yellow": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
         },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "purple": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
         }
       }
     },
@@ -2747,12 +3612,28 @@
       "position": "4+1/4-of-4",
       "primer": {
         "green": {
-          "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         },
         "magenta": {
           "sample": "primerTones/short33.mp3",
           "note": "A4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "yellow": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
+        },
+        "purple": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
         }
       }
     },
@@ -2761,7 +3642,27 @@
       "measure": 69,
       "position": "1-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
         "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
           "sample": "primerTones/short19.mp3",
           "note": "G3"
         }
@@ -2774,7 +3675,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short39.mp3",
-          "note": "Eb5"
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -2783,13 +3704,29 @@
       "measure": 69,
       "position": "2-of-4",
       "primer": {
-        "pink": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
           "sample": "primerTones/short23.mp3",
           "note": "B3"
         },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
         "purple": {
-          "sample": "primerTones/short23.mp3",
-          "note": "B3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -2798,13 +3735,29 @@
       "measure": 69,
       "position": "2+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
         "pink": {
           "sample": "primerTones/short15.mp3",
-          "note": "Eb3"
+          "note": "D#3"
         },
         "purple": {
           "sample": "primerTones/short15.mp3",
-          "note": "Eb3"
+          "note": "D#3"
         }
       }
     },
@@ -2815,7 +3768,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short42.mp3",
-          "note": "Gb5"
+          "note": "F#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short42.mp3",
+          "note": "F#5"
+        },
+        "orange": {
+          "sample": "primerTones/short42.mp3",
+          "note": "F#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "D#3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "D#3"
         }
       }
     },
@@ -2826,7 +3799,27 @@
       "primer": {
         "green": {
           "sample": "primerTones/short39.mp3",
-          "note": "Eb5"
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short15.mp3",
+          "note": "D#3"
+        },
+        "pink": {
+          "sample": "primerTones/short15.mp3",
+          "note": "D#3"
+        },
+        "purple": {
+          "sample": "primerTones/short15.mp3",
+          "note": "D#3"
         }
       }
     },
@@ -2835,13 +3828,29 @@
       "measure": 69,
       "position": "3+3/4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short13.mp3",
+          "note": "C#3"
+        },
         "pink": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         },
         "purple": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         }
       }
     },
@@ -2850,6 +3859,22 @@
       "measure": 69,
       "position": "4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
         "pink": {
           "sample": "primerTones/short16.mp3",
           "note": "E3"
@@ -2865,6 +3890,53 @@
       "measure": 69,
       "position": "4+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "orange": {
+          "sample": "primerTones/short39.mp3",
+          "note": "D#5"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 115,
+      "measure": 70,
+      "position": "1-of-3",
+      "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
         "magenta": {
           "sample": "primerTones/short40.mp3",
           "note": "E5"
@@ -2884,17 +3956,18 @@
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
-        }
-      }
-    },
-    {
-      "id": 115,
-      "measure": 70,
-      "position": "1-of-3",
-      "primer": {
-        "green": {
-          "sample": "primerTones/short40.mp3",
-          "note": "E5"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
         }
       }
     },
@@ -2935,20 +4008,63 @@
       "position": "3-of-3",
       "primer": {
         "green": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "orange": {
+          "sample": "primerTones/long90.mp3",
+          "note": "E5"
+        },
+        "blue": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "red": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/long78.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/long66.mp3",
+          "note": "E3"
+        }
+      }
+    },
+    {
+      "id": 118,
+      "measure": 71,
+      "position": "2-of-3",
+      "primer": {
+        "green": {
           "sample": "primerTones/long88.mp3",
           "note": "D5"
         },
         "magenta": {
-          "sample": "primerTones/long88.mp3",
-          "note": "D5"
+          "sample": "primerTones/long80.mp3",
+          "note": "F#4"
         },
         "orange": {
           "sample": "primerTones/long80.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "blue": {
           "sample": "primerTones/long80.mp3",
-          "note": "Gb4"
+          "note": "F#4"
         },
         "red": {
           "sample": "primerTones/long76.mp3",
@@ -2960,50 +4076,15 @@
         },
         "yellow": {
           "sample": "primerTones/long68.mp3",
-          "note": "Gb3"
+          "note": "F#3"
         },
         "pink": {
           "sample": "primerTones/long64.mp3",
           "note": "D3"
         },
         "purple": {
-          "sample": "primerTones/long56.mp3",
-          "note": "Gb2"
-        }
-      }
-    },
-    {
-      "id": 118,
-      "measure": 71,
-      "position": "2-of-3",
-      "primer": {
-        "green": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
-        },
-        "magenta": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
-        },
-        "orange": {
-          "sample": "primerTones/long81.mp3",
-          "note": "G4"
-        },
-        "cyan": {
-          "sample": "primerTones/long72.mp3",
-          "note": "Bb3"
-        },
-        "yellow": {
-          "sample": "primerTones/long72.mp3",
-          "note": "Bb3"
-        },
-        "pink": {
-          "sample": "primerTones/long69.mp3",
-          "note": "G3"
-        },
-        "purple": {
-          "sample": "primerTones/long57.mp3",
-          "note": "G2"
+          "sample": "primerTones/long64.mp3",
+          "note": "D3"
         }
       }
     },
@@ -3013,40 +4094,40 @@
       "position": "1-of-3",
       "primer": {
         "green": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
+          "sample": "primerTones/long84.mp3",
+          "note": "Bb4"
         },
         "magenta": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
         },
         "orange": {
-          "sample": "primerTones/long82.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/long81.mp3",
+          "note": "G4"
         },
         "blue": {
-          "sample": "primerTones/long82.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/long80.mp3",
+          "note": "F#4"
         },
         "red": {
-          "sample": "primerTones/long77.mp3",
-          "note": "Eb4"
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
         },
         "cyan": {
-          "sample": "primerTones/long77.mp3",
-          "note": "Eb4"
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
         },
         "yellow": {
-          "sample": "primerTones/long70.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/long72.mp3",
+          "note": "Bb3"
         },
         "pink": {
-          "sample": "primerTones/long65.mp3",
-          "note": "Eb3"
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
         },
         "purple": {
-          "sample": "primerTones/long58.mp3",
-          "note": "Ab2"
+          "sample": "primerTones/long69.mp3",
+          "note": "G3"
         }
       }
     },
@@ -3056,40 +4137,40 @@
       "position": "2-of-2",
       "primer": {
         "green": {
-          "sample": "primerTones/long93.mp3",
-          "note": "G5"
+          "sample": "primerTones/long89.mp3",
+          "note": "D#5"
         },
         "magenta": {
-          "sample": "primerTones/long93.mp3",
-          "note": "G5"
+          "sample": "primerTones/long82.mp3",
+          "note": "G#4"
         },
         "orange": {
-          "sample": "primerTones/long86.mp3",
-          "note": "C5"
+          "sample": "primerTones/long82.mp3",
+          "note": "G#4"
         },
         "blue": {
-          "sample": "primerTones/long86.mp3",
-          "note": "C5"
+          "sample": "primerTones/long82.mp3",
+          "note": "G#4"
         },
         "red": {
-          "sample": "primerTones/long81.mp3",
-          "note": "G4"
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
         },
         "cyan": {
-          "sample": "primerTones/long81.mp3",
-          "note": "G4"
+          "sample": "primerTones/long76.mp3",
+          "note": "D4"
         },
         "yellow": {
-          "sample": "primerTones/long74.mp3",
-          "note": "C4"
+          "sample": "primerTones/long70.mp3",
+          "note": "G#3"
         },
         "pink": {
-          "sample": "primerTones/long69.mp3",
-          "note": "G3"
+          "sample": "primerTones/long65.mp3",
+          "note": "D#3"
         },
         "purple": {
-          "sample": "primerTones/long62.mp3",
-          "note": "C3"
+          "sample": "primerTones/long65.mp3",
+          "note": "D#3"
         }
       }
     },
@@ -3103,8 +4184,8 @@
           "note": "D5"
         },
         "magenta": {
-          "sample": "primerTones/short38.mp3",
-          "note": "D5"
+          "sample": "primerTones/short35.mp3",
+          "note": "B4"
         },
         "orange": {
           "sample": "primerTones/short35.mp3",
@@ -3127,8 +4208,8 @@
           "note": "D4"
         },
         "pink": {
-          "sample": "primerTones/short23.mp3",
-          "note": "B3"
+          "sample": "primerTones/short14.mp3",
+          "note": "D3"
         },
         "purple": {
           "sample": "primerTones/short14.mp3",
@@ -3170,8 +4251,8 @@
           "note": "G4"
         },
         "pink": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         },
         "purple": {
           "sample": "primerTones/short19.mp3",
@@ -3186,39 +4267,39 @@
       "primer": {
         "green": {
           "sample": "primerTones/short44.mp3",
-          "note": "Ab5"
+          "note": "G#5"
         },
         "magenta": {
           "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "note": "C#5"
         },
         "orange": {
           "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "note": "C#5"
         },
         "blue": {
           "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "note": "G#4"
         },
         "red": {
-          "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/short25.mp3",
+          "note": "C#4"
         },
         "cyan": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "yellow": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "pink": {
           "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "note": "G#3"
         },
         "purple": {
           "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "note": "G#3"
         }
       }
     },
@@ -3227,21 +4308,41 @@
       "measure": 78,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short44.mp3",
+          "note": "G#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
         "orange": {
-          "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
         },
         "blue": {
           "sample": "primerTones/short33.mp3",
           "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "C#4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "C#4"
         },
         "yellow": {
           "sample": "primerTones/short24.mp3",
           "note": "C4"
         },
         "pink": {
-          "sample": "primerTones/short21.mp3",
-          "note": "A3"
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
+        },
+        "purple": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
         }
       }
     },
@@ -3249,7 +4350,44 @@
       "id": 125,
       "measure": 80,
       "position": "1-of-3",
-      "primer": {}
+      "primer": {
+        "green": {
+          "sample": "primerTones/short44.mp3",
+          "note": "G#5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "C#5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short25.mp3",
+          "note": "C#4"
+        },
+        "cyan": {
+          "sample": "primerTones/short25.mp3",
+          "note": "C#4"
+        },
+        "yellow": {
+          "sample": "primerTones/short24.mp3",
+          "note": "C4"
+        },
+        "pink": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
+        },
+        "purple": {
+          "sample": "primerTones/short20.mp3",
+          "note": "G#3"
+        }
+      }
     },
     {
       "id": 126,
@@ -3274,13 +4412,17 @@
           "sample": "primerTones/short40.mp3",
           "note": "E5"
         },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
         "pink": {
           "sample": "primerTones/short16.mp3",
           "note": "E3"
         },
         "purple": {
-          "sample": "primerTones/short4.mp3",
-          "note": "E2"
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
         }
       }
     },
@@ -3300,6 +4442,30 @@
         "orange": {
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short28.mp3",
+          "note": "Fb4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "Fb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "Fb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
         }
       }
     },
@@ -3308,6 +4474,14 @@
       "measure": 98,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
         "orange": {
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
@@ -3317,8 +4491,8 @@
           "note": "Gb4"
         },
         "red": {
-          "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "cyan": {
           "sample": "primerTones/short22.mp3",
@@ -3343,13 +4517,37 @@
       "measure": 98,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "orange": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "yellow": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
         },
         "pink": {
-          "sample": "primerTones/short20.mp3",
-          "note": "Ab3"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "purple": {
           "sample": "primerTones/short22.mp3",
@@ -3362,9 +4560,41 @@
       "measure": 98,
       "position": "4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
         "red": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3378,16 +4608,32 @@
           "note": "Db5"
         },
         "magenta": {
-          "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "orange": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "pink": {
-          "sample": "primerTones/short21.mp3",
-          "note": "A3"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "purple": {
           "sample": "primerTones/short22.mp3",
@@ -3400,17 +4646,41 @@
       "measure": 99,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "orange": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
         "red": {
-          "sample": "primerTones/short29.mp3",
-          "note": "F4"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "yellow": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3419,9 +4689,41 @@
       "measure": 99,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
         "purple": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         }
       }
     },
@@ -3430,17 +4732,41 @@
       "measure": 99,
       "position": "4-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "blue": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "yellow": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         },
         "pink": {
-          "sample": "primerTones/short22.mp3",
-          "note": "Bb3"
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "purple": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         }
       }
     },
@@ -3449,17 +4775,37 @@
       "measure": 100,
       "position": "1-of-4",
       "primer": {
-        "magenta": {
+        "green": {
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
         },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
         "orange": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
         },
         "blue": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "purple": {
           "sample": "primerTones/short22.mp3",
@@ -3472,6 +4818,38 @@
       "measure": 100,
       "position": "1+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "purple": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
@@ -3483,9 +4861,41 @@
       "measure": 100,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
         "red": {
-          "sample": "primerTones/short28.mp3",
-          "note": "E4"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "yellow": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3494,15 +4904,39 @@
       "measure": 100,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
         "blue": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "yellow": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         },
         "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         }
@@ -3517,6 +4951,10 @@
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
         },
+        "magenta": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
         "orange": {
           "sample": "primerTones/short32.mp3",
           "note": "Ab4"
@@ -3524,6 +4962,14 @@
         "blue": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "cyan": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         },
         "yellow": {
           "sample": "primerTones/short21.mp3",
@@ -3534,8 +4980,8 @@
           "note": "G3"
         },
         "purple": {
-          "sample": "primerTones/short12.mp3",
-          "note": "C3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -3549,16 +4995,36 @@
           "note": "E5"
         },
         "magenta": {
-          "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
         },
         "orange": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -3567,17 +5033,41 @@
       "measure": 101,
       "position": "2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "blue": {
           "sample": "primerTones/short32.mp3",
           "note": "Ab4"
         },
         "red": {
-          "sample": "primerTones/short30.mp3",
-          "note": "Gb4"
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
         },
         "yellow": {
           "sample": "primerTones/short21.mp3",
           "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -3586,15 +5076,39 @@
       "measure": 101,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "blue": {
           "sample": "primerTones/short30.mp3",
           "note": "Gb4"
         },
         "red": {
-          "sample": "primerTones/short32.mp3",
-          "note": "Ab4"
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "cyan": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         },
         "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
+        "purple": {
           "sample": "primerTones/short19.mp3",
           "note": "G3"
         }
@@ -3605,13 +5119,41 @@
       "measure": 101,
       "position": "3+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short30.mp3",
+          "note": "Gb4"
+        },
+        "red": {
+          "sample": "primerTones/short28.mp3",
+          "note": "E4"
+        },
         "cyan": {
           "sample": "primerTones/short28.mp3",
           "note": "E4"
         },
+        "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
+        },
         "purple": {
-          "sample": "primerTones/short12.mp3",
-          "note": "C3"
+          "sample": "primerTones/short19.mp3",
+          "note": "G3"
         }
       }
     },
@@ -3620,11 +5162,39 @@
       "measure": 102,
       "position": "1-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short40.mp3",
+          "note": "E5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "blue": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
         },
         "yellow": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "purple": {
           "sample": "primerTones/short21.mp3",
           "note": "A3"
         }
@@ -3635,13 +5205,29 @@
       "measure": 102,
       "position": "2-of-4",
       "primer": {
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
         "red": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
         },
-        "pink": {
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "yellow": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
+        },
+        "pink": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
+        },
+        "purple": {
+          "sample": "primerTones/short21.mp3",
+          "note": "A3"
         }
       }
     },
@@ -3650,13 +5236,29 @@
       "measure": 102,
       "position": "2+1/2-of-4",
       "primer": {
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
         "yellow": {
           "sample": "primerTones/short29.mp3",
           "note": "F4"
         },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "purple": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3665,9 +5267,41 @@
       "measure": 102,
       "position": "3-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
         "orange": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3676,7 +5310,39 @@
       "measure": 102,
       "position": "3+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
         "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         }
@@ -3692,12 +5358,36 @@
           "note": "Db5"
         },
         "magenta": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
         },
         "red": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3711,12 +5401,36 @@
           "note": "F5"
         },
         "magenta": {
-          "sample": "primerTones/short37.mp3",
-          "note": "Db5"
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "orange": {
+          "sample": "primerTones/short36.mp3",
+          "note": "C5"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
         },
         "cyan": {
           "sample": "primerTones/short33.mp3",
-          "note": "A4"
+          "note": "Bbb4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3730,24 +5444,36 @@
           "note": "G5"
         },
         "magenta": {
-          "sample": "primerTones/short43.mp3",
-          "note": "G5"
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
         },
         "orange": {
           "sample": "primerTones/short41.mp3",
           "note": "F5"
         },
-        "cyan": {
+        "blue": {
           "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "note": "Dbb5"
+        },
+        "red": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short33.mp3",
+          "note": "Bbb4"
         },
         "yellow": {
           "sample": "primerTones/short36.mp3",
           "note": "C5"
         },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
         "purple": {
-          "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3760,9 +5486,21 @@
           "sample": "primerTones/short45.mp3",
           "note": "A5"
         },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
         "blue": {
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
+        },
+        "red": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "cyan": {
           "sample": "primerTones/short34.mp3",
@@ -3771,6 +5509,14 @@
         "yellow": {
           "sample": "primerTones/short34.mp3",
           "note": "Bb4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3779,15 +5525,39 @@
       "measure": 103,
       "position": "3-of-4",
       "primer": {
-        "red": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
           "sample": "primerTones/short37.mp3",
           "note": "Db5"
         },
+        "red": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
         "yellow": {
-          "sample": "primerTones/short33.mp3, primerTones/short29.mp3",
-          "note": "A4, F4"
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
         },
         "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
           "sample": "primerTones/short22.mp3",
           "note": "Bb3"
         }
@@ -3798,13 +5568,41 @@
       "measure": 103,
       "position": "3+1/2-of-4",
       "primer": {
+        "green": {
+          "sample": "primerTones/short45.mp3",
+          "note": "A5"
+        },
+        "magenta": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "orange": {
+          "sample": "primerTones/short41.mp3",
+          "note": "F5"
+        },
+        "blue": {
+          "sample": "primerTones/short37.mp3",
+          "note": "Db5"
+        },
         "red": {
-          "sample": "primerTones/short36.mp3",
-          "note": "C5"
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
+        },
+        "cyan": {
+          "sample": "primerTones/short34.mp3",
+          "note": "Bb4"
         },
         "yellow": {
           "sample": "primerTones/short31.mp3",
           "note": "G4"
+        },
+        "pink": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
+        },
+        "purple": {
+          "sample": "primerTones/short22.mp3",
+          "note": "Bb3"
         }
       }
     },
@@ -3812,56 +5610,93 @@
       "id": 156,
       "measure": 104,
       "position": "1-of-4",
-      "primer": {
-        "green": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
-        },
-        "magenta": {
-          "sample": "primerTones/long89.mp3",
-          "note": "Eb5"
-        },
-        "orange": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
-        },
-        "blue": {
-          "sample": "primerTones/long84.mp3",
-          "note": "Bb4"
-        },
-        "red": {
-          "sample": "primerTones/long81.mp3",
-          "note": "G4"
-        },
-        "cyan": {
-          "sample": "primerTones/long81.mp3",
-          "note": "G4"
-        },
-        "yellow": {
-          "sample": "primerTones/long77.mp3",
-          "note": "Eb4"
-        },
-        "pink": {
-          "sample": "primerTones/long69.mp3",
-          "note": "G3"
-        },
-        "purple": {
-          "sample": "primerTones/long60.mp3",
-          "note": "Bb2"
-        }
-      }
+      "primer": {}
     },
     {
       "id": 157,
       "measure": 107,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "green": {
+          "sample": "primerTones/short38.mp3",
+          "note": "D5"
+        },
+        "magenta": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "orange": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "blue": {
+          "sample": "primerTones/short33.mp3",
+          "note": "A4"
+        },
+        "red": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "cyan": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "yellow": {
+          "sample": "primerTones/short26.mp3",
+          "note": "D4"
+        },
+        "pink": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        },
+        "purple": {
+          "sample": "primerTones/short16.mp3",
+          "note": "E3"
+        }
+      }
     },
     {
       "id": 158,
       "measure": 112,
       "position": "1-of-4",
-      "primer": {}
+      "primer": {
+        "green": {
+          "sample": "primerTones/short46.mp3",
+          "note": "Bb5"
+        },
+        "magenta": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "orange": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "blue": {
+          "sample": "primerTones/short32.mp3",
+          "note": "Ab4"
+        },
+        "red": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "cyan": {
+          "sample": "primerTones/short31.mp3",
+          "note": "G4"
+        },
+        "yellow": {
+          "sample": "primerTones/short29.mp3",
+          "note": "F4"
+        },
+        "pink": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        },
+        "purple": {
+          "sample": "primerTones/short17.mp3",
+          "note": "F3"
+        }
+      }
     },
     {
       "id": 159,
@@ -4464,11 +6299,11 @@
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -4557,11 +6392,11 @@
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -4650,11 +6485,11 @@
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -4732,15 +6567,15 @@
         },
         "yellow": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -4751,15 +6586,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "magenta": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "orange": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "blue": {
           "sample": "primerTones/short19.mp3",
@@ -4775,15 +6610,15 @@
         },
         "yellow": {
           "sample": "primerTones/short10.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         },
         "pink": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         },
         "purple": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         }
       }
     },
@@ -4861,15 +6696,15 @@
         },
         "yellow": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -4880,15 +6715,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "magenta": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "orange": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "blue": {
           "sample": "primerTones/short19.mp3",
@@ -4904,15 +6739,15 @@
         },
         "yellow": {
           "sample": "primerTones/short10.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         },
         "pink": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         },
         "purple": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         }
       }
     },
@@ -4990,15 +6825,15 @@
         },
         "yellow": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -5009,15 +6844,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "magenta": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "orange": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "blue": {
           "sample": "primerTones/short19.mp3",
@@ -5033,15 +6868,15 @@
         },
         "yellow": {
           "sample": "primerTones/short10.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         },
         "pink": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         },
         "purple": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         }
       }
     },
@@ -5119,15 +6954,15 @@
         },
         "yellow": {
           "sample": "primerTones/short13.mp3",
-          "note": "Db3"
+          "note": "C#3"
         },
         "pink": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         },
         "purple": {
           "sample": "primerTones/short6.mp3",
-          "note": "Gb2"
+          "note": "F#2"
         }
       }
     },
@@ -5162,15 +6997,15 @@
         },
         "yellow": {
           "sample": "primerTones/short10.mp3",
-          "note": "Bb2"
+          "note": "A#2"
         },
         "pink": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         },
         "purple": {
           "sample": "primerTones/short3.mp3",
-          "note": "Eb2"
+          "note": "D#2"
         }
       }
     },
@@ -5181,15 +7016,15 @@
       "primer": {
         "green": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "magenta": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "orange": {
           "sample": "primerTones/short25.mp3",
-          "note": "Db4"
+          "note": "C#4"
         },
         "blue": {
           "sample": "primerTones/short21.mp3",

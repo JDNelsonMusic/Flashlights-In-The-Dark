@@ -76,16 +76,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     // trigger flash and/or sound
                     switch self.state.keyboardTriggerMode {
                     case .torch:
-                        self.state.flashOn(id: idx)
+                        self.state.flashOn(id: idx, allowWhenDisarmed: true)
                     case .sound:
                         guard idx < self.state.devices.count else { return nil }
                         let device = self.state.devices[idx]
-                        self.state.triggerSound(device: device)
+                        self.state.triggerSound(device: device, allowWhenDisarmed: true)
                     case .both:
-                        self.state.flashOn(id: idx)
+                        self.state.flashOn(id: idx, allowWhenDisarmed: true)
                         guard idx < self.state.devices.count else { return nil }
                         let deviceBoth = self.state.devices[idx]
-                        self.state.triggerSound(device: deviceBoth)
+                        self.state.triggerSound(device: deviceBoth, allowWhenDisarmed: true)
                     }
                     // send MIDI note on with scale mapping
                     let r = idx / 8
@@ -105,16 +105,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         // release flash and/or sound
                         switch self.state.keyboardTriggerMode {
                         case .torch:
-                            self.state.flashOff(id: idx)
+                            self.state.flashOff(id: idx, allowWhenDisarmed: true)
                         case .sound:
                             guard idx < self.state.devices.count else { return nil }
                             let device = self.state.devices[idx]
-                            self.state.stopSound(device: device)
+                            self.state.stopSound(device: device, allowWhenDisarmed: true)
                         case .both:
-                            self.state.flashOff(id: idx)
+                            self.state.flashOff(id: idx, allowWhenDisarmed: true)
                             guard idx < self.state.devices.count else { return nil }
                             let deviceBothRel = self.state.devices[idx]
-                            self.state.stopSound(device: deviceBothRel)
+                            self.state.stopSound(device: deviceBothRel, allowWhenDisarmed: true)
                         }
                         // send MIDI note off with mapping
                         let r = idx / 8

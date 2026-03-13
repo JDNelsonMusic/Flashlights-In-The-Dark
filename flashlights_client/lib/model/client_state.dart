@@ -4,22 +4,49 @@ import 'package:flashlights_client/model/event_recipe.dart';
 import 'package:flashlights_client/network/osc_packet.dart';
 
 class PrimerColorPlacement {
-  const PrimerColorPlacement({required this.staffIndex, required this.slots});
+  const PrimerColorPlacement({required this.partLabel, required this.slots});
 
-  final int staffIndex;
+  final String partLabel;
   final List<int> slots;
 }
 
 const Map<PrimerColor, PrimerColorPlacement> kPrimerColorPlacements = {
-  PrimerColor.green: PrimerColorPlacement(staffIndex: 4, slots: [16, 29, 44]),
-  PrimerColor.magenta: PrimerColorPlacement(staffIndex: 5, slots: [12, 24, 25]),
-  PrimerColor.orange: PrimerColorPlacement(staffIndex: 6, slots: [23, 38, 51]),
-  PrimerColor.blue: PrimerColorPlacement(staffIndex: 7, slots: [27, 41, 42]),
-  PrimerColor.red: PrimerColorPlacement(staffIndex: 8, slots: [1, 14, 15]),
-  PrimerColor.cyan: PrimerColorPlacement(staffIndex: 9, slots: [40, 53, 54]),
-  PrimerColor.yellow: PrimerColorPlacement(staffIndex: 10, slots: [7, 19, 34]),
-  PrimerColor.pink: PrimerColorPlacement(staffIndex: 11, slots: [9, 20, 21]),
-  PrimerColor.purple: PrimerColorPlacement(staffIndex: 12, slots: [3, 4, 18]),
+  PrimerColor.green: PrimerColorPlacement(
+    partLabel: 'Sop L1',
+    slots: [16, 29, 44],
+  ),
+  PrimerColor.magenta: PrimerColorPlacement(
+    partLabel: 'Sop L2',
+    slots: [12, 24, 25],
+  ),
+  PrimerColor.orange: PrimerColorPlacement(
+    partLabel: 'Sop L2',
+    slots: [23, 38, 51],
+  ),
+  PrimerColor.blue: PrimerColorPlacement(
+    partLabel: 'Alto L1',
+    slots: [27, 41, 42],
+  ),
+  PrimerColor.red: PrimerColorPlacement(
+    partLabel: 'Alto L2',
+    slots: [1, 14, 15],
+  ),
+  PrimerColor.cyan: PrimerColorPlacement(
+    partLabel: 'Alto L2',
+    slots: [40, 53, 54],
+  ),
+  PrimerColor.yellow: PrimerColorPlacement(
+    partLabel: 'Tenor L1',
+    slots: [7, 19, 34],
+  ),
+  PrimerColor.pink: PrimerColorPlacement(
+    partLabel: 'Bass L1',
+    slots: [9, 20, 21],
+  ),
+  PrimerColor.purple: PrimerColorPlacement(
+    partLabel: 'Bass L1',
+    slots: [3, 4, 18],
+  ),
 };
 
 /// Global client state, holds the dynamic slot and clock offset.
@@ -29,6 +56,7 @@ class ClientState {
       myColor = ValueNotifier<PrimerColor?>(_slotColorMap[_initialSlot]),
       deviceId = ValueNotifier<String>('unknown'),
       clockOffsetMs = ValueNotifier<double>(0.0),
+      cueRoutingIssue = ValueNotifier<String?>(null),
       flashOn = ValueNotifier<bool>(false),
       audioPlaying = ValueNotifier<bool>(false),
       recording = ValueNotifier<bool>(false),
@@ -53,6 +81,9 @@ class ClientState {
 
   /// Rolling average clock offset from /sync (ms).
   final ValueNotifier<double> clockOffsetMs;
+
+  /// Non-null when incoming cues are being rejected for routing/session reasons.
+  final ValueNotifier<String?> cueRoutingIssue;
 
   /// Whether the flashlight is currently on.
   final ValueNotifier<bool> flashOn;
@@ -90,37 +121,6 @@ class ClientState {
     PrimerColor.cyan: [40, 53, 54],
   };
 
-  static const Map<int, String> slotSingerNames = {
-    1: 'Amber',
-    3: 'Fred',
-    4: 'Brock',
-    5: 'Proxy',
-    7: 'Anton',
-    9: 'Bob D.',
-    12: 'Izzy',
-    14: 'Miranda',
-    15: 'Susan',
-    16: 'Abby C.',
-    18: 'Cory',
-    19: 'Ash',
-    20: 'Andy L.',
-    21: 'Ken C.',
-    23: 'Sydney F.',
-    24: 'Jennie',
-    25: 'Jessie S.',
-    27: 'Kelly W.',
-    29: 'Abigail B.',
-    34: 'Josh B.',
-    38: 'Amani',
-    40: 'Kelsey',
-    41: 'Molly',
-    42: 'Heidi BB',
-    44: 'Nicole',
-    51: 'Phoebe',
-    53: 'Sam',
-    54: 'Lissa',
-  };
-
   static const int _initialSlot = int.fromEnvironment('SLOT', defaultValue: 1);
 
   // One source of truth for the expected live-performance slots.
@@ -128,7 +128,6 @@ class ClientState {
     1,
     3,
     4,
-    5,
     7,
     9,
     12,
@@ -178,8 +177,6 @@ class ClientState {
 
   PrimerColor? colorForSlot(int slot) => _slotColorMap[slot];
 
-  String? singerNameForSlot(int slot) => slotSingerNames[slot];
-
   PrimerColorPlacement? practicePlacementForColor(PrimerColor color) =>
       kPrimerColorPlacements[color];
 
@@ -191,8 +188,8 @@ class ClientState {
     return List<int>.unmodifiable(placement.slots);
   }
 
-  int? practiceStaffIndexForColor(PrimerColor color) =>
-      kPrimerColorPlacements[color]?.staffIndex;
+  String? practicePartLabelForColor(PrimerColor color) =>
+      kPrimerColorPlacements[color]?.partLabel;
 
   int? practiceSlotNumberForSlot(int slot) {
     final color = colorForSlot(slot);

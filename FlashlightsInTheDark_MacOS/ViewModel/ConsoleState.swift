@@ -123,7 +123,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     ]
 
     private let performanceSlots: [Int] = [
-        1, 3, 4, 5, 7, 9, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
+        1, 3, 4, 7, 9, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
         27, 29, 34, 38, 40, 41, 42, 44, 51, 53, 54
     ]
 
@@ -359,6 +359,14 @@ public final class ConsoleState: ObservableObject, Sendable {
         return true
     }
 
+    private func ensureCueAuthorized(_ action: String, allowWhenDisarmed: Bool) -> Bool {
+        if isArmed || allowWhenDisarmed {
+            return true
+        }
+        lastLog = "⚠️ SAFE mode: arm before \(action)"
+        return false
+    }
+
     /// Make a slot glow in the UI for a short duration
     public func glow(slot: Int, duration: Double = 0.3) {
         Task { @MainActor in
@@ -383,47 +391,61 @@ public final class ConsoleState: ObservableObject, Sendable {
         triggeredSlots.remove(slot)
     }
 
-    private func nextTorchGeneration(for slot: Int) -> Int {
-        let next = (torchIntentGeneration[slot] ?? 0) &+ 1
-        torchIntentGeneration[slot] = next
+    nonisolated func cueSlot(for device: ChoirDevice) -> Int {
+        max(device.listeningSlot, 1)
+    }
+
+    private func nextTorchGeneration(forDeviceID deviceID: Int) -> Int {
+        let next = (torchIntentGeneration[deviceID] ?? 0) &+ 1
+        torchIntentGeneration[deviceID] = next
         return next
     }
 
-    private func torchIntentMatches(slot: Int, generation: Int, expectsOn: Bool) -> Bool {
-        guard torchIntentGeneration[slot] == generation,
-              slot >= 0,
-              slot < devices.count else { return false }
-        return devices[slot].torchOn == expectsOn
+    private func torchIntentMatches(deviceID: Int, generation: Int, expectsOn: Bool) -> Bool {
+        guard torchIntentGeneration[deviceID] == generation,
+              let idx = devices.firstIndex(where: { $0.id == deviceID }) else { return false }
+        return devices[idx].torchOn == expectsOn
     }
 
     /// Send a flashlight-on command and retry once if not acknowledged, but abort if intent changes.
-    private func reliableFlashOn(slot: Int, generation: Int) {
+    private func reliableFlashOn(
+        deviceID: Int,
+        targetSlot: Int,
+        generation: Int,
+        allowWhenDisarmed: Bool
+    ) {
         Task.detached { [weak self] in
             guard let self = self else { return }
-            let slotNum = slot + 1
+            let slotNum = targetSlot
             do {
                 let osc = try await self.broadcasterTask.value
                 let shouldSend = await MainActor.run {
-                    self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true)
+                    self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: true)
                 }
                 guard shouldSend else { return }
-                try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
+                try await osc.send(
+                    FlashOn(index: Int32(slotNum), intensity: 1),
+                    allowWhenDisarmed: allowWhenDisarmed
+                )
                 await MainActor.run {
-                    guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true) else { return }
+                    guard self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: true) else { return }
                     self.lastLog = "/flash/on [\(slotNum), 1] (sent)"
                     self.glow(slot: slotNum)
                 }
                 await self.midi.sendControlChange(UInt8(slotNum), value: 127)
                 try await Task.sleep(nanoseconds: 100_000_000)
                 let retryState = await MainActor.run { () -> (Bool, Date?) in
-                    (self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true),
+                    (self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: true),
                      self.lastAckTimes[slotNum])
                 }
                 guard retryState.0 else { return }
                 if Date().timeIntervalSince(retryState.1 ?? .distantPast) > 0.1 {
-                    try await osc.send(FlashOn(index: Int32(slotNum), intensity: 1))
+                    try await osc.send(
+                        FlashOn(index: Int32(slotNum), intensity: 1),
+                        allowWhenDisarmed: allowWhenDisarmed
+                    )
                     await MainActor.run {
-                        guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: true) else { return }
+                        guard self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: true) else { return }
                         self.lastLog = "⚠️ Re-sent /flash/on to \(slotNum) (no ack)"
                     }
                 }
@@ -433,24 +455,32 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
     }
 
-    private func sendFlashOff(slot: Int, generation: Int) {
+    private func sendFlashOff(
+        deviceID: Int,
+        targetSlot: Int,
+        generation: Int,
+        allowWhenDisarmed: Bool
+    ) {
         Task.detached { [weak self] in
             guard let self = self else { return }
-            let slotNum = slot + 1
+            let slotNum = targetSlot
             do {
                 let osc = try await self.broadcasterTask.value
                 let shouldSend = await MainActor.run {
-                    self.torchIntentMatches(slot: slot, generation: generation, expectsOn: false)
+                    self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: false)
                 }
                 guard shouldSend else { return }
-                try await osc.send(FlashOff(index: Int32(slotNum)))
+                try await osc.send(
+                    FlashOff(index: Int32(slotNum)),
+                    allowWhenDisarmed: allowWhenDisarmed
+                )
                 await MainActor.run {
-                    guard self.torchIntentMatches(slot: slot, generation: generation, expectsOn: false) else { return }
+                    guard self.torchIntentMatches(deviceID: deviceID, generation: generation, expectsOn: false) else { return }
                     self.lastLog = "/flash/off [\(slotNum)]"
                 }
                 await self.midi.sendControlChange(UInt8(slotNum), value: 0)
             } catch {
-                print("Error sending FlashOff for slot \(slot + 1): \(error)")
+                print("Error sending FlashOff for slot \(slotNum): \(error)")
             }
         }
     }
@@ -464,18 +494,29 @@ public final class ConsoleState: ObservableObject, Sendable {
     
 
     @discardableResult
-    public func toggleTorch(id: Int) -> [ChoirDevice] {
-        guard ensureArmedForCue("sending cues") else { return devices }
+    public func toggleTorch(id: Int, allowWhenDisarmed: Bool = false) -> [ChoirDevice] {
+        guard ensureCueAuthorized("sending cues", allowWhenDisarmed: allowWhenDisarmed) else { return devices }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return devices }
         guard !devices[idx].isPlaceholder else { return devices }
         objectWillChange.send()
         let newState = !devices[idx].torchOn
-        let generation = nextTorchGeneration(for: id)
+        let targetSlot = cueSlot(for: devices[idx])
+        let generation = nextTorchGeneration(forDeviceID: id)
         devices[idx].torchOn = newState
         if newState {
-            reliableFlashOn(slot: id, generation: generation)
+            reliableFlashOn(
+                deviceID: id,
+                targetSlot: targetSlot,
+                generation: generation,
+                allowWhenDisarmed: allowWhenDisarmed
+            )
         } else {
-            sendFlashOff(slot: id, generation: generation)
+            sendFlashOff(
+                deviceID: id,
+                targetSlot: targetSlot,
+                generation: generation,
+                allowWhenDisarmed: allowWhenDisarmed
+            )
         }
         print("[ConsoleState] Torch toggled on #\(id) ⇒ \(newState)")
         updateAnyTorchOn()
@@ -483,53 +524,70 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     
     /// Directly flash on a specific lamp slot (no toggle) and update state.
-    public func flashOn(id: Int) {
-        guard ensureArmedForCue("sending cues") else { return }
+    public func flashOn(id: Int, allowWhenDisarmed: Bool = false) {
+        guard ensureCueAuthorized("sending cues", allowWhenDisarmed: allowWhenDisarmed) else { return }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
-        let generation = nextTorchGeneration(for: id)
+        let targetSlot = cueSlot(for: devices[idx])
+        let generation = nextTorchGeneration(forDeviceID: id)
         devices[idx].torchOn = true
-        reliableFlashOn(slot: id, generation: generation)
+        reliableFlashOn(
+            deviceID: id,
+            targetSlot: targetSlot,
+            generation: generation,
+            allowWhenDisarmed: allowWhenDisarmed
+        )
         updateAnyTorchOn()
     }
     /// Directly flash off a specific lamp slot and update state.
-    public func flashOff(id: Int) {
-        guard ensureArmedForCue("sending cues") else { return }
+    public func flashOff(id: Int, allowWhenDisarmed: Bool = false) {
+        guard ensureCueAuthorized("sending cues", allowWhenDisarmed: allowWhenDisarmed) else { return }
         guard let idx = devices.firstIndex(where: { $0.id == id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
         objectWillChange.send()
-        let generation = nextTorchGeneration(for: id)
+        let targetSlot = cueSlot(for: devices[idx])
+        let generation = nextTorchGeneration(forDeviceID: id)
         devices[idx].torchOn = false
-        sendFlashOff(slot: id, generation: generation)
+        sendFlashOff(
+            deviceID: id,
+            targetSlot: targetSlot,
+            generation: generation,
+            allowWhenDisarmed: allowWhenDisarmed
+        )
         updateAnyTorchOn()
     }
 
     /// Trigger a list of real slots according to the current keyboardTriggerMode.
-    public func triggerSlots(realSlots: [Int]) {
+    public func triggerSlots(realSlots: [Int], allowWhenDisarmed: Bool = false) {
         for real in realSlots {
-            let idx = real - 1
+            guard let idx = devices.firstIndex(where: { !$0.isPlaceholder && $0.listeningSlot == real }) else {
+                continue
+            }
+            let device = devices[idx]
             switch keyboardTriggerMode {
             case .torch:
-                _ = toggleTorch(id: idx)
+                _ = toggleTorch(id: device.id, allowWhenDisarmed: allowWhenDisarmed)
             case .sound:
-                guard idx < devices.count else { continue }
-                let device = devices[idx]
-                triggerSound(device: device)
+                triggerSound(device: device, allowWhenDisarmed: allowWhenDisarmed)
             case .both:
-                _ = toggleTorch(id: idx)
-                guard idx < devices.count else { continue }
-                let device = devices[idx]
-                triggerSound(device: device)
+                _ = toggleTorch(id: device.id, allowWhenDisarmed: allowWhenDisarmed)
+                triggerSound(device: device, allowWhenDisarmed: allowWhenDisarmed)
             }
         }
     }
     
     // MARK: – One-click build & run  🚀
     public func buildAndRun(device: ChoirDevice) {
+        let slot = cueSlot(for: device)
         Task.detached {
-            let slot  = device.id + 1          // 1-based in Flutter world
             let udid  = device.udid
+            guard let projectURL = Self.resolveFlutterProjectURL() else {
+                await MainActor.run {
+                    self.lastLog = "⚠️ Could not locate flashlights_client/ for flutter run"
+                }
+                return
+            }
 
             /// Construct: flutter run -d <UDID> --release --dart-define=SLOT=<N>
             let args  = ["run",
@@ -540,8 +598,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             let proc = Process()
             proc.launchPath = "/usr/bin/env"
             proc.arguments  = ["flutter"] + args
-            // run from flutter project directory
-            proc.currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            proc.currentDirectoryURL = projectURL
 
             let pipe = Pipe()
             proc.standardOutput = pipe
@@ -558,8 +615,8 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     
     /// Trigger playback of a preloaded audio file on a specific device
-    public func triggerSound(device: ChoirDevice) {
-        guard ensureArmedForCue("triggering sound") else { return }
+    public func triggerSound(device: ChoirDevice, allowWhenDisarmed: Bool = false) {
+        guard ensureCueAuthorized("triggering sound", allowWhenDisarmed: allowWhenDisarmed) else { return }
         guard !device.isPlaceholder else { return }
 
         Task.detached { [weak self] in
@@ -587,7 +644,10 @@ public final class ConsoleState: ObservableObject, Sendable {
                                              file: file,
                                              gain: gain,
                                              startAtMs: startAtMs)
-                    try await oscBroadcaster.send(message)
+                    try await oscBroadcaster.send(
+                        message,
+                        allowWhenDisarmed: allowWhenDisarmed
+                    )
 
                     await MainActor.run {
                         self.lastLog = "/audio/play \(slotNumber) \(file)"
@@ -744,22 +804,26 @@ public final class ConsoleState: ObservableObject, Sendable {
         sanitizeGroupMembers()
     }
     /// Stop playback of sound on a specific device slot (send audio/stop)
-    public func stopSound(device: ChoirDevice) {
+    public func stopSound(device: ChoirDevice, allowWhenDisarmed: Bool = true) {
         guard let idx = devices.firstIndex(where: { $0.id == device.id }) else { return }
         guard !devices[idx].isPlaceholder else { return }
+        let slotNumber = cueSlot(for: device)
         Task.detached { [weak self] in
             guard let self = self else { return }
             do {
                 let osc = try await self.broadcasterTask.value
-                let slot = Int32(device.id + 1)
-                try await osc.send(AudioStop(index: slot))
+                let slot = Int32(slotNumber)
+                try await osc.send(
+                    AudioStop(index: slot),
+                    allowWhenDisarmed: allowWhenDisarmed
+                )
                 await MainActor.run { self.lastLog = "/audio/stop [\(slot)]" }
-                let base = device.id * 4
+                let noteBase = slotNumber * 4
                 for offset in 0..<4 {
-                    await self.midi.sendNoteOff(UInt8(base + offset))
+                    await self.midi.sendNoteOff(UInt8(noteBase + offset))
                 }
             } catch {
-                print("Error stopping sound for slot \(device.id + 1): \(error)")
+                print("Error stopping sound for slot \(slotNumber): \(error)")
             }
         }
     }
@@ -788,7 +852,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 for i in 0...steps {
                     let intensity = Float32(i) / Float32(steps)
                     for d in devicesList where !d.isPlaceholder {
-                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                        do { try await osc.send(FlashOn(index: Int32(self.cueSlot(for: d)), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(attack) * 1_000_000 / UInt64(steps))
                 }
@@ -798,7 +862,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                     let t = Float32(i) / Float32(steps)
                     let intensity = (1 - t) + t * sustainLevel
                     for d in devicesList where !d.isPlaceholder {
-                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                        do { try await osc.send(FlashOn(index: Int32(self.cueSlot(for: d)), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(decay) * 1_000_000 / UInt64(steps))
                 }
@@ -825,12 +889,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                 for i in 0...steps {
                     let intensity = sustainLevel * (1 - Float32(i) / Float32(steps))
                     for d in devicesList where !d.isPlaceholder {
-                        do { try await osc.send(FlashOn(index: Int32(d.id + 1), intensity: intensity)) } catch {}
+                        do { try await osc.send(FlashOn(index: Int32(self.cueSlot(for: d)), intensity: intensity)) } catch {}
                     }
                     try await Task.sleep(nanoseconds: UInt64(releaseDur) * 1_000_000 / UInt64(steps))
                 }
                 for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                    do { try await osc.send(FlashOff(index: Int32(self.cueSlot(for: d)))) } catch {}
                 }
                 await MainActor.run { self.lastLog = "/envelope release" }
             } catch {
@@ -866,7 +930,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                     for d in devicesList where !d.isPlaceholder {
                         try? await osc.send(
-                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                            FlashOn(index: Int32(self.cueSlot(for: d)), intensity: Float32(intensity))
                         )
                     }
 
@@ -877,7 +941,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
 
                 for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                    do { try await osc.send(FlashOff(index: Int32(self.cueSlot(for: d)))) } catch {}
                 }
             } catch {
                 print("⚠️ startStrobe error: \(error)")
@@ -927,7 +991,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                     for d in devicesList where !d.isPlaceholder {
                         try? await osc.send(
-                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                            FlashOn(index: Int32(self.cueSlot(for: d)), intensity: Float32(intensity))
                         )
                     }
 
@@ -938,7 +1002,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
 
                 for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                    do { try await osc.send(FlashOff(index: Int32(self.cueSlot(for: d)))) } catch {}
                 }
             } catch {
                 print("⚠️ startSlowStrobe error: \(error)")
@@ -987,7 +1051,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                     for d in devicesList where !d.isPlaceholder {
                         try? await osc.send(
-                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                            FlashOn(index: Int32(self.cueSlot(for: d)), intensity: Float32(intensity))
                         )
                     }
 
@@ -998,7 +1062,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
 
                 for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                    do { try await osc.send(FlashOff(index: Int32(self.cueSlot(for: d)))) } catch {}
                 }
             } catch {
                 print("⚠️ startGlowRamp error: \(error)")
@@ -1047,7 +1111,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                     for d in devicesList where !d.isPlaceholder {
                         try? await osc.send(
-                            FlashOn(index: Int32(d.id + 1), intensity: Float32(intensity))
+                            FlashOn(index: Int32(self.cueSlot(for: d)), intensity: Float32(intensity))
                         )
                     }
 
@@ -1058,7 +1122,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 }
 
                 for d in devicesList where !d.isPlaceholder {
-                    do { try await osc.send(FlashOff(index: Int32(d.id + 1))) } catch {}
+                    do { try await osc.send(FlashOff(index: Int32(self.cueSlot(for: d)))) } catch {}
                 }
             } catch {
                 print("⚠️ startSlowGlowRamp error: \(error)")
@@ -1088,13 +1152,20 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Build the app for a single device slot.
     public func build(device: ChoirDevice) {
         statuses[device.id] = .clean
+        let slot = cueSlot(for: device)
         Task.detached {
-            let slot = device.id + 1
+            guard let projectURL = Self.resolveFlutterProjectURL() else {
+                await MainActor.run {
+                    self.statuses[device.id] = .buildFailed
+                    self.lastLog = "⚠️ Could not locate flashlights_client/ for flutter build"
+                }
+                return
+            }
             let args = ["build", "ios", "--release", "--dart-define=SLOT=\(slot)"]
             let proc = Process()
             proc.launchPath = "/usr/bin/env"
             proc.arguments = ["flutter"] + args
-            proc.currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            proc.currentDirectoryURL = projectURL
             do {
                 try proc.run()
                 proc.waitUntilExit()
@@ -1117,17 +1188,22 @@ public final class ConsoleState: ObservableObject, Sendable {
     /// Run the app on a single device slot (must be built).
     public func run(device: ChoirDevice) {
         guard statuses[device.id] == .buildReady else { return }
+        guard let projectURL = Self.resolveFlutterProjectURL() else {
+            statuses[device.id] = .runFailed
+            lastLog = "⚠️ Could not locate flashlights_client/ for flutter run"
+            return
+        }
         // terminate any existing run process
         if let prev = runProcesses[device.id] {
             prev.terminate()
             runProcesses[device.id] = nil
         }
-        let slot = device.id + 1
+        let slot = cueSlot(for: device)
         let args = ["run", "-d", device.udid, "--release", "--dart-define=SLOT=\(slot)"]
         let proc = Process()
         proc.launchPath = "/usr/bin/env"
         proc.arguments = ["flutter"] + args
-        proc.currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        proc.currentDirectoryURL = projectURL
         let pipe = Pipe()
         proc.standardOutput = pipe
         proc.standardError = pipe
@@ -1163,13 +1239,14 @@ public final class ConsoleState: ObservableObject, Sendable {
         guard ensureArmedForCue("sending cues") else { return devices }
         for idx in devices.indices where !devices[idx].isPlaceholder {
             devices[idx].torchOn = true
+            let slot = cueSlot(for: devices[idx])
             Task.detached { [weak self] in
                 guard let self = self else { return }
                 do {
                     let osc = try await self.broadcasterTask.value
-                    try await osc.send(FlashOn(index: Int32(idx + 1), intensity: 1))
+                    try await osc.send(FlashOn(index: Int32(slot), intensity: 1))
                 } catch {
-                    print("Error sending FlashOn for slot \(idx + 1): \(error)")
+                    print("Error sending FlashOn for slot \(slot): \(error)")
                 }
             }
         }
@@ -1281,12 +1358,14 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
             return
         }
-        let idx = slot - 1
+        let idx = resolvedDeviceIndex(forDiscoveredSlot: slot, deviceId: deviceId) ?? (slot - 1)
+        guard devices.indices.contains(idx) else { return }
         devices[idx].ip = ip
         if let deviceId, !deviceId.isEmpty {
             devices[idx].udid = deviceId
         }
-        statuses[idx] = .live
+        devices[idx].listeningSlot = slot
+        statuses[devices[idx].id] = .live
         lastHello[slot] = Date()
         lastHelloProbe.removeValue(forKey: slot)
         lastLog = "📳 Device \(slot) announced at \(ip)"
@@ -1296,6 +1375,66 @@ public final class ConsoleState: ObservableObject, Sendable {
 // MARK: - Lifecycle helpers
 
 extension ConsoleState {
+    private func resolvedDeviceIndex(forDiscoveredSlot slot: Int, deviceId: String?) -> Int? {
+        if let deviceId, !deviceId.isEmpty,
+           let idx = devices.firstIndex(where: { $0.udid == deviceId }) {
+            return idx
+        }
+        if let idx = devices.firstIndex(where: { !$0.isPlaceholder && $0.listeningSlot == slot }) {
+            return idx
+        }
+        let fallback = slot - 1
+        guard devices.indices.contains(fallback) else { return nil }
+        return fallback
+    }
+
+    nonisolated private static func resolveFlutterProjectURL() -> URL? {
+        let fileManager = FileManager.default
+        let sourceRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent() // ViewModel
+            .deletingLastPathComponent() // FlashlightsInTheDark_MacOS
+            .deletingLastPathComponent() // repo root
+
+        let initialCandidates = [
+            URL(fileURLWithPath: fileManager.currentDirectoryPath),
+            Bundle.main.bundleURL,
+            Bundle.main.bundleURL.deletingLastPathComponent(),
+            Bundle.main.resourceURL,
+            sourceRoot
+        ].compactMap { $0 }
+
+        var seen = Set<String>()
+        for candidate in initialCandidates {
+            var cursor = candidate
+            for _ in 0..<6 {
+                let repoCandidate = cursor.appendingPathComponent("flashlights_client", isDirectory: true)
+                let pubspec = repoCandidate.appendingPathComponent("pubspec.yaml")
+                if fileManager.fileExists(atPath: pubspec.path) {
+                    return repoCandidate
+                }
+
+                let directPubspec = cursor.appendingPathComponent("pubspec.yaml")
+                if cursor.lastPathComponent == "flashlights_client",
+                   fileManager.fileExists(atPath: directPubspec.path) {
+                    return cursor
+                }
+
+                let key = cursor.standardizedFileURL.path
+                if !seen.insert(key).inserted {
+                    break
+                }
+
+                let parent = cursor.deletingLastPathComponent()
+                if parent.path == cursor.path {
+                    break
+                }
+                cursor = parent
+            }
+        }
+
+        return nil
+    }
+
     /// Restore the most recent session devices from UserDefaults.
     /// Returns nil if no session data was saved.
     static func restoreLastSession() -> [ChoirDevice]? {
@@ -2119,9 +2258,9 @@ extension ConsoleState {
                         do {
                             let osc = try await self.broadcasterTask.value
                             if intensity > 0 {
-                                try await osc.send(FlashOn(index: Int32(device.id + 1), intensity: intensity))
+                                try await osc.send(FlashOn(index: Int32(self.cueSlot(for: device)), intensity: intensity))
                             } else {
-                                try await osc.send(FlashOff(index: Int32(device.id + 1)))
+                                try await osc.send(FlashOff(index: Int32(self.cueSlot(for: device))))
                             }
                         } catch {
                             print("Error sending brightness CC for device \(device.id+1): \(error)")

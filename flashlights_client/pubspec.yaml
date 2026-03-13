@@ -34,7 +34,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/event_recipes.json
-    - assets/FlashlightsInTheDark_SingerScore23.musicxml
+    - assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml
     - assets/osmd_view.html
     - assets/opensheetmusicdisplay.min.js
     # Primer tone library (explicit listing avoids wildcard bundling gaps on iOS)

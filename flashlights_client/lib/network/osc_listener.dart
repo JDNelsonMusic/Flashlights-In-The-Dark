@@ -26,6 +26,19 @@ const Duration _slowHelloInterval = Duration(seconds: 10);
 const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
 
+@visibleForTesting
+Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
+  if (startAtMs == null) {
+    return Duration.zero;
+  }
+  final reference = now ?? DateTime.now();
+  final delayMs =
+      (startAtMs - reference.millisecondsSinceEpoch)
+          .clamp(0, double.infinity)
+          .toInt();
+  return Duration(milliseconds: delayMs);
+}
+
 class _NetworkEvent {
   const _NetworkEvent({
     required this.timestamp,
@@ -174,8 +187,11 @@ class OscListener {
   int _protocolMismatchCount = 0;
   int _duplicatesDropped = 0;
   int _outOfOrderDropped = 0;
+  int _slotMismatchCount = 0;
 
   int _lastProcessedSeq = -1;
+  String? _lastAcceptedCueAddress;
+  String? _lastAcceptedCueId;
   final LinkedHashMap<String, DateTime> _recentCueIds =
       LinkedHashMap<String, DateTime>();
   static const Duration _cueIdTtl = Duration(minutes: 3);
@@ -204,6 +220,13 @@ class OscListener {
     _recentCueIds.clear();
   }
 
+  void _setCueRoutingIssue(String? issue) {
+    if (client.cueRoutingIssue.value == issue) {
+      return;
+    }
+    client.cueRoutingIssue.value = issue;
+  }
+
   void _unlockConductor({required String reason}) {
     final hadLock = _trustedConductorAddress != null;
     _trustedConductorAddress = null;
@@ -218,6 +241,7 @@ class OscListener {
       });
     }
 
+    _setCueRoutingIssue(null);
     client.connected.value = false;
     if (_running) {
       _restartHelloTimer(_fastHelloInterval);
@@ -229,6 +253,7 @@ class OscListener {
     _trustedConductorPort = port;
     _lockedShowSessionId = showSessionId;
     _resetCueOrderingState();
+    _setCueRoutingIssue(null);
     _record('pairing', 'Locked conductor endpoint', <String, Object?>{
       'ip': address.address,
       'port': port,
@@ -474,6 +499,9 @@ class OscListener {
   }) {
     if (envelope.protocolVersion != kConcertProtocolVersion) {
       _protocolMismatchCount += 1;
+      _setCueRoutingIssue(
+        'Protocol mismatch: expected v$kConcertProtocolVersion, got v${envelope.protocolVersion}',
+      );
       _record(
         'protocol',
         'Dropped cue due to protocol mismatch',
@@ -488,6 +516,11 @@ class OscListener {
 
     final lockedSession = _lockedShowSessionId;
     if (lockedSession == null || lockedSession != envelope.showSessionId) {
+      _setCueRoutingIssue(
+        lockedSession == null
+            ? 'Cue arrived before session lock completed'
+            : 'Session mismatch: expected $lockedSession',
+      );
       _record(
         'protocol',
         'Dropped cue due to showSessionId mismatch',
@@ -501,6 +534,16 @@ class OscListener {
     }
 
     if (requiresSlot && envelope.slot != client.myIndex.value) {
+      _slotMismatchCount += 1;
+      _setCueRoutingIssue(
+        'Cue for slot ${envelope.slot}, phone is slot ${client.myIndex.value}',
+      );
+      _record('routing', 'Dropped cue due to slot mismatch', <String, Object?>{
+        'address': datagram.message.address,
+        'cueId': envelope.cueId,
+        'cueSlot': envelope.slot,
+        'currentSlot': client.myIndex.value,
+      });
       return false;
     }
 
@@ -525,7 +568,10 @@ class OscListener {
     }
 
     _lastProcessedSeq = envelope.seq;
+    _lastAcceptedCueAddress = datagram.message.address;
+    _lastAcceptedCueId = envelope.cueId;
     _markConductorHeartbeat();
+    _setCueRoutingIssue(null);
 
     _record('cue', 'Accepted cue', <String, Object?>{
       'address': datagram.message.address,
@@ -951,13 +997,11 @@ class OscListener {
       return;
     }
 
-    final nowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
-    final startAt = startAtMs ?? nowMs;
-    final delayMs = (startAt - nowMs).clamp(0, double.infinity).toInt();
+    final delay = playbackDelayForStartAtMs(startAtMs);
     final dedupeKey = 'event:$eventId:slot=$slot';
 
     unawaited(
-      Future<void>.delayed(Duration(milliseconds: delayMs), () async {
+      Future<void>.delayed(delay, () async {
         await _playPrimer(
           assignment.sample,
           1.0,
@@ -989,12 +1033,23 @@ class OscListener {
       return;
     }
 
-    await _playPrimer(
-      file,
-      gain.toDouble(),
-      sendAck: true,
-      cueId: envelope.cueId,
-      seq: envelope.seq,
+    double? startAtMs;
+    if (envelope.payload.length >= 3 && envelope.payload[2] is num) {
+      startAtMs = (envelope.payload[2] as num).toDouble();
+    }
+
+    final delay = playbackDelayForStartAtMs(startAtMs);
+
+    unawaited(
+      Future<void>.delayed(delay, () async {
+        await _playPrimer(
+          file,
+          gain.toDouble(),
+          sendAck: true,
+          cueId: envelope.cueId,
+          seq: envelope.seq,
+        );
+      }),
     );
   }
 
@@ -1028,6 +1083,7 @@ class OscListener {
     final newSlot = args[0] as int;
     if (newSlot != client.myIndex.value) {
       client.myIndex.value = newSlot;
+      _setCueRoutingIssue(null);
       _record('slot', 'Updated listening slot', <String, Object?>{
         'slot': newSlot,
       });
@@ -1202,9 +1258,14 @@ class OscListener {
       'protocolVersion': kConcertProtocolVersion,
       'unknownSenderCount': _unknownSenderCount,
       'protocolMismatchCount': _protocolMismatchCount,
+      'slotMismatchCount': _slotMismatchCount,
       'duplicatesDropped': _duplicatesDropped,
       'outOfOrderDropped': _outOfOrderDropped,
       'lastProcessedSeq': _lastProcessedSeq,
+      'currentSlot': client.myIndex.value,
+      'cueRoutingIssue': client.cueRoutingIssue.value,
+      'lastAcceptedCueAddress': _lastAcceptedCueAddress,
+      'lastAcceptedCueId': _lastAcceptedCueId,
       'helloIntervalSeconds': _currentHelloInterval.inSeconds,
       'events': _eventLog.map((e) => e.toJson()).toList(growable: false),
     };

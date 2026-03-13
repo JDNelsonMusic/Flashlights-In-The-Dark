@@ -107,9 +107,13 @@ class _HeaderSection extends StatelessWidget {
       valueListenable: client.myIndex,
       builder: (context, myIndex, _) {
         final slotColor = kSlotOutlineColors[myIndex] ?? Colors.white70;
-        final singerName = client.singerNameForSlot(myIndex);
+        final partLabel = client.colorForSlot(myIndex)?.voicePart;
         final singerLabel =
-            singerName ?? (myIndex == 0 ? 'Unassigned' : 'Slot $myIndex');
+            myIndex == 0
+                ? 'Unassigned'
+                : partLabel == null
+                ? 'Slot $myIndex'
+                : 'Slot $myIndex · $partLabel';
         return _GlassPanel(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
           child: Column(
@@ -170,6 +174,19 @@ class _HeaderSection extends StatelessWidget {
                         accent: statusAccent,
                         muted: !connected,
                       ),
+                      ValueListenableBuilder<String?>(
+                        valueListenable: client.cueRoutingIssue,
+                        builder: (context, issue, _) {
+                          if (issue == null || issue.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return _InfoPill(
+                            icon: Icons.warning_amber_rounded,
+                            label: issue,
+                            accent: const Color(0xFFFFA630),
+                          );
+                        },
+                      ),
                       FilledButton.icon(
                         key: const Key('refreshConnectionButton'),
                         onPressed:
@@ -222,18 +239,14 @@ class _SlotSelectorPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final slots = client.availableSlots;
     final currentColor = client.colorForSlot(currentSlot);
-    final slotLabel =
-        currentColor == null
-            ? 'Unassigned'
-            : '${currentColor.displayName} (${currentColor.voicePart})';
-    final singerName = client.singerNameForSlot(currentSlot);
+    final partLabel = currentColor?.voicePart;
     final isUnassigned = currentSlot == 0;
     final pillLabel =
         isUnassigned
             ? 'Select slot'
-            : singerName == null
-            ? 'Slot $currentSlot · $slotLabel'
-            : '$singerName · Slot $currentSlot · $slotLabel';
+            : partLabel == null
+            ? 'Slot $currentSlot'
+            : 'Slot $currentSlot · $partLabel';
     return PopupMenuButton<int>(
       onSelected: (slot) => unawaited(onSelect(slot)),
       color: Colors.black.withValues(alpha: 0.9),
@@ -241,15 +254,8 @@ class _SlotSelectorPill extends StatelessWidget {
       itemBuilder: (context) {
         return slots.map((slot) {
           final color = client.colorForSlot(slot);
-          final colorLabel = color?.displayName ?? 'Unassigned';
-          final voiceLabel = color?.voicePart;
-          final description =
-              voiceLabel == null ? colorLabel : '$colorLabel ($voiceLabel)';
-          final name = client.singerNameForSlot(slot);
+          final description = color?.voicePart ?? 'Unassigned';
           final segments = <String>['Slot $slot'];
-          if (name != null) {
-            segments.add(name);
-          }
           segments.add(description);
           return PopupMenuItem<int>(
             value: slot,
@@ -731,10 +737,6 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     } catch (e) {
       debugPrint('[UI] Torch level set failed: $e');
     }
-    flosc.OscListener.instance.sendCustom('/flash/on', [
-      client.myIndex.value,
-      clamped,
-    ]);
   }
 
   Future<void> _updateBrightness(double delta) {
@@ -1469,10 +1471,10 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                           : client.practiceSlotsForColor(
                                             primerColor,
                                           );
-                                  final staffIndex =
+                                  final partLabel =
                                       primerColor == null
                                           ? null
-                                          : client.practiceStaffIndexForColor(
+                                          : client.practicePartLabelForColor(
                                             primerColor,
                                           );
                                   final practiceSlotNumber = client
@@ -1488,7 +1490,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                       assignment: assignment,
                                       primerColor: primerColor,
                                       practiceSlots: practiceSlots,
-                                      practiceStaffIndex: staffIndex,
+                                      practicePartLabel: partLabel,
                                       practiceSlotNumber: practiceSlotNumber,
                                       onTap:
                                           () => client.setPracticeEventIndex(i),
@@ -1544,7 +1546,7 @@ class _PracticeEventCard extends StatelessWidget {
     required this.assignment,
     required this.practiceSlots,
     this.primerColor,
-    this.practiceStaffIndex,
+    this.practicePartLabel,
     this.practiceSlotNumber,
     required this.onTap,
     required this.onPlay,
@@ -1557,7 +1559,7 @@ class _PracticeEventCard extends StatelessWidget {
   final PrimerAssignment? assignment;
   final PrimerColor? primerColor;
   final List<int> practiceSlots;
-  final int? practiceStaffIndex;
+  final String? practicePartLabel;
   final int? practiceSlotNumber;
   final VoidCallback onTap;
   final VoidCallback onPlay;
@@ -1750,7 +1752,7 @@ class _PracticeEventCard extends StatelessWidget {
               _PrimerInfoSection(
                 primerColor: primerColor,
                 practiceSlots: practiceSlots,
-                practiceStaffIndex: practiceStaffIndex,
+                practicePartLabel: practicePartLabel,
                 practiceSlotNumber: practiceSlotNumber,
                 accent: primerAccent,
               ),
@@ -1775,14 +1777,14 @@ class _PrimerInfoSection extends StatelessWidget {
   const _PrimerInfoSection({
     required this.primerColor,
     required this.practiceSlots,
-    required this.practiceStaffIndex,
+    required this.practicePartLabel,
     required this.practiceSlotNumber,
     required this.accent,
   });
 
   final PrimerColor? primerColor;
   final List<int> practiceSlots;
-  final int? practiceStaffIndex;
+  final String? practicePartLabel;
   final int? practiceSlotNumber;
   final Color? accent;
 
@@ -1793,8 +1795,8 @@ class _PrimerInfoSection extends StatelessWidget {
     final colorName = primerColor?.displayName ?? 'Unassigned';
     final groupLabel =
         groupIndex != null ? 'Group $groupIndex · $colorName' : colorName;
-    final staffLabel =
-        practiceStaffIndex != null ? 'Staff $practiceStaffIndex' : 'Staff —';
+    final partLabel =
+        practicePartLabel != null ? 'Part $practicePartLabel' : 'Part —';
     final slotsLabel =
         practiceSlots.isEmpty ? 'Slots —' : 'Slots ${practiceSlots.join(', ')}';
     final youLabel =
@@ -1837,7 +1839,7 @@ class _PrimerInfoSection extends StatelessWidget {
                   spacing: 12,
                   runSpacing: 4,
                   children: [
-                    Text(staffLabel, style: textTheme.bodySmall),
+                    Text(partLabel, style: textTheme.bodySmall),
                     Text(slotsLabel, style: textTheme.bodySmall),
                     if (youLabel != null)
                       Text(
@@ -2010,14 +2012,23 @@ class DebugOverlay extends StatelessWidget {
                   final trustedIp = snapshot['trustedConductorIp'] as String?;
                   final showSessionId = snapshot['showSessionId'] as String?;
                   final protocolVersion = snapshot['protocolVersion'];
+                  final cueRoutingIssue =
+                      snapshot['cueRoutingIssue'] as String?;
+                  final currentSlot = snapshot['currentSlot'];
                   final unknown = snapshot['unknownSenderCount'];
                   final duplicates = snapshot['duplicatesDropped'];
                   final outOfOrder = snapshot['outOfOrderDropped'];
                   final mismatches = snapshot['protocolMismatchCount'];
+                  final slotMismatches = snapshot['slotMismatchCount'];
+                  final lastAcceptedCueAddress =
+                      snapshot['lastAcceptedCueAddress'] as String?;
                   return Text(
                     'Trusted: ${trustedIp ?? 'none'} · Session: ${showSessionId ?? 'none'} · v$protocolVersion\\n'
+                    'Slot: $currentSlot · Cue routing: ${cueRoutingIssue ?? 'ok'}\\n'
                     'Unknown senders: $unknown · Duplicates dropped: $duplicates · '
-                    'Out-of-order dropped: $outOfOrder · Protocol mismatches: $mismatches',
+                    'Out-of-order dropped: $outOfOrder · Protocol mismatches: $mismatches · '
+                    'Slot mismatches: $slotMismatches\\n'
+                    'Last accepted cue: ${lastAcceptedCueAddress ?? 'none'}',
                     style: const TextStyle(color: Colors.white70),
                   );
                 },

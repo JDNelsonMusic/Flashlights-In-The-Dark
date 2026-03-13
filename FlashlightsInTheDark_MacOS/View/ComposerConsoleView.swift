@@ -737,7 +737,7 @@ struct ComposerConsoleView: View {
                             .font(.caption2)
                             .foregroundStyle(statusColor)
                         Button {
-                            state.triggerSound(device: device)
+                            state.triggerSound(device: device, allowWhenDisarmed: true)
                         } label: {
                             Image(systemName: "speaker.wave.2.fill")
                                 .foregroundStyle(Color.mintGlow)
@@ -764,7 +764,7 @@ struct ComposerConsoleView: View {
                                 )
                             LightRaysView(color: .mintGlow)
                         }
-                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.id + 1)) ? 1 : 0)
+                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.listeningSlot)) ? 1 : 0)
                         .allowsHitTesting(false)
                     )
                     Menu {
@@ -787,12 +787,12 @@ struct ComposerConsoleView: View {
                 .onTapGesture {
                     switch state.keyboardTriggerMode {
                     case .torch:
-                        state.toggleTorch(id: device.id)
+                        state.toggleTorch(id: device.id, allowWhenDisarmed: true)
                     case .sound:
-                        state.triggerSound(device: device)
+                        state.triggerSound(device: device, allowWhenDisarmed: true)
                     case .both:
-                        state.toggleTorch(id: device.id)
-                        state.triggerSound(device: device)
+                        state.toggleTorch(id: device.id, allowWhenDisarmed: true)
+                        state.triggerSound(device: device, allowWhenDisarmed: true)
                     }
                 }
             }

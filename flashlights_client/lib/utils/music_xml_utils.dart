@@ -4,18 +4,12 @@ import 'package:xml/xml.dart';
 import 'package:flashlights_client/model/event_recipe.dart';
 
 const String _kScoreAssetPath =
-    'assets/FlashlightsInTheDark_SingerScore23.musicxml';
+    'assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml';
 
 const Set<String> _kLightChorusPartIds = {
-  'P4', // Soprano 3
-  'P5', // Soprano 4
-  'P6', // Soprano 5
-  'P7', // Alto 3
-  'P8', // Alto 4
-  'P9', // Alto 5
-  'P10', // Tenor 2
-  'P11', // Baritone 2
-  'P12', // Bass 3
+  'P4', // Soprano L1, L2
+  'P5', // Alto L1, L2
+  'P6', // Tenor/Bass L
 };
 
 class _PartSelection {
@@ -26,14 +20,14 @@ class _PartSelection {
 
 const Map<PrimerColor, _PartSelection> _kPrimerColorPartMap = {
   PrimerColor.green: _PartSelection(partId: 'P4'),
-  PrimerColor.magenta: _PartSelection(partId: 'P5'),
-  PrimerColor.orange: _PartSelection(partId: 'P6'),
-  PrimerColor.blue: _PartSelection(partId: 'P7'),
-  PrimerColor.red: _PartSelection(partId: 'P8'),
-  PrimerColor.cyan: _PartSelection(partId: 'P9'),
-  PrimerColor.yellow: _PartSelection(partId: 'P10'),
-  PrimerColor.pink: _PartSelection(partId: 'P11'),
-  PrimerColor.purple: _PartSelection(partId: 'P12'),
+  PrimerColor.magenta: _PartSelection(partId: 'P4'),
+  PrimerColor.orange: _PartSelection(partId: 'P4'),
+  PrimerColor.blue: _PartSelection(partId: 'P5'),
+  PrimerColor.red: _PartSelection(partId: 'P5'),
+  PrimerColor.cyan: _PartSelection(partId: 'P5'),
+  PrimerColor.yellow: _PartSelection(partId: 'P6'),
+  PrimerColor.pink: _PartSelection(partId: 'P6'),
+  PrimerColor.purple: _PartSelection(partId: 'P6'),
 };
 
 const String _kDefaultNoteColor = '#000000';

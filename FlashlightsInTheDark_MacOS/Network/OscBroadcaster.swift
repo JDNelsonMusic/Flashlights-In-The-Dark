@@ -270,9 +270,10 @@ public actor OscBroadcaster {
     public func sendCue(
         address: OscAddress,
         slot: Int32,
-        payload: [any OSCValue]
+        payload: [any OSCValue],
+        allowWhenDisarmed: Bool = false
     ) async throws {
-        guard isArmed else {
+        guard isArmed || allowWhenDisarmed else {
             throw NSError(
                 domain: "OscBroadcaster",
                 code: 403,

@@ -65,3 +65,37 @@ final class OscMessagesTests: XCTestCase {
         XCTAssertEqual(decoded?.timestamp, original.timestamp)
     }
 }
+
+@MainActor
+final class ConsoleStateTests: XCTestCase {
+    func testDeviceDiscoveryRetainsPhysicalDeviceIdentityAcrossSlotChanges() {
+        let state = ConsoleState()
+
+        state.deviceDiscovered(slot: 1, ip: "10.0.0.1", deviceId: "device-A")
+        XCTAssertEqual(state.devices[0].udid, "device-A")
+        XCTAssertEqual(state.devices[0].listeningSlot, 1)
+
+        state.deviceDiscovered(slot: 27, ip: "10.0.0.27", deviceId: "device-A")
+
+        XCTAssertEqual(state.devices[0].udid, "device-A")
+        XCTAssertEqual(state.devices[0].ip, "10.0.0.27")
+        XCTAssertEqual(state.devices[0].listeningSlot, 27)
+        XCTAssertEqual(state.statuses[state.devices[0].id], .live)
+        XCTAssertNotEqual(state.devices[26].udid, "device-A")
+        XCTAssertNotNil(state.lastHelloDate(forSlot: 27))
+    }
+
+    func testTriggerSlotsUsesAssignedListeningSlot() {
+        let state = ConsoleState()
+        state.isArmed = true
+        state.keyboardTriggerMode = .torch
+
+        state.assignSlot(device: state.devices[0], slot: 27)
+        state.assignSlot(device: state.devices[26], slot: 1)
+
+        state.triggerSlots(realSlots: [27])
+
+        XCTAssertTrue(state.devices[0].torchOn)
+        XCTAssertFalse(state.devices[26].torchOn)
+    }
+}

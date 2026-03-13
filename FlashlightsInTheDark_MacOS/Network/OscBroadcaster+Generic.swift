@@ -2,20 +2,25 @@ import OSCKit
 
 public extension OscBroadcaster {
     @inline(__always)
-    func send<T: OscCodable>(_ model: T) async throws {
+    func send<T: OscCodable>(
+        _ model: T,
+        allowWhenDisarmed: Bool = false
+    ) async throws {
         switch model {
         case let m as FlashOn:
             try await sendCue(
                 address: .flashOn,
                 slot: m.index,
-                payload: [m.intensity]
+                payload: [m.intensity],
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case let m as FlashOff:
             try await sendCue(
                 address: .flashOff,
                 slot: m.index,
-                payload: []
+                payload: [],
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case let m as AudioPlay:
@@ -26,14 +31,16 @@ public extension OscBroadcaster {
             try await sendCue(
                 address: .audioPlay,
                 slot: m.index,
-                payload: payload
+                payload: payload,
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case let m as AudioStop:
             try await sendCue(
                 address: .audioStop,
                 slot: m.index,
-                payload: []
+                payload: [],
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case let m as EventTrigger:
@@ -44,14 +51,16 @@ public extension OscBroadcaster {
             try await sendCue(
                 address: .eventTrigger,
                 slot: m.index,
-                payload: payload
+                payload: payload,
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case let m as MicRecord:
             try await sendCue(
                 address: .micRecord,
                 slot: m.index,
-                payload: [m.maxDuration]
+                payload: [m.maxDuration],
+                allowWhenDisarmed: allowWhenDisarmed
             )
 
         case _ as PanicAllStop:

@@ -40,23 +40,23 @@ extension PrimerColorDisplay on PrimerColor {
   String get voicePart {
     switch (this) {
       case PrimerColor.green:
-        return 'S3';
+        return 'Sop L1';
       case PrimerColor.magenta:
-        return 'S4';
+        return 'Sop L2';
       case PrimerColor.orange:
-        return 'S5';
+        return 'Sop L2';
       case PrimerColor.blue:
-        return 'A3';
+        return 'Alto L1';
       case PrimerColor.red:
-        return 'A4';
+        return 'Alto L2';
       case PrimerColor.cyan:
-        return 'A5';
+        return 'Alto L2';
       case PrimerColor.yellow:
-        return 'T2';
+        return 'Tenor L1';
       case PrimerColor.pink:
-        return 'B2';
+        return 'Bass L1';
       case PrimerColor.purple:
-        return 'B3';
+        return 'Bass L1';
     }
   }
 

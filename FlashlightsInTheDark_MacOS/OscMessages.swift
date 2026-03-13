@@ -17,7 +17,7 @@ public enum OscAddress: String {
 
 public enum ConcertProtocol {
     public static let version: Int32 = 2
-    public static let expectedDeviceCount: Int = 28
+    public static let expectedDeviceCount: Int = 27
 }
 
 public protocol OscCodable {
