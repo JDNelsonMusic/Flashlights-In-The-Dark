@@ -59,6 +59,9 @@ FlashlightsInTheDark_Protools-Session-OLD*/
 *.ptx
 *.wfm
 
+# Committed export refs: keep MP3s, ignore local WAV sources
+audio/protools-exports/**/*.wav
+
 # -------------------------------
 #  Local score-study assets
 # -------------------------------
