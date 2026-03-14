@@ -25,6 +25,7 @@ const Duration _fastHelloInterval = Duration(seconds: 2);
 const Duration _slowHelloInterval = Duration(seconds: 10);
 const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
+const int _legacySoundEventCount = 32;
 
 @visibleForTesting
 Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
@@ -37,6 +38,130 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
           .clamp(0, double.infinity)
           .toInt();
   return Duration(milliseconds: delayMs);
+}
+
+String? _normaliseAudioPlayToken(String raw) {
+  var value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  if (value.startsWith('./')) {
+    value = value.substring(2);
+  }
+  if (value.contains('/')) {
+    value = value.split('/').last;
+  }
+  return value;
+}
+
+@visibleForTesting
+String? resolvePrimerAudioPlayFile(String raw) {
+  final token = _normaliseAudioPlayToken(raw);
+  if (token == null || token.isEmpty) {
+    return null;
+  }
+
+  final lower = token.toLowerCase();
+  if (lower.startsWith('short') || lower.startsWith('long')) {
+    return token;
+  }
+
+  final legacyPrimer = RegExp(r'^a(\d+)(?:\.mp3)?$', caseSensitive: false);
+  final match = legacyPrimer.firstMatch(token);
+  if (match == null) {
+    return null;
+  }
+
+  final value = int.tryParse(match.group(1) ?? '');
+  if (value == null) {
+    return null;
+  }
+  if (value >= 0 && value <= 48) {
+    return 'Short$value.mp3';
+  }
+  if (value >= 50 && value <= 98) {
+    return 'Long$value.mp3';
+  }
+  return null;
+}
+
+@visibleForTesting
+String? resolveBundledAudioPlayAssetKey(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    return null;
+  }
+
+  var value = trimmed;
+  if (value.startsWith('./')) {
+    value = value.substring(2);
+  }
+
+  if (value.startsWith('available-sounds/')) {
+    if (!value.toLowerCase().endsWith('.mp3')) {
+      value = '$value.mp3';
+    }
+    return value;
+  }
+
+  final token = _normaliseAudioPlayToken(value);
+  if (token == null || token.isEmpty) {
+    return null;
+  }
+
+  String? prefixedAsset(String folder, String stem, int number) {
+    if (number < 1 || number > _legacySoundEventCount) {
+      return null;
+    }
+    return 'available-sounds/$folder/$stem$number.mp3';
+  }
+
+  final directBank = RegExp(r'^([bcd])(\d+)(?:\.mp3)?$', caseSensitive: false);
+  final directMatch = directBank.firstMatch(token);
+  if (directMatch != null) {
+    final stem = directMatch.group(1)!.toLowerCase();
+    final number = int.tryParse(directMatch.group(2) ?? '');
+    if (number == null) {
+      return null;
+    }
+    switch (stem) {
+      case 'b':
+        return prefixedAsset('sound-events-LEFT', 'b', number);
+      case 'c':
+        return prefixedAsset('sound-events-CENTER', 'c', number);
+      case 'd':
+        return prefixedAsset('sound-events-RIGHT', 'd', number);
+    }
+  }
+
+  final familyBank = RegExp(
+    r'^(se[clr])-(\d+)(?:\.mp3)?$',
+    caseSensitive: false,
+  );
+  final familyMatch = familyBank.firstMatch(token);
+  if (familyMatch == null) {
+    return null;
+  }
+
+  final family = familyMatch.group(1)!.toLowerCase();
+  final zeroBasedIndex = int.tryParse(familyMatch.group(2) ?? '');
+  if (zeroBasedIndex == null) {
+    return null;
+  }
+
+  // The repo currently ships 32 legacy left/center/right sound-event MP3s
+  // per family. Map the 0-based transport vocabulary onto those bundled files.
+  final assetNumber = zeroBasedIndex + 1;
+  switch (family) {
+    case 'sel':
+      return prefixedAsset('sound-events-LEFT', 'b', assetNumber);
+    case 'sec':
+      return prefixedAsset('sound-events-CENTER', 'c', assetNumber);
+    case 'ser':
+      return prefixedAsset('sound-events-RIGHT', 'd', assetNumber);
+    default:
+      return null;
+  }
 }
 
 class _NetworkEvent {
@@ -131,7 +256,9 @@ OSCSocket _createBroadcastSocket({
 }) {
   final socket = OSCSocket(
     serverAddress: serverAddress,
-    serverPort: serverPort,
+    // Use an ephemeral source port for outbound traffic so the dedicated
+    // receive socket remains the sole owner of UDP/9000.
+    serverPort: 0,
     destination: InternetAddress('255.255.255.255'),
     destinationPort: serverPort,
   );
@@ -612,16 +739,87 @@ class OscListener {
       }
 
       client.audioPlaying.value = true;
-      unawaited(
-        Future<void>.delayed(const Duration(seconds: 2), () {
-          if (_playbackToken == playbackToken) {
-            client.audioPlaying.value = false;
-          }
-        }),
-      );
+      _scheduleAudioPlayingReset(playbackToken, const Duration(seconds: 2));
     } catch (e) {
       _record('audio', 'Native playback failed', <String, Object?>{
         'error': e.toString(),
+      });
+      client.audioPlaying.value = false;
+    }
+
+    if (sendAck) {
+      _sendAck(cueId: cueId, seq: seq);
+    }
+  }
+
+  void _scheduleAudioPlayingReset(int playbackToken, Duration duration) {
+    unawaited(
+      Future<void>.delayed(duration, () {
+        if (_playbackToken == playbackToken) {
+          client.audioPlaying.value = false;
+        }
+      }),
+    );
+  }
+
+  Future<void> _playEventMedia({
+    String? primerFile,
+    String? electronicsAssetKey,
+    double? electronicsDurationMs,
+    bool sendAck = false,
+    String? dedupeKey,
+    String? cueId,
+    int? seq,
+  }) async {
+    if (_shouldSkipPrimer(dedupeKey)) {
+      _record(
+        'dedupe',
+        'Skipping duplicate event media request',
+        <String, Object?>{'key': dedupeKey},
+      );
+      if (sendAck) {
+        _sendAck(cueId: cueId, seq: seq);
+      }
+      return;
+    }
+
+    if (primerFile == null && electronicsAssetKey == null) {
+      if (sendAck) {
+        _sendAck(cueId: cueId, seq: seq);
+      }
+      return;
+    }
+
+    try {
+      final session = await audio_session.AudioSession.instance;
+      await session.setActive(true);
+
+      if (primerFile != null) {
+        await NativeAudio.playPrimerTone(primerFile, 1.0);
+      }
+      if (electronicsAssetKey != null) {
+        await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
+      }
+
+      if (dedupeKey != null) {
+        _registerPrimerKey(dedupeKey);
+      }
+
+      final playbackToken = ++_playbackToken;
+      client.audioPlaying.value = true;
+      final resetMs = (electronicsDurationMs ?? 2000.0).round().clamp(
+        2000,
+        45000,
+      );
+      _scheduleAudioPlayingReset(
+        playbackToken,
+        Duration(milliseconds: resetMs),
+      );
+    } catch (e) {
+      _record('audio', 'Event media playback failed', <String, Object?>{
+        'error': e.toString(),
+        if (primerFile != null) 'primer': primerFile,
+        if (electronicsAssetKey != null) 'electronics': electronicsAssetKey,
       });
       client.audioPlaying.value = false;
     }
@@ -988,9 +1186,10 @@ class OscListener {
     }
 
     final slot = client.myIndex.value;
-    final assignment = client.assignmentForSlot(event, slot);
-    if (assignment == null) {
-      _record('event', 'No assignment for slot', <String, Object?>{
+    final primerAssignment = client.assignmentForSlot(event, slot);
+    final electronicsAssignment = client.electronicsForSlot(event, slot);
+    if (primerAssignment == null && electronicsAssignment == null) {
+      _record('event', 'No event media for slot', <String, Object?>{
         'eventId': eventId,
         'slot': slot,
       });
@@ -1002,9 +1201,10 @@ class OscListener {
 
     unawaited(
       Future<void>.delayed(delay, () async {
-        await _playPrimer(
-          assignment.sample,
-          1.0,
+        await _playEventMedia(
+          primerFile: primerAssignment?.sample,
+          electronicsAssetKey: electronicsAssignment?.sample,
+          electronicsDurationMs: electronicsAssignment?.durationMs,
           sendAck: true,
           dedupeKey: dedupeKey,
           cueId: envelope.cueId,
@@ -1039,12 +1239,34 @@ class OscListener {
     }
 
     final delay = playbackDelayForStartAtMs(startAtMs);
+    final primerFile = resolvePrimerAudioPlayFile(file);
+    final bundledAssetKey =
+        primerFile == null ? resolveBundledAudioPlayAssetKey(file) : null;
+
+    if (primerFile == null && bundledAssetKey == null) {
+      _record('audio', 'Unsupported /audio/play request', <String, Object?>{
+        'file': file,
+        'slot': envelope.slot,
+      });
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+      return;
+    }
 
     unawaited(
       Future<void>.delayed(delay, () async {
-        await _playPrimer(
-          file,
-          gain.toDouble(),
+        if (primerFile != null) {
+          await _playPrimer(
+            primerFile,
+            gain.toDouble(),
+            sendAck: true,
+            cueId: envelope.cueId,
+            seq: envelope.seq,
+          );
+          return;
+        }
+
+        await _playEventMedia(
+          electronicsAssetKey: bundledAssetKey,
           sendAck: true,
           cueId: envelope.cueId,
           seq: envelope.seq,
@@ -1228,6 +1450,14 @@ class OscListener {
     _record('manual', 'Manual refresh requested');
     _unlockConductor(reason: 'manual refresh');
     await _scheduleRebind(reason: 'manual refresh');
+    _sendHello();
+  }
+
+  Future<void> announcePresence() async {
+    if (!_running) {
+      await start();
+      return;
+    }
     _sendHello();
   }
 

@@ -231,6 +231,35 @@ class ClientState {
     return null;
   }
 
+  ChoirFamily? choirFamilyForSlot(int slot) {
+    final color = colorForSlot(slot);
+    if (color == null) {
+      return null;
+    }
+    switch (color) {
+      case PrimerColor.green:
+      case PrimerColor.magenta:
+      case PrimerColor.orange:
+        return ChoirFamily.soprano;
+      case PrimerColor.blue:
+      case PrimerColor.red:
+      case PrimerColor.cyan:
+        return ChoirFamily.alto;
+      case PrimerColor.yellow:
+      case PrimerColor.pink:
+      case PrimerColor.purple:
+        return ChoirFamily.tenorBass;
+    }
+  }
+
+  ElectronicsAssignment? electronicsForSlot(EventRecipe event, int slot) {
+    final family = choirFamilyForSlot(slot);
+    if (family == null) {
+      return null;
+    }
+    return event.electronicsAssignments[family];
+  }
+
   bool shouldHandleIndex(int messageIndex, {int? slotOverride}) {
     final slot = slotOverride ?? myIndex.value;
     return messageIndex == slot;

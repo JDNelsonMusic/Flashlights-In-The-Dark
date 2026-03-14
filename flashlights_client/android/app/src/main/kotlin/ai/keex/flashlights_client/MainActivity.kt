@@ -6,6 +6,7 @@ import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.media.AudioAttributes
 import android.media.MediaMetadataRetriever
+import android.media.MediaPlayer
 import android.media.SoundPool
 import io.flutter.FlutterInjector
 import io.flutter.embedding.android.FlutterActivity
@@ -33,10 +34,12 @@ import java.util.concurrent.Executors
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
     private lateinit var primerAudio: PrimerToneManager
+    private lateinit var electronicsAudio: ElectronicsClipManager
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         primerAudio = PrimerToneManager(applicationContext)
+        electronicsAudio = ElectronicsClipManager(applicationContext)
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "ai.keex.flashlights/torch"
@@ -103,12 +106,25 @@ class MainActivity : FlutterActivity() {
                     primerAudio.play(fileName, volume)
                     result.success(null)
                 }
+                "playEventClip" -> {
+                    val assetKey = call.argument<String>("assetKey")
+                    if (assetKey == null) {
+                        result.error("INVALID_ARGUMENTS", "assetKey missing", null)
+                        return@setMethodCallHandler
+                    }
+                    val volume = (call.argument<Number>("volume") ?: 1.0).toFloat()
+                    electronicsAudio.play(assetKey, volume)
+                    result.success(null)
+                }
                 "stopPrimerTone" -> {
                     primerAudio.stopAll()
+                    electronicsAudio.stopAll()
                     result.success(null)
                 }
                 "diagnostics" -> {
-                    result.success(primerAudio.diagnostics())
+                    val payload = HashMap(primerAudio.diagnostics())
+                    payload["electronicsPlayers"] = electronicsAudio.activePlayerCount()
+                    result.success(payload)
                 }
                 else -> result.notImplemented()
             }
@@ -164,6 +180,9 @@ class MainActivity : FlutterActivity() {
         multicastLock = null
         if (::primerAudio.isInitialized) {
             primerAudio.release()
+        }
+        if (::electronicsAudio.isInitialized) {
+            electronicsAudio.release()
         }
         super.onDestroy()
     }
@@ -523,6 +542,128 @@ private class PrimerToneManager(context: Context) {
         private const val MAX_SOUND_STREAMS = 24
         private const val STREAM_CLEANUP_PADDING_MS = 32L
         private const val DEFAULT_STREAM_DURATION_MS = 4000L
+    }
+}
+
+private class ElectronicsClipManager(context: Context) {
+    private val appContext = context.applicationContext
+    private val assetManager = appContext.assets
+    private val flutterLoader = FlutterInjector.instance().flutterLoader()
+    private val cacheDirectory: File = File(appContext.cacheDir, "electronicsEventClips").apply {
+        if (!exists()) {
+            mkdirs()
+        }
+    }
+    private val executor: ExecutorService = Executors.newCachedThreadPool()
+    private val lock = Any()
+    private val activePlayers: MutableMap<Int, MediaPlayer> = mutableMapOf()
+    private var nextPlayerId: Int = 1
+
+    fun play(assetKey: String, volume: Float) {
+        val trimmed = assetKey.trim()
+        if (trimmed.isEmpty()) {
+            return
+        }
+        executor.execute {
+            val clamped = volume.coerceIn(0f, 1f)
+            val player = MediaPlayer()
+            val playerId = synchronized(lock) {
+                val id = nextPlayerId++
+                activePlayers[id] = player
+                id
+            }
+
+            try {
+                player.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+
+                val lookupKey = flutterLoader.getLookupKeyForAsset(trimmed)
+                try {
+                    assetManager.openFd(lookupKey).use { afd ->
+                        player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                    }
+                } catch (openError: IOException) {
+                    val cached = materialiseAsset(lookupKey, trimmed)
+                    player.setDataSource(cached.absolutePath)
+                }
+
+                player.setVolume(clamped, clamped)
+                player.setOnCompletionListener { completed ->
+                    removePlayer(playerId, completed)
+                }
+                player.setOnErrorListener { failed, what, extra ->
+                    Log.e(
+                        TAG,
+                        "Electronics clip failed for $trimmed (what=$what, extra=$extra)"
+                    )
+                    removePlayer(playerId, failed)
+                    true
+                }
+                player.prepare()
+                player.start()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to play electronics clip $trimmed", e)
+                removePlayer(playerId, player)
+            }
+        }
+    }
+
+    fun stopAll() {
+        val players = synchronized(lock) {
+            val copy = activePlayers.values.toList()
+            activePlayers.clear()
+            copy
+        }
+        players.forEach { player ->
+            try {
+                if (player.isPlaying) {
+                    player.stop()
+                }
+            } catch (_: Exception) {
+            } finally {
+                player.reset()
+                player.release()
+            }
+        }
+    }
+
+    fun activePlayerCount(): Int = synchronized(lock) { activePlayers.size }
+
+    fun release() {
+        stopAll()
+        executor.shutdownNow()
+    }
+
+    private fun removePlayer(playerId: Int, player: MediaPlayer) {
+        synchronized(lock) {
+            activePlayers.remove(playerId)
+        }
+        try {
+            if (player.isPlaying) {
+                player.stop()
+            }
+        } catch (_: Exception) {
+        } finally {
+            player.reset()
+            player.release()
+        }
+    }
+
+    private fun materialiseAsset(lookupKey: String, assetKey: String): File {
+        val target = File(cacheDirectory, assetKey.substringAfterLast("/"))
+        if (target.exists()) {
+            return target
+        }
+        assetManager.open(lookupKey).use { input ->
+            FileOutputStream(target).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return target
     }
 }
 

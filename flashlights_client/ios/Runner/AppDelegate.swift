@@ -6,6 +6,7 @@ import AVFoundation
 @objc class AppDelegate: FlutterAppDelegate {
   private weak var flutterController: FlutterViewController?
   private let primerAudio = PrimerAudioEngine()
+  private let electronicsAudio = ElectronicsClipEngine()
 
   override func application(
     _ application: UIApplication,
@@ -17,6 +18,7 @@ import AVFoundation
       return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     flutterController = controller
+    electronicsAudio.attachFlutterController(controller)
 
     let torchChannel = FlutterMethodChannel(
       name: "ai.keex.flashlights/torch",
@@ -107,8 +109,20 @@ import AVFoundation
         let volume = (args["volume"] as? Double) ?? 1.0
         self.primerAudio.play(canonicalName: fileName, gain: volume)
         result(nil)
+      case "playEventClip":
+        guard
+          let args = call.arguments as? [String: Any],
+          let assetKey = args["assetKey"] as? String
+        else {
+          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected assetKey", details: nil))
+          return
+        }
+        let volume = (args["volume"] as? Double) ?? 1.0
+        self.electronicsAudio.play(assetKey: assetKey, gain: volume)
+        result(nil)
       case "stopPrimerTone":
         self.primerAudio.stopAll()
+        self.electronicsAudio.stopAll()
         result(nil)
       case "diagnostics":
         result(self.primerAudio.diagnosticsPayload())
@@ -122,12 +136,14 @@ import AVFoundation
 
   override func applicationWillResignActive(_ application: UIApplication) {
     primerAudio.handleAppWillResignActive()
+    electronicsAudio.handleAppWillResignActive()
     super.applicationWillResignActive(application)
   }
 
   override func applicationDidBecomeActive(_ application: UIApplication) {
     super.applicationDidBecomeActive(application)
     primerAudio.handleAppDidBecomeActive()
+    electronicsAudio.handleAppDidBecomeActive()
   }
 
   private func setTorchLevel(level: Double) {
@@ -150,12 +166,11 @@ import AVFoundation
     let session = AVAudioSession.sharedInstance()
     do {
       try session.setCategory(
-        .playAndRecord,
+        .playback,
         mode: .default,
-        options: [.defaultToSpeaker, .mixWithOthers]
+        options: [.mixWithOthers]
       )
       try session.setActive(true, options: [])
-      try? session.overrideOutputAudioPort(.speaker)
     } catch {
       NSLog("Audio session error: \(error)")
     }
@@ -456,12 +471,11 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
     let configure: () throws -> Void = {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(
-        .playAndRecord,
+        .playback,
         mode: .default,
-        options: [.defaultToSpeaker, .mixWithOthers]
+        options: [.mixWithOthers]
       )
       try session.setActive(true, options: [])
-      try? session.overrideOutputAudioPort(.speaker)
     }
 
     do {
@@ -656,5 +670,166 @@ private final class PrimerAudioEngine: NSObject, AVAudioPlayerDelegate {
       trimmed += ".mp3"
     }
     return trimmed
+  }
+}
+
+private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
+  private let queue = DispatchQueue(
+    label: "ai.keex.flashlights.electronics-audio",
+    qos: .userInitiated
+  )
+  private weak var flutterController: FlutterViewController?
+  private var activePlayers: [ObjectIdentifier: AVAudioPlayer] = [:]
+  private var sessionConfigured = false
+
+  func attachFlutterController(_ controller: FlutterViewController) {
+    flutterController = controller
+  }
+
+  func handleAppWillResignActive() {
+    queue.async {
+      self.sessionConfigured = false
+      self.stopActivePlayersLocked()
+    }
+  }
+
+  func handleAppDidBecomeActive() {
+    queue.async {
+      do {
+        try self.configureSession()
+      } catch {
+        NSLog("[ElectronicsClipEngine] Failed to reactivate audio session: \(error)")
+      }
+    }
+  }
+
+  func play(assetKey: String, gain: Double) {
+    let trimmed = assetKey.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { return }
+    let capped = max(0.0, min(gain, 1.0))
+
+    queue.async {
+      guard let url = self.locateAssetURL(assetKey: trimmed) else {
+        NSLog("[ElectronicsClipEngine] Asset not found for \(trimmed)")
+        return
+      }
+
+      do {
+        if !self.sessionConfigured {
+          try self.configureSession()
+        }
+        let player = try AVAudioPlayer(contentsOf: url)
+        player.delegate = self
+        player.numberOfLoops = 0
+        player.volume = Float(capped)
+        player.prepareToPlay()
+        let identifier = ObjectIdentifier(player)
+        self.activePlayers[identifier] = player
+
+        DispatchQueue.main.async {
+          player.play()
+        }
+      } catch {
+        NSLog("[ElectronicsClipEngine] Playback failed for \(trimmed): \(error)")
+      }
+    }
+  }
+
+  func stopAll() {
+    queue.async {
+      self.stopActivePlayersLocked()
+    }
+  }
+
+  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    queue.async {
+      self.activePlayers.removeValue(forKey: ObjectIdentifier(player))
+    }
+  }
+
+  func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+    queue.async {
+      self.activePlayers.removeValue(forKey: ObjectIdentifier(player))
+      NSLog("[ElectronicsClipEngine] Decode error: \(String(describing: error))")
+    }
+  }
+
+  private func stopActivePlayersLocked() {
+    let players = Array(activePlayers.values)
+    activePlayers.removeAll(keepingCapacity: true)
+    for player in players {
+      player.stop()
+      player.currentTime = 0
+    }
+  }
+
+  private func configureSession() throws {
+    let configure: () throws -> Void = {
+      let session = AVAudioSession.sharedInstance()
+      try session.setCategory(
+        .playback,
+        mode: .default,
+        options: [.mixWithOthers]
+      )
+      try session.setActive(true, options: [])
+    }
+
+    do {
+      if Thread.isMainThread {
+        try configure()
+      } else {
+        var thrownError: Error?
+        DispatchQueue.main.sync {
+          do {
+            try configure()
+          } catch {
+            thrownError = error
+          }
+        }
+        if let thrownError {
+          throw thrownError
+        }
+      }
+      sessionConfigured = true
+    } catch {
+      sessionConfigured = false
+      throw error
+    }
+  }
+
+  private func locateAssetURL(assetKey: String) -> URL? {
+    var candidates: [URL] = []
+    func addCandidate(_ url: URL?) {
+      guard let url else { return }
+      candidates.append(url)
+    }
+
+    if let controller = flutterController {
+      let lookupKey = controller.lookupKey(forAsset: assetKey)
+      addCandidate(Bundle.main.bundleURL.appendingPathComponent(lookupKey))
+      if let frameworks = Bundle.main.privateFrameworksURL?
+        .appendingPathComponent("App.framework/flutter_assets") {
+        addCandidate(frameworks.appendingPathComponent(lookupKey))
+      }
+    }
+
+    if let frameworks = Bundle.main.privateFrameworksURL?
+      .appendingPathComponent("App.framework/flutter_assets") {
+      addCandidate(frameworks.appendingPathComponent(assetKey))
+    }
+
+    addCandidate(Bundle.main.bundleURL.appendingPathComponent("flutter_assets/\(assetKey)"))
+
+    let fm = FileManager.default
+    var seen = Set<String>()
+    for url in candidates {
+      let path = url.path
+      if seen.contains(path) { continue }
+      seen.insert(path)
+      if fm.fileExists(atPath: path) {
+        return url
+      }
+    }
+    return nil
   }
 }

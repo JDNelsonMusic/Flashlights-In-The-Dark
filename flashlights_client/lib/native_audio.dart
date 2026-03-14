@@ -147,7 +147,25 @@ class NativeAudio {
     await _channel.invokeMethod('playPrimerTone', payload);
   }
 
-  /// Stops any primer tone playback in progress on the native side.
+  /// Plays a bundled event-electronics clip directly from the Flutter asset tree.
+  static Future<void> playElectronicsClip(
+    String assetKey,
+    double volume,
+  ) async {
+    final trimmed = assetKey.trim();
+    if (trimmed.isEmpty) {
+      debugPrint('[NativeAudio] Ignoring empty electronics clip request');
+      return;
+    }
+
+    final payload = <String, dynamic>{
+      'assetKey': trimmed,
+      'volume': volume.clamp(0.0, 1.0),
+    };
+    await _channel.invokeMethod('playEventClip', payload);
+  }
+
+  /// Stops any native playback in progress on the platform side.
   static Future<void> stopPrimerTone() async {
     await ensureInitialized();
     await _channel.invokeMethod('stopPrimerTone');

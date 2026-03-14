@@ -136,6 +136,12 @@ flutter:
     - available-sounds/primerTones/Short46.mp3
     - available-sounds/primerTones/Short47.mp3
     - available-sounds/primerTones/Short48.mp3
+    - available-sounds/sound-events-LEFT/
+    - available-sounds/sound-events-CENTER/
+    - available-sounds/sound-events-RIGHT/
+    - available-sounds/electronics-event-clips/soprano/
+    - available-sounds/electronics-event-clips/alto/
+    - available-sounds/electronics-event-clips/tenor-bass/
 
 dependency_overrides:
   win32: ^5.14.0

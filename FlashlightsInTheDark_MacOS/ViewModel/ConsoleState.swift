@@ -1979,23 +1979,17 @@ extension ConsoleState {
     }
 
     private func sendEventTriggers(for event: EventRecipe, startAtMs: Double) async {
-        guard !event.primerAssignments.isEmpty, isBroadcasting else { return }
+        guard isBroadcasting else { return }
         do {
             let broadcaster = try await broadcasterTask.value
-            for color in event.primerAssignments.keys.sorted(by: { $0.groupIndex < $1.groupIndex }) {
-                let targetSlots = slots(for: color).sorted()
-                guard !targetSlots.isEmpty else { continue }
-                for slot in targetSlots {
-                    let msg = EventTrigger(index: Int32(slot),
-                                           eventId: Int32(event.id),
-                                           startAtMs: startAtMs)
-                    try await broadcaster.send(msg)
-                }
+            for slot in performanceSlots {
+                let msg = EventTrigger(index: Int32(slot),
+                                       eventId: Int32(event.id),
+                                       startAtMs: startAtMs)
+                try await broadcaster.send(msg)
             }
-            if let fileName = event.primerAssignments.first?.value.oscFileName {
-                await MainActor.run {
-                    self.lastLog = "▶︎ Sent event triggers for Event #\(event.id) (\(fileName))"
-                }
+            await MainActor.run {
+                self.lastLog = "▶︎ Sent event trigger for Event #\(event.id)"
             }
         } catch {
             await MainActor.run {

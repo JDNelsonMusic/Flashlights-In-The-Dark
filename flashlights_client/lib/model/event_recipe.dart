@@ -84,6 +84,34 @@ extension PrimerColorDisplay on PrimerColor {
   }
 }
 
+enum ChoirFamily { soprano, alto, tenorBass }
+
+ChoirFamily? choirFamilyFromString(String raw) {
+  switch (raw.toLowerCase()) {
+    case 'soprano':
+      return ChoirFamily.soprano;
+    case 'alto':
+      return ChoirFamily.alto;
+    case 'tenor_bass':
+      return ChoirFamily.tenorBass;
+    default:
+      return null;
+  }
+}
+
+extension ChoirFamilyAsset on ChoirFamily {
+  String get recipeKey {
+    switch (this) {
+      case ChoirFamily.soprano:
+        return 'soprano';
+      case ChoirFamily.alto:
+        return 'alto';
+      case ChoirFamily.tenorBass:
+        return 'tenor_bass';
+    }
+  }
+}
+
 PrimerColor? primerColorFromString(String raw) {
   switch (raw.toLowerCase()) {
     case 'blue':
@@ -118,6 +146,28 @@ class PrimerAssignment {
   String get normalizedSample => sample.trim();
 }
 
+class ElectronicsAssignment {
+  ElectronicsAssignment({
+    required this.sample,
+    required this.channelMode,
+    this.sourceStartMs,
+    this.sourceEndMs,
+    this.durationMs,
+    this.fadeInMs,
+    this.fadeOutMs,
+    this.timingRule,
+  });
+
+  final String sample;
+  final String channelMode;
+  final double? sourceStartMs;
+  final double? sourceEndMs;
+  final double? durationMs;
+  final double? fadeInMs;
+  final double? fadeOutMs;
+  final String? timingRule;
+}
+
 String? _canonicalPrimerSample(String? raw) {
   if (raw == null) {
     return null;
@@ -146,12 +196,33 @@ String? _canonicalPrimerSample(String? raw) {
   return '$prefix$fileName';
 }
 
+String? _canonicalElectronicsSample(String? raw) {
+  if (raw == null) {
+    return null;
+  }
+  var value = raw.trim();
+  if (value.isEmpty) {
+    return null;
+  }
+  if (value.startsWith('./')) {
+    value = value.substring(2);
+  }
+  if (!value.toLowerCase().endsWith('.mp3')) {
+    value = '$value.mp3';
+  }
+  if (!value.startsWith('available-sounds/')) {
+    value = 'available-sounds/$value';
+  }
+  return value;
+}
+
 class EventRecipe {
   EventRecipe({
     required this.id,
     required this.measure,
     required this.position,
     required this.primerAssignments,
+    required this.electronicsAssignments,
   });
 
   final int id;
@@ -160,6 +231,7 @@ class EventRecipe {
   // Official trigger-score beat position for this event, not the sung-note onset.
   final String? position;
   final Map<PrimerColor, PrimerAssignment> primerAssignments;
+  final Map<ChoirFamily, ElectronicsAssignment> electronicsAssignments;
 
   static EventRecipe fromJson(Map<String, dynamic> json) {
     final primer = <PrimerColor, PrimerAssignment>{};
@@ -176,11 +248,42 @@ class EventRecipe {
         }
       });
     }
+
+    final electronics = <ChoirFamily, ElectronicsAssignment>{};
+    final electronicsJson = json['electronics'] as Map<String, dynamic>?;
+    if (electronicsJson != null) {
+      electronicsJson.forEach((key, value) {
+        final family = choirFamilyFromString(key);
+        if (family == null || value is! Map<String, dynamic>) {
+          return;
+        }
+        final sample = _canonicalElectronicsSample(value['sample'] as String?);
+        final channelMode = (value['channelMode'] as String?)?.trim();
+        if (sample == null ||
+            sample.isEmpty ||
+            channelMode == null ||
+            channelMode.isEmpty) {
+          return;
+        }
+        electronics[family] = ElectronicsAssignment(
+          sample: sample,
+          channelMode: channelMode,
+          sourceStartMs: (value['sourceStartMs'] as num?)?.toDouble(),
+          sourceEndMs: (value['sourceEndMs'] as num?)?.toDouble(),
+          durationMs: (value['durationMs'] as num?)?.toDouble(),
+          fadeInMs: (value['fadeInMs'] as num?)?.toDouble(),
+          fadeOutMs: (value['fadeOutMs'] as num?)?.toDouble(),
+          timingRule: (value['timingRule'] as String?)?.trim(),
+        );
+      });
+    }
+
     return EventRecipe(
       id: json['id'] as int,
       measure: json['measure'] as int?,
       position: json['position'] as String?,
       primerAssignments: primer,
+      electronicsAssignments: electronics,
     );
   }
 }

@@ -54,14 +54,13 @@ Future<void> _bootstrapNative() async {
   // 3. Configure the audio session so primer tones play even in silent mode.
   try {
     final session = await audio_session.AudioSession.instance;
-    final iosOptions =
-        audio_session.AVAudioSessionCategoryOptions.defaultToSpeaker |
-        audio_session.AVAudioSessionCategoryOptions.mixWithOthers;
     await session.configure(
       audio_session.AudioSessionConfiguration(
-        avAudioSessionCategory:
-            audio_session.AVAudioSessionCategory.playAndRecord,
-        avAudioSessionCategoryOptions: iosOptions,
+        // Mic capture is currently disabled in the concert client, so prefer a
+        // straight playback session for reliable loudspeaker routing on iPhone.
+        avAudioSessionCategory: audio_session.AVAudioSessionCategory.playback,
+        avAudioSessionCategoryOptions:
+            audio_session.AVAudioSessionCategoryOptions.mixWithOthers,
         avAudioSessionMode: audio_session.AVAudioSessionMode.defaultMode,
         androidAudioAttributes: audio_session.AndroidAudioAttributes(
           contentType: audio_session.AndroidAudioContentType.sonification,
@@ -748,6 +747,11 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     client.myIndex.value = newSlot;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('lastSlot', newSlot);
+    try {
+      await flosc.OscListener.instance.announcePresence();
+    } catch (e) {
+      debugPrint('[SlotSelect] Failed to announce updated slot: $e');
+    }
   }
 
   @override
