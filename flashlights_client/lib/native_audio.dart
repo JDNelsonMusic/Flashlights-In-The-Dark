@@ -18,6 +18,7 @@ class NativeAudio {
   static Map<String, dynamic>? _lastInitSnapshot;
   static Object? _lastInitError;
   static Timer? _retryTimer;
+  static Future<Map<String, dynamic>>? _assetManifestFuture;
 
   static bool get _isSupportedPlatform {
     if (kIsWeb) {
@@ -110,8 +111,7 @@ class NativeAudio {
   }
 
   static Future<Map<String, dynamic>> _primeAssets() async {
-    final manifestJson = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> decoded = jsonDecode(manifestJson);
+    final decoded = await _loadAssetManifest();
     final primerAssets =
         decoded.keys
             .where((key) => key.startsWith('available-sounds/primerTones/'))
@@ -125,8 +125,20 @@ class NativeAudio {
       'assets': primerAssets,
       'canonical': canonical,
       'requested': primerAssets.length,
+      'bundledAssetCount': decoded.length,
       'generatedAt': DateTime.now().toIso8601String(),
     };
+  }
+
+  static Future<Map<String, dynamic>> _loadAssetManifest() {
+    return _assetManifestFuture ??= () async {
+      final manifestJson = await rootBundle.loadString('AssetManifest.json');
+      final decoded = jsonDecode(manifestJson);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('AssetManifest.json was not a map');
+      }
+      return decoded;
+    }();
   }
 
   /// Triggers playback of the given [fileName] using the platform audio layer.
@@ -156,6 +168,11 @@ class NativeAudio {
     if (trimmed.isEmpty) {
       debugPrint('[NativeAudio] Ignoring empty electronics clip request');
       return;
+    }
+
+    final manifest = await _loadAssetManifest();
+    if (!manifest.containsKey(trimmed)) {
+      throw StateError('Bundled electronics asset not found: $trimmed');
     }
 
     final payload = <String, dynamic>{

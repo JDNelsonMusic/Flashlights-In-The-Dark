@@ -125,7 +125,9 @@ import AVFoundation
         self.electronicsAudio.stopAll()
         result(nil)
       case "diagnostics":
-        result(self.primerAudio.diagnosticsPayload())
+        var payload = self.primerAudio.diagnosticsPayload()
+        payload.merge(self.electronicsAudio.diagnosticsPayload()) { _, new in new }
+        result(payload)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -681,6 +683,10 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
   private weak var flutterController: FlutterViewController?
   private var activePlayers: [ObjectIdentifier: AVAudioPlayer] = [:]
   private var sessionConfigured = false
+  private var lastRequestedAssetKey: String?
+  private var lastResolvedAssetPath: String?
+  private var lastPlaybackError: String?
+  private var lastPlaybackStartedAtMs: Double = 0
 
   func attachFlutterController(_ controller: FlutterViewController) {
     flutterController = controller
@@ -709,7 +715,10 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     let capped = max(0.0, min(gain, 1.0))
 
     queue.async {
+      self.lastRequestedAssetKey = trimmed
       guard let url = self.locateAssetURL(assetKey: trimmed) else {
+        self.lastResolvedAssetPath = nil
+        self.lastPlaybackError = "Asset not found"
         NSLog("[ElectronicsClipEngine] Asset not found for \(trimmed)")
         return
       }
@@ -718,6 +727,7 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
         if !self.sessionConfigured {
           try self.configureSession()
         }
+        self.lastResolvedAssetPath = url.path
         let player = try AVAudioPlayer(contentsOf: url)
         player.delegate = self
         player.numberOfLoops = 0
@@ -725,11 +735,14 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
         player.prepareToPlay()
         let identifier = ObjectIdentifier(player)
         self.activePlayers[identifier] = player
+        self.lastPlaybackError = nil
+        self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
 
         DispatchQueue.main.async {
           player.play()
         }
       } catch {
+        self.lastPlaybackError = error.localizedDescription
         NSLog("[ElectronicsClipEngine] Playback failed for \(trimmed): \(error)")
       }
     }
@@ -750,8 +763,23 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     queue.async {
       self.activePlayers.removeValue(forKey: ObjectIdentifier(player))
+      self.lastPlaybackError = error?.localizedDescription ?? "Decode error"
       NSLog("[ElectronicsClipEngine] Decode error: \(String(describing: error))")
     }
+  }
+
+  func diagnosticsPayload() -> [String: Any] {
+    var payload: [String: Any] = [:]
+    queue.sync {
+      payload = [
+        "electronicsPlayers": self.activePlayers.count,
+        "lastElectronicsAssetKey": self.lastRequestedAssetKey ?? NSNull(),
+        "lastElectronicsResolvedPath": self.lastResolvedAssetPath ?? NSNull(),
+        "lastElectronicsError": self.lastPlaybackError ?? NSNull(),
+        "lastElectronicsPlaybackStartedAtMs": self.lastPlaybackStartedAtMs
+      ]
+    }
+    return payload
   }
 
   private func stopActivePlayersLocked() {

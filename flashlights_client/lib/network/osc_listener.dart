@@ -1196,6 +1196,14 @@ class OscListener {
       return;
     }
 
+    _record('event', 'Resolved event media', <String, Object?>{
+      'eventId': eventId,
+      'slot': slot,
+      if (primerAssignment != null) 'primer': primerAssignment.sample,
+      if (electronicsAssignment != null)
+        'electronics': electronicsAssignment.sample,
+    });
+
     final delay = playbackDelayForStartAtMs(startAtMs);
     final dedupeKey = 'event:$eventId:slot=$slot';
 

@@ -2001,6 +2001,26 @@ class DebugOverlay extends StatelessWidget {
                   );
                 },
               ),
+              FutureBuilder<Map<String, dynamic>?>(
+                future: NativeAudio.diagnostics(),
+                builder: (context, snapshot) {
+                  final data = snapshot.data;
+                  final players = data?['electronicsPlayers'];
+                  final assetKey = data?['lastElectronicsAssetKey'];
+                  final lastError = data?['lastElectronicsError'];
+                  final resolvedPath = data?['lastElectronicsResolvedPath'];
+                  return Text(
+                    'Electronics: players=${players ?? 'n/a'} · asset=${assetKey ?? 'none'} · '
+                    'error=${lastError ?? 'none'}${resolvedPath == null ? '' : '\\nResolved path: $resolvedPath'}',
+                    style: TextStyle(
+                      color:
+                          lastError == null || lastError == 'null'
+                              ? Colors.white70
+                              : Colors.redAccent,
+                    ),
+                  );
+                },
+              ),
               ValueListenableBuilder<double>(
                 valueListenable: client.clockOffsetMs,
                 builder:
