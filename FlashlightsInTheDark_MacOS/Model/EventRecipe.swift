@@ -12,7 +12,9 @@ public struct EventRecipeBundle: Decodable {
 // MARK: - Event Recipe --------------------------------------------------------
 public struct EventRecipe: Identifiable, Decodable {
     public let id: Int
+    /// Official trigger-score measure for this event, not the sung-note onset.
     public let measure: Int?
+    /// Official trigger-score beat position for this event, not the sung-note onset.
     public let position: String?
     public let primerAssignments: [PrimerColor: PrimerAssignment]
 

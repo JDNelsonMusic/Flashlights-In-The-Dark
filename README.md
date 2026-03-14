@@ -6,7 +6,9 @@ A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-b
 
 ## Concert Hardening (2026)
 
-- Reliability runbook: [CONCERT_READINESS.md](CONCERT_READINESS.md)
+- Reliability runbook: [docs/project-management/CONCERT_READINESS.md](docs/project-management/CONCERT_READINESS.md)
+- Composer/tech state map: [docs/project-management/PROJECT_STATE.md](docs/project-management/PROJECT_STATE.md)
+- Fast reorientation map: [docs/project-management/composermap.md](docs/project-management/composermap.md)
 - One-command verification: `scripts/verify.sh`
 - Soak simulator: `scripts/soak_sim.sh` and `tools/concert_sim.py`
 - Legacy onboarding scripts in `scripts/` are deprecated for normal deployment; use TestFlight (iOS) and Play Store (Android).
@@ -147,7 +149,7 @@ Legacy USB onboarding helpers (`scripts/choir_onboard.sh`) are deprecated and re
 
 - Create or activate a Python 3.11+ virtualenv inside the repo and install the helper app dependencies:
   `python3 -m venv .venv && .venv/bin/pip install -r light_chorus_app/requirements.txt`.
-- Launch the GUI with `python light_chorus_app_gui.py` (run from the repository root so relative paths resolve).
+- Launch the GUI with `python tools/light_chorus_gui.py` from the repository root.
 - Click **Browse…** to select a Light Chorus MIDI export (e.g. `flashlights_client/FlashlightsInTheDark_SingerScore24.midi`), pick an output `.xlsx`, choose the octave numbering style, then press **Generate Spreadsheet**.
 - The tool writes an "Event Recipes" style workbook; each populated cell lists the pitch on the first line and the corresponding `primerTones/shortXX.mp3` asset on the second.
 
@@ -217,6 +219,35 @@ Have a tech lead familiar with TestFlight/Play Store rollout and Wi-Fi troublesh
 # Repository Tour
 
 See [Repository Guidelines](AGENTS.md) for contributor expectations and workflow tips.
+
+High-signal root layout:
+
+```text
+flashlights-in-the-dark/
+├── README.md
+├── AGENTS.md
+├── FlashlightsInTheDark_MacOS/          # Swift macOS conductor console
+├── FlashlightsInTheDark.xcodeproj/      # Xcode project for the console
+├── flashlights_client/                  # Flutter singer client
+├── Flashlights-ITD_EventRecipes_4_2026_0309/  # current score + event recipe outputs
+├── Flashlights-ITD_EventRecipes_3_2025_0921/  # legacy score + recipe outputs
+├── FlashlightsInTheDark_Protools-Session/     # composer DAW workspace
+├── audio/                               # exported audio and rendered references
+├── docs/
+│   ├── project-management/              # active planning, readiness, and state docs
+│   ├── protools-housekeeping/           # generated timing and audit reports
+│   ├── reference-images/                # trigger-score photos and visual references
+│   └── score-study/                     # collected score-study submissions
+├── scripts/                             # operational and generation scripts
+├── tools/
+│   ├── concert_sim.py                   # rehearsal/network simulator
+│   ├── light_chorus_gui.py              # Light Chorus spreadsheet entrypoint
+│   └── legacy/                          # older Python backup/prototype utilities
+├── light_chorus_app/                    # spreadsheet-builder package code
+├── fastlane/                            # iOS signing / export helpers
+├── SimphoniMacOS/                       # adjacent experimental material
+└── src/                                 # adjacent experimental web material
+```
 
 flashlights-in-the-dark/
 ├── AGENTS.md                  # contributor guide
@@ -436,7 +467,7 @@ Conductor’s Console (Mac App): A Swift application that provides a user interf
 
 MIDI Integration: The control software can appear as a virtual MIDI device (“Flashlights Bridge”) on the Mac. This means you can route MIDI from a DAW like Logic or Ableton into the Flashlights app. Each relevant MIDI note or control change can correspond to an action (for example, Note C2 might map to turning on all lights, or a range of notes might map chromatically to different phones’ flashlights). The app uses a specific mapping (embedded from earlier prototypes) where a 32-note range is mapped to the 28 actual device slots in a musically convenient way (skipping unused slots). This mapping aligns with the composer’s intended scale and chords for the piece. Additionally, certain MIDI CC messages (like the sustain pedal) are mapped to global functions (e.g., sustain could latch lights on until released).
 
-Automation and Scripting: The repository includes Python-based prototype tools such as Flashlights_Midi_Panel_Simulator.py, which was an earlier GUI to simulate the system. While the final performance will rely on the native Mac app, these tools were invaluable during development to test the concept quickly. They also serve as a backup: for instance, the Python OSC sender script can manually send flashlight commands if needed. The presence of these scripts means the project can be operated in a pinch even outside the Mac app (via command-line or different OS), though with less convenience.
+Automation and Scripting: The repository includes Python-based prototype tools under `tools/legacy/`, including `Flashlights_Midi_Panel_Simulator.py`, which was an earlier GUI to simulate the system. While the final performance will rely on the native Mac app, these tools were invaluable during development to test the concept quickly. They also serve as a backup: for instance, `tools/legacy/Little_OSC_Test-sender.py` can manually send flashlight commands if needed. The presence of these scripts means the project can be operated in a pinch even outside the Mac app (via command-line or different OS), though with less convenience.
 
 Clock Synchronization: Both the Mac software and the mobile app implement a simple clock sync mechanism using OSC time tags (NTP format). The Mac periodically sends a /sync message containing its current time; each phone calculates the difference between its local clock and the received time and slowly adjusts for any drift. This keeps all devices within a close temporal alignment for the duration of the performance. In practice, this is hands-off and just improves reliability of simultaneous events.
 

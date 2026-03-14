@@ -10,7 +10,7 @@ It is not a contributor guide. It is a "where am I, what is alive, and what do I
 
 Read these in order:
 
-1. `PROJECT_STATE.md`
+1. `docs/project-management/PROJECT_STATE.md`
 2. `docs/2026-03-13-rehearsal-cut-plan.md`
 3. `docs/protools-housekeeping/event_timeline.md`
 4. `docs/protools-housekeeping/session_audit.md`
@@ -151,6 +151,8 @@ For the current working cut, the practical bypass span is now much better define
 So the active structural problem is no longer "where should the cut probably go?" It is "how should the `38 -> bridge -> 104` handoff be realized musically and technically?"
 
 ## What Is Actually Wired Into The Apps
+
+The `measure` and `position` values carried by each event should be treated as official trigger points from the annotated trigger-score photos, not as literal sung-note attack times.
 
 ### macOS conductor
 

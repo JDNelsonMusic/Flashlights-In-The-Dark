@@ -2,7 +2,7 @@
 
 Last refreshed: March 13, 2026
 
-This file is the root-level source-of-truth map for the current workspace state. It is meant to answer two questions quickly:
+This file is the workspace source-of-truth map for the current repository state. It is meant to answer two questions quickly:
 
 1. What is currently canonical?
 2. If I change the piece structure, what else do I have to touch?
@@ -35,11 +35,12 @@ Verified current facts from the generated reports:
 - The encoded score runs to `6:58.235`.
 - Encoded tempo changes currently occur at measure `1` (`102 BPM`) and measure `30` (`72 BPM`).
 
-## Root Map
+## Workspace Map
 
 | Path | Role | Status |
 | --- | --- | --- |
 | `README.md` | project overview and contributor-facing setup | active, but duration language still describes the longer version |
+| `docs/project-management/` | active planning, readiness, review, and state docs | active coordination layer |
 | `FlashlightsInTheDark_MacOS/` | macOS conductor console | core runtime target |
 | `flashlights_client/` | Flutter singer client | core runtime target |
 | `FlashlightsInTheDark_Protools-Session/` | Pro Tools sessions, backups, raw and rendered audio | core composer/audio workspace |
@@ -47,10 +48,13 @@ Verified current facts from the generated reports:
 | `Flashlights-ITD_EventRecipes_3_2025_0921/` | older recipe + score generation | legacy reference, not current source-of-truth |
 | `scripts/` | operational and generation scripts | active |
 | `docs/protools-housekeeping/` | generated audit + timeline outputs for the Pro Tools work | active orientation layer |
+| `docs/reference-images/` | official trigger-score photos and visual reference graphics | active reference layer |
+| `docs/score-study/` | collected score-study submissions and archive zip | secondary reference, not on immediate runtime path |
 | `light_chorus_app/` | MIDI-to-spreadsheet helper app | active support tooling |
+| `tools/light_chorus_gui.py` | Light Chorus spreadsheet-builder entrypoint | active support tooling |
+| `tools/legacy/` | older backup/prototype Python control utilities | legacy support tooling |
 | `docs/` | OSC schema, validation, deployment notes | active support docs |
 | `fastlane/` | iOS/TestFlight support | active but not on the cut-critical path |
-| `FlashlightsScoreStudyInsights/` | analysis/reference material | secondary reference, not on immediate runtime path |
 | `SimphoniMacOS/`, `src/`, `tools/` | adjacent experimental/support material | not currently on the main performance wiring path |
 
 ## Core Data Flow
@@ -72,11 +76,14 @@ The practical implication is:
 
 Pro Tools is a parallel audio-production layer, but the conductor/client event logic is now largely data-driven from `event_recipes.json`.
 
+The `measure` and `position` attached to each event should now be read as the official trigger point from the annotated trigger-score photos, not as the sung-note onset.
+
 ## Source-Of-Truth Matrix
 
 | Domain | Canonical source | Downstream copies / consumers | Notes |
 | --- | --- | --- | --- |
 | Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`, `scripts/build_protools_event_timeline.py` | Flutter practice view uses its own asset copy, not the source folder directly |
+| Official trigger positions | `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv` | `scripts/generate_event_recipes_v4.py`, recipe spreadsheet rows, runtime JSON `measure` / `position` fields | Source images documented in `docs/official_trigger_positions.md`; these trigger points intentionally lead the sung events |
 | Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | The copies are currently identical |
 | Recipe generation logic | `scripts/generate_event_recipes_v4.py` | writes JSON copies and CSV/XLSX outputs | This script currently points at the v4 score folder |
 | macOS cue UI | `FlashlightsInTheDark_MacOS/View/EventTriggerStrip.swift` | consumes decoded event recipes | Event count is dynamic |
@@ -147,9 +154,9 @@ If the goal is "get the piece substantially pulled together in the next day", th
 
 If coming back cold after months away, open these first:
 
-1. `PROJECT_STATE.md`
+1. `docs/project-management/PROJECT_STATE.md`
 2. `docs/2026-03-13-rehearsal-cut-plan.md`
-3. `composermap.md`
+3. `docs/project-management/composermap.md`
 4. `docs/protools-housekeeping/session_audit.md`
 5. `docs/protools-housekeeping/event_timeline.md`
 6. `scripts/generate_event_recipes_v4.py`

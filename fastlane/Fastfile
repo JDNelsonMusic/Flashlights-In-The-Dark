@@ -18,7 +18,7 @@ platform :ios do
   lane :reexport do |opts|
     xcodebuild(
       archive_path: opts[:archive_path] || "FlashlightsInTheDark.xcarchive",
-      export_options: "ExportOptions.plist",
+      export_options: File.join(__dir__, "ExportOptions.plist"),
       export_path: opts[:ipa_path] || "FlashlightsInTheDark.ipa",
       skip_build: true
     )

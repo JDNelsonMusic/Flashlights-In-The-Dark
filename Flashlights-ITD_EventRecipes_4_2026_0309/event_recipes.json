@@ -1,7 +1,13 @@
 {
   "source": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
+  "triggerPositionSource": "Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv",
+  "triggerPositionImages": [
+    "docs/reference-images/official-trigger-score/Flashlights_OfficialEventPositions_pg1.jpeg",
+    "docs/reference-images/official-trigger-score/Flashlights_OfficialEventPositions_pg2.jpeg"
+  ],
+  "triggerTimingNote": "The measure/position fields are official trigger points from the annotated trigger score. They are intentionally early relative to sung-note onsets to absorb rehearsal-observed system latency and the short-primer lead-in design.",
   "eventCount": 192,
-  "generated": "2026-03-09T22:31:13+00:00",
+  "generated": "2026-03-14T06:48:55+00:00",
   "events": [
     {
       "id": 1,

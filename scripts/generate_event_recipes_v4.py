@@ -21,18 +21,23 @@ except ImportError:  # pragma: no cover - optional export
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OLD_BUNDLE_PATH = ROOT / "FlashlightsInTheDark_MacOS/Resources/event_recipes.json"
+REFERENCE_BUNDLE_PATH = ROOT / "FlashlightsInTheDark_MacOS/Resources/event_recipes.json"
 NEW_SCORE_PATH = (
     ROOT
     / "Flashlights-ITD_EventRecipes_4_2026_0309"
     / "FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml"
 )
 OUTPUT_DIR = ROOT / "Flashlights-ITD_EventRecipes_4_2026_0309"
+OFFICIAL_TRIGGER_POSITIONS_PATH = OUTPUT_DIR / "official_trigger_positions.csv"
 OUTPUT_CSV_PATH = OUTPUT_DIR / "Flashlights-ITD_EventRecipes_4.csv"
 OUTPUT_XLSX_PATH = OUTPUT_DIR / "Flashlights-ITD_EventRecipes_4.xlsx"
 OUTPUT_JSON_PATH = OUTPUT_DIR / "event_recipes.json"
 MAC_JSON_PATH = ROOT / "FlashlightsInTheDark_MacOS/Resources/event_recipes.json"
 CLIENT_JSON_PATH = ROOT / "flashlights_client/assets/event_recipes.json"
+OFFICIAL_TRIGGER_POSITION_IMAGES = [
+    ROOT / "docs/reference-images/official-trigger-score/Flashlights_OfficialEventPositions_pg1.jpeg",
+    ROOT / "docs/reference-images/official-trigger-score/Flashlights_OfficialEventPositions_pg2.jpeg",
+]
 
 POSITION_RE = re.compile(r"^(?P<beat>[\d+\/]+)-of-(?P<measure_beats>\d+)$")
 
@@ -60,16 +65,31 @@ PART_TO_COLORS = {
     "P6": ["yellow", "pink", "purple"],
 }
 
-ROW_CONFIG = [
-    ("green", "Sop L1", "Slots 16,29,44", "Green"),
-    ("magenta", "Sop L2", "Slots 12,24,25", "Magenta"),
-    ("orange", "Sop L2", "Slots 23,38,51", "Orange"),
-    ("blue", "Alto L1", "Slots 27,41,42", "Blue"),
-    ("red", "Alto L2", "Slots 1,14,15", "Red"),
-    ("cyan", "Alto L2", "Slots 40,53,54", "Cyan"),
-    ("yellow", "Tenor L1", "Slots 7,19,34", "Yellow"),
-    ("pink", "Bass L1", "Slots 9,20,21", "Pink"),
-    ("purple", "Bass L1", "Slots 3,4,18", "Purple"),
+SPREADSHEET_STAFF_CONFIG = [
+    ("Sop L1", [("green", "Slots 16,29,44", "Green")]),
+    (
+        "Sop L2",
+        [
+            ("magenta", "Slots 12,24,25", "Magenta"),
+            ("orange", "Slots 23,38,51", "Orange"),
+        ],
+    ),
+    ("Alto L1", [("blue", "Slots 27,41,42", "Blue")]),
+    (
+        "Alto L2",
+        [
+            ("red", "Slots 1,14,15", "Red"),
+            ("cyan", "Slots 40,53,54", "Cyan"),
+        ],
+    ),
+    ("Tenor L1", [("yellow", "Slots 7,19,34", "Yellow")]),
+    (
+        "Bass L1",
+        [
+            ("pink", "Slots 9,20,21", "Pink"),
+            ("purple", "Slots 3,4,18", "Purple"),
+        ],
+    ),
 ]
 
 
@@ -95,21 +115,44 @@ class NoteSpan:
     label: str
 
 
-def load_legacy_event_points(path: Path) -> list[EventPoint]:
+def load_reference_lengths(path: Path) -> dict[int, bool]:
     bundle = json.loads(path.read_text())
-    points: list[EventPoint] = []
+    lengths: dict[int, bool] = {}
     for event in bundle["events"]:
         primer = event.get("primer", {})
         samples = [assignment.get("sample", "") for assignment in primer.values()]
-        is_long = any("long" in sample.lower() for sample in samples)
-        points.append(
-            EventPoint(
-                event_id=event["id"],
-                measure=event["measure"],
-                position=event["position"],
-                is_long=is_long,
+        lengths[event["id"]] = any("long" in sample.lower() for sample in samples)
+    return lengths
+
+
+def load_official_event_points(
+    path: Path,
+    *,
+    reference_lengths: dict[int, bool],
+) -> list[EventPoint]:
+    points: list[EventPoint] = []
+    with path.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            event_id = int(row["event_id"])
+            if event_id not in reference_lengths:
+                raise ValueError(f"Missing reference sample length for event {event_id}")
+            points.append(
+                EventPoint(
+                    event_id=event_id,
+                    measure=int(row["measure"]),
+                    position=row["position"].strip(),
+                    is_long=reference_lengths[event_id],
+                )
             )
+
+    expected_ids = list(range(1, len(points) + 1))
+    actual_ids = [point.event_id for point in points]
+    if actual_ids != expected_ids:
+        raise ValueError(
+            "Official trigger positions must contain sequential event IDs starting at 1"
         )
+
     return points
 
 
@@ -295,6 +338,15 @@ def build_bundle(
 
     return {
         "source": str(NEW_SCORE_PATH.relative_to(ROOT)),
+        "triggerPositionSource": str(OFFICIAL_TRIGGER_POSITIONS_PATH.relative_to(ROOT)),
+        "triggerPositionImages": [
+            str(path.relative_to(ROOT)) for path in OFFICIAL_TRIGGER_POSITION_IMAGES
+        ],
+        "triggerTimingNote": (
+            "The measure/position fields are official trigger points from the annotated "
+            "trigger score. They are intentionally early relative to sung-note onsets to "
+            "absorb rehearsal-observed system latency and the short-primer lead-in design."
+        ),
         "eventCount": len(events_payload),
         "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "events": events_payload,
@@ -306,6 +358,11 @@ def build_spreadsheet_rows(bundle: dict[str, object]) -> list[list[str]]:
     header_row = ["", "Event #"] + [str(event["id"]) for event in events]
     measure_row = ["", "Measure #"] + [str(event["measure"]) for event in events]
     position_row = ["", "Position (beat)"] + [str(event["position"]) for event in events]
+    official_trigger_row = [
+        "",
+        "Official Trigger Point (measure+beat)",
+        *[f"m{event['measure']} {event['position']}" for event in events],
+    ]
     length_row = [
         "",
         "Sample Length",
@@ -322,28 +379,83 @@ def build_spreadsheet_rows(bundle: dict[str, object]) -> list[list[str]]:
 
     rows: list[list[str]] = [
         ["Source Score", str(NEW_SCORE_PATH.relative_to(ROOT))],
+        ["Trigger Position Source", str(OFFICIAL_TRIGGER_POSITIONS_PATH.relative_to(ROOT))],
+        [
+            "Trigger Timing Note",
+            (
+                "These measure/position values are the official trigger points from "
+                "docs/reference-images/official-trigger-score/"
+                "Flashlights_OfficialEventPositions_pg1.jpeg and "
+                "docs/reference-images/official-trigger-score/"
+                "Flashlights_OfficialEventPositions_pg2.jpeg. They are intentionally early "
+                "relative to sung-note onsets to accommodate roughly half-note rehearsal "
+                "latency and the short-primer eighth-note lead."
+            ),
+        ],
         [
             "Assignment Rule",
-            "Legacy event timings with active light-chorus pitches sampled top-to-bottom per reduced staff; duplicate the lowest available layer when fewer than three pitches sound.",
+            "Official trigger positions with active light-chorus pitches sampled top-to-bottom per reduced staff; duplicate the lowest available layer when fewer than three pitches sound.",
         ],
         [],
         header_row,
         measure_row,
         position_row,
+        official_trigger_row,
         length_row,
     ]
 
-    for color, part_label, slots_label, display_color in ROW_CONFIG:
-        sample_row = ["", f"{part_label}: {slots_label} [{display_color}]"]
-        note_row = ["", f"CorrespondingNote {part_label} [{display_color}]"]
-        for event in events:
-            assignment = event.get("primer", {}).get(color)
+    def build_staff_row_label(
+        part_label: str,
+        members: list[tuple[str, str, str]],
+    ) -> str:
+        member_text = " | ".join(
+            f"{slots_label} [{display_color}]"
+            for _, slots_label, display_color in members
+        )
+        return f"{part_label}: {member_text}"
+
+    def build_note_row_label(
+        part_label: str,
+        members: list[tuple[str, str, str]],
+    ) -> str:
+        color_text = "/".join(display_color for _, _, display_color in members)
+        return f"CorrespondingNote {part_label} [{color_text}]"
+
+    def combine_staff_values(
+        event: dict[str, object],
+        members: list[tuple[str, str, str]],
+        field: str,
+    ) -> str:
+        grouped_values: dict[str, list[str]] = {}
+        ordered_values: list[str] = []
+        primer = event.get("primer", {})
+        for color, _, display_color in members:
+            assignment = primer.get(color)
             if assignment is None:
-                sample_row.append("")
-                note_row.append("")
-            else:
-                sample_row.append(assignment["sample"])
-                note_row.append(assignment["note"])
+                continue
+            value = assignment.get(field)
+            if not value:
+                continue
+            if value not in grouped_values:
+                grouped_values[value] = []
+                ordered_values.append(value)
+            grouped_values[value].append(display_color)
+
+        if not ordered_values:
+            return ""
+        if len(ordered_values) == 1:
+            return ordered_values[0]
+
+        return " | ".join(
+            f"{'/'.join(grouped_values[value])}: {value}" for value in ordered_values
+        )
+
+    for part_label, members in SPREADSHEET_STAFF_CONFIG:
+        sample_row = ["", build_staff_row_label(part_label, members)]
+        note_row = ["", build_note_row_label(part_label, members)]
+        for event in events:
+            sample_row.append(combine_staff_values(event, members, "sample"))
+            note_row.append(combine_staff_values(event, members, "note"))
         rows.append(sample_row)
         rows.append(note_row)
 
@@ -374,18 +486,22 @@ def export_xlsx(rows: list[list[str]], path: Path) -> None:
         for column_index, value in enumerate(row, start=1):
             sheet.cell(row=row_index, column=column_index, value=value)
 
-    for row_index in (4, 5, 6, 7):
+    for row_index in (6, 7, 8, 9, 10):
         for cell in sheet[row_index]:
             cell.font = Font(bold=True)
 
-    sheet.freeze_panes = "C4"
+    sheet.freeze_panes = "C7"
     workbook.save(path)
 
 
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    event_points = load_legacy_event_points(OLD_BUNDLE_PATH)
+    reference_lengths = load_reference_lengths(REFERENCE_BUNDLE_PATH)
+    event_points = load_official_event_points(
+        OFFICIAL_TRIGGER_POSITIONS_PATH,
+        reference_lengths=reference_lengths,
+    )
 
     root = ET.parse(NEW_SCORE_PATH).getroot()
     score_data: dict[str, tuple[dict[int, MeasureContext], dict[int, list[NoteSpan]]]] = {}

@@ -155,7 +155,9 @@ class EventRecipe {
   });
 
   final int id;
+  // Official trigger-score measure for this event, not the sung-note onset.
   final int? measure;
+  // Official trigger-score beat position for this event, not the sung-note onset.
   final String? position;
   final Map<PrimerColor, PrimerAssignment> primerAssignments;
 

@@ -20,6 +20,11 @@ These are recommendations, not destructive edits. Confirm the session choice in 
 - `event_timeline_events.csv`: one row per event
 - `event_timeline_clips.csv`: one row per color/sample assignment
 
+## Manual Sync References
+
+- `electronics_sync_reference.md`: manually maintained timing anchors for aligning rendered electronics audio with score measures while deriving the `192` event recipes
+- `../official_trigger_positions.md`: authoritative explanation of the official event trigger points and their image/source files
+
 ## Immediate Safe Actions
 
 - Remove `.DS_Store` files from the Pro Tools session tree.
