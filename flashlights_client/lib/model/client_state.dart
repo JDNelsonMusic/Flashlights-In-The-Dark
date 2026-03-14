@@ -10,41 +10,105 @@ class PrimerColorPlacement {
   final List<int> slots;
 }
 
+enum LightChorusPart {
+  sopranoL1,
+  sopranoL2,
+  tenorL,
+  bassL,
+  altoL2,
+  altoL1,
+}
+
+extension LightChorusPartDisplay on LightChorusPart {
+  String get label {
+    switch (this) {
+      case LightChorusPart.sopranoL1:
+        return 'Sop-L1';
+      case LightChorusPart.sopranoL2:
+        return 'Sop-L2';
+      case LightChorusPart.tenorL:
+        return 'Ten-L';
+      case LightChorusPart.bassL:
+        return 'Bass-L';
+      case LightChorusPart.altoL2:
+        return 'Alto-L2';
+      case LightChorusPart.altoL1:
+        return 'Alto-L1';
+    }
+  }
+
+  int get defaultSlot {
+    switch (this) {
+      case LightChorusPart.sopranoL1:
+        return 16;
+      case LightChorusPart.sopranoL2:
+        return 12;
+      case LightChorusPart.tenorL:
+        return 7;
+      case LightChorusPart.bassL:
+        return 9;
+      case LightChorusPart.altoL2:
+        return 1;
+      case LightChorusPart.altoL1:
+        return 27;
+    }
+  }
+
+  List<int> get slots {
+    switch (this) {
+      case LightChorusPart.sopranoL1:
+        return const <int>[16, 29, 44];
+      case LightChorusPart.sopranoL2:
+        return const <int>[12, 24, 25, 23, 38, 51];
+      case LightChorusPart.tenorL:
+        return const <int>[7, 19, 34];
+      case LightChorusPart.bassL:
+        return const <int>[9, 20, 21, 3, 4, 18];
+      case LightChorusPart.altoL2:
+        return const <int>[1, 14, 15, 40, 53, 54];
+      case LightChorusPart.altoL1:
+        return const <int>[27, 41, 42];
+    }
+  }
+
+  String get slotSummary => slots.join(' · ');
+}
+
 const Map<PrimerColor, PrimerColorPlacement> kPrimerColorPlacements = {
   PrimerColor.green: PrimerColorPlacement(
-    partLabel: 'Sop L1',
+    partLabel: 'Sop-L1',
     slots: [16, 29, 44],
   ),
   PrimerColor.magenta: PrimerColorPlacement(
-    partLabel: 'Sop L2',
+    partLabel: 'Sop-L2',
     slots: [12, 24, 25],
   ),
   PrimerColor.orange: PrimerColorPlacement(
-    partLabel: 'Sop L2',
+    partLabel: 'Sop-L2',
     slots: [23, 38, 51],
   ),
   PrimerColor.blue: PrimerColorPlacement(
-    partLabel: 'Alto L1',
+    partLabel: 'Alto-L1',
     slots: [27, 41, 42],
   ),
   PrimerColor.red: PrimerColorPlacement(
-    partLabel: 'Alto L2',
+    partLabel: 'Alto-L2',
     slots: [1, 14, 15],
   ),
   PrimerColor.cyan: PrimerColorPlacement(
-    partLabel: 'Alto L2',
+    partLabel: 'Alto-L2',
     slots: [40, 53, 54],
   ),
   PrimerColor.yellow: PrimerColorPlacement(
-    partLabel: 'Tenor L1',
+    partLabel: 'Ten-L',
     slots: [7, 19, 34],
   ),
   PrimerColor.pink: PrimerColorPlacement(
-    partLabel: 'Bass L1',
+    partLabel: 'Bass-L',
     slots: [9, 20, 21],
   ),
   PrimerColor.purple: PrimerColorPlacement(
-    partLabel: 'Bass L1',
+    partLabel: 'Bass-L',
     slots: [3, 4, 18],
   ),
 };
@@ -171,11 +235,44 @@ class ClientState {
 
   static final Map<int, PrimerColor> _slotColorMap = _buildSlotColorMap();
   static final List<int> _availableSlots = _buildAvailableSlots();
+  static const List<LightChorusPart> _availableParts = <LightChorusPart>[
+    LightChorusPart.sopranoL1,
+    LightChorusPart.sopranoL2,
+    LightChorusPart.tenorL,
+    LightChorusPart.bassL,
+    LightChorusPart.altoL2,
+    LightChorusPart.altoL1,
+  ];
 
   /// Public accessor for known seating slots.
   List<int> get availableSlots => _availableSlots;
+  List<LightChorusPart> get availableParts => _availableParts;
 
   PrimerColor? colorForSlot(int slot) => _slotColorMap[slot];
+
+  LightChorusPart? partForSlot(int slot) {
+    final color = colorForSlot(slot);
+    if (color == null) {
+      return null;
+    }
+    switch (color) {
+      case PrimerColor.green:
+        return LightChorusPart.sopranoL1;
+      case PrimerColor.magenta:
+      case PrimerColor.orange:
+        return LightChorusPart.sopranoL2;
+      case PrimerColor.yellow:
+        return LightChorusPart.tenorL;
+      case PrimerColor.pink:
+      case PrimerColor.purple:
+        return LightChorusPart.bassL;
+      case PrimerColor.red:
+      case PrimerColor.cyan:
+        return LightChorusPart.altoL2;
+      case PrimerColor.blue:
+        return LightChorusPart.altoL1;
+    }
+  }
 
   PrimerColorPlacement? practicePlacementForColor(PrimerColor color) =>
       kPrimerColorPlacements[color];

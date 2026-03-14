@@ -1979,17 +1979,29 @@ extension ConsoleState {
     }
 
     private func sendEventTriggers(for event: EventRecipe, startAtMs: Double) async {
-        guard isBroadcasting else { return }
         do {
             let broadcaster = try await broadcasterTask.value
+            var sentSlots: [Int] = []
+            var failedSlots: [Int] = []
             for slot in performanceSlots {
                 let msg = EventTrigger(index: Int32(slot),
                                        eventId: Int32(event.id),
                                        startAtMs: startAtMs)
-                try await broadcaster.send(msg)
+                do {
+                    try await broadcaster.send(msg)
+                    sentSlots.append(slot)
+                } catch {
+                    failedSlots.append(slot)
+                }
             }
             await MainActor.run {
-                self.lastLog = "▶︎ Sent event trigger for Event #\(event.id)"
+                if sentSlots.isEmpty {
+                    self.lastLog = "⚠️ No event triggers sent for Event #\(event.id) (\(failedSlots.count) slots unavailable)"
+                } else if failedSlots.isEmpty {
+                    self.lastLog = "▶︎ Sent event trigger for Event #\(event.id)"
+                } else {
+                    self.lastLog = "▶︎ Sent Event #\(event.id) to \(sentSlots.count) slots (\(failedSlots.count) unavailable)"
+                }
             }
         } catch {
             await MainActor.run {

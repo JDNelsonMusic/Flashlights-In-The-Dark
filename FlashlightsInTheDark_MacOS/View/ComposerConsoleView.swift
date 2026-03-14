@@ -3,6 +3,27 @@ import AppKit
 
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
+    
+    private struct StaffModule: Identifiable {
+        let id: String
+        let title: String
+        let accent: Color
+        let slots: [Int]
+        
+        var slotSummary: String {
+            slots.map(String.init).joined(separator: " · ")
+        }
+    }
+    
+    private let staffModules: [StaffModule] = [
+        StaffModule(id: "sop-l1", title: "Sop-L1", accent: .slotGreen, slots: [16, 29, 44]),
+        StaffModule(id: "sop-l2", title: "Sop-L2", accent: .hotMagenta, slots: [12, 24, 25, 23, 38, 51]),
+        StaffModule(id: "ten-l", title: "Ten-L", accent: .slotYellow, slots: [7, 19, 34]),
+        StaffModule(id: "bass-l", title: "Bass-L", accent: .lightRose, slots: [9, 20, 21, 3, 4, 18]),
+        StaffModule(id: "alto-l2", title: "Alto-L2", accent: .brightRed, slots: [1, 14, 15, 40, 53, 54]),
+        StaffModule(id: "alto-l1", title: "Alto-L1", accent: .royalBlue, slots: [27, 41, 42])
+    ]
+
     /// Returns true if any device's torch is currently on
     private var anyTorchOn: Bool {
         state.devices.contains { $0.torchOn }
@@ -480,20 +501,7 @@ struct ComposerConsoleView: View {
                     .padding(.vertical, 4)
                     .background(Color.black.opacity(0.2))
 
-                    VStack(spacing: 24) {
-                        ForEach(slotRows.indices, id: \.self) { row in
-                            HStack(spacing: 24) {
-                                ForEach(slotRows[row], id: \.self) { slot in
-                                    let device = state.devices[slot - 1]
-                                    SlotCell(device: device,
-                                             keyLabel: keyLabels[slot],
-                                             outline: slotOutlineColors[slot],
-                                             isTriggered: state.triggeredSlots.contains(slot))
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
+                    staffModuleSection
                     groupTriggerStripe
                     Spacer(minLength: 8)
                     // Status bar
@@ -662,6 +670,78 @@ struct ComposerConsoleView: View {
         }
     }
 
+    private var staffModuleSection: some View {
+        LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(minimum: 150), spacing: 16), count: 6),
+            spacing: 16
+        ) {
+            ForEach(staffModules) { module in
+                StaffModuleCard(
+                    module: module,
+                    devices: orderedDevices(for: module),
+                    connectedCount: connectedDeviceCount(for: module),
+                    hasTorch: orderedDevices(for: module).contains(where: \.torchOn),
+                    hasAudio: orderedDevices(for: module).contains(where: \.audioPlaying),
+                    isTriggered: module.slots.contains(where: { state.triggeredSlots.contains($0) || state.glowingSlots.contains($0) }),
+                    hasTargets: !actionDevices(for: module).isEmpty,
+                    onTorch: { toggleModuleTorch(module) },
+                    onSound: { triggerModuleSound(module) },
+                    onBoth: { triggerModule(module) }
+                )
+                .environmentObject(state)
+            }
+        }
+    }
+
+    private func orderedDevices(for module: StaffModule) -> [ChoirDevice] {
+        state.devices
+            .filter { !$0.isPlaceholder && module.slots.contains($0.listeningSlot) }
+            .sorted { lhs, rhs in
+                let lhsIndex = module.slots.firstIndex(of: lhs.listeningSlot) ?? .max
+                let rhsIndex = module.slots.firstIndex(of: rhs.listeningSlot) ?? .max
+                return lhsIndex < rhsIndex
+            }
+    }
+
+    private func actionDevices(for module: StaffModule) -> [ChoirDevice] {
+        orderedDevices(for: module).filter { device in
+            let status = state.statuses[device.id] ?? .clean
+            return status == .live || !device.ip.isEmpty
+        }
+    }
+
+    private func connectedDeviceCount(for module: StaffModule) -> Int {
+        orderedDevices(for: module).reduce(into: 0) { count, device in
+            if (state.statuses[device.id] ?? .clean) == .live {
+                count += 1
+            }
+        }
+    }
+
+    private func toggleModuleTorch(_ module: StaffModule) {
+        for device in actionDevices(for: module) {
+            _ = state.toggleTorch(id: device.id, allowWhenDisarmed: true)
+        }
+    }
+
+    private func triggerModuleSound(_ module: StaffModule) {
+        for device in actionDevices(for: module) {
+            state.triggerSound(device: device, allowWhenDisarmed: true)
+        }
+    }
+
+    private func triggerModule(_ module: StaffModule) {
+        switch state.keyboardTriggerMode {
+        case .torch:
+            toggleModuleTorch(module)
+        case .sound:
+            triggerModuleSound(module)
+        case .both:
+            toggleModuleTorch(module)
+            triggerModuleSound(module)
+        }
+    }
+
 #if DEBUG
     struct ComposerConsoleView_Previews: PreviewProvider {
         static var previews: some View {
@@ -675,20 +755,145 @@ struct ComposerConsoleView: View {
     private var groupTriggerStripe: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                ForEach(1...9, id: \.self) { idx in
-                    Button(tripleLabels[idx] ?? "Group \(idx)") {
-                        if let slots = tripleTriggers[idx] {
-                            state.triggerSlots(realSlots: slots)
-                        }
+                ForEach(staffModules) { module in
+                    Button(module.title) {
+                        triggerModule(module)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(tripleColors[idx] ?? .white)
+                    .tint(module.accent)
                     .controlSize(.large)
+                    .disabled(actionDevices(for: module).isEmpty)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)
             EventTriggerStrip()
                 .environmentObject(state)
+        }
+    }
+
+    private struct StaffModuleCard: View {
+        @EnvironmentObject var state: ConsoleState
+
+        let module: StaffModule
+        let devices: [ChoirDevice]
+        let connectedCount: Int
+        let hasTorch: Bool
+        let hasAudio: Bool
+        let isTriggered: Bool
+        let hasTargets: Bool
+        let onTorch: () -> Void
+        let onSound: () -> Void
+        let onBoth: () -> Void
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(module.title)
+                        .font(.headline)
+                    Spacer()
+                    Text("\(connectedCount)/\(devices.count)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(connectedCount > 0 ? Color.mintGlow : .secondary)
+                }
+
+                Text("Slots \(module.slotSummary)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Label(hasTorch ? "Torch on" : "Torch idle", systemImage: hasTorch ? "flashlight.on.fill" : "flashlight.off.fill")
+                        .font(.caption2)
+                    Label(hasAudio ? "Audio" : "Idle", systemImage: "speaker.wave.2.fill")
+                        .font(.caption2)
+                }
+                .foregroundStyle(.secondary)
+
+                Divider()
+
+                HStack(spacing: 8) {
+                    ForEach(devices) { device in
+                        ModuleMemberBadge(
+                            slot: device.listeningSlot,
+                            status: state.statuses[device.id] ?? .clean,
+                            accent: module.accent,
+                            torchOn: device.torchOn,
+                            audioPlaying: device.audioPlaying
+                        )
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                HStack(spacing: 8) {
+                    Button {
+                        onTorch()
+                    } label: {
+                        Image(systemName: "flashlight.on.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(module.accent)
+                    .disabled(!hasTargets)
+
+                    Button {
+                        onSound()
+                    } label: {
+                        Image(systemName: "speaker.wave.2.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(module.accent)
+                    .disabled(!hasTargets)
+
+                    Button("Both") {
+                        onBoth()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(module.accent)
+                    .disabled(!hasTargets)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.black.opacity(0.2))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.95 : 0.45), lineWidth: 2)
+            )
+            .shadow(
+                color: module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.35 : 0.12),
+                radius: isTriggered || hasTorch || hasAudio ? 18 : 10
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 18))
+            .onTapGesture {
+                guard hasTargets else { return }
+                onBoth()
+            }
+        }
+    }
+
+    private struct ModuleMemberBadge: View {
+        let slot: Int
+        let status: DeviceStatus
+        let accent: Color
+        let torchOn: Bool
+        let audioPlaying: Bool
+
+        var body: some View {
+            VStack(spacing: 4) {
+                Circle()
+                    .fill(torchOn ? accent : status.color.opacity(0.7))
+                    .frame(width: 12, height: 12)
+                    .overlay(
+                        Circle()
+                            .stroke(accent.opacity(audioPlaying ? 1 : 0.35), lineWidth: audioPlaying ? 2 : 1)
+                    )
+                Text("\(slot)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 

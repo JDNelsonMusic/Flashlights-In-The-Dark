@@ -25,6 +25,7 @@ const Duration _fastHelloInterval = Duration(seconds: 2);
 const Duration _slowHelloInterval = Duration(seconds: 10);
 const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
+const Duration _soundEventPlaybackDelay = Duration(milliseconds: 365);
 const int _legacySoundEventCount = 32;
 
 @visibleForTesting
@@ -38,6 +39,11 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
           .clamp(0, double.infinity)
           .toInt();
   return Duration(milliseconds: delayMs);
+}
+
+@visibleForTesting
+Duration soundEventPlaybackDelay({required bool hasSoundEventClip}) {
+  return hasSoundEventClip ? _soundEventPlaybackDelay : Duration.zero;
 }
 
 String? _normaliseAudioPlayToken(String raw) {
@@ -794,23 +800,48 @@ class OscListener {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
 
+      final playbackToken = ++_playbackToken;
+      final electronicsDelay = soundEventPlaybackDelay(
+        hasSoundEventClip: electronicsAssetKey != null,
+      );
+
       if (primerFile != null) {
         await NativeAudio.playPrimerTone(primerFile, 1.0);
       }
       if (electronicsAssetKey != null) {
-        await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
+        _record('audio', 'Scheduling sound-event clip playback', <String, Object?>{
+          'asset': electronicsAssetKey,
+          'delayMs': electronicsDelay.inMilliseconds,
+        });
+        unawaited(
+          Future<void>.delayed(electronicsDelay, () async {
+            if (_playbackToken != playbackToken) {
+              return;
+            }
+            try {
+              await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
+            } catch (e) {
+              _record(
+                'audio',
+                'Delayed sound-event playback failed',
+                <String, Object?>{
+                  'error': e.toString(),
+                  'electronics': electronicsAssetKey,
+                },
+              );
+            }
+          }),
+        );
       }
 
       if (dedupeKey != null) {
         _registerPrimerKey(dedupeKey);
       }
 
-      final playbackToken = ++_playbackToken;
       client.audioPlaying.value = true;
-      final resetMs = (electronicsDurationMs ?? 2000.0).round().clamp(
-        2000,
-        45000,
-      );
+      final resetMs =
+          (electronicsDurationMs ?? 2000.0).round().clamp(2000, 45000) +
+          electronicsDelay.inMilliseconds;
       _scheduleAudioPlayingReset(
         playbackToken,
         Duration(milliseconds: resetMs),

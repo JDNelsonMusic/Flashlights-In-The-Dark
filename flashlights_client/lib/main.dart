@@ -88,14 +88,14 @@ class _HeaderSection extends StatelessWidget {
   const _HeaderSection({
     required this.platform,
     required this.onTitleTap,
-    required this.onSlotSelected,
+    required this.onPartSelected,
     required this.onRefreshConnection,
     required this.refreshingConnection,
   });
 
   final String platform;
   final VoidCallback onTitleTap;
-  final Future<void> Function(int) onSlotSelected;
+  final Future<void> Function(LightChorusPart) onPartSelected;
   final VoidCallback onRefreshConnection;
   final bool refreshingConnection;
 
@@ -106,13 +106,13 @@ class _HeaderSection extends StatelessWidget {
       valueListenable: client.myIndex,
       builder: (context, myIndex, _) {
         final slotColor = kSlotOutlineColors[myIndex] ?? Colors.white70;
-        final partLabel = client.colorForSlot(myIndex)?.voicePart;
+        final partLabel = client.partForSlot(myIndex)?.label;
         final singerLabel =
             myIndex == 0
                 ? 'Unassigned'
                 : partLabel == null
                 ? 'Slot $myIndex'
-                : 'Slot $myIndex · $partLabel';
+                : '$partLabel · Slot $myIndex';
         return _GlassPanel(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
           child: Column(
@@ -162,7 +162,7 @@ class _HeaderSection extends StatelessWidget {
                       _SlotSelectorPill(
                         currentSlot: myIndex,
                         accent: slotColor,
-                        onSelect: onSlotSelected,
+                        onSelect: onPartSelected,
                       ),
                       _InfoPill(
                         icon:
@@ -232,32 +232,31 @@ class _SlotSelectorPill extends StatelessWidget {
 
   final int currentSlot;
   final Color accent;
-  final Future<void> Function(int) onSelect;
+  final Future<void> Function(LightChorusPart) onSelect;
 
   @override
   Widget build(BuildContext context) {
-    final slots = client.availableSlots;
-    final currentColor = client.colorForSlot(currentSlot);
-    final partLabel = currentColor?.voicePart;
+    final parts = client.availableParts;
+    final currentPart = client.partForSlot(currentSlot);
+    final partLabel = currentPart?.label;
     final isUnassigned = currentSlot == 0;
     final pillLabel =
         isUnassigned
-            ? 'Select slot'
+            ? 'Select part'
             : partLabel == null
             ? 'Slot $currentSlot'
-            : 'Slot $currentSlot · $partLabel';
-    return PopupMenuButton<int>(
-      onSelected: (slot) => unawaited(onSelect(slot)),
+            : '$partLabel · Slot $currentSlot';
+    return PopupMenuButton<LightChorusPart>(
+      onSelected: (part) => unawaited(onSelect(part)),
       color: Colors.black.withValues(alpha: 0.9),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       itemBuilder: (context) {
-        return slots.map((slot) {
-          final color = client.colorForSlot(slot);
-          final description = color?.voicePart ?? 'Unassigned';
-          final segments = <String>['Slot $slot'];
-          segments.add(description);
-          return PopupMenuItem<int>(
-            value: slot,
+        return parts.map((part) {
+          final accentSlot = part.defaultSlot;
+          final segments = <String>[part.label];
+          segments.add('Slots ${part.slotSummary}');
+          return PopupMenuItem<LightChorusPart>(
+            value: part,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -265,7 +264,7 @@ class _SlotSelectorPill extends StatelessWidget {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: kSlotOutlineColors[slot] ?? Colors.white54,
+                    color: kSlotOutlineColors[accentSlot] ?? Colors.white54,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -743,14 +742,18 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     return _setBrightness(target);
   }
 
-  Future<void> _handleSlotSelected(int newSlot) async {
-    client.myIndex.value = newSlot;
+  Future<void> _handlePartSelected(LightChorusPart part) async {
+    final currentSlot = client.myIndex.value;
+    final nextSlot =
+        client.partForSlot(currentSlot) == part ? currentSlot : part.defaultSlot;
+    client.myIndex.value = nextSlot;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('lastSlot', newSlot);
+    await prefs.setInt('lastSlot', nextSlot);
+    await prefs.setString('lastPart', part.name);
     try {
       await flosc.OscListener.instance.announcePresence();
     } catch (e) {
-      debugPrint('[SlotSelect] Failed to announce updated slot: $e');
+      debugPrint('[PartSelect] Failed to announce updated part: $e');
     }
   }
 
@@ -787,7 +790,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                       child: _HeaderSection(
                         platform: platform,
                         onTitleTap: _handleTitleTap,
-                        onSlotSelected: _handleSlotSelected,
+                        onPartSelected: _handlePartSelected,
                         onRefreshConnection:
                             () => unawaited(_refreshConnection()),
                         refreshingConnection: _refreshingConnection,
@@ -802,7 +805,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Tap the Slot button above to activate your assigned number so the system knows where you are seated in the choir.',
+                              'Use the Part button above to choose your light-chorus staff. The exact seat slot can still be assigned from the macOS console when needed.',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: Colors.white70),
                             ),
