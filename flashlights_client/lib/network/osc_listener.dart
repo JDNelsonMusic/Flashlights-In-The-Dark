@@ -27,7 +27,7 @@ const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
 const int _legacySoundEventCount = 32;
 const bool kPrimerPlaybackEnabled = false;
-const Duration _lightSequenceTick = Duration(milliseconds: 75);
+const Duration _lightSequenceTick = Duration(milliseconds: 40);
 
 @visibleForTesting
 Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {

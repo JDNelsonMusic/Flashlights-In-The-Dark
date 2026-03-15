@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-15T02:38:12+00:00",
+  "generated": "2026-03-15T03:20:05+00:00",
   "sourceMusicXml": "flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
   "sourceTriggerManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
   "stageOrder": [
@@ -229,20 +229,21 @@
       "measure": 2,
       "position": "beat1",
       "scoreLabel": "M2, beat1",
-      "summary": "A strong forte shimmer courses left-to-right, hangs in the middle distance, then rebounds right-to-left.",
+      "summary": "A strong forte shimmer courses left-to-right, then measures 11\u201319 fracture into faster irregular cross-ensemble flashes before the rebound.",
       "scoreDynamics": "f",
       "designTags": [
         "double_sweep",
         "forte_shimmer",
-        "cross_stage"
+        "cross_stage",
+        "stochastic_middle_band"
       ],
       "availableWindowMs": 55882.353,
       "durationMs": 52529.412,
       "parts": {
         "soprano_l1": {
           "label": "Sop-L1",
-          "summary": "Opens the first bright sweep and reignites on the rebound.",
-          "motion": "left-right-left",
+          "summary": "Opens the first bright sweep, then breaks into fast left-biased stochastic flashes before reigniting.",
+          "motion": "left-right-stochastic-left",
           "peakLevel": 0.86,
           "durationMs": 52529.412,
           "keyframes": [
@@ -263,12 +264,40 @@
               "level": 0.22
             },
             {
-              "atMs": 25214.118,
-              "level": 0.36
+              "atMs": 21011.765,
+              "level": 0.12
             },
             {
-              "atMs": 32568.235,
-              "level": 0.18
+              "atMs": 23112.941,
+              "level": 0.58
+            },
+            {
+              "atMs": 24688.824,
+              "level": 0.08
+            },
+            {
+              "atMs": 27315.294,
+              "level": 0.66
+            },
+            {
+              "atMs": 28891.177,
+              "level": 0.1
+            },
+            {
+              "atMs": 31517.647,
+              "level": 0.5
+            },
+            {
+              "atMs": 33093.53,
+              "level": 0.08
+            },
+            {
+              "atMs": 35720.0,
+              "level": 0.72
+            },
+            {
+              "atMs": 37821.177,
+              "level": 0.12
             },
             {
               "atMs": 39922.353,
@@ -286,8 +315,8 @@
         },
         "soprano_l2": {
           "label": "Sop-L2",
-          "summary": "Tracks the first sweep while holding a brighter mid-span glow.",
-          "motion": "left-right-left",
+          "summary": "Tracks the first sweep, then interlocks with Sop-L1 in faster uneven upper-left flickers.",
+          "motion": "left-right-stochastic-left",
           "peakLevel": 0.82,
           "durationMs": 52529.412,
           "keyframes": [
@@ -308,12 +337,40 @@
               "level": 0.24
             },
             {
-              "atMs": 27315.294,
-              "level": 0.34
+              "atMs": 22062.353,
+              "level": 0.1
+            },
+            {
+              "atMs": 24163.53,
+              "level": 0.54
+            },
+            {
+              "atMs": 25739.412,
+              "level": 0.12
+            },
+            {
+              "atMs": 27840.588,
+              "level": 0.62
+            },
+            {
+              "atMs": 29941.765,
+              "level": 0.1
+            },
+            {
+              "atMs": 32042.941,
+              "level": 0.46
             },
             {
               "atMs": 34669.412,
-              "level": 0.2
+              "level": 0.14
+            },
+            {
+              "atMs": 37295.883,
+              "level": 0.68
+            },
+            {
+              "atMs": 39397.059,
+              "level": 0.12
             },
             {
               "atMs": 42023.53,
@@ -331,8 +388,8 @@
         },
         "tenor_l": {
           "label": "Ten-L",
-          "summary": "The center-left staff takes over the sustained shimmer.",
-          "motion": "central-sustain",
+          "summary": "The center-left staff becomes a restless engine of irregular flashes across measures 11\u201319.",
+          "motion": "central-stochastic",
           "peakLevel": 0.78,
           "durationMs": 52529.412,
           "keyframes": [
@@ -353,12 +410,44 @@
               "level": 0.26
             },
             {
-              "atMs": 29416.471,
-              "level": 0.3
+              "atMs": 21537.059,
+              "level": 0.14
             },
             {
-              "atMs": 36770.588,
-              "level": 0.18
+              "atMs": 23638.235,
+              "level": 0.6
+            },
+            {
+              "atMs": 25214.118,
+              "level": 0.08
+            },
+            {
+              "atMs": 26790.0,
+              "level": 0.74
+            },
+            {
+              "atMs": 28891.177,
+              "level": 0.12
+            },
+            {
+              "atMs": 30992.353,
+              "level": 0.52
+            },
+            {
+              "atMs": 33093.53,
+              "level": 0.08
+            },
+            {
+              "atMs": 35194.706,
+              "level": 0.7
+            },
+            {
+              "atMs": 37295.883,
+              "level": 0.1
+            },
+            {
+              "atMs": 39922.353,
+              "level": 0.56
             },
             {
               "atMs": 44124.706,
@@ -376,8 +465,8 @@
         },
         "bass_l": {
           "label": "Bass-L",
-          "summary": "Bass anchors the middle with the warmest, weightiest pulse.",
-          "motion": "center-anchor",
+          "summary": "Bass anchors the stochastic section with the deepest irregular weight.",
+          "motion": "center-stochastic",
           "peakLevel": 0.74,
           "durationMs": 52529.412,
           "keyframes": [
@@ -395,11 +484,35 @@
             },
             {
               "atMs": 22062.353,
-              "level": 0.28
+              "level": 0.18
             },
             {
-              "atMs": 31517.647,
-              "level": 0.26
+              "atMs": 24163.53,
+              "level": 0.58
+            },
+            {
+              "atMs": 26264.706,
+              "level": 0.1
+            },
+            {
+              "atMs": 28365.882,
+              "level": 0.72
+            },
+            {
+              "atMs": 30467.059,
+              "level": 0.12
+            },
+            {
+              "atMs": 32568.235,
+              "level": 0.48
+            },
+            {
+              "atMs": 34669.412,
+              "level": 0.08
+            },
+            {
+              "atMs": 36770.588,
+              "level": 0.64
             },
             {
               "atMs": 38871.765,
@@ -421,8 +534,8 @@
         },
         "alto_l2": {
           "label": "Alto-L2",
-          "summary": "Catches the end of the first sweep, then brightens earlier on the rebound.",
-          "motion": "rightward-receive",
+          "summary": "Receives the first sweep, then snaps into quick right-side irregular replies.",
+          "motion": "rightward-stochastic",
           "peakLevel": 0.8,
           "durationMs": 52529.412,
           "keyframes": [
@@ -439,16 +552,40 @@
               "level": 0.8
             },
             {
-              "atMs": 25214.118,
-              "level": 0.24
+              "atMs": 21011.765,
+              "level": 0.14
             },
             {
-              "atMs": 30467.059,
-              "level": 0.22
+              "atMs": 23638.235,
+              "level": 0.44
             },
             {
-              "atMs": 37821.177,
-              "level": 0.24
+              "atMs": 25739.412,
+              "level": 0.1
+            },
+            {
+              "atMs": 28891.177,
+              "level": 0.7
+            },
+            {
+              "atMs": 30992.353,
+              "level": 0.12
+            },
+            {
+              "atMs": 33618.824,
+              "level": 0.5
+            },
+            {
+              "atMs": 35720.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 38346.471,
+              "level": 0.68
+            },
+            {
+              "atMs": 40972.941,
+              "level": 0.16
             },
             {
               "atMs": 44124.706,
@@ -466,8 +603,8 @@
         },
         "alto_l1": {
           "label": "Alto-L1",
-          "summary": "The far-right edge receives the bright wave last, then launches the return sweep.",
-          "motion": "right-edge-rebound",
+          "summary": "The far-right edge receives the bright wave last, then throws back fast irregular sparks before the return sweep.",
+          "motion": "right-edge-stochastic-rebound",
           "peakLevel": 0.88,
           "durationMs": 52529.412,
           "keyframes": [
@@ -484,16 +621,36 @@
               "level": 0.88
             },
             {
-              "atMs": 27315.294,
-              "level": 0.2
+              "atMs": 22587.647,
+              "level": 0.12
             },
             {
-              "atMs": 29416.471,
-              "level": 0.18
+              "atMs": 24688.824,
+              "level": 0.52
             },
             {
-              "atMs": 35720.0,
-              "level": 0.34
+              "atMs": 26790.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 29941.765,
+              "level": 0.76
+            },
+            {
+              "atMs": 32042.941,
+              "level": 0.1
+            },
+            {
+              "atMs": 34669.412,
+              "level": 0.56
+            },
+            {
+              "atMs": 36770.588,
+              "level": 0.08
+            },
+            {
+              "atMs": 39397.059,
+              "level": 0.72
             },
             {
               "atMs": 40972.941,
@@ -2567,11 +2724,12 @@
       "measure": 115,
       "position": "beat1",
       "scoreLabel": "M115, beat1",
-      "summary": "The final section leaves only fragile pockets of light, peeling away from the center and dissolving into a long dark horizon.",
+      "summary": "From measure 115 onward, every light entrance is locked to actual light-chorus note onsets, dissolving only through score-synchronous rhythmic residue.",
       "scoreDynamics": "p / pp final release",
       "designTags": [
         "finale",
-        "long_fade",
+        "note_synchronous",
+        "rhythmic_lock",
         "dissolve"
       ],
       "availableWindowMs": 116078.665,
@@ -2579,9 +2737,9 @@
       "parts": {
         "soprano_l1": {
           "label": "Sop-L1",
-          "summary": "A last far-left ember returns briefly, then disappears into the final dark.",
-          "motion": "final-echo",
-          "peakLevel": 0.22,
+          "summary": "Every flash is locked to Sop-L1 note onsets, leaving a fragile upper-left residue.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.26,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2589,28 +2747,676 @@
               "level": 0.0
             },
             {
-              "atMs": 9800.0,
-              "level": 0.06
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 21560.0,
+              "atMs": 1666.686,
               "level": 0.22
             },
             {
-              "atMs": 37240.0,
-              "level": 0.08
+              "atMs": 1886.696,
+              "level": 0.084
             },
             {
-              "atMs": 60760.0,
-              "level": 0.04
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 78400.0,
-              "level": 0.1
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 90160.0,
-              "level": 0.03
+              "atMs": 3333.372,
+              "level": 0.26
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.099
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.22
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.084
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.22
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.084
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.22
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.084
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.22
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.084
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.22
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.084
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.22
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.084
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.22
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.084
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.26
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.099
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.26
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.099
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.22
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.084
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.26
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.099
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.22
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.084
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.22
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.084
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.22
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.084
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.22
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.084
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.22
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.084
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.22
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.084
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.22
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.084
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.22
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.084
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.26
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.099
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.22
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.084
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.22
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.084
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.22
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.084
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.22
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.084
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.26
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.099
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.22
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.084
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.26
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.099
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.22
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.084
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.26
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.099
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.22
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.084
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.26
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.099
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.26
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.099
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.22
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.084
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.26
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.099
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.26
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.099
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.26
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.099
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.26
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.099
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.26
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.099
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.26
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.099
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.26
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.099
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,
@@ -2620,9 +3426,9 @@
         },
         "soprano_l2": {
           "label": "Sop-L2",
-          "summary": "Upper-left glow lingers a little longer, but never grows again.",
-          "motion": "final-echo",
-          "peakLevel": 0.24,
+          "summary": "Sop-L2 answers strictly on its own entrances, never drifting off the score rhythm.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.28,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2630,28 +3436,676 @@
               "level": 0.0
             },
             {
-              "atMs": 7840.0,
-              "level": 0.08
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 19600.0,
+              "atMs": 1666.686,
               "level": 0.24
             },
             {
-              "atMs": 35280.0,
-              "level": 0.1
+              "atMs": 1886.696,
+              "level": 0.091
             },
             {
-              "atMs": 56840.0,
-              "level": 0.05
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 74480.0,
-              "level": 0.1
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 88200.0,
-              "level": 0.03
+              "atMs": 3333.372,
+              "level": 0.28
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.106
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.24
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.091
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.24
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.091
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.24
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.091
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.24
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.091
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.24
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.091
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.24
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.091
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.24
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.091
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.28
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.106
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.28
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.106
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.24
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.091
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.28
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.106
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.24
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.091
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.24
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.091
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.24
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.091
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.24
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.091
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.24
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.091
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.24
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.091
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.24
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.091
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.24
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.091
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.28
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.106
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.24
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.091
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.24
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.091
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.24
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.091
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.24
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.091
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.28
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.106
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.24
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.091
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.28
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.106
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.24
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.091
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.28
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.106
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.24
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.091
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.28
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.106
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.28
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.106
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.24
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.091
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.28
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.106
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.28
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.106
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.28
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.106
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.28
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.106
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.28
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.106
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.28
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.106
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.28
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.106
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,
@@ -2661,9 +4115,9 @@
         },
         "tenor_l": {
           "label": "Ten-L",
-          "summary": "Tenor preserves the central residue of the piece the longest.",
-          "motion": "center-residue",
-          "peakLevel": 0.28,
+          "summary": "Tenor keeps the strongest note-synchronous core through the final section.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.32,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2671,28 +4125,820 @@
               "level": 0.0
             },
             {
-              "atMs": 5880.0,
-              "level": 0.08
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 17640.0,
+              "atMs": 1666.686,
               "level": 0.28
             },
             {
-              "atMs": 33320.0,
-              "level": 0.12
+              "atMs": 1886.696,
+              "level": 0.106
             },
             {
-              "atMs": 52920.0,
-              "level": 0.06
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 70560.0,
-              "level": 0.12
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 86240.0,
-              "level": 0.03
+              "atMs": 3333.372,
+              "level": 0.32
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.122
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.28
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.106
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.28
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.106
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.28
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.106
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.28
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.106
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.28
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.106
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.28
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.106
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.28
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.106
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.32
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.122
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.32
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.122
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.28
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.106
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.32
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.122
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 26648.65,
+              "level": 0.0
+            },
+            {
+              "atMs": 26666.682,
+              "level": 0.28
+            },
+            {
+              "atMs": 26886.692,
+              "level": 0.106
+            },
+            {
+              "atMs": 27186.67,
+              "level": 0.0
+            },
+            {
+              "atMs": 27898.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 27916.672,
+              "level": 0.28
+            },
+            {
+              "atMs": 28136.682,
+              "level": 0.106
+            },
+            {
+              "atMs": 28436.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 29982.022,
+              "level": 0.0
+            },
+            {
+              "atMs": 29999.956,
+              "level": 0.32
+            },
+            {
+              "atMs": 30219.966,
+              "level": 0.122
+            },
+            {
+              "atMs": 30520.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 32482.002,
+              "level": 0.0
+            },
+            {
+              "atMs": 32500.034,
+              "level": 0.32
+            },
+            {
+              "atMs": 32616.654,
+              "level": 0.122
+            },
+            {
+              "atMs": 32758.362,
+              "level": 0.0
+            },
+            {
+              "atMs": 32898.698,
+              "level": 0.0
+            },
+            {
+              "atMs": 32916.632,
+              "level": 0.28
+            },
+            {
+              "atMs": 33136.642,
+              "level": 0.106
+            },
+            {
+              "atMs": 33436.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 34148.688,
+              "level": 0.0
+            },
+            {
+              "atMs": 34166.622,
+              "level": 0.28
+            },
+            {
+              "atMs": 34386.632,
+              "level": 0.106
+            },
+            {
+              "atMs": 34686.708,
+              "level": 0.0
+            },
+            {
+              "atMs": 35815.374,
+              "level": 0.0
+            },
+            {
+              "atMs": 35833.308,
+              "level": 0.28
+            },
+            {
+              "atMs": 36053.318,
+              "level": 0.106
+            },
+            {
+              "atMs": 36353.296,
+              "level": 0.0
+            },
+            {
+              "atMs": 38315.354,
+              "level": 0.0
+            },
+            {
+              "atMs": 38333.288,
+              "level": 0.28
+            },
+            {
+              "atMs": 38553.298,
+              "level": 0.106
+            },
+            {
+              "atMs": 38850.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 39148.648,
+              "level": 0.0
+            },
+            {
+              "atMs": 39166.68,
+              "level": 0.28
+            },
+            {
+              "atMs": 39386.69,
+              "level": 0.106
+            },
+            {
+              "atMs": 39686.668,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.28
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.106
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.28
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.106
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.28
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.106
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.28
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.106
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.28
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.106
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.28
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.106
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.28
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.106
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.28
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.106
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.32
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.122
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.28
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.106
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.28
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.106
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.28
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.106
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.28
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.106
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.32
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.122
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.28
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.106
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.32
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.122
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.28
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.106
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.32
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.122
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.28
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.106
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.32
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.122
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.32
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.122
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.28
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.106
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.32
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.122
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.32
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.122
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.32
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.122
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.32
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.122
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.32
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.122
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.32
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.122
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.32
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.122
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,
@@ -2702,9 +4948,9 @@
         },
         "bass_l": {
           "label": "Bass-L",
-          "summary": "Bass gives the final long low ember before the piece finally empties out.",
-          "motion": "center-residue",
-          "peakLevel": 0.3,
+          "summary": "Bass traces each onset with the deepest synchronized low flash.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.34,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2712,28 +4958,820 @@
               "level": 0.0
             },
             {
-              "atMs": 7840.0,
-              "level": 0.1
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 19600.0,
+              "atMs": 1666.686,
               "level": 0.3
             },
             {
-              "atMs": 39200.0,
-              "level": 0.12
+              "atMs": 1886.696,
+              "level": 0.114
             },
             {
-              "atMs": 58800.0,
-              "level": 0.05
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 76440.0,
-              "level": 0.1
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 90160.0,
-              "level": 0.02
+              "atMs": 3333.372,
+              "level": 0.34
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.129
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.3
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.114
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.3
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.114
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.3
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.114
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.3
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.114
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.3
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.114
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.3
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.114
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.3
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.114
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.34
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.129
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.34
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.129
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.3
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.114
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.34
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.129
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 26648.65,
+              "level": 0.0
+            },
+            {
+              "atMs": 26666.682,
+              "level": 0.3
+            },
+            {
+              "atMs": 26886.692,
+              "level": 0.114
+            },
+            {
+              "atMs": 27186.67,
+              "level": 0.0
+            },
+            {
+              "atMs": 27898.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 27916.672,
+              "level": 0.3
+            },
+            {
+              "atMs": 28136.682,
+              "level": 0.114
+            },
+            {
+              "atMs": 28436.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 29982.022,
+              "level": 0.0
+            },
+            {
+              "atMs": 29999.956,
+              "level": 0.34
+            },
+            {
+              "atMs": 30219.966,
+              "level": 0.129
+            },
+            {
+              "atMs": 30520.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 32482.002,
+              "level": 0.0
+            },
+            {
+              "atMs": 32500.034,
+              "level": 0.34
+            },
+            {
+              "atMs": 32616.654,
+              "level": 0.129
+            },
+            {
+              "atMs": 32758.362,
+              "level": 0.0
+            },
+            {
+              "atMs": 32898.698,
+              "level": 0.0
+            },
+            {
+              "atMs": 32916.632,
+              "level": 0.3
+            },
+            {
+              "atMs": 33136.642,
+              "level": 0.114
+            },
+            {
+              "atMs": 33436.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 34148.688,
+              "level": 0.0
+            },
+            {
+              "atMs": 34166.622,
+              "level": 0.3
+            },
+            {
+              "atMs": 34386.632,
+              "level": 0.114
+            },
+            {
+              "atMs": 34686.708,
+              "level": 0.0
+            },
+            {
+              "atMs": 35815.374,
+              "level": 0.0
+            },
+            {
+              "atMs": 35833.308,
+              "level": 0.3
+            },
+            {
+              "atMs": 36053.318,
+              "level": 0.114
+            },
+            {
+              "atMs": 36353.296,
+              "level": 0.0
+            },
+            {
+              "atMs": 38315.354,
+              "level": 0.0
+            },
+            {
+              "atMs": 38333.288,
+              "level": 0.3
+            },
+            {
+              "atMs": 38553.298,
+              "level": 0.114
+            },
+            {
+              "atMs": 38850.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 39148.648,
+              "level": 0.0
+            },
+            {
+              "atMs": 39166.68,
+              "level": 0.3
+            },
+            {
+              "atMs": 39386.69,
+              "level": 0.114
+            },
+            {
+              "atMs": 39686.668,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.3
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.114
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.3
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.114
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.3
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.114
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.3
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.114
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.3
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.114
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.3
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.114
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.3
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.114
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.3
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.114
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.34
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.129
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.3
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.114
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.3
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.114
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.3
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.114
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.3
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.114
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.34
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.129
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.3
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.114
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.34
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.129
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.3
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.114
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.34
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.129
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.3
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.114
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.34
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.129
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.34
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.129
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.3
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.114
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.34
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.129
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.34
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.129
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.34
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.129
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.34
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.129
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.34
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.129
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.34
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.129
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.34
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.129
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,
@@ -2743,9 +5781,9 @@
         },
         "alto_l2": {
           "label": "Alto-L2",
-          "summary": "A faint right-middle recollection answers the center once more.",
-          "motion": "final-echo",
-          "peakLevel": 0.2,
+          "summary": "Alto-L2 articulates the ending as a right-middle rhythmic echo.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.24,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2753,28 +5791,820 @@
               "level": 0.0
             },
             {
-              "atMs": 17640.0,
-              "level": 0.04
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 29400.0,
+              "atMs": 1666.686,
               "level": 0.2
             },
             {
-              "atMs": 47040.0,
-              "level": 0.08
+              "atMs": 1886.696,
+              "level": 0.076
             },
             {
-              "atMs": 68600.0,
-              "level": 0.04
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 84280.0,
-              "level": 0.08
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 94080.0,
-              "level": 0.02
+              "atMs": 3333.372,
+              "level": 0.24
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.091
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.2
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.076
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.2
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.076
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.2
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.076
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.2
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.076
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.2
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.076
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.2
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.076
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.2
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.076
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.24
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.091
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.24
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.091
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.2
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.076
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.24
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.091
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 26648.65,
+              "level": 0.0
+            },
+            {
+              "atMs": 26666.682,
+              "level": 0.2
+            },
+            {
+              "atMs": 26886.692,
+              "level": 0.076
+            },
+            {
+              "atMs": 27186.67,
+              "level": 0.0
+            },
+            {
+              "atMs": 27898.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 27916.672,
+              "level": 0.2
+            },
+            {
+              "atMs": 28136.682,
+              "level": 0.076
+            },
+            {
+              "atMs": 28436.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 29982.022,
+              "level": 0.0
+            },
+            {
+              "atMs": 29999.956,
+              "level": 0.24
+            },
+            {
+              "atMs": 30219.966,
+              "level": 0.091
+            },
+            {
+              "atMs": 30520.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 32482.002,
+              "level": 0.0
+            },
+            {
+              "atMs": 32500.034,
+              "level": 0.24
+            },
+            {
+              "atMs": 32616.654,
+              "level": 0.091
+            },
+            {
+              "atMs": 32758.362,
+              "level": 0.0
+            },
+            {
+              "atMs": 32898.698,
+              "level": 0.0
+            },
+            {
+              "atMs": 32916.632,
+              "level": 0.2
+            },
+            {
+              "atMs": 33136.642,
+              "level": 0.076
+            },
+            {
+              "atMs": 33436.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 34148.688,
+              "level": 0.0
+            },
+            {
+              "atMs": 34166.622,
+              "level": 0.2
+            },
+            {
+              "atMs": 34386.632,
+              "level": 0.076
+            },
+            {
+              "atMs": 34686.708,
+              "level": 0.0
+            },
+            {
+              "atMs": 35815.374,
+              "level": 0.0
+            },
+            {
+              "atMs": 35833.308,
+              "level": 0.2
+            },
+            {
+              "atMs": 36053.318,
+              "level": 0.076
+            },
+            {
+              "atMs": 36353.296,
+              "level": 0.0
+            },
+            {
+              "atMs": 38315.354,
+              "level": 0.0
+            },
+            {
+              "atMs": 38333.288,
+              "level": 0.2
+            },
+            {
+              "atMs": 38553.298,
+              "level": 0.076
+            },
+            {
+              "atMs": 38850.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 39148.648,
+              "level": 0.0
+            },
+            {
+              "atMs": 39166.68,
+              "level": 0.2
+            },
+            {
+              "atMs": 39386.69,
+              "level": 0.076
+            },
+            {
+              "atMs": 39686.668,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.2
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.076
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.2
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.076
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.2
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.076
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.2
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.076
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.2
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.076
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.2
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.076
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.2
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.076
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.2
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.076
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.24
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.091
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.2
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.076
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.2
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.076
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.2
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.076
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.2
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.076
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.24
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.091
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.2
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.076
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.24
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.091
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.2
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.076
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.24
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.091
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.2
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.076
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.24
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.091
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.24
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.091
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.2
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.076
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.24
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.091
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.24
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.091
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.24
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.091
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.24
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.091
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.24
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.091
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.24
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.091
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.24
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.091
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,
@@ -2784,9 +6614,9 @@
         },
         "alto_l1": {
           "label": "Alto-L1",
-          "summary": "The far-right edge is reduced to the faintest last glimmer.",
-          "motion": "final-echo",
-          "peakLevel": 0.16,
+          "summary": "Alto-L1 remains the faintest note-synchronous edge of the final fade.",
+          "motion": "note-synchronous",
+          "peakLevel": 0.22,
           "durationMs": 98000.0,
           "keyframes": [
             {
@@ -2794,28 +6624,820 @@
               "level": 0.0
             },
             {
-              "atMs": 25480.0,
-              "level": 0.03
+              "atMs": 1648.654,
+              "level": 0.0
             },
             {
-              "atMs": 37240.0,
-              "level": 0.16
+              "atMs": 1666.686,
+              "level": 0.18
             },
             {
-              "atMs": 54880.0,
-              "level": 0.06
+              "atMs": 1886.696,
+              "level": 0.068
             },
             {
-              "atMs": 74480.0,
-              "level": 0.03
+              "atMs": 2186.674,
+              "level": 0.0
             },
             {
-              "atMs": 88200.0,
-              "level": 0.06
+              "atMs": 3315.34,
+              "level": 0.0
             },
             {
-              "atMs": 96040.0,
-              "level": 0.01
+              "atMs": 3333.372,
+              "level": 0.22
+            },
+            {
+              "atMs": 3553.284,
+              "level": 0.084
+            },
+            {
+              "atMs": 3850.028,
+              "level": 0.0
+            },
+            {
+              "atMs": 4148.634,
+              "level": 0.0
+            },
+            {
+              "atMs": 4166.666,
+              "level": 0.18
+            },
+            {
+              "atMs": 4386.676,
+              "level": 0.068
+            },
+            {
+              "atMs": 4683.322,
+              "level": 0.0
+            },
+            {
+              "atMs": 4982.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 4999.96,
+              "level": 0.18
+            },
+            {
+              "atMs": 5219.97,
+              "level": 0.068
+            },
+            {
+              "atMs": 5520.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 8315.3,
+              "level": 0.0
+            },
+            {
+              "atMs": 8333.332,
+              "level": 0.18
+            },
+            {
+              "atMs": 8553.342,
+              "level": 0.068
+            },
+            {
+              "atMs": 8853.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 9981.986,
+              "level": 0.0
+            },
+            {
+              "atMs": 10000.018,
+              "level": 0.18
+            },
+            {
+              "atMs": 10220.028,
+              "level": 0.068
+            },
+            {
+              "atMs": 10520.006,
+              "level": 0.0
+            },
+            {
+              "atMs": 13315.358,
+              "level": 0.0
+            },
+            {
+              "atMs": 13333.292,
+              "level": 0.18
+            },
+            {
+              "atMs": 13553.302,
+              "level": 0.068
+            },
+            {
+              "atMs": 13853.378,
+              "level": 0.0
+            },
+            {
+              "atMs": 15815.338,
+              "level": 0.0
+            },
+            {
+              "atMs": 15833.37,
+              "level": 0.18
+            },
+            {
+              "atMs": 16053.38,
+              "level": 0.068
+            },
+            {
+              "atMs": 16350.026,
+              "level": 0.0
+            },
+            {
+              "atMs": 16648.632,
+              "level": 0.0
+            },
+            {
+              "atMs": 16666.664,
+              "level": 0.18
+            },
+            {
+              "atMs": 16886.674,
+              "level": 0.068
+            },
+            {
+              "atMs": 17183.32,
+              "level": 0.0
+            },
+            {
+              "atMs": 17482.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 17499.958,
+              "level": 0.22
+            },
+            {
+              "atMs": 17719.968,
+              "level": 0.084
+            },
+            {
+              "atMs": 18020.044,
+              "level": 0.0
+            },
+            {
+              "atMs": 19982.004,
+              "level": 0.0
+            },
+            {
+              "atMs": 20000.036,
+              "level": 0.22
+            },
+            {
+              "atMs": 20220.046,
+              "level": 0.084
+            },
+            {
+              "atMs": 20520.024,
+              "level": 0.0
+            },
+            {
+              "atMs": 21648.69,
+              "level": 0.0
+            },
+            {
+              "atMs": 21666.624,
+              "level": 0.18
+            },
+            {
+              "atMs": 21886.634,
+              "level": 0.068
+            },
+            {
+              "atMs": 22186.71,
+              "level": 0.0
+            },
+            {
+              "atMs": 24981.964,
+              "level": 0.0
+            },
+            {
+              "atMs": 24999.996,
+              "level": 0.22
+            },
+            {
+              "atMs": 25220.006,
+              "level": 0.084
+            },
+            {
+              "atMs": 25519.984,
+              "level": 0.0
+            },
+            {
+              "atMs": 26648.65,
+              "level": 0.0
+            },
+            {
+              "atMs": 26666.682,
+              "level": 0.18
+            },
+            {
+              "atMs": 26886.692,
+              "level": 0.068
+            },
+            {
+              "atMs": 27186.67,
+              "level": 0.0
+            },
+            {
+              "atMs": 27898.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 27916.672,
+              "level": 0.18
+            },
+            {
+              "atMs": 28136.682,
+              "level": 0.068
+            },
+            {
+              "atMs": 28436.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 29982.022,
+              "level": 0.0
+            },
+            {
+              "atMs": 29999.956,
+              "level": 0.22
+            },
+            {
+              "atMs": 30219.966,
+              "level": 0.084
+            },
+            {
+              "atMs": 30520.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 32482.002,
+              "level": 0.0
+            },
+            {
+              "atMs": 32500.034,
+              "level": 0.22
+            },
+            {
+              "atMs": 32616.654,
+              "level": 0.084
+            },
+            {
+              "atMs": 32758.362,
+              "level": 0.0
+            },
+            {
+              "atMs": 32898.698,
+              "level": 0.0
+            },
+            {
+              "atMs": 32916.632,
+              "level": 0.18
+            },
+            {
+              "atMs": 33136.642,
+              "level": 0.068
+            },
+            {
+              "atMs": 33436.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 34148.688,
+              "level": 0.0
+            },
+            {
+              "atMs": 34166.622,
+              "level": 0.18
+            },
+            {
+              "atMs": 34386.632,
+              "level": 0.068
+            },
+            {
+              "atMs": 34686.708,
+              "level": 0.0
+            },
+            {
+              "atMs": 35815.374,
+              "level": 0.0
+            },
+            {
+              "atMs": 35833.308,
+              "level": 0.18
+            },
+            {
+              "atMs": 36053.318,
+              "level": 0.068
+            },
+            {
+              "atMs": 36353.296,
+              "level": 0.0
+            },
+            {
+              "atMs": 38315.354,
+              "level": 0.0
+            },
+            {
+              "atMs": 38333.288,
+              "level": 0.18
+            },
+            {
+              "atMs": 38553.298,
+              "level": 0.068
+            },
+            {
+              "atMs": 38850.042,
+              "level": 0.0
+            },
+            {
+              "atMs": 39148.648,
+              "level": 0.0
+            },
+            {
+              "atMs": 39166.68,
+              "level": 0.18
+            },
+            {
+              "atMs": 39386.69,
+              "level": 0.068
+            },
+            {
+              "atMs": 39686.668,
+              "level": 0.0
+            },
+            {
+              "atMs": 41232.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 41249.964,
+              "level": 0.18
+            },
+            {
+              "atMs": 41469.974,
+              "level": 0.068
+            },
+            {
+              "atMs": 41769.952,
+              "level": 0.0
+            },
+            {
+              "atMs": 42898.716,
+              "level": 0.0
+            },
+            {
+              "atMs": 42916.65,
+              "level": 0.18
+            },
+            {
+              "atMs": 43136.66,
+              "level": 0.068
+            },
+            {
+              "atMs": 43436.638,
+              "level": 0.0
+            },
+            {
+              "atMs": 45398.696,
+              "level": 0.0
+            },
+            {
+              "atMs": 45416.63,
+              "level": 0.18
+            },
+            {
+              "atMs": 45636.64,
+              "level": 0.068
+            },
+            {
+              "atMs": 45933.286,
+              "level": 0.0
+            },
+            {
+              "atMs": 46231.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 46250.022,
+              "level": 0.18
+            },
+            {
+              "atMs": 46470.032,
+              "level": 0.068
+            },
+            {
+              "atMs": 46770.01,
+              "level": 0.0
+            },
+            {
+              "atMs": 48731.97,
+              "level": 0.0
+            },
+            {
+              "atMs": 48750.002,
+              "level": 0.18
+            },
+            {
+              "atMs": 48970.012,
+              "level": 0.068
+            },
+            {
+              "atMs": 49269.99,
+              "level": 0.0
+            },
+            {
+              "atMs": 52065.342,
+              "level": 0.0
+            },
+            {
+              "atMs": 52083.374,
+              "level": 0.18
+            },
+            {
+              "atMs": 52303.286,
+              "level": 0.068
+            },
+            {
+              "atMs": 52600.03,
+              "level": 0.0
+            },
+            {
+              "atMs": 52898.636,
+              "level": 0.0
+            },
+            {
+              "atMs": 52916.668,
+              "level": 0.18
+            },
+            {
+              "atMs": 53136.678,
+              "level": 0.068
+            },
+            {
+              "atMs": 53436.656,
+              "level": 0.0
+            },
+            {
+              "atMs": 54148.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 54166.658,
+              "level": 0.18
+            },
+            {
+              "atMs": 54386.668,
+              "level": 0.068
+            },
+            {
+              "atMs": 54683.314,
+              "level": 0.0
+            },
+            {
+              "atMs": 54982.018,
+              "level": 0.0
+            },
+            {
+              "atMs": 54999.952,
+              "level": 0.22
+            },
+            {
+              "atMs": 55219.962,
+              "level": 0.084
+            },
+            {
+              "atMs": 55520.038,
+              "level": 0.0
+            },
+            {
+              "atMs": 58731.988,
+              "level": 0.0
+            },
+            {
+              "atMs": 58750.02,
+              "level": 0.18
+            },
+            {
+              "atMs": 58970.03,
+              "level": 0.068
+            },
+            {
+              "atMs": 59270.008,
+              "level": 0.0
+            },
+            {
+              "atMs": 60815.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 60833.304,
+              "level": 0.18
+            },
+            {
+              "atMs": 61053.314,
+              "level": 0.068
+            },
+            {
+              "atMs": 61353.292,
+              "level": 0.0
+            },
+            {
+              "atMs": 62065.36,
+              "level": 0.0
+            },
+            {
+              "atMs": 62083.294,
+              "level": 0.18
+            },
+            {
+              "atMs": 62303.304,
+              "level": 0.068
+            },
+            {
+              "atMs": 62603.38,
+              "level": 0.0
+            },
+            {
+              "atMs": 63732.046,
+              "level": 0.0
+            },
+            {
+              "atMs": 63749.98,
+              "level": 0.18
+            },
+            {
+              "atMs": 63969.99,
+              "level": 0.068
+            },
+            {
+              "atMs": 64269.968,
+              "level": 0.0
+            },
+            {
+              "atMs": 64982.036,
+              "level": 0.0
+            },
+            {
+              "atMs": 64999.97,
+              "level": 0.22
+            },
+            {
+              "atMs": 65219.98,
+              "level": 0.084
+            },
+            {
+              "atMs": 65516.626,
+              "level": 0.0
+            },
+            {
+              "atMs": 65815.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 65833.362,
+              "level": 0.18
+            },
+            {
+              "atMs": 66053.372,
+              "level": 0.068
+            },
+            {
+              "atMs": 66353.35,
+              "level": 0.0
+            },
+            {
+              "atMs": 67482.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 67500.048,
+              "level": 0.22
+            },
+            {
+              "atMs": 67719.96,
+              "level": 0.084
+            },
+            {
+              "atMs": 68016.704,
+              "level": 0.0
+            },
+            {
+              "atMs": 68315.31,
+              "level": 0.0
+            },
+            {
+              "atMs": 68333.342,
+              "level": 0.18
+            },
+            {
+              "atMs": 68553.352,
+              "level": 0.068
+            },
+            {
+              "atMs": 68853.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 69981.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 70000.028,
+              "level": 0.22
+            },
+            {
+              "atMs": 70220.038,
+              "level": 0.084
+            },
+            {
+              "atMs": 70520.016,
+              "level": 0.0
+            },
+            {
+              "atMs": 71648.682,
+              "level": 0.0
+            },
+            {
+              "atMs": 71666.714,
+              "level": 0.18
+            },
+            {
+              "atMs": 71886.626,
+              "level": 0.068
+            },
+            {
+              "atMs": 72183.37,
+              "level": 0.0
+            },
+            {
+              "atMs": 72481.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 72500.008,
+              "level": 0.22
+            },
+            {
+              "atMs": 72720.018,
+              "level": 0.084
+            },
+            {
+              "atMs": 73019.996,
+              "level": 0.0
+            },
+            {
+              "atMs": 74981.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 74999.988,
+              "level": 0.22
+            },
+            {
+              "atMs": 75219.998,
+              "level": 0.084
+            },
+            {
+              "atMs": 75519.976,
+              "level": 0.0
+            },
+            {
+              "atMs": 76648.642,
+              "level": 0.0
+            },
+            {
+              "atMs": 76666.674,
+              "level": 0.18
+            },
+            {
+              "atMs": 76886.684,
+              "level": 0.068
+            },
+            {
+              "atMs": 77183.33,
+              "level": 0.0
+            },
+            {
+              "atMs": 77482.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 77499.968,
+              "level": 0.22
+            },
+            {
+              "atMs": 77719.978,
+              "level": 0.084
+            },
+            {
+              "atMs": 78019.956,
+              "level": 0.0
+            },
+            {
+              "atMs": 79982.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 80000.046,
+              "level": 0.22
+            },
+            {
+              "atMs": 80219.958,
+              "level": 0.084
+            },
+            {
+              "atMs": 80520.034,
+              "level": 0.0
+            },
+            {
+              "atMs": 82481.994,
+              "level": 0.0
+            },
+            {
+              "atMs": 82500.026,
+              "level": 0.22
+            },
+            {
+              "atMs": 82720.036,
+              "level": 0.084
+            },
+            {
+              "atMs": 83020.014,
+              "level": 0.0
+            },
+            {
+              "atMs": 84148.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 84166.712,
+              "level": 0.22
+            },
+            {
+              "atMs": 84386.624,
+              "level": 0.084
+            },
+            {
+              "atMs": 84686.7,
+              "level": 0.0
+            },
+            {
+              "atMs": 86648.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 86666.692,
+              "level": 0.22
+            },
+            {
+              "atMs": 86886.702,
+              "level": 0.084
+            },
+            {
+              "atMs": 87186.68,
+              "level": 0.0
+            },
+            {
+              "atMs": 89148.64,
+              "level": 0.0
+            },
+            {
+              "atMs": 89166.672,
+              "level": 0.22
+            },
+            {
+              "atMs": 89386.682,
+              "level": 0.084
+            },
+            {
+              "atMs": 89686.66,
+              "level": 0.0
+            },
+            {
+              "atMs": 91648.62,
+              "level": 0.0
+            },
+            {
+              "atMs": 91666.652,
+              "level": 0.22
+            },
+            {
+              "atMs": 91886.662,
+              "level": 0.084
+            },
+            {
+              "atMs": 92186.64,
+              "level": 0.0
             },
             {
               "atMs": 98000.0,

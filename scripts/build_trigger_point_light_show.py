@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+import xml.etree.ElementTree as ET
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -43,6 +44,33 @@ PART_LABELS = {
     "bass_l": "Bass-L",
     "alto_l2": "Alto-L2",
     "alto_l1": "Alto-L1",
+}
+
+TP12_FIXED_DURATION_MS = 98000.0
+TP12_TEMPO_BPM = 72.0
+TP12_VOICE_MAP = {
+    "soprano_l1": ("P4", "1"),
+    "soprano_l2": ("P4", "2"),
+    "alto_l1": ("P5", "1"),
+    "alto_l2": ("P5", "2"),
+    "tenor_l": ("P6", "1"),
+    "bass_l": ("P6", "2"),
+}
+TP12_BASE_LEVELS = {
+    "soprano_l1": 0.22,
+    "soprano_l2": 0.24,
+    "tenor_l": 0.28,
+    "bass_l": 0.30,
+    "alto_l2": 0.20,
+    "alto_l1": 0.18,
+}
+TP12_SUMMARIES = {
+    "soprano_l1": "Every flash is locked to Sop-L1 note onsets, leaving a fragile upper-left residue.",
+    "soprano_l2": "Sop-L2 answers strictly on its own entrances, never drifting off the score rhythm.",
+    "tenor_l": "Tenor keeps the strongest note-synchronous core through the final section.",
+    "bass_l": "Bass traces each onset with the deepest synchronized low flash.",
+    "alto_l2": "Alto-L2 articulates the ending as a right-middle rhythmic echo.",
+    "alto_l1": "Alto-L1 remains the faintest note-synchronous edge of the final fade.",
 }
 
 
@@ -78,6 +106,123 @@ def _scale_points(duration_ms: float, points: list[tuple[float, float]]) -> list
     else:
         keyframes[-1]["level"] = 0.0
     return keyframes
+
+
+def _dedupe_fraction_points(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    deduped: dict[float, float] = {}
+    for fraction, level in sorted(points, key=lambda item: item[0]):
+        key = round(fraction, 6)
+        deduped[key] = max(level, deduped.get(key, 0.0))
+    return [(fraction, deduped[fraction]) for fraction in sorted(deduped)]
+
+
+def _collect_tp12_voice_onsets() -> dict[str, list[dict[str, float | bool]]]:
+    root = ET.parse(MUSICXML_PATH).getroot()
+    parts = {part.attrib["id"]: part for part in root.findall("part")}
+    result: dict[str, list[dict[str, float | bool]]] = {}
+    ms_per_beat = 60000.0 / TP12_TEMPO_BPM
+
+    for part_key, (part_id, target_voice) in TP12_VOICE_MAP.items():
+        part = parts[part_id]
+        current_divisions = 1
+        beats_since_115 = 0.0
+        captured: list[dict[str, float | bool]] = []
+
+        for measure in part.findall("measure"):
+            measure_number = int(measure.attrib["number"])
+            attrs = measure.find("attributes")
+            if attrs is not None and attrs.findtext("divisions"):
+                current_divisions = int(attrs.findtext("divisions"))
+
+            if measure_number < 115:
+                continue
+
+            position_divisions = 0
+            max_position_divisions = 0
+            last_note_onset_divisions = 0
+
+            for child in measure:
+                if child.tag == "attributes":
+                    if child.findtext("divisions"):
+                        current_divisions = int(child.findtext("divisions"))
+                    continue
+
+                if child.tag == "backup":
+                    position_divisions -= int(child.findtext("duration", "0"))
+                    continue
+
+                if child.tag == "forward":
+                    position_divisions += int(child.findtext("duration", "0"))
+                    max_position_divisions = max(max_position_divisions, position_divisions)
+                    continue
+
+                if child.tag != "note":
+                    continue
+
+                duration = int(child.findtext("duration", "0"))
+                is_chord = child.find("chord") is not None
+                onset_divisions = last_note_onset_divisions if is_chord else position_divisions
+                voice = child.findtext("voice", "1")
+                is_rest = child.find("rest") is not None
+
+                if voice == target_voice and not is_rest and not is_chord:
+                    onset_beats = beats_since_115 + (onset_divisions / current_divisions)
+                    captured.append(
+                        {
+                            "onsetMs": round(onset_beats * ms_per_beat, 3),
+                            "measureDownbeat": onset_divisions == 0,
+                        }
+                    )
+
+                if not is_chord:
+                    last_note_onset_divisions = position_divisions
+                    position_divisions += duration
+                    max_position_divisions = max(max_position_divisions, position_divisions)
+
+            beats_since_115 += max_position_divisions / current_divisions
+
+        result[part_key] = captured
+
+    return result
+
+
+def _build_tp12_parts() -> dict[str, PartPlan]:
+    onset_map = _collect_tp12_voice_onsets()
+    parts: dict[str, PartPlan] = {}
+
+    for part_key in PART_ORDER:
+        records = onset_map[part_key]
+        base_peak = TP12_BASE_LEVELS[part_key]
+        points: list[tuple[float, float]] = [(0.0, 0.0)]
+
+        for index, record in enumerate(records):
+            onset_ms = float(record["onsetMs"])
+            measure_downbeat = bool(record["measureDownbeat"])
+            next_onset_ms = (
+                float(records[index + 1]["onsetMs"])
+                if index + 1 < len(records)
+                else TP12_FIXED_DURATION_MS
+            )
+            gap_ms = max(180.0, next_onset_ms - onset_ms)
+            peak_level = min(base_peak + (0.04 if measure_downbeat else 0.0), 0.34)
+            tail_level = round(peak_level * 0.38, 3)
+            settle_ms = min(gap_ms * 0.28, 220.0)
+            release_ms = min(gap_ms * 0.62, 520.0)
+            pre_ms = max(0.0, onset_ms - 18.0)
+            points.append((pre_ms / TP12_FIXED_DURATION_MS, 0.0))
+            points.append((onset_ms / TP12_FIXED_DURATION_MS, peak_level))
+            points.append((min(TP12_FIXED_DURATION_MS, onset_ms + settle_ms) / TP12_FIXED_DURATION_MS, tail_level))
+            points.append((min(TP12_FIXED_DURATION_MS, onset_ms + release_ms) / TP12_FIXED_DURATION_MS, 0.0))
+
+        normalised = _dedupe_fraction_points(points)
+        parts[part_key] = PartPlan(
+            summary=TP12_SUMMARIES[part_key],
+            motion="note-synchronous",
+            peak_level=round(max(level for _, level in normalised), 3),
+            points=normalised,
+        )
+
+    return parts
 
 
 def _resolve_event_duration_ms(event_id: int, available_window_ms: float, plan: EventPlan) -> float:
@@ -135,47 +280,47 @@ def _build_event_plans() -> dict[int, EventPlan]:
             },
         ),
         2: EventPlan(
-            summary="A strong forte shimmer courses left-to-right, hangs in the middle distance, then rebounds right-to-left.",
+            summary="A strong forte shimmer courses left-to-right, then measures 11–19 fracture into faster irregular cross-ensemble flashes before the rebound.",
             score_dynamics="f",
-            design_tags=["double_sweep", "forte_shimmer", "cross_stage"],
+            design_tags=["double_sweep", "forte_shimmer", "cross_stage", "stochastic_middle_band"],
             duration_scale=0.94,
             fixed_duration_ms=None,
             parts={
                 "soprano_l1": PartPlan(
-                    summary="Opens the first bright sweep and reignites on the rebound.",
-                    motion="left-right-left",
+                    summary="Opens the first bright sweep, then breaks into fast left-biased stochastic flashes before reigniting.",
+                    motion="left-right-stochastic-left",
                     peak_level=0.86,
-                    points=[(0.00, 0.0), (0.05, 0.14), (0.14, 0.86), (0.28, 0.22), (0.48, 0.36), (0.62, 0.18), (0.76, 0.72), (0.90, 0.10), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.05, 0.14), (0.14, 0.86), (0.28, 0.22), (0.40, 0.12), (0.44, 0.58), (0.47, 0.08), (0.52, 0.66), (0.55, 0.10), (0.60, 0.50), (0.63, 0.08), (0.68, 0.72), (0.72, 0.12), (0.76, 0.72), (0.90, 0.10), (1.00, 0.0)],
                 ),
                 "soprano_l2": PartPlan(
-                    summary="Tracks the first sweep while holding a brighter mid-span glow.",
-                    motion="left-right-left",
+                    summary="Tracks the first sweep, then interlocks with Sop-L1 in faster uneven upper-left flickers.",
+                    motion="left-right-stochastic-left",
                     peak_level=0.82,
-                    points=[(0.00, 0.0), (0.08, 0.12), (0.18, 0.82), (0.32, 0.24), (0.52, 0.34), (0.66, 0.20), (0.80, 0.66), (0.92, 0.10), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.08, 0.12), (0.18, 0.82), (0.32, 0.24), (0.42, 0.10), (0.46, 0.54), (0.49, 0.12), (0.53, 0.62), (0.57, 0.10), (0.61, 0.46), (0.66, 0.14), (0.71, 0.68), (0.75, 0.12), (0.80, 0.66), (0.92, 0.10), (1.00, 0.0)],
                 ),
                 "tenor_l": PartPlan(
-                    summary="The center-left staff takes over the sustained shimmer.",
-                    motion="central-sustain",
+                    summary="The center-left staff becomes a restless engine of irregular flashes across measures 11–19.",
+                    motion="central-stochastic",
                     peak_level=0.78,
-                    points=[(0.00, 0.0), (0.12, 0.10), (0.24, 0.78), (0.38, 0.26), (0.56, 0.30), (0.70, 0.18), (0.84, 0.58), (0.94, 0.08), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.12, 0.10), (0.24, 0.78), (0.38, 0.26), (0.41, 0.14), (0.45, 0.60), (0.48, 0.08), (0.51, 0.74), (0.55, 0.12), (0.59, 0.52), (0.63, 0.08), (0.67, 0.70), (0.71, 0.10), (0.76, 0.56), (0.84, 0.58), (0.94, 0.08), (1.00, 0.0)],
                 ),
                 "bass_l": PartPlan(
-                    summary="Bass anchors the middle with the warmest, weightiest pulse.",
-                    motion="center-anchor",
+                    summary="Bass anchors the stochastic section with the deepest irregular weight.",
+                    motion="center-stochastic",
                     peak_level=0.74,
-                    points=[(0.00, 0.0), (0.16, 0.08), (0.28, 0.74), (0.42, 0.28), (0.60, 0.26), (0.74, 0.18), (0.86, 0.54), (0.95, 0.07), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.16, 0.08), (0.28, 0.74), (0.42, 0.18), (0.46, 0.58), (0.50, 0.10), (0.54, 0.72), (0.58, 0.12), (0.62, 0.48), (0.66, 0.08), (0.70, 0.64), (0.74, 0.18), (0.86, 0.54), (0.95, 0.07), (1.00, 0.0)],
                 ),
                 "alto_l2": PartPlan(
-                    summary="Catches the end of the first sweep, then brightens earlier on the rebound.",
-                    motion="rightward-receive",
+                    summary="Receives the first sweep, then snaps into quick right-side irregular replies.",
+                    motion="rightward-stochastic",
                     peak_level=0.80,
-                    points=[(0.00, 0.0), (0.22, 0.08), (0.34, 0.80), (0.48, 0.24), (0.58, 0.22), (0.72, 0.24), (0.84, 0.60), (0.94, 0.08), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.22, 0.08), (0.34, 0.80), (0.40, 0.14), (0.45, 0.44), (0.49, 0.10), (0.55, 0.70), (0.59, 0.12), (0.64, 0.50), (0.68, 0.10), (0.73, 0.68), (0.78, 0.16), (0.84, 0.60), (0.94, 0.08), (1.00, 0.0)],
                 ),
                 "alto_l1": PartPlan(
-                    summary="The far-right edge receives the bright wave last, then launches the return sweep.",
-                    motion="right-edge-rebound",
+                    summary="The far-right edge receives the bright wave last, then throws back fast irregular sparks before the return sweep.",
+                    motion="right-edge-stochastic-rebound",
                     peak_level=0.88,
-                    points=[(0.00, 0.0), (0.26, 0.06), (0.38, 0.88), (0.52, 0.20), (0.56, 0.18), (0.68, 0.34), (0.78, 0.76), (0.92, 0.10), (1.00, 0.0)],
+                    points=[(0.00, 0.0), (0.26, 0.06), (0.38, 0.88), (0.43, 0.12), (0.47, 0.52), (0.51, 0.08), (0.57, 0.76), (0.61, 0.10), (0.66, 0.56), (0.70, 0.08), (0.75, 0.72), (0.78, 0.76), (0.92, 0.10), (1.00, 0.0)],
                 ),
             },
         ),
@@ -585,49 +730,12 @@ def _build_event_plans() -> dict[int, EventPlan]:
             },
         ),
         12: EventPlan(
-            summary="The final section leaves only fragile pockets of light, peeling away from the center and dissolving into a long dark horizon.",
+            summary="From measure 115 onward, every light entrance is locked to actual light-chorus note onsets, dissolving only through score-synchronous rhythmic residue.",
             score_dynamics="p / pp final release",
-            design_tags=["finale", "long_fade", "dissolve"],
+            design_tags=["finale", "note_synchronous", "rhythmic_lock", "dissolve"],
             duration_scale=None,
-            fixed_duration_ms=98000.0,
-            parts={
-                "soprano_l1": PartPlan(
-                    summary="A last far-left ember returns briefly, then disappears into the final dark.",
-                    motion="final-echo",
-                    peak_level=0.22,
-                    points=[(0.00, 0.0), (0.10, 0.06), (0.22, 0.22), (0.38, 0.08), (0.62, 0.04), (0.80, 0.10), (0.92, 0.03), (1.00, 0.0)],
-                ),
-                "soprano_l2": PartPlan(
-                    summary="Upper-left glow lingers a little longer, but never grows again.",
-                    motion="final-echo",
-                    peak_level=0.24,
-                    points=[(0.00, 0.0), (0.08, 0.08), (0.20, 0.24), (0.36, 0.10), (0.58, 0.05), (0.76, 0.10), (0.90, 0.03), (1.00, 0.0)],
-                ),
-                "tenor_l": PartPlan(
-                    summary="Tenor preserves the central residue of the piece the longest.",
-                    motion="center-residue",
-                    peak_level=0.28,
-                    points=[(0.00, 0.0), (0.06, 0.08), (0.18, 0.28), (0.34, 0.12), (0.54, 0.06), (0.72, 0.12), (0.88, 0.03), (1.00, 0.0)],
-                ),
-                "bass_l": PartPlan(
-                    summary="Bass gives the final long low ember before the piece finally empties out.",
-                    motion="center-residue",
-                    peak_level=0.30,
-                    points=[(0.00, 0.0), (0.08, 0.10), (0.20, 0.30), (0.40, 0.12), (0.60, 0.05), (0.78, 0.10), (0.92, 0.02), (1.00, 0.0)],
-                ),
-                "alto_l2": PartPlan(
-                    summary="A faint right-middle recollection answers the center once more.",
-                    motion="final-echo",
-                    peak_level=0.20,
-                    points=[(0.00, 0.0), (0.18, 0.04), (0.30, 0.20), (0.48, 0.08), (0.70, 0.04), (0.86, 0.08), (0.96, 0.02), (1.00, 0.0)],
-                ),
-                "alto_l1": PartPlan(
-                    summary="The far-right edge is reduced to the faintest last glimmer.",
-                    motion="final-echo",
-                    peak_level=0.16,
-                    points=[(0.00, 0.0), (0.26, 0.03), (0.38, 0.16), (0.56, 0.06), (0.76, 0.03), (0.90, 0.06), (0.98, 0.01), (1.00, 0.0)],
-                ),
-            },
+            fixed_duration_ms=TP12_FIXED_DURATION_MS,
+            parts=_build_tp12_parts(),
         ),
     }
 
