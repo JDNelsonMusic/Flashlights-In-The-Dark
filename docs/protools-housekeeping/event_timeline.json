@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-15T05:25:40+00:00",
+  "generated_utc": "2026-03-15T10:10:54+00:00",
   "sources": {
     "recipe_json": "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
     "musicxml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml"
@@ -1130,7 +1130,8 @@
           "fadeOutMs": 1176.471,
           "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 2,
@@ -1182,7 +1183,8 @@
           "fadeOutMs": 1176.471,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 3,
@@ -1232,7 +1234,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 4,
@@ -1282,7 +1285,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 5,
@@ -1332,7 +1336,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 8,
@@ -1382,7 +1387,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 11,
@@ -1432,7 +1438,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "electronicsByPart": {}
     },
     {
       "id": 12,
@@ -1485,7 +1492,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
         }
-      }
+      },
+      "electronicsByPart": {}
     }
   ],
   "clips": [

@@ -30,6 +30,9 @@ CUT_SOURCE_MP3 = (
     / "electronics"
     / "2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3"
 )
+MUSIQUE_CONCRETE_SOURCE_ROOT = (
+    ROOT / "audio" / "protools-exports" / "musique-concrete"
+)
 FULL_SCORE_XML = (
     ROOT
     / "Flashlights-ITD_EventRecipes_4_2026_0309"
@@ -59,6 +62,8 @@ RECIPE_COPY_PATHS = [
 FADE_IN_MS = 20.0
 FIRST_TRIGGER_START_MS = 2000.0
 CROSSFADE_BEATS = 1.0
+TP8_CONCRETE_FADE_IN_BEATS = 2.0
+TP8_CONCRETE_FADE_OUT_BEATS = 1.0
 
 
 @dataclass(frozen=True)
@@ -88,6 +93,14 @@ class ChoirVariant:
     pan_expression: str
 
 
+@dataclass(frozen=True)
+class PartConcreteVariant:
+    part_key: str
+    directory: str
+    source_name: str
+    label: str
+
+
 CHOIR_VARIANTS = (
     ChoirVariant(
         key="soprano",
@@ -106,6 +119,45 @@ CHOIR_VARIANTS = (
         directory="tenor-bass",
         channel_mode="mono_sum",
         pan_expression="c0=0.5*c0+0.5*c1",
+    ),
+)
+
+PART_CONCRETE_VARIANTS = (
+    PartConcreteVariant(
+        part_key="soprano_l1",
+        directory="soprano-l1",
+        source_name="MusiqueConcrete_Track1.mp3",
+        label="Sop-L1",
+    ),
+    PartConcreteVariant(
+        part_key="soprano_l2",
+        directory="soprano-l2",
+        source_name="MusiqueConcrete_Track1_2.mp3",
+        label="Sop-L2",
+    ),
+    PartConcreteVariant(
+        part_key="tenor_l",
+        directory="tenor-l",
+        source_name="MusiqueConcrete_Track1_3.mp3",
+        label="Ten-L",
+    ),
+    PartConcreteVariant(
+        part_key="bass_l",
+        directory="bass-l",
+        source_name="MusiqueConcrete_Track1_4.mp3",
+        label="Bass-L",
+    ),
+    PartConcreteVariant(
+        part_key="alto_l2",
+        directory="alto-l2",
+        source_name="MusiqueConcrete_Track1_5.mp3",
+        label="Alto-L2",
+    ),
+    PartConcreteVariant(
+        part_key="alto_l1",
+        directory="alto-l1",
+        source_name="MusiqueConcrete_Track1_6.mp3",
+        label="Alto-L1",
     ),
 )
 
@@ -135,6 +187,10 @@ def ffprobe_duration_ms(path: Path) -> float:
 
 def two_beats_ms(tempo_bpm: float) -> float:
     return round(2.0 * 60000.0 / float(tempo_bpm), 3)
+
+
+def beat_ms(tempo_bpm: float, beat_count: float = 1.0) -> float:
+    return round(float(beat_count) * 60000.0 / float(tempo_bpm), 3)
 
 
 def load_trigger_specs(path: Path) -> list[TriggerPointSpec]:
@@ -193,6 +249,17 @@ def variant_output_path(trigger_id: int, variant: ChoirVariant) -> Path:
     return ROOT / "flashlights_client" / variant_asset_key(trigger_id, variant)
 
 
+def part_concrete_asset_key(trigger_id: int, variant: PartConcreteVariant) -> str:
+    return (
+        "available-sounds/electronics-trigger-clips/part-specific/"
+        f"{variant.directory}/electronics-trigger-{trigger_id:02d}-{variant.directory}-musique-concrete.mp3"
+    )
+
+
+def part_concrete_output_path(trigger_id: int, variant: PartConcreteVariant) -> Path:
+    return ROOT / "flashlights_client" / part_concrete_asset_key(trigger_id, variant)
+
+
 def render_variant(
     *,
     source_path: Path,
@@ -215,6 +282,50 @@ def render_variant(
         f"atrim=start={start_ms / 1000.0:.6f}:end={end_ms / 1000.0:.6f},"
         "asetpts=PTS-STARTPTS,"
         f"pan=mono|{variant.pan_expression},"
+        f"afade=t=in:st=0:d={fade_in_ms / 1000.0:.6f},"
+        f"afade=t=out:st={fade_out_start_ms / 1000.0:.6f}:d={fade_out_ms / 1000.0:.6f}"
+    )
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            str(source_path),
+            "-filter:a",
+            filter_graph,
+            "-codec:a",
+            "libmp3lame",
+            "-q:a",
+            "2",
+            str(output_path),
+        ],
+        check=True,
+    )
+
+
+def render_passthrough_variant(
+    *,
+    source_path: Path,
+    output_path: Path,
+    start_ms: float,
+    end_ms: float,
+    fade_in_ms: float,
+    fade_out_ms: float,
+) -> None:
+    duration_ms = round(end_ms - start_ms, 3)
+    if duration_ms <= 0:
+        raise ValueError(f"Non-positive clip duration for {output_path.name}: {duration_ms}")
+
+    fade_out_ms = min(fade_out_ms, duration_ms)
+    fade_out_start_ms = round(duration_ms - fade_out_ms, 3)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    filter_graph = (
+        f"atrim=start={start_ms / 1000.0:.6f}:end={end_ms / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
         f"afade=t=in:st=0:d={fade_in_ms / 1000.0:.6f},"
         f"afade=t=out:st={fade_out_start_ms / 1000.0:.6f}:d={fade_out_ms / 1000.0:.6f}"
     )
@@ -428,6 +539,51 @@ def build_trigger_plans(
             }
         )
 
+    trigger8_plan = next((plan for plan in plans if plan["id"] == 8), None)
+    m38_4_entry = token_lookup.get("38.4")
+    if trigger8_plan is not None and m38_4_entry is not None:
+        trigger8_onset_ms = float(trigger8_plan["onsetMilliseconds"])
+        trigger8_end_ms = round(float(m38_4_entry["start_seconds"]) * 1000.0, 3)
+        trigger8_duration_ms = round(trigger8_end_ms - trigger8_onset_ms, 3)
+        trigger8_tempo_bpm = float(trigger8_plan["tempoBpm"])
+        if trigger8_duration_ms <= 0:
+            raise ValueError(
+                f"Trigger 8 concrete window is invalid: {trigger8_duration_ms} ms"
+            )
+
+        concrete_variants: dict[str, dict[str, Any]] = {}
+        for part_variant in PART_CONCRETE_VARIANTS:
+            source_path = MUSIQUE_CONCRETE_SOURCE_ROOT / part_variant.source_name
+            if not source_path.exists():
+                raise FileNotFoundError(source_path)
+
+            source_duration = ffprobe_duration_ms(source_path)
+            clip_end_ms = min(trigger8_duration_ms, source_duration)
+            fade_in_ms = min(beat_ms(trigger8_tempo_bpm, TP8_CONCRETE_FADE_IN_BEATS), clip_end_ms)
+            fade_out_ms = min(beat_ms(trigger8_tempo_bpm, TP8_CONCRETE_FADE_OUT_BEATS), clip_end_ms)
+            concrete_variants[part_variant.part_key] = {
+                "sample": part_concrete_asset_key(8, part_variant),
+                "channelMode": "part_track",
+                "sourceFile": str(source_path.relative_to(ROOT)),
+                "sourceStartMs": 0.0,
+                "sourceEndMs": clip_end_ms,
+                "durationMs": clip_end_ms,
+                "fadeInMs": fade_in_ms,
+                "fadeOutMs": fade_out_ms,
+                "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+                "designNote": (
+                    f"{part_variant.label} receives its own musique-concrete strand at Trigger 8. "
+                    "The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+                ),
+            }
+
+        trigger8_plan["partVariants"] = concrete_variants
+        trigger8_plan["timingNote"] = (
+            trigger8_plan["timingNote"]
+            + " Trigger 8 is a deliberate exception: six independent musique-concrete stems are assigned "
+            + "to the six light-staff parts and each is forced to end at M38.4 beat 1."
+        )
+
     return plans, offset_ms
 
 
@@ -447,6 +603,19 @@ def render_assets(
                 fade_in_ms=float(payload["fadeInMs"]),
                 fade_out_ms=float(payload["fadeOutMs"]),
                 variant=variant,
+            )
+
+        for part_variant in PART_CONCRETE_VARIANTS:
+            payload = plan.get("partVariants", {}).get(part_variant.part_key)
+            if payload is None:
+                continue
+            render_passthrough_variant(
+                source_path=ROOT / payload["sourceFile"],
+                output_path=part_concrete_output_path(plan["id"], part_variant),
+                start_ms=float(payload["sourceStartMs"]),
+                end_ms=float(payload["sourceEndMs"]),
+                fade_in_ms=float(payload["fadeInMs"]),
+                fade_out_ms=float(payload["fadeOutMs"]),
             )
 
 
@@ -470,6 +639,9 @@ def build_manifest(
         "anchorOffsetMs": offset_ms,
         "fadeInMs": FADE_IN_MS,
         "firstTriggerStartMs": FIRST_TRIGGER_START_MS,
+        "specialPartSpecificTriggerIds": [
+            plan["id"] for plan in plans if plan.get("partVariants")
+        ],
         "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
         "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
         "events": plans,
@@ -491,8 +663,10 @@ def write_manifest(manifest: dict[str, Any]) -> None:
                 "scoreMeasureOrdinal",
                 "position",
                 "tempoBpm",
-                "variant",
+                "assignmentScope",
+                "assignmentKey",
                 "channelMode",
+                "sourceFile",
                 "sourceStartMs",
                 "sourceEndMs",
                 "durationMs",
@@ -513,8 +687,32 @@ def write_manifest(manifest: dict[str, Any]) -> None:
                         "scoreMeasureOrdinal": plan["scoreMeasureOrdinal"],
                         "position": plan["position"],
                         "tempoBpm": plan["tempoBpm"],
-                        "variant": variant_key,
+                        "assignmentScope": "choir_family",
+                        "assignmentKey": variant_key,
                         "channelMode": variant_payload["channelMode"],
+                        "sourceFile": manifest["sourceFile"],
+                        "sourceStartMs": variant_payload["sourceStartMs"],
+                        "sourceEndMs": variant_payload["sourceEndMs"],
+                        "durationMs": variant_payload["durationMs"],
+                        "fadeInMs": variant_payload["fadeInMs"],
+                        "fadeOutMs": variant_payload["fadeOutMs"],
+                        "sample": variant_payload["sample"],
+                    }
+                )
+            for part_key, variant_payload in plan.get("partVariants", {}).items():
+                writer.writerow(
+                    {
+                        "id": plan["id"],
+                        "scoreLabel": plan["scoreLabel"],
+                        "measureToken": plan["measureToken"],
+                        "measure": plan["measure"],
+                        "scoreMeasureOrdinal": plan["scoreMeasureOrdinal"],
+                        "position": plan["position"],
+                        "tempoBpm": plan["tempoBpm"],
+                        "assignmentScope": "light_staff",
+                        "assignmentKey": part_key,
+                        "channelMode": variant_payload["channelMode"],
+                        "sourceFile": variant_payload.get("sourceFile", ""),
                         "sourceStartMs": variant_payload["sourceStartMs"],
                         "sourceEndMs": variant_payload["sourceEndMs"],
                         "durationMs": variant_payload["durationMs"],
@@ -557,6 +755,7 @@ def write_recipe_copies(
                 "scoreLabel": plan["scoreLabel"],
                 "timingNote": plan["timingNote"],
                 "electronics": plan["variants"],
+                "electronicsByPart": plan.get("partVariants", {}),
             }
             for plan in plans
         ],
@@ -590,7 +789,13 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    for path in (FULL_SOURCE_MP3, FULL_SCORE_XML, CUT_SCORE_XML, TRIGGER_POINT_SOURCE):
+    for path in (
+        FULL_SOURCE_MP3,
+        FULL_SCORE_XML,
+        CUT_SCORE_XML,
+        TRIGGER_POINT_SOURCE,
+        MUSIQUE_CONCRETE_SOURCE_ROOT,
+    ):
         if not path.exists():
             raise FileNotFoundError(path)
 
@@ -631,7 +836,10 @@ def main() -> None:
     write_manifest(manifest)
     write_recipe_copies(generated_at=generated_at, plans=plans)
 
-    print(f"Rendered {len(plans) * len(CHOIR_VARIANTS)} assets")
+    part_specific_asset_count = sum(
+        len(plan.get("partVariants", {})) for plan in plans
+    )
+    print(f"Rendered {len(plans) * len(CHOIR_VARIANTS) + part_specific_asset_count} assets")
     print(f"Tour-cut source: {CUT_SOURCE_MP3.relative_to(ROOT)}")
     print(f"Manifest: {MANIFEST_JSON_PATH.relative_to(ROOT)}")
     print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")

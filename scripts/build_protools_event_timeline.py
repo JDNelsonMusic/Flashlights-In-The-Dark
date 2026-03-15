@@ -273,6 +273,7 @@ def build_timeline(
 
         primer_assignments = event.get("primer", {})
         electronics_assignments = event.get("electronics", {})
+        electronics_by_part = event.get("electronicsByPart", {})
         sample_durations = []
         for color, assignment in primer_assignments.items():
             sample = assignment["sample"]
@@ -335,6 +336,32 @@ def build_timeline(
                 }
             )
 
+        for part_key, assignment in electronics_by_part.items():
+            sample = assignment.get("sample", "")
+            sample_duration = float(assignment.get("durationMs", 0.0)) / 1000.0
+            sample_durations.append(sample_duration)
+            clip_rows.append(
+                {
+                    "event_id": event["id"],
+                    "measure_token": measure_token,
+                    "measure": event["measure"],
+                    "position": event["position"],
+                    "onset_seconds": round(onset_seconds, 6),
+                    "end_seconds": round(onset_seconds + sample_duration, 6),
+                    "tempo_bpm": measure_info["tempo_bpm"],
+                    "meter": f"{measure_info['beats']}/{measure_info['beat_type']}",
+                    "clip_type": "electronics_part",
+                    "assignment_key": part_key,
+                    "slots": "",
+                    "sample": sample,
+                    "note": assignment.get("designNote", ""),
+                    "channel_mode": assignment.get("channelMode", ""),
+                    "sample_duration_seconds": sample_duration,
+                    "present_in_macos_assets": True,
+                    "present_in_flutter_assets": True,
+                }
+            )
+
         event_duration = max(sample_durations) if sample_durations else 0.0
         event_rows.append(
             {
@@ -349,7 +376,8 @@ def build_timeline(
                 "tempo_bpm": measure_info["tempo_bpm"],
                 "meter": f"{measure_info['beats']}/{measure_info['beat_type']}",
                 "primer_count": len(primer_assignments),
-                "electronics_count": len(electronics_assignments),
+                "electronics_count": len(electronics_assignments)
+                + len(electronics_by_part),
                 "sample_length": (
                     "LONG"
                     if primer_assignments
@@ -360,6 +388,7 @@ def build_timeline(
                 "timing_note": timing_note_for_event(event, measure_info["words"]),
                 "primer": primer_assignments,
                 "electronics": electronics_assignments,
+                "electronicsByPart": electronics_by_part,
             }
         )
 

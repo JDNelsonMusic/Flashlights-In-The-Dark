@@ -52,67 +52,80 @@ struct EventTriggerStrip: View {
             }
 
             if let current = currentEvent() {
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .top, spacing: 16) {
-                        EventPreviewColumn(
-                            title: "Previous",
-                            events: previous.reversed(),
-                            emphasis: .previous,
-                            recentEventID: state.lastTriggeredEventID,
-                            onSelect: { state.focusOnEvent(id: $0) }
-                        )
-                        .frame(minWidth: 190, maxWidth: 240, alignment: .top)
-
-                        CurrentEventCard(
-                            event: current,
-                            isRecent: current.id == state.lastTriggeredEventID,
-                            triggerAction: { state.triggerCurrentEvent() },
-                            movePrevious: { state.moveToPreviousEvent() },
-                            moveNext: { state.moveToNextEvent() }
-                        )
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .transition(.scale)
-
-                        EventPreviewColumn(
-                            title: "Upcoming",
-                            events: next,
-                            emphasis: .upcoming,
-                            recentEventID: state.lastTriggeredEventID,
-                            onSelect: { state.focusOnEvent(id: $0) }
-                        )
-                        .frame(minWidth: 190, maxWidth: 240, alignment: .top)
-                    }
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        CurrentEventCard(
-                            event: current,
-                            isRecent: current.id == state.lastTriggeredEventID,
-                            triggerAction: { state.triggerCurrentEvent() },
-                            movePrevious: { state.moveToPreviousEvent() },
-                            moveNext: { state.moveToNextEvent() }
-                        )
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .transition(.scale)
-
-                        if !previous.isEmpty {
-                            EventPreviewGridSection(
+                VStack(alignment: .leading, spacing: 14) {
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 16) {
+                            EventPreviewColumn(
                                 title: "Previous",
                                 events: previous.reversed(),
                                 emphasis: .previous,
                                 recentEventID: state.lastTriggeredEventID,
                                 onSelect: { state.focusOnEvent(id: $0) }
                             )
-                        }
+                            .frame(minWidth: 190, maxWidth: 240, alignment: .top)
 
-                        if !next.isEmpty {
-                            EventPreviewGridSection(
+                            CurrentEventCard(
+                                event: current,
+                                isRecent: current.id == state.lastTriggeredEventID,
+                                triggerAction: { state.triggerCurrentEvent() },
+                                movePrevious: { state.moveToPreviousEvent() },
+                                moveNext: { state.moveToNextEvent() }
+                            )
+                            .frame(maxWidth: .infinity, alignment: .top)
+                            .transition(.scale)
+
+                            EventPreviewColumn(
                                 title: "Upcoming",
                                 events: next,
                                 emphasis: .upcoming,
                                 recentEventID: state.lastTriggeredEventID,
                                 onSelect: { state.focusOnEvent(id: $0) }
                             )
+                            .frame(minWidth: 190, maxWidth: 240, alignment: .top)
                         }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            CurrentEventCard(
+                                event: current,
+                                isRecent: current.id == state.lastTriggeredEventID,
+                                triggerAction: { state.triggerCurrentEvent() },
+                                movePrevious: { state.moveToPreviousEvent() },
+                                moveNext: { state.moveToNextEvent() }
+                            )
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                            .transition(.scale)
+
+                            if !previous.isEmpty {
+                                EventPreviewGridSection(
+                                    title: "Previous",
+                                    events: previous.reversed(),
+                                    emphasis: .previous,
+                                    recentEventID: state.lastTriggeredEventID,
+                                    onSelect: { state.focusOnEvent(id: $0) }
+                                )
+                            }
+
+                            if !next.isEmpty {
+                                EventPreviewGridSection(
+                                    title: "Upcoming",
+                                    events: next,
+                                    emphasis: .upcoming,
+                                    recentEventID: state.lastTriggeredEventID,
+                                    onSelect: { state.focusOnEvent(id: $0) }
+                                )
+                            }
+                        }
+                    }
+
+                    if let snapshot = state.lastTriggerCueSnapshot {
+                        CueVerificationCard(
+                            snapshot: snapshot,
+                            isArmed: state.isArmed,
+                            resendPending: { state.resendLastTriggeredCueToPendingSlots() },
+                            resendStaff: { staff in
+                                state.resendLastTriggeredCue(for: staff)
+                            }
+                        )
                     }
                 }
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.currentEventIndex)
@@ -442,6 +455,220 @@ private struct EventPlaceholderCard: View {
 }
 
 // MARK: - Helper Views --------------------------------------------------------
+private struct CueVerificationCard: View {
+    let snapshot: TriggerCueSnapshot
+    let isArmed: Bool
+    let resendPending: () -> Void
+    let resendStaff: (LightStaff) -> Void
+
+    private let staffColumns = [GridItem(.adaptive(minimum: 210, maximum: 280), spacing: 10, alignment: .top)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 12) {
+                    headerCopy
+                    Spacer(minLength: 8)
+                    buttonCluster
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    headerCopy
+                    buttonCluster
+                }
+            }
+
+            LazyVGrid(columns: staffColumns, spacing: 10) {
+                ForEach(LightStaff.stageOrder) { staff in
+                    CueStaffStatusCard(
+                        staff: staff,
+                        statuses: snapshot.statuses(for: staff),
+                        resendAction: { resendStaff(staff) }
+                    )
+                    .disabled(!isArmed)
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+
+    private var headerCopy: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Last Cue Health")
+                .font(.headline)
+                .foregroundStyle(.white)
+            Text("\(snapshot.headline) • \(snapshot.deliverySummary) • \(snapshot.pendingCount) pending • \(snapshot.unavailableCount) unavailable")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text("Sent \(snapshot.sentAt.formatted(date: .omitted, time: .standard))")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var buttonCluster: some View {
+        HStack(spacing: 8) {
+            Button("Resend Missing") {
+                resendPending()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color.mintGlow)
+            .disabled(!isArmed || snapshot.pendingCount == 0 && snapshot.unavailableCount == 0)
+        }
+    }
+}
+
+private struct CueStaffStatusCard: View {
+    let staff: LightStaff
+    let statuses: [TriggerCueSlotStatus]
+    let resendAction: () -> Void
+
+    private var ackedCount: Int {
+        statuses.filter { $0.state == .acked }.count
+    }
+
+    private var pendingCount: Int {
+        statuses.filter { $0.state == .pending }.count
+    }
+
+    private var unavailableCount: Int {
+        statuses.filter { $0.state == .unavailable }.count
+    }
+
+    private var latencyLabel: String {
+        let latencies = statuses.compactMap(\.latencyMs)
+        guard let minLatency = latencies.min(),
+              let maxLatency = latencies.max() else {
+            return "No ack yet"
+        }
+        if minLatency == maxLatency {
+            return "\(minLatency) ms"
+        }
+        return "\(minLatency)-\(maxLatency) ms"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Circle()
+                    .fill(staffAccent)
+                    .frame(width: 8, height: 8)
+                Text(staff.label)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                Spacer()
+                Text("\(ackedCount)/\(statuses.count)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("\(pendingCount) pending · \(unavailableCount) unavailable")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            Text(latencyLabel)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 6) {
+                ForEach(statuses) { status in
+                    CueSeatBadge(status: status, accent: staffAccent)
+                }
+            }
+
+            Button(pendingCount + unavailableCount > 0 ? "Resend Staff" : "All Acked") {
+                resendAction()
+            }
+            .buttonStyle(.bordered)
+            .tint(staffAccent)
+            .disabled(pendingCount + unavailableCount == 0)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(staffAccent.opacity(0.22), lineWidth: 1)
+        )
+    }
+
+    private var staffAccent: Color {
+        switch staff {
+        case .sopranoL1: return .slotGreen
+        case .sopranoL2: return .hotMagenta
+        case .tenorL: return .slotYellow
+        case .bassL: return .lightRose
+        case .altoL2: return .brightRed
+        case .altoL1: return .royalBlue
+        }
+    }
+}
+
+private struct CueSeatBadge: View {
+    let status: TriggerCueSlotStatus
+    let accent: Color
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(status.seatNumber.map { String($0) } ?? "•")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white)
+
+            Circle()
+                .fill(fillColor)
+                .frame(width: 10, height: 10)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(accent.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(accent.opacity(0.16), lineWidth: 1)
+        )
+        .help(statusHelpText)
+    }
+
+    private var fillColor: Color {
+        switch status.state {
+        case .acked:
+            return .green
+        case .pending:
+            return .orange
+        case .unavailable:
+            return .red
+        }
+    }
+
+    private var statusHelpText: String {
+        switch status.state {
+        case .acked:
+            if let latencyMs = status.latencyMs {
+                return "\(status.staffLabel) \(status.seatLabel) · acked in \(latencyMs) ms"
+            }
+            return "\(status.staffLabel) \(status.seatLabel) · acked"
+        case .pending:
+            return "\(status.staffLabel) \(status.seatLabel) · awaiting ack"
+        case .unavailable:
+            return "\(status.staffLabel) \(status.seatLabel) · \(status.failureReason ?? "unavailable")"
+        }
+    }
+}
+
 private struct MiniTag: View {
     let color: String
     let detail: String

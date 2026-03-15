@@ -1153,168 +1153,193 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                 dense ? 12 : compact ? 16 : 18,
                 dense ? 12 : compact ? 14 : 18,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              child: LayoutBuilder(
+                builder: (context, panelConstraints) {
+                  final tiny = panelConstraints.maxHeight < 210;
+                  final compactTriggerStrip = dense || tiny;
+                  final detailLine = detailChips.join(' · ');
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Trigger Practice',
-                        style: (compact
-                                ? Theme.of(context).textTheme.titleSmall
-                                : Theme.of(context).textTheme.titleMedium)
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          Text(
+                            'Trigger Practice',
+                            style: (compact
+                                    ? Theme.of(context).textTheme.titleSmall
+                                    : Theme.of(context).textTheme.titleMedium)
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '8 triggers',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontSize: dense ? 11 : null,
+                                  color: Colors.white70,
+                                ),
+                          ),
+                        ],
                       ),
-                      const Spacer(),
+                      SizedBox(height: tiny ? 2 : dense ? 4 : compact ? 6 : 8),
                       Text(
-                        '8 triggers',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: dense ? 11 : null,
+                        'TP ${currentEvent.id} · M${currentEvent.displayMeasureText} · ${_normalisedBeat(currentEvent.position ?? '')}',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontSize: dense ? 12 : null,
                           color: Colors.white70,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: dense ? 4 : compact ? 6 : 8),
-                  Text(
-                    'TP ${currentEvent.id} · M${currentEvent.displayMeasureText} · ${_normalisedBeat(currentEvent.position ?? '')}',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontSize: dense ? 12 : null,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: dense ? 6 : compact ? 8 : 10),
-                  Text(
-                    detailSummary,
-                    maxLines: dense ? 1 : compact ? 2 : 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: dense ? 11.5 : null,
-                      color: Colors.white70,
-                      height: 1.3,
-                    ),
-                  ),
-                  SizedBox(height: dense ? 6 : compact ? 8 : 10),
-                  SizedBox(
-                    height: dense ? 28 : 34,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: detailChips.length,
-                      separatorBuilder:
-                          (_, _) => SizedBox(width: dense ? 6 : 8),
-                      itemBuilder:
-                          (context, chipIndex) => _EventDetailChip(
-                            label: detailChips[chipIndex],
-                            compact: dense,
+                      if (!tiny) ...[
+                        SizedBox(height: dense ? 6 : compact ? 8 : 10),
+                        Text(
+                          detailSummary,
+                          maxLines: dense ? 1 : compact ? 2 : 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: dense ? 11.5 : null,
+                                color: Colors.white70,
+                                height: 1.3,
+                              ),
+                        ),
+                        SizedBox(height: dense ? 6 : compact ? 8 : 10),
+                        SizedBox(
+                          height: dense ? 28 : 34,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: detailChips.length,
+                            separatorBuilder:
+                                (_, _) => SizedBox(width: dense ? 6 : 8),
+                            itemBuilder:
+                                (context, chipIndex) => _EventDetailChip(
+                                  label: detailChips[chipIndex],
+                                  compact: dense,
+                                ),
                           ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      if (dense) ...[
-                        _PracticeNavButton(
-                          icon: Icons.chevron_left_rounded,
-                          onPressed:
-                              clampedIndex > 0
-                                  ? () => client.movePracticeEvent(-1)
-                                  : null,
                         ),
                       ] else ...[
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed:
-                                clampedIndex > 0
-                                    ? () => client.movePracticeEvent(-1)
-                                    : null,
-                            icon: const Icon(Icons.chevron_left_rounded),
-                            label: const Text('Prev'),
+                        const SizedBox(height: 4),
+                        Text(
+                          detailLine,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 10.5,
+                            color: Colors.white70,
                           ),
                         ),
                       ],
-                      SizedBox(width: dense ? 6 : 8),
-                      Expanded(
-                        flex: dense ? 1 : 2,
-                        child: FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            minimumSize: Size.fromHeight(dense ? 40 : 48),
-                            visualDensity:
-                                dense
-                                    ? const VisualDensity(
-                                      horizontal: -1,
-                                      vertical: -2,
-                                    )
-                                    : VisualDensity.standard,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: dense ? 10 : 16,
-                              vertical: dense ? 10 : 14,
+                      if (!tiny) const Spacer() else const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          if (compactTriggerStrip) ...[
+                            _PracticeNavButton(
+                              icon: Icons.chevron_left_rounded,
+                              onPressed:
+                                  clampedIndex > 0
+                                      ? () => client.movePracticeEvent(-1)
+                                      : null,
+                            ),
+                          ] else ...[
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed:
+                                    clampedIndex > 0
+                                        ? () => client.movePracticeEvent(-1)
+                                        : null,
+                                icon: const Icon(Icons.chevron_left_rounded),
+                                label: const Text('Prev'),
+                              ),
+                            ),
+                          ],
+                          SizedBox(width: compactTriggerStrip ? 6 : 8),
+                          Expanded(
+                            flex: compactTriggerStrip ? 1 : 2,
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                minimumSize: Size.fromHeight(
+                                  compactTriggerStrip ? 38 : 48,
+                                ),
+                                visualDensity:
+                                    compactTriggerStrip
+                                        ? const VisualDensity(
+                                          horizontal: -1,
+                                          vertical: -2,
+                                        )
+                                        : VisualDensity.standard,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: compactTriggerStrip ? 10 : 16,
+                                  vertical: compactTriggerStrip ? 8 : 14,
+                                ),
+                              ),
+                              onPressed:
+                                  () => unawaited(
+                                    _handlePlayRequest(events, clampedIndex),
+                                  ),
+                              icon: Icon(
+                                Icons.play_arrow_rounded,
+                                size: compactTriggerStrip ? 20 : 24,
+                              ),
+                              label: Text(
+                                currentAssignment != null ||
+                                        currentLightingAssignment != null
+                                    ? 'Play Cue'
+                                    : 'Advance',
+                              ),
                             ),
                           ),
-                          onPressed:
-                              () => unawaited(
-                                _handlePlayRequest(events, clampedIndex),
+                          SizedBox(width: compactTriggerStrip ? 6 : 8),
+                          if (compactTriggerStrip) ...[
+                            _PracticeNavButton(
+                              icon: Icons.chevron_right_rounded,
+                              onPressed:
+                                  clampedIndex < events.length - 1
+                                      ? () => client.movePracticeEvent(1)
+                                      : null,
+                            ),
+                          ] else ...[
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed:
+                                    clampedIndex < events.length - 1
+                                        ? () => client.movePracticeEvent(1)
+                                        : null,
+                                icon: const Icon(Icons.chevron_right_rounded),
+                                label: const Text('Next'),
                               ),
-                          icon: Icon(
-                            Icons.play_arrow_rounded,
-                            size: dense ? 20 : 24,
-                          ),
-                          label: Text(
-                            currentAssignment != null ||
-                                    currentLightingAssignment != null
-                                ? 'Play Cue'
-                                : 'Advance',
-                          ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      SizedBox(height: tiny ? 6 : dense ? 8 : compact ? 10 : 12),
+                      SizedBox(
+                        height: tiny ? 42 : dense ? 50 : compact ? 58 : 64,
+                        child: ListView.separated(
+                          controller: _controller,
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: events.length,
+                          separatorBuilder:
+                              (_, _) => SizedBox(width: _itemSpacing),
+                          itemBuilder: (context, i) {
+                            final event = events[i];
+                            final isCurrent = i == clampedIndex;
+                            return _PracticeTriggerChip(
+                              event: event,
+                              isCurrent: isCurrent,
+                              accent: partAccent,
+                              dense: compactTriggerStrip,
+                              onTap: () => client.setPracticeEventIndex(i),
+                            );
+                          },
                         ),
                       ),
-                      SizedBox(width: dense ? 6 : 8),
-                      if (dense) ...[
-                        _PracticeNavButton(
-                          icon: Icons.chevron_right_rounded,
-                          onPressed:
-                              clampedIndex < events.length - 1
-                                  ? () => client.movePracticeEvent(1)
-                                  : null,
-                        ),
-                      ] else ...[
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed:
-                                clampedIndex < events.length - 1
-                                    ? () => client.movePracticeEvent(1)
-                                    : null,
-                            icon: const Icon(Icons.chevron_right_rounded),
-                            label: const Text('Next'),
-                          ),
-                        ),
-                      ],
                     ],
-                  ),
-                  SizedBox(height: dense ? 8 : compact ? 10 : 12),
-                  SizedBox(
-                    height: dense ? 50 : compact ? 58 : 64,
-                    child: ListView.separated(
-                      controller: _controller,
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: events.length,
-                      separatorBuilder:
-                          (_, _) => SizedBox(width: _itemSpacing),
-                      itemBuilder: (context, i) {
-                        final event = events[i];
-                        final isCurrent = i == clampedIndex;
-                        return _PracticeTriggerChip(
-                          event: event,
-                          isCurrent: isCurrent,
-                          accent: partAccent,
-                          dense: dense,
-                          onTap: () => client.setPracticeEventIndex(i),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             );
           },
@@ -1356,6 +1381,8 @@ String _routeLabel(ElectronicsAssignment? assignment) {
       return 'Right channel';
     case 'mono_sum':
       return 'Mono sum';
+    case 'part_track':
+      return 'Part track';
     default:
       return 'No route';
   }
@@ -1397,10 +1424,10 @@ class _PracticeTriggerChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: dense ? 76 : 92,
+        width: dense ? 72 : 92,
         padding: EdgeInsets.symmetric(
-          horizontal: dense ? 8 : 10,
-          vertical: dense ? 6 : 8,
+          horizontal: dense ? 7 : 10,
+          vertical: dense ? 4 : 8,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -1417,22 +1444,23 @@ class _PracticeTriggerChip extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'TP ${event.id}',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontSize: dense ? 12 : null,
+                fontSize: dense ? 11 : null,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: dense ? 1 : 2),
             Text(
               'M${event.displayMeasureText}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: dense ? 10.5 : null,
+                fontSize: dense ? 9.5 : null,
                 color: Colors.white70,
               ),
             ),

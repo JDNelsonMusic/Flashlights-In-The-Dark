@@ -31,6 +31,93 @@ extension DeviceStatus {
 
 }
 
+public enum TriggerCueDeliveryState: String {
+    case acked
+    case pending
+    case unavailable
+}
+
+public struct TriggerCueSlotStatus: Identifiable {
+    public let slot: Int
+    public let staff: LightStaff?
+    public let seatNumber: Int?
+    public let sentAt: Date
+    public let lastAckAt: Date?
+    public let lastHelloAt: Date?
+    public let failureReason: String?
+
+    public var id: Int { slot }
+
+    public var state: TriggerCueDeliveryState {
+        if let lastAckAt, lastAckAt >= sentAt {
+            return .acked
+        }
+        if failureReason != nil {
+            return .unavailable
+        }
+        return .pending
+    }
+
+    public var latencyMs: Int? {
+        guard let lastAckAt, lastAckAt >= sentAt else { return nil }
+        return Int((lastAckAt.timeIntervalSince(sentAt) * 1000).rounded())
+    }
+
+    public var staffLabel: String {
+        staff?.label ?? "Unmapped"
+    }
+
+    public var seatLabel: String {
+        if let seatNumber {
+            return "Seat \(seatNumber)"
+        }
+        return "Slot \(slot)"
+    }
+}
+
+public struct TriggerCueSnapshot {
+    public let eventId: Int
+    public let measureText: String
+    public let beatText: String
+    public let sentAt: Date
+    public let slotStatuses: [TriggerCueSlotStatus]
+
+    public var targetedCount: Int { slotStatuses.count }
+    public var ackedCount: Int { slotStatuses.filter { $0.state == .acked }.count }
+    public var pendingCount: Int { slotStatuses.filter { $0.state == .pending }.count }
+    public var unavailableCount: Int { slotStatuses.filter { $0.state == .unavailable }.count }
+
+    public var headline: String {
+        "TP\(eventId) • M\(measureText) • \(beatText)"
+    }
+
+    public var deliverySummary: String {
+        "\(ackedCount)/\(targetedCount) acked"
+    }
+
+    public func statuses(for staff: LightStaff) -> [TriggerCueSlotStatus] {
+        slotStatuses
+            .filter { $0.staff == staff }
+            .sorted { lhs, rhs in
+                let leftSeat = lhs.seatNumber ?? .max
+                let rightSeat = rhs.seatNumber ?? .max
+                if leftSeat != rightSeat {
+                    return leftSeat < rightSeat
+                }
+                return lhs.slot < rhs.slot
+            }
+    }
+}
+
+private struct TriggerCueContext {
+    let eventId: Int
+    let measureText: String
+    let beatText: String
+    let sentAt: Date
+    let targetSlots: [Int]
+    let failuresBySlot: [Int: String]
+}
+
 // Shared slot mapping data model for console
 private struct ConsoleSlotInfo: Codable {
     let ip: String
@@ -83,6 +170,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     }
     @Published public var currentEventIndex: Int = 0
     @Published public var lastTriggeredEventID: Int?
+    @Published public private(set) var lastTriggerCueSnapshot: TriggerCueSnapshot?
     @Published public private(set) var audioOutputDevices: [AudioDeviceInfo] = []
     @Published public var selectedAudioDeviceID: UInt32 = 0 {
         didSet {
@@ -130,6 +218,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private lazy var canonicalSlots: Set<Int> = {
         Set(performanceSlots)
     }()
+    private var lastTriggerCueContext: TriggerCueContext?
     private var isApplyingGroupSanitization = false
 
     private func resetGroupMembersToDefault() {
@@ -160,6 +249,55 @@ public final class ConsoleState: ObservableObject, Sendable {
         if boundedIndex != currentEventIndex {
             currentEventIndex = boundedIndex
         }
+    }
+
+    private func measureText(for event: EventRecipe) -> String {
+        if let token = event.measureToken?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !token.isEmpty {
+            return token
+        }
+        if let measure = event.measure {
+            return "\(measure)"
+        }
+        return "?"
+    }
+
+    private func beatText(for event: EventRecipe) -> String {
+        guard let position = event.position?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !position.isEmpty else {
+            return "?"
+        }
+        return position
+    }
+
+    private func rebuildLastTriggerCueSnapshot() {
+        guard let context = lastTriggerCueContext else {
+            lastTriggerCueSnapshot = nil
+            return
+        }
+
+        let slotStatuses = context.targetSlots
+            .sorted()
+            .map { slot -> TriggerCueSlotStatus in
+                let seat = StageConsoleLayout.seat(for: slot)
+                return TriggerCueSlotStatus(
+                    slot: slot,
+                    staff: seat?.staff,
+                    seatNumber: seat?.seatNumber,
+                    sentAt: context.sentAt,
+                    lastAckAt: lastAckTimes[slot],
+                    lastHelloAt: lastHello[slot],
+                    failureReason: context.failuresBySlot[slot]
+                )
+            }
+
+        lastTriggerCueSnapshot = TriggerCueSnapshot(
+            eventId: context.eventId,
+            measureText: context.measureText,
+            beatText: context.beatText,
+            sentAt: context.sentAt,
+            slotStatuses: slotStatuses
+        )
     }
 
     // MARK: – Init
@@ -1362,6 +1500,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         statuses[devices[idx].id] = .live
         lastHello[slot] = Date()
         lastHelloProbe.removeValue(forKey: slot)
+        rebuildLastTriggerCueSnapshot()
         lastLog = "📳 Device \(slot) announced at \(ip)"
     }
 }
@@ -1459,6 +1598,7 @@ extension ConsoleState {
                 Task { @MainActor in
                     self?.lastLog = "✅ Ack from slot \(slot)"
                     self?.lastAckTimes[slot] = Date()
+                    self?.rebuildLastTriggerCueSnapshot()
                 }
             }
             await broadcaster.registerTapHandler { [weak self] in
@@ -1967,28 +2107,67 @@ extension ConsoleState {
         }
     }
 
-    private func fire(event: EventRecipe) async {
-        let startAtMs = Date().timeIntervalSince1970 * 1000.0
-        await sendEventTriggers(for: event, startAtMs: startAtMs)
-        let trimmedMeasureToken = event.measureToken?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let measureText: String
-        if let trimmedMeasureToken, !trimmedMeasureToken.isEmpty {
-            measureText = "M\(trimmedMeasureToken)"
-        } else {
-            measureText = event.measure.map { "M\($0)" } ?? "M?"
+    public func resendLastTriggeredCueToPendingSlots() {
+        guard ensureArmedForCue("resending cues") else { return }
+        guard let snapshot = lastTriggerCueSnapshot else {
+            lastLog = "⚠️ No fired trigger to resend"
+            return
         }
-        let beatText = event.position ?? "?"
+        let targetSlots = snapshot.slotStatuses
+            .filter { $0.state != .acked }
+            .map(\.slot)
+        guard !targetSlots.isEmpty else {
+            lastLog = "✅ Last trigger already acknowledged on all targeted slots"
+            return
+        }
+        guard let event = eventRecipes.first(where: { $0.id == snapshot.eventId }) else {
+            lastLog = "⚠️ Last trigger recipe is no longer loaded"
+            return
+        }
+        Task { [weak self] in
+            await self?.fire(event: event, targetSlots: targetSlots)
+        }
+    }
+
+    public func resendLastTriggeredCue(for staff: LightStaff, onlyPending: Bool = true) {
+        guard ensureArmedForCue("resending cues") else { return }
+        guard let snapshot = lastTriggerCueSnapshot else {
+            lastLog = "⚠️ No fired trigger to resend"
+            return
+        }
+        let staffStatuses = snapshot.statuses(for: staff)
+        let targetSlots = staffStatuses
+            .filter { !onlyPending || $0.state != .acked }
+            .map(\.slot)
+        guard !targetSlots.isEmpty else {
+            lastLog = "✅ \(staff.label) is already acknowledged"
+            return
+        }
+        guard let event = eventRecipes.first(where: { $0.id == snapshot.eventId }) else {
+            lastLog = "⚠️ Last trigger recipe is no longer loaded"
+            return
+        }
+        Task { [weak self] in
+            await self?.fire(event: event, targetSlots: targetSlots)
+        }
+    }
+
+    private func fire(event: EventRecipe, targetSlots: [Int]? = nil) async {
+        let startAtMs = Date().timeIntervalSince1970 * 1000.0
+        await sendEventTriggers(for: event, startAtMs: startAtMs, targetSlots: targetSlots ?? performanceSlots)
+        let measureText = "M\(measureText(for: event))"
+        let beatText = beatText(for: event)
         await MainActor.run {
             lastLog = "▶︎ Trigger #\(event.id) • \(measureText) • \(beatText)"
         }
     }
 
-    private func sendEventTriggers(for event: EventRecipe, startAtMs: Double) async {
+    private func sendEventTriggers(for event: EventRecipe, startAtMs: Double, targetSlots: [Int]) async {
         do {
             let broadcaster = try await broadcasterTask.value
             var sentSlots: [Int] = []
-            var failedSlots: [Int] = []
-            for slot in performanceSlots {
+            var failedSlots: [Int: String] = [:]
+            for slot in targetSlots {
                 let msg = EventTrigger(index: Int32(slot),
                                        eventId: Int32(event.id),
                                        startAtMs: startAtMs)
@@ -1996,14 +2175,23 @@ extension ConsoleState {
                     try await broadcaster.send(msg)
                     sentSlots.append(slot)
                 } catch {
-                    failedSlots.append(slot)
+                    failedSlots[slot] = error.localizedDescription
                 }
             }
             await MainActor.run {
+                self.lastTriggerCueContext = TriggerCueContext(
+                    eventId: event.id,
+                    measureText: self.measureText(for: event),
+                    beatText: self.beatText(for: event),
+                    sentAt: Date(timeIntervalSince1970: startAtMs / 1000.0),
+                    targetSlots: targetSlots,
+                    failuresBySlot: failedSlots
+                )
+                self.rebuildLastTriggerCueSnapshot()
                 if sentSlots.isEmpty {
                     self.lastLog = "⚠️ No trigger cues sent for Trigger #\(event.id) (\(failedSlots.count) slots unavailable)"
                 } else if failedSlots.isEmpty {
-                    self.lastLog = "▶︎ Sent Trigger #\(event.id)"
+                    self.lastLog = "▶︎ Sent Trigger #\(event.id) to \(sentSlots.count) slots"
                 } else {
                     self.lastLog = "▶︎ Sent Trigger #\(event.id) to \(sentSlots.count) slots (\(failedSlots.count) unavailable)"
                 }

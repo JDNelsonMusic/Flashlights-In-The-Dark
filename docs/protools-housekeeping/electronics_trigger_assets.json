@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-15T05:24:42+00:00",
+  "generated": "2026-03-15T10:10:51+00:00",
   "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3",
   "fullSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
   "sourceDurationMs": 255980.625,
@@ -11,6 +11,9 @@
   "anchorOffsetMs": 9559.059,
   "fadeInMs": 20.0,
   "firstTriggerStartMs": 2000.0,
+  "specialPartSpecificTriggerIds": [
+    8
+  ],
   "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
   "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
   "events": [
@@ -250,7 +253,7 @@
       "onsetMilliseconds": 98235.294,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11. Trigger 8 is a deliberate exception: six independent musique-concrete stems are assigned to the six light-staff parts and each is forced to end at M38.4 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-08-soprano.mp3",
@@ -281,6 +284,80 @@
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
+        }
+      },
+      "partVariants": {
+        "soprano_l1": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-08-soprano-l1-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Sop-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "soprano_l2": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-08-soprano-l2-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_2.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Sop-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "tenor_l": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-08-tenor-l-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_3.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Ten-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "bass_l": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-08-bass-l-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_4.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Bass-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "alto_l2": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-08-alto-l2-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_5.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Alto-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "alto_l1": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-08-alto-l1-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_6.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Alto-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
         }
       }
     },

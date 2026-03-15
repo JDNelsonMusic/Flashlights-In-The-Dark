@@ -272,6 +272,7 @@ class EventRecipe {
     required this.scoreLabel,
     required this.primerAssignments,
     required this.electronicsAssignments,
+    required this.electronicsByPart,
     required this.lighting,
   });
 
@@ -287,6 +288,7 @@ class EventRecipe {
   final String? scoreLabel;
   final Map<PrimerColor, PrimerAssignment> primerAssignments;
   final Map<ChoirFamily, ElectronicsAssignment> electronicsAssignments;
+  final Map<String, ElectronicsAssignment> electronicsByPart;
   final EventLighting? lighting;
 
   String get displayMeasureText {
@@ -333,6 +335,35 @@ class EventRecipe {
           return;
         }
         electronics[family] = ElectronicsAssignment(
+          sample: sample,
+          channelMode: channelMode,
+          sourceStartMs: (value['sourceStartMs'] as num?)?.toDouble(),
+          sourceEndMs: (value['sourceEndMs'] as num?)?.toDouble(),
+          durationMs: (value['durationMs'] as num?)?.toDouble(),
+          fadeInMs: (value['fadeInMs'] as num?)?.toDouble(),
+          fadeOutMs: (value['fadeOutMs'] as num?)?.toDouble(),
+          timingRule: (value['timingRule'] as String?)?.trim(),
+        );
+      });
+    }
+
+    final electronicsByPart = <String, ElectronicsAssignment>{};
+    final electronicsByPartJson =
+        json['electronicsByPart'] as Map<String, dynamic>?;
+    if (electronicsByPartJson != null) {
+      electronicsByPartJson.forEach((key, value) {
+        if (value is! Map<String, dynamic>) {
+          return;
+        }
+        final sample = _canonicalElectronicsSample(value['sample'] as String?);
+        final channelMode = (value['channelMode'] as String?)?.trim();
+        if (sample == null ||
+            sample.isEmpty ||
+            channelMode == null ||
+            channelMode.isEmpty) {
+          return;
+        }
+        electronicsByPart[key] = ElectronicsAssignment(
           sample: sample,
           channelMode: channelMode,
           sourceStartMs: (value['sourceStartMs'] as num?)?.toDouble(),
@@ -431,6 +462,7 @@ class EventRecipe {
       scoreLabel: (json['scoreLabel'] as String?)?.trim(),
       primerAssignments: primer,
       electronicsAssignments: electronics,
+      electronicsByPart: electronicsByPart,
       lighting: lighting,
     );
   }

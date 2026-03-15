@@ -145,6 +145,13 @@ struct ComposerConsoleView: View {
                 symbol: "sparkles.rectangle.stack"
             )
             SummaryCard(
+                title: "Cue Delivery",
+                value: cueDeliveryValue,
+                subtitle: cueDeliverySubtitle,
+                tint: cueDeliveryTint,
+                symbol: "checkmark.circle"
+            )
+            SummaryCard(
                 title: "Torch State",
                 value: anyTorchOn ? "Active" : "Dark",
                 subtitle: anyTorchOn ? "At least one staff lit" : "All torches off",
@@ -293,6 +300,36 @@ struct ComposerConsoleView: View {
         return event.measureText + " · " + event.positionLabel
     }
 
+    private var cueDeliveryValue: String {
+        guard let snapshot = state.lastTriggerCueSnapshot else {
+            return "Idle"
+        }
+        return snapshot.deliverySummary
+    }
+
+    private var cueDeliverySubtitle: String {
+        guard let snapshot = state.lastTriggerCueSnapshot else {
+            return "Fire a trigger to inspect acknowledgements"
+        }
+        if snapshot.unavailableCount > 0 {
+            return "\(snapshot.headline) · \(snapshot.pendingCount) pending · \(snapshot.unavailableCount) unavailable"
+        }
+        return "\(snapshot.headline) · \(snapshot.pendingCount) pending"
+    }
+
+    private var cueDeliveryTint: Color {
+        guard let snapshot = state.lastTriggerCueSnapshot else {
+            return .secondary
+        }
+        if snapshot.ackedCount == snapshot.targetedCount && snapshot.targetedCount > 0 {
+            return .green
+        }
+        if snapshot.unavailableCount > 0 {
+            return .orange
+        }
+        return .blue
+    }
+
     private var headerIdentity: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Flashlights in the Dark")
@@ -356,7 +393,9 @@ struct ComposerConsoleView: View {
 
     private func summaryColumns(for availableWidth: CGFloat) -> [GridItem] {
         let columnCount: Int
-        if availableWidth >= 1760 {
+        if availableWidth >= 2200 {
+            columnCount = 5
+        } else if availableWidth >= 1760 {
             columnCount = 4
         } else if availableWidth >= 920 {
             columnCount = 2

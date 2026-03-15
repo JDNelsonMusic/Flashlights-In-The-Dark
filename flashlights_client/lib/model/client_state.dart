@@ -360,6 +360,13 @@ class ClientState {
   }
 
   ElectronicsAssignment? electronicsForSlot(EventRecipe event, int slot) {
+    final part = partForSlot(slot);
+    if (part != null) {
+      final partSpecific = event.electronicsByPart[part.recipeKey];
+      if (partSpecific != null) {
+        return partSpecific;
+      }
+    }
     final family = choirFamilyForSlot(slot);
     if (family == null) {
       return null;
