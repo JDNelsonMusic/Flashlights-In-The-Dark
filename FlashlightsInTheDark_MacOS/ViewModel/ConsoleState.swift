@@ -1961,7 +1961,13 @@ extension ConsoleState {
     private func fire(event: EventRecipe) async {
         let startAtMs = Date().timeIntervalSince1970 * 1000.0
         await sendEventTriggers(for: event, startAtMs: startAtMs)
-        let measureText = event.measure.map { "M\($0)" } ?? "M?"
+        let trimmedMeasureToken = event.measureToken?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let measureText: String
+        if let trimmedMeasureToken, !trimmedMeasureToken.isEmpty {
+            measureText = "M\(trimmedMeasureToken)"
+        } else {
+            measureText = event.measure.map { "M\($0)" } ?? "M?"
+        }
         let beatText = event.position ?? "?"
         await MainActor.run {
             lastLog = "▶︎ Trigger #\(event.id) • \(measureText) • \(beatText)"
@@ -2048,7 +2054,7 @@ extension ConsoleState {
             return
         }
 
-        // Primer tones are retired in the 12-trigger workflow.
+        // Primer tones are retired in the reduced trigger workflow.
         if (1...9).contains(ch),
            (0...48).contains(val) || (50...98).contains(val) {
             logMidi("PrimerDisabled \(val) -> Group \(ch)")

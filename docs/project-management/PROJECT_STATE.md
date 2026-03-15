@@ -10,7 +10,7 @@ This file is the workspace source-of-truth map for the current repository state.
 ## Current Canonical State
 
 - Musical structure and cue timing source:
-  `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+  `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
 - Canonical cue bundle:
   `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 - Runtime cue bundle copies:
@@ -28,12 +28,12 @@ This file is the workspace source-of-truth map for the current repository state.
 
 Verified current facts from the generated reports:
 
-- The recipe bundle currently contains `192` events.
+- The runtime trigger bundle currently contains `11` events.
 - The recipe copies in the recipe folder, macOS app, and Flutter app are byte-identical.
 - The primer MP3s in the macOS app and Flutter app are byte-identical with `98` matched files.
-- The recipe cue timeline currently runs from `0:00.000` to `6:29.902`.
-- The encoded score runs to `6:58.235`.
-- Encoded tempo changes currently occur at measure `1` (`102 BPM`) and measure `30` (`72 BPM`).
+- The tour-cut electronics source keeps original measures `1-41`, then jumps to original measure `104`.
+- The Flutter score-practice asset now points at the tour-cut MusicXML.
+- Encoded tempo changes still occur at measure `1` (`102 BPM`) and measure `30` (`72 BPM`) in the surviving material.
 
 ## Workspace Map
 
@@ -82,13 +82,13 @@ The `measure` and `position` attached to each event should now be read as the of
 
 | Domain | Canonical source | Downstream copies / consumers | Notes |
 | --- | --- | --- | --- |
-| Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`, `scripts/build_protools_event_timeline.py` | Flutter practice view uses its own asset copy, not the source folder directly |
+| Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml`, `scripts/build_tour_cut_score.py` | Flutter practice view uses its own asset copy, not the source folder directly |
 | Official trigger positions | `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv` | `scripts/generate_event_recipes_v4.py`, recipe spreadsheet rows, runtime JSON `measure` / `position` fields | Source images documented in `docs/official_trigger_positions.md`; these trigger points intentionally lead the sung events |
-| Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | The copies are currently identical |
+| Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | The copies are currently identical and carry tour-cut `measureToken` / `scoreMeasureOrdinal` metadata |
 | Recipe generation logic | `scripts/generate_event_recipes_v4.py` | writes JSON copies and CSV/XLSX outputs | This script currently points at the v4 score folder |
 | macOS cue UI | `FlashlightsInTheDark_MacOS/View/EventTriggerStrip.swift` | consumes decoded event recipes | Event count is dynamic |
 | Flutter cue/practice model | `flashlights_client/lib/model/event_recipe.dart` | consumes decoded event recipes | Event count is dynamic |
-| Flutter score practice asset path | `flashlights_client/lib/utils/music_xml_utils.dart` | loads hardcoded v26 MusicXML asset | If the score filename changes, this file must change too |
+| Flutter score practice asset path | `flashlights_client/lib/utils/music_xml_utils.dart` | loads hardcoded tour-cut MusicXML asset | If the score filename changes, this file must change too |
 | Flutter asset registration | `flashlights_client/pubspec.yaml` | bundles `event_recipes.json`, MusicXML, and primer MP3s | Must stay aligned with renamed or added assets |
 | Pro Tools working session | `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx` | composer DAW workflow | Recommendation only; confirm in Pro Tools |
 | Pro Tools audit / cue timing reports | `docs/protools-housekeeping/` | composer orientation and cleanup passes | Generated, safe to regenerate |
@@ -160,7 +160,7 @@ If coming back cold after months away, open these first:
 4. `docs/protools-housekeeping/session_audit.md`
 5. `docs/protools-housekeeping/event_timeline.md`
 6. `scripts/generate_event_recipes_v4.py`
-7. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+7. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
 8. `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 9. `flashlights_client/lib/utils/music_xml_utils.dart`
 10. `flashlights_client/pubspec.yaml`

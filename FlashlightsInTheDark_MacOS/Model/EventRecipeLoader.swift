@@ -46,7 +46,11 @@ struct EventRecipeLoader {
         return EventRecipe(
             id: event.id,
             measure: event.measure,
+            measureToken: event.measureToken,
+            scoreMeasureOrdinal: event.scoreMeasureOrdinal,
             position: event.position,
+            scoreLabel: event.scoreLabel,
+            timingNote: event.timingNote,
             primerAssignments: cleaned,
             lighting: event.lighting
         )

@@ -4,7 +4,7 @@ import 'package:xml/xml.dart';
 import 'package:flashlights_client/model/event_recipe.dart';
 
 const String _kScoreAssetPath =
-    'assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml';
+    'assets/FlashlightsInTheDark_v32_TourCut.musicxml';
 
 const Set<String> _kLightChorusPartIds = {
   'P4', // Soprano L1, L2

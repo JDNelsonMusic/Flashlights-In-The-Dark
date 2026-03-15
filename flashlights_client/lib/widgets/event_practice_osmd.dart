@@ -31,10 +31,12 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   int _contextSequence = 0;
   String? _currentNoteLabel;
   int? _currentMeasure;
+  int? _currentWindowMeasure;
 
   PrimerColor? _currentColor;
   PrimerColor? _pendingColor;
   int? _pendingMeasure;
+  int? _pendingWindowMeasure;
   String? _pendingNote;
   String? _pendingHighlightSignature;
   String? _currentHighlightSignature;
@@ -168,11 +170,15 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   Future<void> updatePracticeContext({
     PrimerColor? color,
     int? measure,
+    int? windowMeasure,
     String? note,
   }) async {
     _pendingColor = color;
     if (measure != null) {
       _pendingMeasure = measure;
+    }
+    if (windowMeasure != null) {
+      _pendingWindowMeasure = windowMeasure;
     }
     if (note != null) {
       final trimmed = note.trim();
@@ -191,6 +197,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _pendingColor = null;
     _currentColor = null;
     _pendingMeasure = null;
+    _pendingWindowMeasure = null;
     _pendingNote = null;
     _pendingHighlightSignature = null;
     _currentHighlightSignature = null;
@@ -198,6 +205,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _lastInitXml = null;
     _currentNoteLabel = null;
     _currentMeasure = null;
+    _currentWindowMeasure = null;
     if (mounted) {
       setState(() {
         _initialised = false;
@@ -249,6 +257,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
         _currentHighlightSignature = null;
         _currentNoteLabel = null;
         _currentMeasure = null;
+        _currentWindowMeasure = null;
       }
 
       final highlightChanged =
@@ -265,6 +274,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
         _currentHighlightSignature = highlightSignature;
         _currentNoteLabel = note;
         _currentMeasure = measure;
+        _currentWindowMeasure = _pendingWindowMeasure ?? measure;
       } else if (_initialised) {
         _flushPendingWindow();
       }
@@ -295,7 +305,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
   }
 
   void _flushPendingWindow() {
-    final measure = _pendingMeasure;
+    final measure = _pendingWindowMeasure ?? _pendingMeasure;
     if (!_initialised || measure == null) {
       return;
     }
@@ -384,7 +394,7 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     if (measureNumber <= 0) {
       return;
     }
-    _pendingMeasure = measureNumber;
+    _pendingWindowMeasure = measureNumber;
     unawaited(_sendPayload({'type': 'window', 'measure': measureNumber}));
   }
 
@@ -394,6 +404,8 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
       return;
     }
     final measure = _pendingMeasure ?? _currentMeasure;
+    final windowMeasure =
+        _pendingWindowMeasure ?? _currentWindowMeasure ?? measure;
     final note = _currentNoteLabel;
     final contextSeq = ++_contextSequence;
     await _sendBaseInit(xml, contextSeq: contextSeq);
@@ -401,8 +413,9 @@ class EventPracticeOSMDState extends State<EventPracticeOSMD> {
     _currentHighlightSignature = _composeHighlightSignature(measure, note);
     _currentNoteLabel = note;
     _currentMeasure = measure;
-    if (measure != null) {
-      setMeasure(measure);
+    _currentWindowMeasure = windowMeasure;
+    if (windowMeasure != null) {
+      setMeasure(windowMeasure);
     }
   }
 

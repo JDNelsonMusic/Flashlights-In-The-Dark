@@ -15,11 +15,13 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
+from score_measure_utils import build_measure_token_map
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RECIPE_JSON = ROOT / "Flashlights-ITD_EventRecipes_4_2026_0309" / "event_recipes.json"
 DEFAULT_SCORE_XML = (
-    ROOT / "Flashlights-ITD_EventRecipes_4_2026_0309" / "FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml"
+    ROOT / "Flashlights-ITD_EventRecipes_4_2026_0309" / "FlashlightsInTheDark_v32_TourCut.musicxml"
 )
 DEFAULT_OUTPUT_DIR = ROOT / "docs" / "protools-housekeeping"
 POSITION_RE = re.compile(r"^(?P<beat>[\d+/]+)-of-(?P<measure_beats>\d+)$")
@@ -84,7 +86,10 @@ def parse_mixed_number(raw: str) -> Fraction:
 
 
 def parse_position_offset(position: str, beat_type: int) -> Fraction:
-    match = POSITION_RE.match(position.strip())
+    stripped = position.strip()
+    if stripped.lower().startswith("beat"):
+        return Fraction(int(stripped[4:]) - 1) * Fraction(4, beat_type)
+    match = POSITION_RE.match(stripped)
     if match is None:
         raise ValueError(f"Unsupported position format: {position}")
     beat_value = parse_mixed_number(match.group("beat"))
@@ -250,7 +255,7 @@ def timing_note_for_event(event: dict[str, Any], measure_words: list[str]) -> st
 
 def build_timeline(
     recipe_bundle: dict[str, Any],
-    measure_lookup: dict[int, dict[str, Any]],
+    measure_lookup: dict[str, dict[str, Any]],
     asset_inventory: dict[str, dict[str, dict[str, Any]]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     event_rows: list[dict[str, Any]] = []
@@ -259,13 +264,15 @@ def build_timeline(
     referenced_samples_original: dict[str, str] = {}
 
     for event in recipe_bundle["events"]:
-        measure_info = measure_lookup[event["measure"]]
+        measure_token = str(event.get("measureToken") or event["measure"])
+        measure_info = measure_lookup[measure_token]
         onset_fraction = parse_position_offset(event["position"], measure_info["beat_type"])
         onset_seconds = measure_info["start_seconds"] + (
             float(onset_fraction) * 60.0 / measure_info["tempo_bpm"]
         )
 
         primer_assignments = event.get("primer", {})
+        electronics_assignments = event.get("electronics", {})
         sample_durations = []
         for color, assignment in primer_assignments.items():
             sample = assignment["sample"]
@@ -283,19 +290,48 @@ def build_timeline(
             clip_rows.append(
                 {
                     "event_id": event["id"],
+                    "measure_token": measure_token,
                     "measure": event["measure"],
                     "position": event["position"],
                     "onset_seconds": round(onset_seconds, 6),
                     "end_seconds": round(onset_seconds + sample_duration, 6),
                     "tempo_bpm": measure_info["tempo_bpm"],
                     "meter": f"{measure_info['beats']}/{measure_info['beat_type']}",
-                    "color": color,
-                    "slots": COLOR_TO_SLOTS[color],
+                    "clip_type": "primer",
+                    "assignment_key": color,
+                    "slots": COLOR_TO_SLOTS.get(color, ""),
                     "sample": sample,
                     "note": assignment["note"],
+                    "channel_mode": "",
                     "sample_duration_seconds": sample_duration,
                     "present_in_macos_assets": sample_key in asset_inventory["macos"],
                     "present_in_flutter_assets": sample_key in asset_inventory["flutter"],
+                }
+            )
+
+        for family, assignment in electronics_assignments.items():
+            sample = assignment.get("sample", "")
+            sample_duration = float(assignment.get("durationMs", 0.0)) / 1000.0
+            sample_durations.append(sample_duration)
+            clip_rows.append(
+                {
+                    "event_id": event["id"],
+                    "measure_token": measure_token,
+                    "measure": event["measure"],
+                    "position": event["position"],
+                    "onset_seconds": round(onset_seconds, 6),
+                    "end_seconds": round(onset_seconds + sample_duration, 6),
+                    "tempo_bpm": measure_info["tempo_bpm"],
+                    "meter": f"{measure_info['beats']}/{measure_info['beat_type']}",
+                    "clip_type": "electronics",
+                    "assignment_key": family,
+                    "slots": "",
+                    "sample": sample,
+                    "note": "",
+                    "channel_mode": assignment.get("channelMode", ""),
+                    "sample_duration_seconds": sample_duration,
+                    "present_in_macos_assets": True,
+                    "present_in_flutter_assets": True,
                 }
             )
 
@@ -303,6 +339,7 @@ def build_timeline(
         event_rows.append(
             {
                 "id": event["id"],
+                "measure_token": measure_token,
                 "measure": event["measure"],
                 "position": event["position"],
                 "onset_seconds": round(onset_seconds, 6),
@@ -312,14 +349,17 @@ def build_timeline(
                 "tempo_bpm": measure_info["tempo_bpm"],
                 "meter": f"{measure_info['beats']}/{measure_info['beat_type']}",
                 "primer_count": len(primer_assignments),
+                "electronics_count": len(electronics_assignments),
                 "sample_length": (
                     "LONG"
-                    if any("long" in assignment["sample"].lower() for assignment in primer_assignments.values())
-                    else "SHORT"
+                    if primer_assignments
+                    and any("long" in assignment["sample"].lower() for assignment in primer_assignments.values())
+                    else ("SHORT" if primer_assignments else "ELECTRONICS")
                 ),
                 "measure_words": measure_info["words"],
                 "timing_note": timing_note_for_event(event, measure_info["words"]),
                 "primer": primer_assignments,
+                "electronics": electronics_assignments,
             }
         )
 
@@ -440,7 +480,7 @@ def render_markdown(report: dict[str, Any]) -> str:
 
 def build_report(recipe_json: Path, score_xml: Path) -> dict[str, Any]:
     recipe_bundle = json.loads(recipe_json.read_text())
-    tempo_map, measure_lookup = build_measure_map(score_xml)
+    tempo_map, measure_lookup, _ = build_measure_token_map(score_xml)
     asset_inventory = build_asset_inventory()
     event_recipe_hashes = build_event_recipe_hashes()
     event_rows, clip_rows, integration = build_timeline(
@@ -456,7 +496,7 @@ def build_report(recipe_json: Path, score_xml: Path) -> dict[str, Any]:
         "Performance-time onsets are exact with respect to the encoded MusicXML tempo and meter map.",
         "The score contains explicit tempo changes at measures 1 (102 BPM) and 30 (72 BPM), with no later encoded tempo changes.",
         "Measures 115 and 130 contain 'articulate freely in aleatoric style'; events in and after that late section should be human-validated if absolute seconds matter in performance.",
-        "Clip end times use the currently bundled primer asset durations, not clip-edge data from the PTX files.",
+        "Clip end times come from the currently bundled trigger assets and may differ from older primer-based reports.",
     ]
 
     return {
@@ -477,7 +517,7 @@ def build_report(recipe_json: Path, score_xml: Path) -> dict[str, Any]:
         },
         "tempo_changes": [
             {
-                "measure": entry["measure"],
+                "measure": entry["measureToken"],
                 "start_seconds": entry["start_seconds"],
                 "tempo_bpm": entry["tempo_bpm"],
                 "beats": entry["beats"],

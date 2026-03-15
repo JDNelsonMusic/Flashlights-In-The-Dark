@@ -429,6 +429,10 @@ private struct LightStaffPlanCard: View {
 
 private extension EventRecipe {
     var measureText: String {
+        if let token = measureToken?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !token.isEmpty {
+            return token
+        }
         if let measure { return "\(measure)" }
         return "—"
     }

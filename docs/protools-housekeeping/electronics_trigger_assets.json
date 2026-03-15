@@ -1,25 +1,31 @@
 {
-  "generated": "2026-03-15T02:12:40+00:00",
-  "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
-  "sourceDurationMs": 440147.292,
+  "generated": "2026-03-15T05:24:42+00:00",
+  "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3",
+  "fullSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+  "sourceDurationMs": 255980.625,
   "syncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
-  "triggerPointSource": "FlashlightsInTheDark_v31_TwelveTriggerPoints.pdf",
+  "triggerPointSource": "docs/score-study/tour_cut_trigger_points.csv",
+  "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
   "flutterAssetRoot": "flashlights_client/available-sounds/electronics-trigger-clips",
-  "triggerPointCount": 12,
+  "triggerPointCount": 8,
   "anchorOffsetMs": 9559.059,
   "fadeInMs": 20.0,
   "firstTriggerStartMs": 2000.0,
-  "tailRule": "Each clip ends 2 beats after the next trigger point and fades across those final 2 beats.",
+  "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
+  "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
   "events": [
     {
       "id": 1,
       "measure": 1,
+      "measureToken": "1",
+      "scoreMeasureOrdinal": 1,
       "position": "beat1",
       "scoreLabel": "M1, beat1",
+      "role": "opening",
       "onsetMilliseconds": 0.0,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3",
@@ -56,12 +62,15 @@
     {
       "id": 2,
       "measure": 2,
+      "measureToken": "2",
+      "scoreMeasureOrdinal": 2,
       "position": "beat1",
       "scoreLabel": "M2, beat1",
+      "role": "opening_anchor",
       "onsetMilliseconds": 2352.941,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-02-soprano.mp3",
@@ -98,12 +107,15 @@
     {
       "id": 3,
       "measure": 25,
+      "measureToken": "25",
+      "scoreMeasureOrdinal": 25,
       "position": "beat4",
       "scoreLabel": "M25, beat4",
+      "role": "opening",
       "onsetMilliseconds": 58235.294,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-03-soprano.mp3",
@@ -140,12 +152,15 @@
     {
       "id": 4,
       "measure": 33,
+      "measureToken": "33",
+      "scoreMeasureOrdinal": 33,
       "position": "beat2",
       "scoreLabel": "M33, beat2",
+      "role": "opening",
       "onsetMilliseconds": 78235.294,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-04-soprano.mp3",
@@ -182,19 +197,22 @@
     {
       "id": 5,
       "measure": 36,
+      "measureToken": "36",
+      "scoreMeasureOrdinal": 36,
       "position": "beat1",
       "scoreLabel": "M36, beat1",
+      "role": "truncated_opening",
       "onsetMilliseconds": 84901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-05-soprano.mp3",
           "channelMode": "left",
           "sourceStartMs": 94461.02,
-          "sourceEndMs": 131127.687,
-          "durationMs": 36666.667,
+          "sourceEndMs": 109461.02,
+          "durationMs": 15000.0,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -203,8 +221,8 @@
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-05-alto.mp3",
           "channelMode": "right",
           "sourceStartMs": 94461.02,
-          "sourceEndMs": 131127.687,
-          "durationMs": 36666.667,
+          "sourceEndMs": 109461.02,
+          "durationMs": 15000.0,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -213,92 +231,8 @@
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-05-tenor-bass.mp3",
           "channelMode": "mono_sum",
           "sourceStartMs": 94461.02,
-          "sourceEndMs": 131127.687,
-          "durationMs": 36666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      }
-    },
-    {
-      "id": 6,
-      "measure": 46,
-      "position": "beat3",
-      "scoreLabel": "M46, beat3",
-      "onsetMilliseconds": 119901.961,
-      "tempoBpm": 72.0,
-      "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-06-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 129461.02,
-          "sourceEndMs": 175294.354,
-          "durationMs": 45833.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-06-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 129461.02,
-          "sourceEndMs": 175294.354,
-          "durationMs": 45833.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-06-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 129461.02,
-          "sourceEndMs": 175294.354,
-          "durationMs": 45833.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      }
-    },
-    {
-      "id": 7,
-      "measure": 63,
-      "position": "beat3",
-      "scoreLabel": "M63, beat3",
-      "onsetMilliseconds": 164068.628,
-      "tempoBpm": 72.0,
-      "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-07-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 173627.687,
-          "sourceEndMs": 214461.02,
-          "durationMs": 40833.333,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-07-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 173627.687,
-          "sourceEndMs": 214461.02,
-          "durationMs": 40833.333,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-07-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 173627.687,
-          "sourceEndMs": 214461.02,
-          "durationMs": 40833.333,
+          "sourceEndMs": 109461.02,
+          "durationMs": 15000.0,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -307,20 +241,23 @@
     },
     {
       "id": 8,
-      "measure": 78,
+      "measure": 38,
+      "measureToken": "38.3",
+      "scoreMeasureOrdinal": 40,
       "position": "beat1",
-      "scoreLabel": "M78, beat1",
-      "onsetMilliseconds": 203235.294,
+      "scoreLabel": "M38.3, beat1",
+      "role": "bridge_crossfade",
+      "onsetMilliseconds": 98235.294,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-08-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 212794.353,
-          "sourceEndMs": 250294.353,
-          "durationMs": 37500.0,
+          "sourceStartMs": 107794.353,
+          "sourceEndMs": 116127.687,
+          "durationMs": 8333.334,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -328,9 +265,9 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-08-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 212794.353,
-          "sourceEndMs": 250294.353,
-          "durationMs": 37500.0,
+          "sourceStartMs": 107794.353,
+          "sourceEndMs": 116127.687,
+          "durationMs": 8333.334,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -338,93 +275,9 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-08-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 212794.353,
-          "sourceEndMs": 250294.353,
-          "durationMs": 37500.0,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      }
-    },
-    {
-      "id": 9,
-      "measure": 89,
-      "position": "beat1",
-      "scoreLabel": "M89, beat1",
-      "onsetMilliseconds": 239068.627,
-      "tempoBpm": 72.0,
-      "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-09-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 248627.686,
-          "sourceEndMs": 280294.353,
-          "durationMs": 31666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-09-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 248627.686,
-          "sourceEndMs": 280294.353,
-          "durationMs": 31666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-09-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 248627.686,
-          "sourceEndMs": 280294.353,
-          "durationMs": 31666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      }
-    },
-    {
-      "id": 10,
-      "measure": 98,
-      "position": "beat1",
-      "scoreLabel": "M98, beat1",
-      "onsetMilliseconds": 269068.627,
-      "tempoBpm": 72.0,
-      "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-10-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 278627.686,
-          "sourceEndMs": 300294.353,
-          "durationMs": 21666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-10-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 278627.686,
-          "sourceEndMs": 300294.353,
-          "durationMs": 21666.667,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-10-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 278627.686,
-          "sourceEndMs": 300294.353,
-          "durationMs": 21666.667,
+          "sourceStartMs": 107794.353,
+          "sourceEndMs": 116127.687,
+          "durationMs": 8333.334,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
@@ -434,18 +287,21 @@
     {
       "id": 11,
       "measure": 104,
+      "measureToken": "104",
+      "scoreMeasureOrdinal": 42,
       "position": "beat1",
       "scoreLabel": "M104, beat1",
-      "onsetMilliseconds": 289068.627,
+      "role": "reentry",
+      "onsetMilliseconds": 104901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-11-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 298627.686,
-          "sourceEndMs": 335294.353,
+          "sourceStartMs": 114461.02,
+          "sourceEndMs": 151127.687,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
@@ -454,8 +310,8 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-11-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 298627.686,
-          "sourceEndMs": 335294.353,
+          "sourceStartMs": 114461.02,
+          "sourceEndMs": 151127.687,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
@@ -464,8 +320,8 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-11-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 298627.686,
-          "sourceEndMs": 335294.353,
+          "sourceStartMs": 114461.02,
+          "sourceEndMs": 151127.687,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
@@ -476,19 +332,22 @@
     {
       "id": 12,
       "measure": 115,
+      "measureToken": "115",
+      "scoreMeasureOrdinal": 53,
       "position": "beat1",
       "scoreLabel": "M115, beat1",
-      "onsetMilliseconds": 324068.627,
+      "role": "final_section",
+      "onsetMilliseconds": 139901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-12-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 333627.686,
-          "sourceEndMs": 440147.292,
-          "durationMs": 106519.606,
+          "sourceStartMs": 149461.02,
+          "sourceEndMs": 255980.625,
+          "durationMs": 106519.605,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
@@ -496,9 +355,9 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-12-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 333627.686,
-          "sourceEndMs": 440147.292,
-          "durationMs": 106519.606,
+          "sourceStartMs": 149461.02,
+          "sourceEndMs": 255980.625,
+          "durationMs": 106519.605,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
@@ -506,9 +365,9 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-12-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 333627.686,
-          "sourceEndMs": 440147.292,
-          "durationMs": 106519.606,
+          "sourceStartMs": 149461.02,
+          "sourceEndMs": 255980.625,
+          "durationMs": 106519.605,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"

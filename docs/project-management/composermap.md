@@ -14,7 +14,7 @@ Read these in order:
 2. `docs/2026-03-13-rehearsal-cut-plan.md`
 3. `docs/protools-housekeeping/event_timeline.md`
 4. `docs/protools-housekeeping/session_audit.md`
-5. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+5. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
 6. `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx`
 
 Then answer one question before doing anything else:
@@ -33,11 +33,13 @@ Short version:
 - `4` measures of twinkling noises and lights
 - chorus enters at `104`
 
-Repo-level interpretation:
+Repo-level interpretation now implemented:
 
-- preserve the opening through measure `38`
-- treat measures `39-42` as the current bridge-sized transition zone
-- bypass the current middle body until the measure `104` return
+- preserve original measures `1-37`
+- keep original measures `38-41` as the `4`-measure bridge window
+- relabel those four measures as `38 / 38.2 / 38.3 / 38.4`
+- rewrite those bridge measures as singer rests in the tour-cut score
+- bypass original measures `42-103`
 - preserve enough structure that the phased restoration plan can add material back later
 
 ### Current Cut Anchors
@@ -107,13 +109,12 @@ So if you cut the middle of the piece, the safest order is:
 
 Current recipe-driven cue facts:
 
-- `192` events in the current recipe bundle
-- first cue event at `0:00.000`
-- last cue event at `6:29.902`
-- encoded score end at `6:58.235`
+- `11` trigger events in the current runtime bundle
+- trigger labels now include `38.2 / 38.3 / 38.4`
+- the cut electronics source keeps original measures `1-41`, then jumps to original measure `104`
 - tempo `102 BPM` from measure `1`
 - tempo `72 BPM` from measure `30`
-- late score text introduces a freer zone at measures `115` and `130`
+- late score text still introduces a freer zone at measures `115` and `130`
 
 ### Anchor Points
 
@@ -212,7 +213,7 @@ This prevents you from solving the same structural problem three times in three 
 
 ### Score and recipe layer
 
-- `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+- `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
 - `scripts/generate_event_recipes_v4.py`
 - `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 - `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`
@@ -220,7 +221,7 @@ This prevents you from solving the same structural problem three times in three 
 
 ### Flutter score-practice layer
 
-- `flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+- `flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml`
 - `flashlights_client/lib/utils/music_xml_utils.dart`
 - `flashlights_client/pubspec.yaml`
 

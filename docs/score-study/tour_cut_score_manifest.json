@@ -1,0 +1,3771 @@
+{
+  "generated": "2026-03-15T04:58:13+00:00",
+  "sourceScore": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
+  "cutScoreSource": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
+  "cutScoreFlutterAsset": "flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml",
+  "bridgeMeasureLabels": [
+    "38",
+    "38.2",
+    "38.3",
+    "38.4"
+  ],
+  "bridgeSourceMeasures": [
+    "38",
+    "39",
+    "40",
+    "41"
+  ],
+  "resumeAtMeasure": 104,
+  "parts": {
+    "P1": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ],
+    "P2": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ],
+    "P3": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ],
+    "P4": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ],
+    "P5": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ],
+    "P6": [
+      {
+        "sourceMeasure": "1",
+        "tourCutMeasure": "1",
+        "baseMeasure": 1,
+        "ordinal": 1,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "2",
+        "tourCutMeasure": "2",
+        "baseMeasure": 2,
+        "ordinal": 2,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "3",
+        "tourCutMeasure": "3",
+        "baseMeasure": 3,
+        "ordinal": 3,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "4",
+        "tourCutMeasure": "4",
+        "baseMeasure": 4,
+        "ordinal": 4,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "5",
+        "tourCutMeasure": "5",
+        "baseMeasure": 5,
+        "ordinal": 5,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "6",
+        "tourCutMeasure": "6",
+        "baseMeasure": 6,
+        "ordinal": 6,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "7",
+        "tourCutMeasure": "7",
+        "baseMeasure": 7,
+        "ordinal": 7,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "8",
+        "tourCutMeasure": "8",
+        "baseMeasure": 8,
+        "ordinal": 8,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "9",
+        "tourCutMeasure": "9",
+        "baseMeasure": 9,
+        "ordinal": 9,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "10",
+        "tourCutMeasure": "10",
+        "baseMeasure": 10,
+        "ordinal": 10,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "11",
+        "tourCutMeasure": "11",
+        "baseMeasure": 11,
+        "ordinal": 11,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "12",
+        "tourCutMeasure": "12",
+        "baseMeasure": 12,
+        "ordinal": 12,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "13",
+        "tourCutMeasure": "13",
+        "baseMeasure": 13,
+        "ordinal": 13,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "14",
+        "tourCutMeasure": "14",
+        "baseMeasure": 14,
+        "ordinal": 14,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "15",
+        "tourCutMeasure": "15",
+        "baseMeasure": 15,
+        "ordinal": 15,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "16",
+        "tourCutMeasure": "16",
+        "baseMeasure": 16,
+        "ordinal": 16,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "17",
+        "tourCutMeasure": "17",
+        "baseMeasure": 17,
+        "ordinal": 17,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "18",
+        "tourCutMeasure": "18",
+        "baseMeasure": 18,
+        "ordinal": 18,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "19",
+        "tourCutMeasure": "19",
+        "baseMeasure": 19,
+        "ordinal": 19,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "20",
+        "tourCutMeasure": "20",
+        "baseMeasure": 20,
+        "ordinal": 20,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "21",
+        "tourCutMeasure": "21",
+        "baseMeasure": 21,
+        "ordinal": 21,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "22",
+        "tourCutMeasure": "22",
+        "baseMeasure": 22,
+        "ordinal": 22,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "23",
+        "tourCutMeasure": "23",
+        "baseMeasure": 23,
+        "ordinal": 23,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "24",
+        "tourCutMeasure": "24",
+        "baseMeasure": 24,
+        "ordinal": 24,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "25",
+        "tourCutMeasure": "25",
+        "baseMeasure": 25,
+        "ordinal": 25,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "26",
+        "tourCutMeasure": "26",
+        "baseMeasure": 26,
+        "ordinal": 26,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "27",
+        "tourCutMeasure": "27",
+        "baseMeasure": 27,
+        "ordinal": 27,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "28",
+        "tourCutMeasure": "28",
+        "baseMeasure": 28,
+        "ordinal": 28,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "29",
+        "tourCutMeasure": "29",
+        "baseMeasure": 29,
+        "ordinal": 29,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "30",
+        "tourCutMeasure": "30",
+        "baseMeasure": 30,
+        "ordinal": 30,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "31",
+        "tourCutMeasure": "31",
+        "baseMeasure": 31,
+        "ordinal": 31,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "32",
+        "tourCutMeasure": "32",
+        "baseMeasure": 32,
+        "ordinal": 32,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "33",
+        "tourCutMeasure": "33",
+        "baseMeasure": 33,
+        "ordinal": 33,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "34",
+        "tourCutMeasure": "34",
+        "baseMeasure": 34,
+        "ordinal": 34,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "35",
+        "tourCutMeasure": "35",
+        "baseMeasure": 35,
+        "ordinal": 35,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "36",
+        "tourCutMeasure": "36",
+        "baseMeasure": 36,
+        "ordinal": 36,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "37",
+        "tourCutMeasure": "37",
+        "baseMeasure": 37,
+        "ordinal": 37,
+        "role": "opening"
+      },
+      {
+        "sourceMeasure": "38",
+        "tourCutMeasure": "38",
+        "baseMeasure": 38,
+        "ordinal": 38,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "39",
+        "tourCutMeasure": "38.2",
+        "baseMeasure": 39,
+        "ordinal": 39,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "40",
+        "tourCutMeasure": "38.3",
+        "baseMeasure": 40,
+        "ordinal": 40,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "41",
+        "tourCutMeasure": "38.4",
+        "baseMeasure": 41,
+        "ordinal": 41,
+        "role": "tour_cut_rest_bridge"
+      },
+      {
+        "sourceMeasure": "104",
+        "tourCutMeasure": "104",
+        "baseMeasure": 104,
+        "ordinal": 42,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "105",
+        "tourCutMeasure": "105",
+        "baseMeasure": 105,
+        "ordinal": 43,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "106",
+        "tourCutMeasure": "106",
+        "baseMeasure": 106,
+        "ordinal": 44,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "107",
+        "tourCutMeasure": "107",
+        "baseMeasure": 107,
+        "ordinal": 45,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "108",
+        "tourCutMeasure": "108",
+        "baseMeasure": 108,
+        "ordinal": 46,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "109",
+        "tourCutMeasure": "109",
+        "baseMeasure": 109,
+        "ordinal": 47,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "110",
+        "tourCutMeasure": "110",
+        "baseMeasure": 110,
+        "ordinal": 48,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "111",
+        "tourCutMeasure": "111",
+        "baseMeasure": 111,
+        "ordinal": 49,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "112",
+        "tourCutMeasure": "112",
+        "baseMeasure": 112,
+        "ordinal": 50,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "113",
+        "tourCutMeasure": "113",
+        "baseMeasure": 113,
+        "ordinal": 51,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "114",
+        "tourCutMeasure": "114",
+        "baseMeasure": 114,
+        "ordinal": 52,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "115",
+        "tourCutMeasure": "115",
+        "baseMeasure": 115,
+        "ordinal": 53,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "116",
+        "tourCutMeasure": "116",
+        "baseMeasure": 116,
+        "ordinal": 54,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "117",
+        "tourCutMeasure": "117",
+        "baseMeasure": 117,
+        "ordinal": 55,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "118",
+        "tourCutMeasure": "118",
+        "baseMeasure": 118,
+        "ordinal": 56,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "119",
+        "tourCutMeasure": "119",
+        "baseMeasure": 119,
+        "ordinal": 57,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "120",
+        "tourCutMeasure": "120",
+        "baseMeasure": 120,
+        "ordinal": 58,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "121",
+        "tourCutMeasure": "121",
+        "baseMeasure": 121,
+        "ordinal": 59,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "122",
+        "tourCutMeasure": "122",
+        "baseMeasure": 122,
+        "ordinal": 60,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "123",
+        "tourCutMeasure": "123",
+        "baseMeasure": 123,
+        "ordinal": 61,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "124",
+        "tourCutMeasure": "124",
+        "baseMeasure": 124,
+        "ordinal": 62,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "125",
+        "tourCutMeasure": "125",
+        "baseMeasure": 125,
+        "ordinal": 63,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "126",
+        "tourCutMeasure": "126",
+        "baseMeasure": 126,
+        "ordinal": 64,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "127",
+        "tourCutMeasure": "127",
+        "baseMeasure": 127,
+        "ordinal": 65,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "128",
+        "tourCutMeasure": "128",
+        "baseMeasure": 128,
+        "ordinal": 66,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "129",
+        "tourCutMeasure": "129",
+        "baseMeasure": 129,
+        "ordinal": 67,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "130",
+        "tourCutMeasure": "130",
+        "baseMeasure": 130,
+        "ordinal": 68,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "131",
+        "tourCutMeasure": "131",
+        "baseMeasure": 131,
+        "ordinal": 69,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "132",
+        "tourCutMeasure": "132",
+        "baseMeasure": 132,
+        "ordinal": 70,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "133",
+        "tourCutMeasure": "133",
+        "baseMeasure": 133,
+        "ordinal": 71,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "134",
+        "tourCutMeasure": "134",
+        "baseMeasure": 134,
+        "ordinal": 72,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "135",
+        "tourCutMeasure": "135",
+        "baseMeasure": 135,
+        "ordinal": 73,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "136",
+        "tourCutMeasure": "136",
+        "baseMeasure": 136,
+        "ordinal": 74,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "137",
+        "tourCutMeasure": "137",
+        "baseMeasure": 137,
+        "ordinal": 75,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "138",
+        "tourCutMeasure": "138",
+        "baseMeasure": 138,
+        "ordinal": 76,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "139",
+        "tourCutMeasure": "139",
+        "baseMeasure": 139,
+        "ordinal": 77,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "140",
+        "tourCutMeasure": "140",
+        "baseMeasure": 140,
+        "ordinal": 78,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "141",
+        "tourCutMeasure": "141",
+        "baseMeasure": 141,
+        "ordinal": 79,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "142",
+        "tourCutMeasure": "142",
+        "baseMeasure": 142,
+        "ordinal": 80,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "143",
+        "tourCutMeasure": "143",
+        "baseMeasure": 143,
+        "ordinal": 81,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "144",
+        "tourCutMeasure": "144",
+        "baseMeasure": 144,
+        "ordinal": 82,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "145",
+        "tourCutMeasure": "145",
+        "baseMeasure": 145,
+        "ordinal": 83,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "146",
+        "tourCutMeasure": "146",
+        "baseMeasure": 146,
+        "ordinal": 84,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "147",
+        "tourCutMeasure": "147",
+        "baseMeasure": 147,
+        "ordinal": 85,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "148",
+        "tourCutMeasure": "148",
+        "baseMeasure": 148,
+        "ordinal": 86,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "149",
+        "tourCutMeasure": "149",
+        "baseMeasure": 149,
+        "ordinal": 87,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "150",
+        "tourCutMeasure": "150",
+        "baseMeasure": 150,
+        "ordinal": 88,
+        "role": "post_cut_survivor"
+      },
+      {
+        "sourceMeasure": "151",
+        "tourCutMeasure": "151",
+        "baseMeasure": 151,
+        "ordinal": 89,
+        "role": "post_cut_survivor"
+      }
+    ]
+  }
+}

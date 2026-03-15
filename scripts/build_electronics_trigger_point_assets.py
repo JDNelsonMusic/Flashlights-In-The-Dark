@@ -12,23 +12,35 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from build_protools_event_timeline import build_measure_map
+from score_measure_utils import build_measure_token_map
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_MP3 = (
+FULL_SOURCE_MP3 = (
     ROOT
     / "audio"
     / "protools-exports"
     / "electronics"
     / "2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3"
 )
-SCORE_XML = (
+CUT_SOURCE_MP3 = (
+    ROOT
+    / "audio"
+    / "protools-exports"
+    / "electronics"
+    / "2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3"
+)
+FULL_SCORE_XML = (
     ROOT
     / "Flashlights-ITD_EventRecipes_4_2026_0309"
     / "FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml"
 )
-TRIGGER_POINT_SOURCE = ROOT / "FlashlightsInTheDark_v31_TwelveTriggerPoints.pdf"
+CUT_SCORE_XML = (
+    ROOT
+    / "Flashlights-ITD_EventRecipes_4_2026_0309"
+    / "FlashlightsInTheDark_v32_TourCut.musicxml"
+)
+TRIGGER_POINT_SOURCE = ROOT / "docs" / "score-study" / "tour_cut_trigger_points.csv"
 SYNC_REFERENCE_PATH = ROOT / "docs" / "protools-housekeeping" / "electronics_sync_reference.md"
 FLUTTER_ASSET_ROOT = (
     ROOT / "flashlights_client" / "available-sounds" / "electronics-trigger-clips"
@@ -44,24 +56,28 @@ RECIPE_COPY_PATHS = [
     ROOT / "FlashlightsInTheDark_MacOS" / "Resources" / "event_recipes.json",
     ROOT / "flashlights_client" / "assets" / "event_recipes.json",
 ]
-DEFAULT_WORKERS = 4
 FADE_IN_MS = 20.0
 FIRST_TRIGGER_START_MS = 2000.0
+CROSSFADE_BEATS = 1.0
 
 
 @dataclass(frozen=True)
 class TriggerPointSpec:
     id: int
+    measure_token: str
     measure: int
-    beat: int
+    position_label: str
+    score_label: str
+    role: str
+    source_measure_token: str
+    source_measure: int
 
     @property
-    def position_label(self) -> str:
-        return f"beat{self.beat}"
-
-    @property
-    def score_label(self) -> str:
-        return f"M{self.measure}, {self.position_label}"
+    def beat(self) -> int:
+        raw = self.position_label.strip().lower()
+        if not raw.startswith("beat"):
+            raise ValueError(f"Unsupported position label: {self.position_label}")
+        return int(raw[4:])
 
 
 @dataclass(frozen=True)
@@ -71,21 +87,6 @@ class ChoirVariant:
     channel_mode: str
     pan_expression: str
 
-
-TRIGGER_POINTS = (
-    TriggerPointSpec(id=1, measure=1, beat=1),
-    TriggerPointSpec(id=2, measure=2, beat=1),
-    TriggerPointSpec(id=3, measure=25, beat=4),
-    TriggerPointSpec(id=4, measure=33, beat=2),
-    TriggerPointSpec(id=5, measure=36, beat=1),
-    TriggerPointSpec(id=6, measure=46, beat=3),
-    TriggerPointSpec(id=7, measure=63, beat=3),
-    TriggerPointSpec(id=8, measure=78, beat=1),
-    TriggerPointSpec(id=9, measure=89, beat=1),
-    TriggerPointSpec(id=10, measure=98, beat=1),
-    TriggerPointSpec(id=11, measure=104, beat=1),
-    TriggerPointSpec(id=12, measure=115, beat=1),
-)
 
 CHOIR_VARIANTS = (
     ChoirVariant(
@@ -136,18 +137,41 @@ def two_beats_ms(tempo_bpm: float) -> float:
     return round(2.0 * 60000.0 / float(tempo_bpm), 3)
 
 
+def load_trigger_specs(path: Path) -> list[TriggerPointSpec]:
+    with path.open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    specs = [
+        TriggerPointSpec(
+            id=int(row["id"]),
+            measure_token=row["measure_token"].strip(),
+            measure=int(row["measure"]),
+            position_label=row["position"].strip(),
+            score_label=row["score_label"].strip(),
+            role=row.get("role", "").strip(),
+            source_measure_token=row.get("source_measure_token", row["measure_token"]).strip(),
+            source_measure=int(row.get("source_measure", row["measure"])),
+        )
+        for row in rows
+    ]
+    ids = [spec.id for spec in specs]
+    if len(set(ids)) != len(ids):
+        raise ValueError("Trigger IDs must be unique")
+    return specs
+
+
 def trigger_onset_ms(
-    measure_lookup: dict[int, dict[str, Any]],
+    token_lookup: dict[str, dict[str, Any]],
     trigger: TriggerPointSpec,
-) -> tuple[float, float]:
-    entry = measure_lookup.get(trigger.measure)
+) -> tuple[float, float, int]:
+    entry = token_lookup.get(trigger.measure_token)
     if entry is None:
-        raise ValueError(f"Measure {trigger.measure} missing from score timing map")
+        raise ValueError(f"Measure token {trigger.measure_token} missing from score timing map")
 
     beats = int(entry["beats"])
     if trigger.beat < 1 or trigger.beat > beats:
         raise ValueError(
-            f"Trigger point {trigger.id} beat {trigger.beat} outside measure {trigger.measure} ({beats} beats)"
+            f"Trigger point {trigger.id} beat {trigger.beat} outside measure {trigger.measure_token} ({beats} beats)"
         )
 
     beat_type = int(entry["beat_type"])
@@ -155,7 +179,7 @@ def trigger_onset_ms(
     start_seconds = float(entry["start_seconds"])
     beat_offset_seconds = (trigger.beat - 1) * (4.0 / beat_type) * 60.0 / tempo_bpm
     onset_ms = round((start_seconds + beat_offset_seconds) * 1000.0, 3)
-    return onset_ms, tempo_bpm
+    return onset_ms, tempo_bpm, int(entry["ordinal"])
 
 
 def variant_asset_key(trigger_id: int, variant: ChoirVariant) -> str:
@@ -185,7 +209,6 @@ def render_variant(
 
     fade_out_ms = min(fade_out_ms, duration_ms)
     fade_out_start_ms = round(duration_ms - fade_out_ms, 3)
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     filter_graph = (
@@ -216,6 +239,103 @@ def render_variant(
     )
 
 
+def render_cut_source(
+    *,
+    full_source_path: Path,
+    output_path: Path,
+    full_token_lookup: dict[str, dict[str, Any]],
+    cut_token_lookup: dict[str, dict[str, Any]],
+    trigger_specs: list[TriggerPointSpec],
+) -> None:
+    trigger_by_id = {trigger.id: trigger for trigger in trigger_specs}
+    trigger5 = trigger_by_id[5]
+    trigger8 = trigger_by_id[8]
+    trigger11 = trigger_by_id[11]
+
+    full_5_ms, _, _ = trigger_onset_ms(
+        full_token_lookup,
+        TriggerPointSpec(
+            id=trigger5.id,
+            measure_token=trigger5.source_measure_token,
+            measure=trigger5.source_measure,
+            position_label=trigger5.position_label,
+            score_label=trigger5.score_label,
+            role=trigger5.role,
+            source_measure_token=trigger5.source_measure_token,
+            source_measure=trigger5.source_measure,
+        ),
+    )
+    full_8_ms, _, _ = trigger_onset_ms(
+        full_token_lookup,
+        TriggerPointSpec(
+            id=trigger8.id,
+            measure_token=trigger8.source_measure_token,
+            measure=trigger8.source_measure,
+            position_label=trigger8.position_label,
+            score_label=trigger8.score_label,
+            role=trigger8.role,
+            source_measure_token=trigger8.source_measure_token,
+            source_measure=trigger8.source_measure,
+        ),
+    )
+    full_11_ms, _, _ = trigger_onset_ms(
+        full_token_lookup,
+        TriggerPointSpec(
+            id=trigger11.id,
+            measure_token=trigger11.source_measure_token,
+            measure=trigger11.source_measure,
+            position_label=trigger11.position_label,
+            score_label=trigger11.score_label,
+            role=trigger11.role,
+            source_measure_token=trigger11.source_measure_token,
+            source_measure=trigger11.source_measure,
+        ),
+    )
+
+    cut_5_ms, _, _ = trigger_onset_ms(cut_token_lookup, trigger5)
+    cut_8_ms, tempo_8_bpm, _ = trigger_onset_ms(cut_token_lookup, trigger8)
+    cut_11_ms, _, _ = trigger_onset_ms(cut_token_lookup, trigger11)
+
+    span_5_to_8_ms = round(cut_8_ms - cut_5_ms, 3)
+    span_8_to_11_ms = round(cut_11_ms - cut_8_ms, 3)
+    if span_5_to_8_ms <= 0 or span_8_to_11_ms <= 0:
+        raise ValueError("Tour-cut trigger ordering is invalid for 5 -> 8 -> 11")
+
+    crossfade_ms = round((60000.0 / tempo_8_bpm) * CROSSFADE_BEATS, 3)
+    segment_5_ms = span_5_to_8_ms + crossfade_ms
+    segment_8_ms = span_8_to_11_ms
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    filter_graph = (
+        f"[0:a]atrim=start=0:end={full_5_ms / 1000.0:.6f},asetpts=PTS-STARTPTS[pre];"
+        f"[0:a]atrim=start={full_5_ms / 1000.0:.6f}:end={(full_5_ms + segment_5_ms) / 1000.0:.6f},asetpts=PTS-STARTPTS[seg5];"
+        f"[0:a]atrim=start={full_8_ms / 1000.0:.6f}:end={(full_8_ms + segment_8_ms) / 1000.0:.6f},asetpts=PTS-STARTPTS[seg8];"
+        f"[seg5][seg8]acrossfade=d={crossfade_ms / 1000.0:.6f}[bridge];"
+        f"[0:a]atrim=start={full_11_ms / 1000.0:.6f},asetpts=PTS-STARTPTS[tail];"
+        "[pre][bridge][tail]concat=n=3:v=0:a=1[out]"
+    )
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            str(full_source_path),
+            "-filter_complex",
+            filter_graph,
+            "-map",
+            "[out]",
+            "-codec:a",
+            "libmp3lame",
+            "-q:a",
+            "2",
+            str(output_path),
+        ],
+        check=True,
+    )
+
+
 def clear_output_root(output_root: Path) -> None:
     if output_root.exists():
         shutil.rmtree(output_root)
@@ -224,18 +344,22 @@ def clear_output_root(output_root: Path) -> None:
 
 def build_trigger_plans(
     *,
-    measure_lookup: dict[int, dict[str, Any]],
+    token_lookup: dict[str, dict[str, Any]],
     source_duration_ms: float,
+    trigger_specs: list[TriggerPointSpec],
 ) -> tuple[list[dict[str, Any]], float]:
     trigger_rows: list[dict[str, Any]] = []
-    for trigger in TRIGGER_POINTS:
-        onset_ms, tempo_bpm = trigger_onset_ms(measure_lookup, trigger)
+    for trigger in trigger_specs:
+        onset_ms, tempo_bpm, ordinal = trigger_onset_ms(token_lookup, trigger)
         trigger_rows.append(
             {
                 "id": trigger.id,
                 "measure": trigger.measure,
+                "measureToken": trigger.measure_token,
+                "scoreMeasureOrdinal": ordinal,
                 "position": trigger.position_label,
                 "scoreLabel": trigger.score_label,
+                "role": trigger.role,
                 "onsetMs": onset_ms,
                 "tempoBpm": tempo_bpm,
             }
@@ -287,14 +411,18 @@ def build_trigger_plans(
             {
                 "id": int(trigger["id"]),
                 "measure": int(trigger["measure"]),
+                "measureToken": str(trigger["measureToken"]),
+                "scoreMeasureOrdinal": int(trigger["scoreMeasureOrdinal"]),
                 "position": str(trigger["position"]),
                 "scoreLabel": str(trigger["scoreLabel"]),
+                "role": str(trigger["role"]),
                 "onsetMilliseconds": trigger["onsetMs"],
                 "tempoBpm": trigger["tempoBpm"],
                 "sourceOffsetMs": offset_ms,
                 "timingNote": (
-                    "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; "
-                    "all other clip boundaries are derived from the score beat map."
+                    "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. "
+                    "Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates "
+                    "full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11."
                 ),
                 "variants": variant_payload,
             }
@@ -331,16 +459,19 @@ def build_manifest(
 ) -> dict[str, Any]:
     return {
         "generated": generated_at,
-        "sourceFile": str(SOURCE_MP3.relative_to(ROOT)),
+        "sourceFile": str(CUT_SOURCE_MP3.relative_to(ROOT)),
+        "fullSourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "sourceDurationMs": source_duration_ms,
         "syncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
         "triggerPointSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
+        "scoreMusicXml": str(CUT_SCORE_XML.relative_to(ROOT)),
         "flutterAssetRoot": str(FLUTTER_ASSET_ROOT.relative_to(ROOT)),
         "triggerPointCount": len(plans),
         "anchorOffsetMs": offset_ms,
         "fadeInMs": FADE_IN_MS,
         "firstTriggerStartMs": FIRST_TRIGGER_START_MS,
-        "tailRule": "Each clip ends 2 beats after the next trigger point and fades across those final 2 beats.",
+        "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
+        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
         "events": plans,
     }
 
@@ -355,7 +486,9 @@ def write_manifest(manifest: dict[str, Any]) -> None:
             fieldnames=[
                 "id",
                 "scoreLabel",
+                "measureToken",
                 "measure",
+                "scoreMeasureOrdinal",
                 "position",
                 "tempoBpm",
                 "variant",
@@ -375,7 +508,9 @@ def write_manifest(manifest: dict[str, Any]) -> None:
                     {
                         "id": plan["id"],
                         "scoreLabel": plan["scoreLabel"],
+                        "measureToken": plan["measureToken"],
                         "measure": plan["measure"],
+                        "scoreMeasureOrdinal": plan["scoreMeasureOrdinal"],
                         "position": plan["position"],
                         "tempoBpm": plan["tempoBpm"],
                         "variant": variant_key,
@@ -399,13 +534,16 @@ def write_recipe_copies(
         "source": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
         "triggerPositionSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
         "triggerTimingNote": (
-            "These 12 trigger points come from the annotated twelve-trigger score. "
-            "Trigger Point 2 is locked to 00:11.912 in the stereo-sum electronics export. "
-            "Trigger Point 1 starts at 00:02.000 in the file. All later derived clips start at their beat-mapped onsets and end 2 beats after the next trigger point."
+            "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 8, 11, 12. "
+            "Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4, with Trigger 8 landing at 38.3. "
+            "Trigger Point 2 remains locked to 00:11.912 in the tour-cut electronics master. "
+            "The master truncates Trigger 5, crossfades into Trigger 8, and rejoins the source at Trigger 11. "
+            "Trigger Point 1 starts at 00:02.000 in the file. All later clips start at their beat-mapped tour-cut onsets and end 2 beats after the next surviving trigger."
         ),
         "eventCount": len(plans),
         "generated": generated_at,
-        "electronicsSource": str(SOURCE_MP3.relative_to(ROOT)),
+        "scoreMusicXml": str(CUT_SCORE_XML.relative_to(ROOT)),
+        "electronicsSource": str(CUT_SOURCE_MP3.relative_to(ROOT)),
         "electronicsSyncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
         "electronicsManifest": str(MANIFEST_JSON_PATH.relative_to(ROOT)),
         "electronicsGenerated": generated_at,
@@ -413,6 +551,8 @@ def write_recipe_copies(
             {
                 "id": plan["id"],
                 "measure": plan["measure"],
+                "measureToken": plan["measureToken"],
+                "scoreMeasureOrdinal": plan["scoreMeasureOrdinal"],
                 "position": plan["position"],
                 "scoreLabel": plan["scoreLabel"],
                 "timingNote": plan["timingNote"],
@@ -430,7 +570,7 @@ def write_recipe_copies(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render the 12 choir-part-specific electronics trigger-point assets "
+            "Render the tour-cut choir-part-specific electronics trigger assets "
             "and replace the runtime recipe bundles."
         )
     )
@@ -439,30 +579,48 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Update manifests and recipe bundles without re-rendering MP3 assets.",
     )
+    parser.add_argument(
+        "--skip-cut-source",
+        action="store_true",
+        help="Reuse the existing tour-cut electronics master if it already exists.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    if not SOURCE_MP3.exists():
-        raise FileNotFoundError(SOURCE_MP3)
-    if not SCORE_XML.exists():
-        raise FileNotFoundError(SCORE_XML)
-    if not TRIGGER_POINT_SOURCE.exists():
-        raise FileNotFoundError(TRIGGER_POINT_SOURCE)
+    for path in (FULL_SOURCE_MP3, FULL_SCORE_XML, CUT_SCORE_XML, TRIGGER_POINT_SOURCE):
+        if not path.exists():
+            raise FileNotFoundError(path)
 
-    _, measure_lookup = build_measure_map(SCORE_XML)
-    source_duration_ms = ffprobe_duration_ms(SOURCE_MP3)
+    _, full_token_lookup, _ = build_measure_token_map(FULL_SCORE_XML)
+    _, cut_token_lookup, _ = build_measure_token_map(CUT_SCORE_XML)
+    trigger_specs = load_trigger_specs(TRIGGER_POINT_SOURCE)
+
+    if not args.skip_render and not args.skip_cut_source:
+        render_cut_source(
+            full_source_path=FULL_SOURCE_MP3,
+            output_path=CUT_SOURCE_MP3,
+            full_token_lookup=full_token_lookup,
+            cut_token_lookup=cut_token_lookup,
+            trigger_specs=trigger_specs,
+        )
+
+    if not CUT_SOURCE_MP3.exists():
+        raise FileNotFoundError(CUT_SOURCE_MP3)
+
+    source_duration_ms = ffprobe_duration_ms(CUT_SOURCE_MP3)
     plans, offset_ms = build_trigger_plans(
-        measure_lookup=measure_lookup,
+        token_lookup=cut_token_lookup,
         source_duration_ms=source_duration_ms,
+        trigger_specs=trigger_specs,
     )
     generated_at = iso_now()
 
     if not args.skip_render:
         clear_output_root(FLUTTER_ASSET_ROOT)
-        render_assets(source_path=SOURCE_MP3, plans=plans)
+        render_assets(source_path=CUT_SOURCE_MP3, plans=plans)
 
     manifest = build_manifest(
         generated_at=generated_at,
@@ -474,6 +632,7 @@ def main() -> None:
     write_recipe_copies(generated_at=generated_at, plans=plans)
 
     print(f"Rendered {len(plans) * len(CHOIR_VARIANTS)} assets")
+    print(f"Tour-cut source: {CUT_SOURCE_MP3.relative_to(ROOT)}")
     print(f"Manifest: {MANIFEST_JSON_PATH.relative_to(ROOT)}")
     print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")
 

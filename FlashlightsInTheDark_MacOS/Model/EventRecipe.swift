@@ -14,25 +14,39 @@ public struct EventRecipe: Identifiable, Decodable {
     public let id: Int
     /// Official trigger-score measure for this event, not the sung-note onset.
     public let measure: Int?
+    /// Exact displayed measure token from the current cut score, e.g. "38.2".
+    public let measureToken: String?
+    /// Ordinal position in the currently loaded score asset.
+    public let scoreMeasureOrdinal: Int?
     /// Official trigger-score beat position for this event, not the sung-note onset.
     public let position: String?
+    public let scoreLabel: String?
+    public let timingNote: String?
     public let primerAssignments: [PrimerColor: PrimerAssignment]
     public let lighting: EventLighting?
 
     enum CodingKeys: String, CodingKey {
-        case id, measure, position, primer, lighting
+        case id, measure, measureToken, scoreMeasureOrdinal, position, scoreLabel, timingNote, primer, lighting
     }
 
     public init(
         id: Int,
         measure: Int?,
+        measureToken: String?,
+        scoreMeasureOrdinal: Int?,
         position: String?,
+        scoreLabel: String?,
+        timingNote: String?,
         primerAssignments: [PrimerColor: PrimerAssignment],
         lighting: EventLighting? = nil
     ) {
         self.id = id
         self.measure = measure
+        self.measureToken = measureToken
+        self.scoreMeasureOrdinal = scoreMeasureOrdinal
         self.position = position
+        self.scoreLabel = scoreLabel
+        self.timingNote = timingNote
         self.primerAssignments = primerAssignments
         self.lighting = lighting
     }
@@ -41,7 +55,11 @@ public struct EventRecipe: Identifiable, Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         measure = try container.decodeIfPresent(Int.self, forKey: .measure)
+        measureToken = try container.decodeIfPresent(String.self, forKey: .measureToken)
+        scoreMeasureOrdinal = try container.decodeIfPresent(Int.self, forKey: .scoreMeasureOrdinal)
         position = try container.decodeIfPresent(String.self, forKey: .position)
+        scoreLabel = try container.decodeIfPresent(String.self, forKey: .scoreLabel)
+        timingNote = try container.decodeIfPresent(String.self, forKey: .timingNote)
         if let rawPrimer = try container.decodeIfPresent([String: PrimerAssignment].self, forKey: .primer) {
             var mapped: [PrimerColor: PrimerAssignment] = [:]
             for (key, assignment) in rawPrimer {

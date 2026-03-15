@@ -10,13 +10,18 @@ Choir-facing wording from the correspondence:
 
 > Measures 1-37 (shadow chorus holding through 38) -hold for 4 more measures of twinkling noises and lights -- Chorus enters at 104
 
-Working interpretation for the repo:
+Working interpretation now implemented in the repo:
 
-- Keep measures `1-37`.
-- Preserve the shadow-chorus hold through measure `38`.
-- Insert or preserve a `4`-measure bridge of twinkling noises and lights immediately after measure `38`.
-- Re-enter with the chorus at measure `104`.
-- For the current rehearsal version, this effectively bypasses the existing middle span from measures `39-103`, except for whatever transition material is intentionally used to cover the bridge.
+- Keep original measures `1-37`.
+- Keep original measures `38-41` as the `4`-measure bridge window.
+- Relabel those four bridge measures in the cut score as:
+  - `38`
+  - `38.2`
+  - `38.3`
+  - `38.4`
+- Rewrite those bridge measures as singer rests in the tour-cut score.
+- Re-enter with the chorus at original measure `104`.
+- For the current rehearsal/tour version, this bypasses original measures `42-103`.
 
 ## Current Event-Map Anchors
 
@@ -65,8 +70,9 @@ For this repo, the cut affects four layers:
 
 ### Score and recipe layer
 
-- The structural change is conceptually a jump from measure `38` to measure `104`, with a custom `4`-measure transition in between.
-- The source-of-truth score file is `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`.
+- The structural change is now implemented as:
+  `1-37`, then cut-score bridge measures `38 / 38.2 / 38.3 / 38.4`, then original measure `104`.
+- The current cut score file is `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`.
 - After the score is updated, regenerate the recipe bundle before editing downstream copies by hand.
 
 ### Runtime app layer
@@ -76,7 +82,7 @@ For this repo, the cut affects four layers:
   - `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`
   - `flashlights_client/assets/event_recipes.json`
 - If the MusicXML filename or version changes, also update:
-  - `flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+  - `flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml`
   - `flashlights_client/lib/utils/music_xml_utils.dart`
   - `flashlights_client/pubspec.yaml`
 

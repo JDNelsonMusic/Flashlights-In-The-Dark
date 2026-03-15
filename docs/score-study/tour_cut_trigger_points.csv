@@ -1,0 +1,9 @@
+id,measure_token,measure,position,score_label,role,source_measure_token,source_measure
+1,1,1,beat1,"M1, beat1",opening,1,1
+2,2,2,beat1,"M2, beat1",opening_anchor,2,2
+3,25,25,beat4,"M25, beat4",opening,25,25
+4,33,33,beat2,"M33, beat2",opening,33,33
+5,36,36,beat1,"M36, beat1",truncated_opening,36,36
+8,38.3,38,beat1,"M38.3, beat1",bridge_crossfade,78,78
+11,104,104,beat1,"M104, beat1",reentry,104,104
+12,115,115,beat1,"M115, beat1",final_section,115,115

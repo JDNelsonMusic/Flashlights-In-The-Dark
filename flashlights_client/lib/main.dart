@@ -1131,7 +1131,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'The in-app practice strip now mirrors the reduced 12-trigger electronics design. Preview playback uses your currently selected staff routing only.',
+                                    'The in-app practice strip now mirrors the reduced tour-cut electronics design. Preview playback uses your currently selected staff routing only.',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -1565,7 +1565,7 @@ class _TriggerPointCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final measureText = event.measure != null ? 'M${event.measure}' : 'M—';
+    final measureText = 'M${event.displayMeasureText}';
     final beatText = _normalisedBeat(event.position ?? '');
     final clipLabel =
         assignment == null ? 'No clip' : assignment!.sample.split('/').last;

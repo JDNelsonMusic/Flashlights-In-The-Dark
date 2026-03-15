@@ -266,7 +266,10 @@ class EventRecipe {
   EventRecipe({
     required this.id,
     required this.measure,
+    required this.measureToken,
+    required this.scoreMeasureOrdinal,
     required this.position,
+    required this.scoreLabel,
     required this.primerAssignments,
     required this.electronicsAssignments,
     required this.lighting,
@@ -275,11 +278,27 @@ class EventRecipe {
   final int id;
   // Official trigger-score measure for this event, not the sung-note onset.
   final int? measure;
+  // Exact displayed measure token from the cut score, e.g. "38.2".
+  final String? measureToken;
+  // Ordinal position in the currently loaded score asset for OSMD windowing.
+  final int? scoreMeasureOrdinal;
   // Official trigger-score beat position for this event, not the sung-note onset.
   final String? position;
+  final String? scoreLabel;
   final Map<PrimerColor, PrimerAssignment> primerAssignments;
   final Map<ChoirFamily, ElectronicsAssignment> electronicsAssignments;
   final EventLighting? lighting;
+
+  String get displayMeasureText {
+    final token = measureToken?.trim();
+    if (token != null && token.isNotEmpty) {
+      return token;
+    }
+    if (measure != null) {
+      return '$measure';
+    }
+    return '—';
+  }
 
   static EventRecipe fromJson(Map<String, dynamic> json) {
     final primer = <PrimerColor, PrimerAssignment>{};
@@ -406,7 +425,10 @@ class EventRecipe {
     return EventRecipe(
       id: json['id'] as int,
       measure: json['measure'] as int?,
+      measureToken: (json['measureToken'] as String?)?.trim(),
+      scoreMeasureOrdinal: json['scoreMeasureOrdinal'] as int?,
       position: json['position'] as String?,
+      scoreLabel: (json['scoreLabel'] as String?)?.trim(),
       primerAssignments: primer,
       electronicsAssignments: electronics,
       lighting: lighting,

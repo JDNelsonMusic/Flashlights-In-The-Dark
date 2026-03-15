@@ -34,7 +34,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/event_recipes.json
-    - assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml
+    - assets/FlashlightsInTheDark_v32_TourCut.musicxml
     - assets/osmd_view.html
     - assets/opensheetmusicdisplay.min.js
     - available-sounds/sound-events-LEFT/
