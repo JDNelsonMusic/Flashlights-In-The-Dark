@@ -59,6 +59,9 @@ double interpolateLightLevel(
     final previous = keyframes[index - 1];
     final current = keyframes[index];
     if (clampedElapsed <= current.atMs) {
+      if (previous.interpolation == 'step') {
+        return previous.level;
+      }
       final span = current.atMs - previous.atMs;
       if (span <= 0) {
         return current.level;

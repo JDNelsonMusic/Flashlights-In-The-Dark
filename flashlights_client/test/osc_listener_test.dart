@@ -83,6 +83,17 @@ void main() {
       expect(interpolateLightLevel(keyframes, 2500), closeTo(0.25, 0.001));
     });
 
+    test('honours step interpolation for binary passages', () {
+      final stepped = <LightingKeyframe>[
+        LightingKeyframe(atMs: 0, level: 0, interpolation: 'step'),
+        LightingKeyframe(atMs: 1000, level: 1, interpolation: 'step'),
+        LightingKeyframe(atMs: 1400, level: 0, interpolation: 'step'),
+      ];
+      expect(interpolateLightLevel(stepped, 500), 0);
+      expect(interpolateLightLevel(stepped, 1100), 1);
+      expect(interpolateLightLevel(stepped, 1450), 0);
+    });
+
     test('holds final level after sequence end', () {
       expect(interpolateLightLevel(keyframes, 3200), 0);
     });

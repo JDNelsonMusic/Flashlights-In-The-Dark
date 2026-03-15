@@ -79,7 +79,7 @@ class PartPlan:
     summary: str
     motion: str
     peak_level: float
-    points: list[tuple[float, float]]
+    points: list[tuple[float, float] | tuple[float, float, str]]
 
 
 @dataclass(frozen=True)
@@ -92,11 +92,23 @@ class EventPlan:
     parts: dict[str, PartPlan]
 
 
-def _scale_points(duration_ms: float, points: list[tuple[float, float]]) -> list[dict[str, float]]:
-    keyframes: list[dict[str, float]] = []
-    for fraction, level in points:
+def _scale_points(
+    duration_ms: float,
+    points: list[tuple[float, float] | tuple[float, float, str]],
+) -> list[dict[str, float | str]]:
+    keyframes: list[dict[str, float | str]] = []
+    for raw_point in points:
+        fraction = raw_point[0]
+        level = raw_point[1]
+        interpolation = raw_point[2] if len(raw_point) > 2 else "linear"
         at_ms = round(duration_ms * fraction, 3)
-        keyframes.append({"atMs": at_ms, "level": round(max(0.0, min(level, 1.0)), 3)})
+        entry: dict[str, float | str] = {
+            "atMs": at_ms,
+            "level": round(max(0.0, min(level, 1.0)), 3),
+        }
+        if interpolation != "linear":
+            entry["interpolation"] = interpolation
+        keyframes.append(entry)
     if not keyframes:
         return [{"atMs": 0.0, "level": 0.0}]
     if keyframes[0]["atMs"] != 0.0:
@@ -108,12 +120,18 @@ def _scale_points(duration_ms: float, points: list[tuple[float, float]]) -> list
     return keyframes
 
 
-def _dedupe_fraction_points(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
-    deduped: dict[float, float] = {}
-    for fraction, level in sorted(points, key=lambda item: item[0]):
+def _dedupe_fraction_points(
+    points: list[tuple[float, float] | tuple[float, float, str]],
+) -> list[tuple[float, float] | tuple[float, float, str]]:
+    deduped: dict[float, tuple[float, float] | tuple[float, float, str]] = {}
+    for point in sorted(points, key=lambda item: item[0]):
+        fraction = point[0]
+        level = point[1]
         key = round(fraction, 6)
-        deduped[key] = max(level, deduped.get(key, 0.0))
-    return [(fraction, deduped[fraction]) for fraction in sorted(deduped)]
+        existing = deduped.get(key)
+        if existing is None or level >= existing[1]:
+            deduped[key] = point
+    return [deduped[fraction] for fraction in sorted(deduped)]
 
 
 def _collect_tp12_voice_onsets() -> dict[str, list[dict[str, float | bool]]]:
@@ -193,7 +211,7 @@ def _build_tp12_parts() -> dict[str, PartPlan]:
     for part_key in PART_ORDER:
         records = onset_map[part_key]
         base_peak = TP12_BASE_LEVELS[part_key]
-        points: list[tuple[float, float]] = [(0.0, 0.0)]
+        points: list[tuple[float, float] | tuple[float, float, str]] = [(0.0, 0.0, "step")]
 
         for index, record in enumerate(records):
             onset_ms = float(record["onsetMs"])
@@ -203,22 +221,18 @@ def _build_tp12_parts() -> dict[str, PartPlan]:
                 if index + 1 < len(records)
                 else TP12_FIXED_DURATION_MS
             )
-            gap_ms = max(180.0, next_onset_ms - onset_ms)
+            gap_ms = max(160.0, next_onset_ms - onset_ms)
             peak_level = min(base_peak + (0.04 if measure_downbeat else 0.0), 0.34)
-            tail_level = round(peak_level * 0.38, 3)
-            settle_ms = min(gap_ms * 0.28, 220.0)
-            release_ms = min(gap_ms * 0.62, 520.0)
-            pre_ms = max(0.0, onset_ms - 18.0)
-            points.append((pre_ms / TP12_FIXED_DURATION_MS, 0.0))
-            points.append((onset_ms / TP12_FIXED_DURATION_MS, peak_level))
-            points.append((min(TP12_FIXED_DURATION_MS, onset_ms + settle_ms) / TP12_FIXED_DURATION_MS, tail_level))
-            points.append((min(TP12_FIXED_DURATION_MS, onset_ms + release_ms) / TP12_FIXED_DURATION_MS, 0.0))
+            pulse_ms = min(180.0 if measure_downbeat else 120.0, gap_ms * 0.42)
+            off_ms = min(TP12_FIXED_DURATION_MS, onset_ms + pulse_ms)
+            points.append((onset_ms / TP12_FIXED_DURATION_MS, peak_level, "step"))
+            points.append((off_ms / TP12_FIXED_DURATION_MS, 0.0, "step"))
 
         normalised = _dedupe_fraction_points(points)
         parts[part_key] = PartPlan(
             summary=TP12_SUMMARIES[part_key],
             motion="note-synchronous",
-            peak_level=round(max(level for _, level in normalised), 3),
+            peak_level=round(max(point[1] for point in normalised), 3),
             points=normalised,
         )
 
@@ -280,47 +294,169 @@ def _build_event_plans() -> dict[int, EventPlan]:
             },
         ),
         2: EventPlan(
-            summary="A strong forte shimmer courses left-to-right, then measures 11–19 fracture into faster irregular cross-ensemble flashes before the rebound.",
+            summary="A strong forte shimmer courses left-to-right, then measures 11–19 fracture into hard max-brightness glitter before the rebound.",
             score_dynamics="f",
-            design_tags=["double_sweep", "forte_shimmer", "cross_stage", "stochastic_middle_band"],
+            design_tags=["double_sweep", "forte_shimmer", "cross_stage", "stochastic_middle_band", "binary_glitter"],
             duration_scale=0.94,
             fixed_duration_ms=None,
             parts={
                 "soprano_l1": PartPlan(
-                    summary="Opens the first bright sweep, then breaks into fast left-biased stochastic flashes before reigniting.",
-                    motion="left-right-stochastic-left",
-                    peak_level=0.86,
-                    points=[(0.00, 0.0), (0.05, 0.14), (0.14, 0.86), (0.28, 0.22), (0.40, 0.12), (0.44, 0.58), (0.47, 0.08), (0.52, 0.66), (0.55, 0.10), (0.60, 0.50), (0.63, 0.08), (0.68, 0.72), (0.72, 0.12), (0.76, 0.72), (0.90, 0.10), (1.00, 0.0)],
+                    summary="Opens the first bright sweep, then breaks into left-biased hard glitter before reigniting.",
+                    motion="left-right-binary-glitter",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.05, 0.14),
+                        (0.14, 0.86),
+                        (0.28, 0.22),
+                        (0.37, 0.0),
+                        (0.392, 1.0, "step"),
+                        (0.404, 0.0, "step"),
+                        (0.438, 1.0, "step"),
+                        (0.450, 0.0, "step"),
+                        (0.496, 1.0, "step"),
+                        (0.508, 0.0, "step"),
+                        (0.556, 1.0, "step"),
+                        (0.568, 0.0, "step"),
+                        (0.614, 1.0, "step"),
+                        (0.626, 0.0, "step"),
+                        (0.690, 1.0, "step"),
+                        (0.704, 0.0),
+                        (0.76, 0.72),
+                        (0.90, 0.10),
+                        (1.00, 0.0),
+                    ],
                 ),
                 "soprano_l2": PartPlan(
-                    summary="Tracks the first sweep, then interlocks with Sop-L1 in faster uneven upper-left flickers.",
-                    motion="left-right-stochastic-left",
-                    peak_level=0.82,
-                    points=[(0.00, 0.0), (0.08, 0.12), (0.18, 0.82), (0.32, 0.24), (0.42, 0.10), (0.46, 0.54), (0.49, 0.12), (0.53, 0.62), (0.57, 0.10), (0.61, 0.46), (0.66, 0.14), (0.71, 0.68), (0.75, 0.12), (0.80, 0.66), (0.92, 0.10), (1.00, 0.0)],
+                    summary="Tracks the first sweep, then interlocks with Sop-L1 in upper-left hard glitter.",
+                    motion="left-right-binary-glitter",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.08, 0.12),
+                        (0.18, 0.82),
+                        (0.32, 0.24),
+                        (0.375, 0.0),
+                        (0.410, 1.0, "step"),
+                        (0.422, 0.0, "step"),
+                        (0.468, 1.0, "step"),
+                        (0.480, 0.0, "step"),
+                        (0.522, 1.0, "step"),
+                        (0.536, 0.0, "step"),
+                        (0.598, 1.0, "step"),
+                        (0.610, 0.0, "step"),
+                        (0.664, 1.0, "step"),
+                        (0.676, 0.0, "step"),
+                        (0.726, 1.0, "step"),
+                        (0.738, 0.0),
+                        (0.80, 0.66),
+                        (0.92, 0.10),
+                        (1.00, 0.0),
+                    ],
                 ),
                 "tenor_l": PartPlan(
-                    summary="The center-left staff becomes a restless engine of irregular flashes across measures 11–19.",
-                    motion="central-stochastic",
-                    peak_level=0.78,
-                    points=[(0.00, 0.0), (0.12, 0.10), (0.24, 0.78), (0.38, 0.26), (0.41, 0.14), (0.45, 0.60), (0.48, 0.08), (0.51, 0.74), (0.55, 0.12), (0.59, 0.52), (0.63, 0.08), (0.67, 0.70), (0.71, 0.10), (0.76, 0.56), (0.84, 0.58), (0.94, 0.08), (1.00, 0.0)],
+                    summary="The center-left staff becomes a restless engine of full-power irregular flashes.",
+                    motion="central-binary-glitter",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.12, 0.10),
+                        (0.24, 0.78),
+                        (0.36, 0.18),
+                        (0.390, 1.0, "step"),
+                        (0.402, 0.0, "step"),
+                        (0.430, 1.0, "step"),
+                        (0.442, 0.0, "step"),
+                        (0.486, 1.0, "step"),
+                        (0.500, 0.0, "step"),
+                        (0.548, 1.0, "step"),
+                        (0.560, 0.0, "step"),
+                        (0.606, 1.0, "step"),
+                        (0.620, 0.0, "step"),
+                        (0.652, 1.0, "step"),
+                        (0.664, 0.0, "step"),
+                        (0.710, 1.0, "step"),
+                        (0.724, 0.0),
+                        (0.84, 0.58),
+                        (0.94, 0.08),
+                        (1.00, 0.0),
+                    ],
                 ),
                 "bass_l": PartPlan(
-                    summary="Bass anchors the stochastic section with the deepest irregular weight.",
-                    motion="center-stochastic",
-                    peak_level=0.74,
-                    points=[(0.00, 0.0), (0.16, 0.08), (0.28, 0.74), (0.42, 0.18), (0.46, 0.58), (0.50, 0.10), (0.54, 0.72), (0.58, 0.12), (0.62, 0.48), (0.66, 0.08), (0.70, 0.64), (0.74, 0.18), (0.86, 0.54), (0.95, 0.07), (1.00, 0.0)],
+                    summary="Bass anchors the glitter with the deepest max-brightness cuts.",
+                    motion="center-binary-glitter",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.16, 0.08),
+                        (0.28, 0.74),
+                        (0.37, 0.0),
+                        (0.404, 1.0, "step"),
+                        (0.418, 0.0, "step"),
+                        (0.452, 1.0, "step"),
+                        (0.466, 0.0, "step"),
+                        (0.518, 1.0, "step"),
+                        (0.532, 0.0, "step"),
+                        (0.586, 1.0, "step"),
+                        (0.598, 0.0, "step"),
+                        (0.646, 1.0, "step"),
+                        (0.660, 0.0, "step"),
+                        (0.716, 1.0, "step"),
+                        (0.730, 0.0),
+                        (0.86, 0.54),
+                        (0.95, 0.07),
+                        (1.00, 0.0),
+                    ],
                 ),
                 "alto_l2": PartPlan(
-                    summary="Receives the first sweep, then snaps into quick right-side irregular replies.",
-                    motion="rightward-stochastic",
-                    peak_level=0.80,
-                    points=[(0.00, 0.0), (0.22, 0.08), (0.34, 0.80), (0.40, 0.14), (0.45, 0.44), (0.49, 0.10), (0.55, 0.70), (0.59, 0.12), (0.64, 0.50), (0.68, 0.10), (0.73, 0.68), (0.78, 0.16), (0.84, 0.60), (0.94, 0.08), (1.00, 0.0)],
+                    summary="Receives the first sweep, then snaps into right-side hard glitter replies.",
+                    motion="rightward-binary-glitter",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.22, 0.08),
+                        (0.34, 0.80),
+                        (0.372, 0.0),
+                        (0.420, 1.0, "step"),
+                        (0.434, 0.0, "step"),
+                        (0.474, 1.0, "step"),
+                        (0.488, 0.0, "step"),
+                        (0.540, 1.0, "step"),
+                        (0.554, 0.0, "step"),
+                        (0.610, 1.0, "step"),
+                        (0.624, 0.0, "step"),
+                        (0.680, 1.0, "step"),
+                        (0.694, 0.0, "step"),
+                        (0.734, 1.0, "step"),
+                        (0.748, 0.0),
+                        (0.84, 0.60),
+                        (0.94, 0.08),
+                        (1.00, 0.0),
+                    ],
                 ),
                 "alto_l1": PartPlan(
-                    summary="The far-right edge receives the bright wave last, then throws back fast irregular sparks before the return sweep.",
-                    motion="right-edge-stochastic-rebound",
-                    peak_level=0.88,
-                    points=[(0.00, 0.0), (0.26, 0.06), (0.38, 0.88), (0.43, 0.12), (0.47, 0.52), (0.51, 0.08), (0.57, 0.76), (0.61, 0.10), (0.66, 0.56), (0.70, 0.08), (0.75, 0.72), (0.78, 0.76), (0.92, 0.10), (1.00, 0.0)],
+                    summary="The far-right edge receives the bright wave last, then throws back the brightest hard sparks before the return sweep.",
+                    motion="right-edge-binary-glitter-rebound",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0),
+                        (0.26, 0.06),
+                        (0.38, 0.88),
+                        (0.400, 0.0),
+                        (0.444, 1.0, "step"),
+                        (0.458, 0.0, "step"),
+                        (0.506, 1.0, "step"),
+                        (0.520, 0.0, "step"),
+                        (0.570, 1.0, "step"),
+                        (0.584, 0.0, "step"),
+                        (0.636, 1.0, "step"),
+                        (0.650, 0.0, "step"),
+                        (0.704, 1.0, "step"),
+                        (0.718, 0.0),
+                        (0.78, 0.76),
+                        (0.92, 0.10),
+                        (1.00, 0.0),
+                    ],
                 ),
             },
         ),
@@ -640,47 +776,155 @@ def _build_event_plans() -> dict[int, EventPlan]:
             },
         ),
         10: EventPlan(
-            summary="A broad crescendo grows from scattered piano embers into the brightest cross-stage surge before Trigger 11.",
-            score_dynamics="p -> ff",
-            design_tags=["crescendo", "left_to_right", "climax_preparation"],
+            summary="A binary max-brightness glitter field grows denser across the ensemble from measure 98 to 104, culminating just before Trigger 11.",
+            score_dynamics="p -> ff via density",
+            design_tags=["binary_glitter", "density_crescendo", "left_to_right", "climax_preparation"],
             duration_scale=0.98,
             fixed_duration_ms=None,
             parts={
                 "soprano_l1": PartPlan(
-                    summary="Begins the crescendo early on the far-left edge and returns at the final crest.",
-                    motion="crescendo-sweep",
-                    peak_level=0.96,
-                    points=[(0.00, 0.0), (0.08, 0.08), (0.24, 0.26), (0.46, 0.52), (0.66, 0.82), (0.82, 0.96), (0.92, 0.20), (1.00, 0.0)],
+                    summary="Far-left sparks start relatively sparse and then accelerate toward the climax.",
+                    motion="binary-density-sweep",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.08, 1.0, "step"),
+                        (0.11, 0.0, "step"),
+                        (0.26, 1.0, "step"),
+                        (0.29, 0.0, "step"),
+                        (0.46, 1.0, "step"),
+                        (0.49, 0.0, "step"),
+                        (0.63, 1.0, "step"),
+                        (0.66, 0.0, "step"),
+                        (0.74, 1.0, "step"),
+                        (0.77, 0.0, "step"),
+                        (0.82, 1.0, "step"),
+                        (0.85, 0.0, "step"),
+                        (0.89, 1.0, "step"),
+                        (0.92, 0.0, "step"),
+                        (0.96, 1.0, "step"),
+                        (0.985, 0.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
                 "soprano_l2": PartPlan(
-                    summary="Takes the growing wave and keeps it shining through the center of the build.",
-                    motion="crescendo-sweep",
-                    peak_level=0.94,
-                    points=[(0.00, 0.0), (0.12, 0.06), (0.28, 0.24), (0.50, 0.56), (0.70, 0.84), (0.86, 0.94), (0.94, 0.18), (1.00, 0.0)],
+                    summary="Upper-left glitter fills in after Sop-L1 and stays active through the build.",
+                    motion="binary-density-sweep",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.12, 1.0, "step"),
+                        (0.15, 0.0, "step"),
+                        (0.30, 1.0, "step"),
+                        (0.33, 0.0, "step"),
+                        (0.48, 1.0, "step"),
+                        (0.51, 0.0, "step"),
+                        (0.64, 1.0, "step"),
+                        (0.67, 0.0, "step"),
+                        (0.76, 1.0, "step"),
+                        (0.79, 0.0, "step"),
+                        (0.84, 1.0, "step"),
+                        (0.87, 0.0, "step"),
+                        (0.91, 1.0, "step"),
+                        (0.94, 0.0, "step"),
+                        (0.975, 1.0, "step"),
+                        (0.99, 0.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
                 "tenor_l": PartPlan(
-                    summary="Center-left staff becomes the core engine of the crescendo.",
-                    motion="center-build",
-                    peak_level=0.98,
-                    points=[(0.00, 0.0), (0.16, 0.06), (0.34, 0.28), (0.56, 0.62), (0.74, 0.90), (0.88, 0.98), (0.96, 0.18), (1.00, 0.0)],
+                    summary="Tenor becomes the main engine of the binary density crescendo.",
+                    motion="binary-center-build",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.18, 1.0, "step"),
+                        (0.21, 0.0, "step"),
+                        (0.36, 1.0, "step"),
+                        (0.39, 0.0, "step"),
+                        (0.52, 1.0, "step"),
+                        (0.55, 0.0, "step"),
+                        (0.66, 1.0, "step"),
+                        (0.69, 0.0, "step"),
+                        (0.78, 1.0, "step"),
+                        (0.805, 0.0, "step"),
+                        (0.86, 1.0, "step"),
+                        (0.885, 0.0, "step"),
+                        (0.92, 1.0, "step"),
+                        (0.945, 0.0, "step"),
+                        (0.975, 1.0, "step"),
+                        (0.992, 0.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
                 "bass_l": PartPlan(
-                    summary="Bass reaches the deepest, fullest brightness at the top of the swell.",
-                    motion="center-build",
+                    summary="Bass throws the heaviest max-brightness cuts near the crest of the build.",
+                    motion="binary-center-build",
                     peak_level=1.0,
-                    points=[(0.00, 0.0), (0.18, 0.06), (0.36, 0.30), (0.58, 0.66), (0.76, 0.94), (0.90, 1.00), (0.96, 0.18), (1.00, 0.0)],
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.22, 1.0, "step"),
+                        (0.25, 0.0, "step"),
+                        (0.40, 1.0, "step"),
+                        (0.43, 0.0, "step"),
+                        (0.56, 1.0, "step"),
+                        (0.59, 0.0, "step"),
+                        (0.70, 1.0, "step"),
+                        (0.73, 0.0, "step"),
+                        (0.82, 1.0, "step"),
+                        (0.845, 0.0, "step"),
+                        (0.89, 1.0, "step"),
+                        (0.915, 0.0, "step"),
+                        (0.95, 1.0, "step"),
+                        (0.972, 0.0, "step"),
+                        (0.99, 1.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
                 "alto_l2": PartPlan(
-                    summary="The right-middle catches late and helps throw the climax back across the stage.",
-                    motion="crescendo-rebound",
-                    peak_level=0.96,
-                    points=[(0.00, 0.0), (0.24, 0.04), (0.42, 0.24), (0.64, 0.60), (0.80, 0.90), (0.92, 0.96), (0.98, 0.16), (1.00, 0.0)],
+                    summary="Right-middle glitter catches late and helps complete the binary surge.",
+                    motion="binary-rebound",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.28, 1.0, "step"),
+                        (0.31, 0.0, "step"),
+                        (0.46, 1.0, "step"),
+                        (0.49, 0.0, "step"),
+                        (0.62, 1.0, "step"),
+                        (0.65, 0.0, "step"),
+                        (0.76, 1.0, "step"),
+                        (0.79, 0.0, "step"),
+                        (0.86, 1.0, "step"),
+                        (0.885, 0.0, "step"),
+                        (0.92, 1.0, "step"),
+                        (0.945, 0.0, "step"),
+                        (0.98, 1.0, "step"),
+                        (0.995, 0.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
                 "alto_l1": PartPlan(
-                    summary="The far-right edge peaks last, completing the full-range sweep into the next trigger.",
-                    motion="crescendo-rebound",
-                    peak_level=0.98,
-                    points=[(0.00, 0.0), (0.30, 0.02), (0.50, 0.20), (0.70, 0.56), (0.86, 0.92), (0.96, 0.98), (1.00, 0.0)],
+                    summary="The far-right edge peaks last, with only hard on/off flashes driving the climax.",
+                    motion="binary-rebound",
+                    peak_level=1.0,
+                    points=[
+                        (0.00, 0.0, "step"),
+                        (0.32, 1.0, "step"),
+                        (0.35, 0.0, "step"),
+                        (0.52, 1.0, "step"),
+                        (0.55, 0.0, "step"),
+                        (0.68, 1.0, "step"),
+                        (0.71, 0.0, "step"),
+                        (0.80, 1.0, "step"),
+                        (0.83, 0.0, "step"),
+                        (0.89, 1.0, "step"),
+                        (0.915, 0.0, "step"),
+                        (0.95, 1.0, "step"),
+                        (0.975, 0.0, "step"),
+                        (0.992, 1.0, "step"),
+                        (1.00, 0.0, "step"),
+                    ],
                 ),
             },
         ),

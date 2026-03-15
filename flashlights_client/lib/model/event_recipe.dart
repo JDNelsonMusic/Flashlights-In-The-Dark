@@ -169,10 +169,15 @@ class ElectronicsAssignment {
 }
 
 class LightingKeyframe {
-  LightingKeyframe({required this.atMs, required this.level});
+  LightingKeyframe({
+    required this.atMs,
+    required this.level,
+    this.interpolation = 'linear',
+  });
 
   final double atMs;
   final double level;
+  final String interpolation;
 }
 
 class LightingAssignment {
@@ -342,10 +347,16 @@ class EventRecipe {
               .map((entry) {
                 final atMs = (entry['atMs'] as num?)?.toDouble();
                 final level = (entry['level'] as num?)?.toDouble();
+                final interpolation =
+                    (entry['interpolation'] as String?)?.trim() ?? 'linear';
                 if (atMs == null || level == null) {
                   return null;
                 }
-                return LightingKeyframe(atMs: atMs, level: level);
+                return LightingKeyframe(
+                  atMs: atMs,
+                  level: level,
+                  interpolation: interpolation,
+                );
               })
               .whereType<LightingKeyframe>()
               .toList(growable: false);
