@@ -31,12 +31,14 @@ flutter:
   uses-material-design: true
   assets:
     - assets/event_recipes.json
+    - assets/show_profiles.json
     - available-sounds/sound-events-LEFT/
     - available-sounds/sound-events-CENTER/
     - available-sounds/sound-events-RIGHT/
     - available-sounds/electronics-trigger-clips/soprano/
     - available-sounds/electronics-trigger-clips/alto/
     - available-sounds/electronics-trigger-clips/tenor-bass/
+    - available-sounds/electronics-trigger-clips/part-specific/
 
 dependency_overrides:
   win32: ^5.14.0

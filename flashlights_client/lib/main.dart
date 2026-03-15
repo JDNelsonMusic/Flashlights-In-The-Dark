@@ -157,12 +157,25 @@ class _HeaderSection extends StatelessWidget {
                 valueListenable: client.connected,
                 builder: (context, connected, _) {
                   final status = connected ? 'Connected' : 'Searching…';
-                  return Text(
-                    '$kAppVersion · $platform · $status',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: Colors.white70,
-                      letterSpacing: 0.2,
-                    ),
+                  return ValueListenableBuilder(
+                    valueListenable: client.showProfiles,
+                    builder: (context, manifest, _) {
+                      final profileLabel = manifest?.activeProfile?.shortLabel;
+                      final line = [
+                        kAppVersion,
+                        platform,
+                        if (profileLabel != null && profileLabel.isNotEmpty)
+                          profileLabel,
+                        status,
+                      ].join(' · ');
+                      return Text(
+                        line,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.white70,
+                          letterSpacing: 0.2,
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -645,6 +658,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     flosc.OscListener.instance.start();
     unawaited(client.ensureEventRecipesLoaded());
+    unawaited(client.ensureShowProfilesLoaded());
     unawaited(_setAppScreenToMaximum());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -1573,6 +1587,14 @@ class DebugOverlay extends StatelessWidget {
                 builder:
                     (context, connected, _) => Text(
                       'Connected: $connected',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: client.showProfiles,
+                builder:
+                    (context, manifest, _) => Text(
+                      'Profile: ${manifest?.activeProfile?.label ?? 'unknown'}',
                       style: const TextStyle(color: Colors.white70),
                     ),
               ),

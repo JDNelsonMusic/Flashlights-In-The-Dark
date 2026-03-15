@@ -3,12 +3,12 @@
   "triggerPositionSource": "docs/score-study/tour_cut_trigger_points.csv",
   "triggerTimingNote": "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4, with Trigger 8 landing at 38.3. Trigger Point 2 remains locked to 00:11.912 in the tour-cut electronics master. The master truncates Trigger 5, crossfades into Trigger 8, and rejoins the source at Trigger 11. Trigger Point 1 starts at 00:02.000 in the file. All later clips start at their beat-mapped tour-cut onsets and end 2 beats after the next surviving trigger.",
   "eventCount": 8,
-  "generated": "2026-03-15T10:10:51+00:00",
+  "generated": "2026-03-15T11:24:46+00:00",
   "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
   "electronicsSource": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3",
   "electronicsSyncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
   "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
-  "electronicsGenerated": "2026-03-15T10:10:51+00:00",
+  "electronicsGenerated": "2026-03-15T11:24:46+00:00",
   "events": [
     {
       "id": 1,
@@ -50,7 +50,189 @@
           "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "Darkness opens from stage left and only gradually reaches the far-right edge.",
+        "scoreDynamics": "ppp -> p",
+        "designTags": [
+          "opening",
+          "left_to_right",
+          "emergence"
+        ],
+        "durationMs": 2258.823,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Leads the first glint at the far-left edge.",
+            "motion": "lead-left",
+            "peakLevel": 0.18,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 316.235,
+                "level": 0.18
+              },
+              {
+                "atMs": 948.706,
+                "level": 0.08
+              },
+              {
+                "atMs": 1761.882,
+                "level": 0.02
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Answers just right of the opening spark.",
+            "motion": "left-to-right",
+            "peakLevel": 0.16,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 496.941,
+                "level": 0.03
+              },
+              {
+                "atMs": 948.706,
+                "level": 0.16
+              },
+              {
+                "atMs": 1400.47,
+                "level": 0.06
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "A low ember wakes after the sopranos.",
+            "motion": "center-late",
+            "peakLevel": 0.14,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 768.0,
+                "level": 0.02
+              },
+              {
+                "atMs": 1264.941,
+                "level": 0.14
+              },
+              {
+                "atMs": 1671.529,
+                "level": 0.05
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass arrives last, kept deliberately restrained.",
+            "motion": "center-late",
+            "peakLevel": 0.12,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 948.706,
+                "level": 0.01
+              },
+              {
+                "atMs": 1445.647,
+                "level": 0.12
+              },
+              {
+                "atMs": 1852.235,
+                "level": 0.04
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "A small right-side shimmer catches only near the end.",
+            "motion": "tail-answer",
+            "peakLevel": 0.08,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1355.294,
+                "level": 0.0
+              },
+              {
+                "atMs": 1807.058,
+                "level": 0.08
+              },
+              {
+                "atMs": 2078.117,
+                "level": 0.03
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge barely speaks before Trigger 2.",
+            "motion": "tail-answer",
+            "peakLevel": 0.06,
+            "durationMs": 2258.823,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1626.353,
+                "level": 0.0
+              },
+              {
+                "atMs": 1987.764,
+                "level": 0.06
+              },
+              {
+                "atMs": 2258.823,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 2,
@@ -92,7 +274,496 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "Measures 11\u201319 become a field of hard max-brightness glitter, thrown in fast irregular cuts across the ensemble.",
+        "scoreDynamics": "f",
+        "designTags": [
+          "binary_glitter",
+          "stochastic",
+          "cross_stage",
+          "mm11_19"
+        ],
+        "durationMs": 53088.235,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Upper-left flashes initiate the glitter swarm.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 7432.353,
+                "level": 0.86
+              },
+              {
+                "atMs": 15926.47,
+                "level": 0.14
+              },
+              {
+                "atMs": 20173.529,
+                "level": 0.0
+              },
+              {
+                "atMs": 21235.294,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21978.529,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 23995.882,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 24739.118,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27287.353,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28030.588,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30791.176,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 31534.412,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34932.059,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35675.294,
+                "level": 0.0
+              },
+              {
+                "atMs": 42470.588,
+                "level": 0.66
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Sop-L2 interlocks with Sop-L1 in upper-left hard glitter.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 9555.882,
+                "level": 0.82
+              },
+              {
+                "atMs": 18050.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 20704.412,
+                "level": 0.0
+              },
+              {
+                "atMs": 22403.235,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 23146.47,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25694.706,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26437.941,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28986.176,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 29729.412,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32914.706,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33657.941,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 37480.294,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38223.529,
+                "level": 0.0
+              },
+              {
+                "atMs": 44594.117,
+                "level": 0.58
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "The middle-left becomes a restless engine of full-power irregular cuts.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 11679.412,
+                "level": 0.76
+              },
+              {
+                "atMs": 19111.765,
+                "level": 0.16
+              },
+              {
+                "atMs": 20916.765,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21660.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 23677.353,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 24420.588,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26862.647,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27605.882,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30260.294,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 31003.529,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34401.176,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35144.412,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38966.764,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39710.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 45655.882,
+                "level": 0.52
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass anchors the glitter with the deepest max-brightness strikes.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 13802.941,
+                "level": 0.72
+              },
+              {
+                "atMs": 19642.647,
+                "level": 0.0
+              },
+              {
+                "atMs": 21766.176,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 22509.412,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 24951.47,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25694.706,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28349.117,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 29092.353,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32171.47,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32914.706,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 36312.353,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 37055.588,
+                "level": 0.0
+              },
+              {
+                "atMs": 44594.117,
+                "level": 0.5
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "Right-middle replies arrive as bright, clipped sparks.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 15926.47,
+                "level": 0.78
+              },
+              {
+                "atMs": 20173.529,
+                "level": 0.0
+              },
+              {
+                "atMs": 22827.941,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 23571.176,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26225.588,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26968.823,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 29729.412,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30472.647,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33551.765,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34295.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38011.176,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38754.412,
+                "level": 0.0
+              },
+              {
+                "atMs": 45655.882,
+                "level": 0.56
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge throws back the latest and brightest hard sparks.",
+            "motion": "binary-glitter",
+            "peakLevel": 1.0,
+            "durationMs": 53088.235,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 18050.0,
+                "level": 0.84
+              },
+              {
+                "atMs": 21235.294,
+                "level": 0.0
+              },
+              {
+                "atMs": 24102.059,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 24845.294,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27605.882,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28349.117,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 31322.059,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32065.294,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35569.117,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 36312.353,
+                "level": 0.0
+              },
+              {
+                "atMs": 43532.353,
+                "level": 0.7
+              },
+              {
+                "atMs": 53088.235,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 3,
@@ -134,7 +805,209 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "The glare breaks into a soft right-to-left retreat with long afterimages.",
+        "scoreDynamics": "p",
+        "designTags": [
+          "afterimage",
+          "right_to_left",
+          "decrescendo"
+        ],
+        "durationMs": 18600.0,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Receives only the last remnant of the retreat.",
+            "motion": "receive",
+            "peakLevel": 0.22,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 10044.0,
+                "level": 0.02
+              },
+              {
+                "atMs": 13392.0,
+                "level": 0.22
+              },
+              {
+                "atMs": 16368.0,
+                "level": 0.06
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Lights after the altos, then falls back into dark.",
+            "motion": "receive",
+            "peakLevel": 0.24,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 7068.0,
+                "level": 0.03
+              },
+              {
+                "atMs": 10788.0,
+                "level": 0.24
+              },
+              {
+                "atMs": 14508.0,
+                "level": 0.08
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "Carries the center of the decrescendo for the longest span.",
+            "motion": "center-carry",
+            "peakLevel": 0.28,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4836.0,
+                "level": 0.05
+              },
+              {
+                "atMs": 8556.0,
+                "level": 0.28
+              },
+              {
+                "atMs": 11904.0,
+                "level": 0.14
+              },
+              {
+                "atMs": 15624.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "A grounded low glow lingers under the receding wave.",
+            "motion": "low-anchor",
+            "peakLevel": 0.26,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 3348.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 7068.0,
+                "level": 0.26
+              },
+              {
+                "atMs": 10788.0,
+                "level": 0.16
+              },
+              {
+                "atMs": 14880.0,
+                "level": 0.05
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "Starts the retreat with a soft but clear right-side lead.",
+            "motion": "lead-right",
+            "peakLevel": 0.3,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1488.0,
+                "level": 0.08
+              },
+              {
+                "atMs": 4464.0,
+                "level": 0.3
+              },
+              {
+                "atMs": 8928.0,
+                "level": 0.12
+              },
+              {
+                "atMs": 13392.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge speaks first, then withdraws fastest.",
+            "motion": "lead-right",
+            "peakLevel": 0.34,
+            "durationMs": 18600.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 744.0,
+                "level": 0.1
+              },
+              {
+                "atMs": 3720.0,
+                "level": 0.34
+              },
+              {
+                "atMs": 7068.0,
+                "level": 0.1
+              },
+              {
+                "atMs": 11160.0,
+                "level": 0.02
+              },
+              {
+                "atMs": 18600.0,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 4,
@@ -176,7 +1049,200 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "A compact pulse ignites from the middle and flicks outward in one compressed gesture.",
+        "scoreDynamics": "p -> mp",
+        "designTags": [
+          "center_out",
+          "compressed_pulse"
+        ],
+        "durationMs": 6000.0,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Catches the outermost left splash at the end.",
+            "motion": "outer-splash",
+            "peakLevel": 0.26,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 3600.0,
+                "level": 0.02
+              },
+              {
+                "atMs": 4680.0,
+                "level": 0.26
+              },
+              {
+                "atMs": 5520.0,
+                "level": 0.06
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Supports the left-hand rebound after the central burst.",
+            "motion": "outer-splash",
+            "peakLevel": 0.3,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2640.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 3840.0,
+                "level": 0.3
+              },
+              {
+                "atMs": 4920.0,
+                "level": 0.1
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "The first clear ignition appears in the center-left.",
+            "motion": "center-ignite",
+            "peakLevel": 0.4,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 720.0,
+                "level": 0.1
+              },
+              {
+                "atMs": 1800.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 3120.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 4560.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass answers the central pulse with a short low bloom.",
+            "motion": "center-ignite",
+            "peakLevel": 0.36,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 600.0,
+                "level": 0.08
+              },
+              {
+                "atMs": 1680.0,
+                "level": 0.36
+              },
+              {
+                "atMs": 2880.0,
+                "level": 0.16
+              },
+              {
+                "atMs": 4440.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "The right-middle receives the pulse after the center.",
+            "motion": "outer-splash",
+            "peakLevel": 0.28,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2040.0,
+                "level": 0.04
+              },
+              {
+                "atMs": 3360.0,
+                "level": 0.28
+              },
+              {
+                "atMs": 4560.0,
+                "level": 0.09
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge takes the final flick outward.",
+            "motion": "outer-splash",
+            "peakLevel": 0.24,
+            "durationMs": 6000.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 3240.0,
+                "level": 0.03
+              },
+              {
+                "atMs": 4440.0,
+                "level": 0.24
+              },
+              {
+                "atMs": 5400.0,
+                "level": 0.06
+              },
+              {
+                "atMs": 6000.0,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 5,
@@ -218,7 +1284,193 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "The ensemble narrows into a held threshold, preparing the cut-bridge.",
+        "scoreDynamics": "mp -> p",
+        "designTags": [
+          "threshold",
+          "narrowing",
+          "pre_bridge"
+        ],
+        "durationMs": 12533.333,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Holds a narrow left edge of light.",
+            "motion": "narrow-hold",
+            "peakLevel": 0.24,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1754.667,
+                "level": 0.18
+              },
+              {
+                "atMs": 5765.333,
+                "level": 0.24
+              },
+              {
+                "atMs": 10026.666,
+                "level": 0.12
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Keeps the left-center suspended just under the sopranos.",
+            "motion": "narrow-hold",
+            "peakLevel": 0.22,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2005.333,
+                "level": 0.16
+              },
+              {
+                "atMs": 6016.0,
+                "level": 0.22
+              },
+              {
+                "atMs": 10277.333,
+                "level": 0.1
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "Acts as the center seam of the threshold.",
+            "motion": "center-seam",
+            "peakLevel": 0.2,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2256.0,
+                "level": 0.12
+              },
+              {
+                "atMs": 6266.667,
+                "level": 0.2
+              },
+              {
+                "atMs": 10277.333,
+                "level": 0.08
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass stays dim and grounded, barely moving.",
+            "motion": "center-seam",
+            "peakLevel": 0.18,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2506.667,
+                "level": 0.1
+              },
+              {
+                "atMs": 6768.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 10528.0,
+                "level": 0.07
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "Right-middle remains present but subdued.",
+            "motion": "narrow-hold",
+            "peakLevel": 0.18,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2757.333,
+                "level": 0.08
+              },
+              {
+                "atMs": 6768.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 10528.0,
+                "level": 0.08
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge becomes the faintest active contour.",
+            "motion": "narrow-hold",
+            "peakLevel": 0.16,
+            "durationMs": 12533.333,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 3008.0,
+                "level": 0.06
+              },
+              {
+                "atMs": 7269.333,
+                "level": 0.16
+              },
+              {
+                "atMs": 10778.666,
+                "level": 0.08
+              },
+              {
+                "atMs": 12533.333,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 8,
@@ -333,6 +1585,274 @@
           "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
           "designNote": "Alto-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
         }
+      },
+      "lighting": {
+        "summary": "A denser bridge crest sweeps right-to-left, still strictly max-brightness or off.",
+        "scoreDynamics": "mf",
+        "designTags": [
+          "bridge",
+          "binary_glitter",
+          "right_to_left"
+        ],
+        "durationMs": 6533.334,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Receives the returning sweep last, after the center has already flashed.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 3005.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3332.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4834.667,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5161.334,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Upper-left joins late in the return sweep.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 2352.0,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 2678.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4181.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4508.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "Tenor catches the wave after the altos but before the sopranos.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1829.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 2156.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3658.667,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3985.334,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5357.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5684.001,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass carries the heaviest middle-stage cuts.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 1437.333,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1829.334,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3005.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3397.334,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4573.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4965.334,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "Right-middle launches the sweep with repeated bright cuts.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 522.667,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 914.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1960.0,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 2352.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3789.334,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4181.334,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge begins the crest in the starkest cuts.",
+            "motion": "binary-sweep",
+            "peakLevel": 1.0,
+            "durationMs": 6533.334,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 261.333,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 653.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1568.0,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1960.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3136.0,
+                "level": 1.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3528.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 6533.334,
+                "level": 0.0
+              }
+            ]
+          }
+        }
       }
     },
     {
@@ -375,7 +1895,241 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "The chorus return begins with the piece\u2019s only fully unified slow glow, then the six staves separate again.",
+        "scoreDynamics": "mp -> mf -> p",
+        "designTags": [
+          "unified_glow",
+          "reentry",
+          "only_full_unison"
+        ],
+        "durationMs": 30800.0,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Starts in perfect unison with the ensemble, then peels left.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 12936.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 19096.0,
+                "level": 0.3
+              },
+              {
+                "atMs": 24640.0,
+                "level": 0.12
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Shares the same opening glow before separating slightly later.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 12936.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 20328.0,
+                "level": 0.32
+              },
+              {
+                "atMs": 25872.0,
+                "level": 0.14
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "The center seam of the unified glow stays bright longest.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 14168.0,
+                "level": 0.22
+              },
+              {
+                "atMs": 21560.0,
+                "level": 0.34
+              },
+              {
+                "atMs": 26488.0,
+                "level": 0.16
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Bass anchors the common ramp and releases toward the floor.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 14168.0,
+                "level": 0.2
+              },
+              {
+                "atMs": 20944.0,
+                "level": 0.3
+              },
+              {
+                "atMs": 25872.0,
+                "level": 0.14
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "The right-center keeps the opening glow and then drifts outward.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 12936.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 19712.0,
+                "level": 0.3
+              },
+              {
+                "atMs": 25256.0,
+                "level": 0.14
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "The far-right edge breaks away last, completing the split.",
+            "motion": "unified-then-split",
+            "peakLevel": 0.92,
+            "durationMs": 30800.0,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0
+              },
+              {
+                "atMs": 4312.0,
+                "level": 0.4
+              },
+              {
+                "atMs": 8624.0,
+                "level": 0.92
+              },
+              {
+                "atMs": 12936.0,
+                "level": 0.18
+              },
+              {
+                "atMs": 20944.0,
+                "level": 0.32
+              },
+              {
+                "atMs": 26488.0,
+                "level": 0.16
+              },
+              {
+                "atMs": 30800.0,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 12,
@@ -417,7 +2171,3015 @@
           "timingRule": "final_trigger_to_track_end"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {},
+      "lighting": {
+        "summary": "From measure 115 onward, every light entrance is locked to actual light-chorus note onsets and released only by silence.",
+        "scoreDynamics": "p / pp final release",
+        "designTags": [
+          "finale",
+          "note_synchronous",
+          "rhythmic_lock",
+          "tour_cut"
+        ],
+        "durationMs": 106792.371,
+        "parts": {
+          "soprano_l1": {
+            "label": "Sop-L1",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.29,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.24,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.29,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          },
+          "soprano_l2": {
+            "label": "Sop-L2",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.31,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.26,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.31,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          },
+          "tenor_l": {
+            "label": "Ten-L",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.35,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27916.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32687.5,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32916.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34166.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35833.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38333.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39166.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.3,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.35,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          },
+          "bass_l": {
+            "label": "Bass-L",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.39,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27916.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32687.5,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32916.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34166.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35833.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38333.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39166.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.34,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.39,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l2": {
+            "label": "Alto-L2",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.27,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27916.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32687.5,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32916.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34166.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35833.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38333.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39166.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.22,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.27,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          },
+          "alto_l1": {
+            "label": "Alto-L1",
+            "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
+            "motion": "note-synchronous",
+            "peakLevel": 0.25,
+            "durationMs": 106792.371,
+            "keyframes": [
+              {
+                "atMs": 0.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 1786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3333.333,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 3533.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4166.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 4286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5000.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 5120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8333.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 8453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10000.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 10120.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13333.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 13453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15833.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 15953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 16786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 17700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 20200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 21786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 25200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 26786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 27916.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 28036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 30200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32687.5,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 32916.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 33036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34166.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 34286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35833.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 35953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38333.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 38453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39166.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 39286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41250.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 41370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 42916.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 43036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45416.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 45536.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46250.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 46370.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48750.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 48870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52083.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 52916.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 53036.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54166.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 54286.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 55200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58750.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 58870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60833.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 60953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62083.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 62203.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63750.0,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 63870.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65833.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 65953.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 67700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68333.333,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 68453.333,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 70200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 71786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 72700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 75200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76666.667,
+                "level": 0.2,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 76786.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 77700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80000.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 80200.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82500.0,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 82700.0,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84166.667,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 84366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86666.667,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 86866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89166.667,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 89366.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91666.667,
+                "level": 0.25,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 91866.667,
+                "level": 0.0,
+                "interpolation": "step"
+              },
+              {
+                "atMs": 106792.371,
+                "level": 0.0
+              }
+            ]
+          }
+        }
+      }
     }
-  ]
+  ],
+  "lightingSourceMusicXml": "flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml",
+  "lightingManifest": "docs/score-study/tour_cut_light_show.json",
+  "lightingGenerated": "2026-03-15T11:24:52+00:00",
+  "lightingDesignNote": "Tour-cut six-staff torch choreography preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 11 begins with the piece's only fully unified slow glow before the staves separate again; Trigger Point 12 is strictly locked to light-chorus note onsets.",
+  "profileId": "tour_cut",
+  "profileLabel": "Tour Cut",
+  "lightShowManifest": "docs/score-study/tour_cut_light_show.json"
 }

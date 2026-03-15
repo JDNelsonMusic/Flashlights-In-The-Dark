@@ -68,6 +68,8 @@ struct EventTriggerStrip: View {
                                 event: current,
                                 isRecent: current.id == state.lastTriggeredEventID,
                                 triggerAction: { state.triggerCurrentEvent() },
+                                triggerAudioOnlyAction: { state.triggerCurrentEventAudioOnly() },
+                                triggerLightingOnlyAction: { state.triggerCurrentEventLightingOnly() },
                                 movePrevious: { state.moveToPreviousEvent() },
                                 moveNext: { state.moveToNextEvent() }
                             )
@@ -89,6 +91,8 @@ struct EventTriggerStrip: View {
                                 event: current,
                                 isRecent: current.id == state.lastTriggeredEventID,
                                 triggerAction: { state.triggerCurrentEvent() },
+                                triggerAudioOnlyAction: { state.triggerCurrentEventAudioOnly() },
+                                triggerLightingOnlyAction: { state.triggerCurrentEventLightingOnly() },
                                 movePrevious: { state.moveToPreviousEvent() },
                                 moveNext: { state.moveToNextEvent() }
                             )
@@ -122,6 +126,8 @@ struct EventTriggerStrip: View {
                             snapshot: snapshot,
                             isArmed: state.isArmed,
                             resendPending: { state.resendLastTriggeredCueToPendingSlots() },
+                            resendAudioOnly: { state.resendLastTriggeredAudioToPendingSlots() },
+                            resendLightingOnly: { state.resendLastTriggeredLightingToPendingSlots() },
                             resendStaff: { staff in
                                 state.resendLastTriggeredCue(for: staff)
                             }
@@ -344,6 +350,8 @@ private struct CurrentEventCard: View {
     let event: EventRecipe
     let isRecent: Bool
     let triggerAction: () -> Void
+    let triggerAudioOnlyAction: () -> Void
+    let triggerLightingOnlyAction: () -> Void
     let movePrevious: () -> Void
     let moveNext: () -> Void
     private let tagColumns = [GridItem(.adaptive(minimum: 110, maximum: 220), spacing: 8, alignment: .leading)]
@@ -407,17 +415,51 @@ private struct CurrentEventCard: View {
                 }
             }
 
-            Button(action: triggerAction) {
-                HStack {
-                    Image(systemName: "play.circle.fill")
-                    Text("Fire Trigger (Space)")
-                        .bold()
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    triggerButton(
+                        title: "Fire Trigger (Space)",
+                        systemImage: "play.circle.fill",
+                        tint: Color.mintGlow,
+                        action: triggerAction
+                    )
+                    triggerButton(
+                        title: "Audio Only",
+                        systemImage: "speaker.wave.2.fill",
+                        tint: .cyan,
+                        action: triggerAudioOnlyAction
+                    )
+                    triggerButton(
+                        title: "Lights Only",
+                        systemImage: "flashlight.on.fill",
+                        tint: .orange,
+                        action: triggerLightingOnlyAction
+                    )
                 }
-                .padding(.vertical, 6)
-                .padding(.horizontal, 12)
+
+                VStack(spacing: 8) {
+                    triggerButton(
+                        title: "Fire Trigger (Space)",
+                        systemImage: "play.circle.fill",
+                        tint: Color.mintGlow,
+                        action: triggerAction
+                    )
+                    HStack(spacing: 8) {
+                        triggerButton(
+                            title: "Audio Only",
+                            systemImage: "speaker.wave.2.fill",
+                            tint: .cyan,
+                            action: triggerAudioOnlyAction
+                        )
+                        triggerButton(
+                            title: "Lights Only",
+                            systemImage: "flashlight.on.fill",
+                            tint: .orange,
+                            action: triggerLightingOnlyAction
+                        )
+                    }
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color.mintGlow)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -430,6 +472,26 @@ private struct CurrentEventCard: View {
                 )
         )
         .shadow(color: Color.black.opacity(0.3), radius: 14, x: 0, y: 8)
+    }
+
+    private func triggerButton(
+        title: String,
+        systemImage: String,
+        tint: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: systemImage)
+                Text(title)
+                    .bold()
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(tint)
     }
 }
 
@@ -459,6 +521,8 @@ private struct CueVerificationCard: View {
     let snapshot: TriggerCueSnapshot
     let isArmed: Bool
     let resendPending: () -> Void
+    let resendAudioOnly: () -> Void
+    let resendLightingOnly: () -> Void
     let resendStaff: (LightStaff) -> Void
 
     private let staffColumns = [GridItem(.adaptive(minimum: 210, maximum: 280), spacing: 10, alignment: .top)]
@@ -506,7 +570,7 @@ private struct CueVerificationCard: View {
             Text("Last Cue Health")
                 .font(.headline)
                 .foregroundStyle(.white)
-            Text("\(snapshot.headline) • \(snapshot.deliverySummary) • \(snapshot.pendingCount) pending • \(snapshot.unavailableCount) unavailable")
+            Text("\(snapshot.headline) • \(snapshot.componentSummary) • \(snapshot.deliverySummary) • \(snapshot.pendingCount) pending • \(snapshot.unavailableCount) unavailable")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text("Sent \(snapshot.sentAt.formatted(date: .omitted, time: .standard))")
@@ -522,6 +586,20 @@ private struct CueVerificationCard: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(Color.mintGlow)
+            .disabled(!isArmed || snapshot.pendingCount == 0 && snapshot.unavailableCount == 0)
+
+            Button("Audio Only") {
+                resendAudioOnly()
+            }
+            .buttonStyle(.bordered)
+            .tint(.cyan)
+            .disabled(!isArmed || snapshot.pendingCount == 0 && snapshot.unavailableCount == 0)
+
+            Button("Lights Only") {
+                resendLightingOnly()
+            }
+            .buttonStyle(.bordered)
+            .tint(.orange)
             .disabled(!isArmed || snapshot.pendingCount == 0 && snapshot.unavailableCount == 0)
         }
     }

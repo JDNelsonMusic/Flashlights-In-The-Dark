@@ -1,0 +1,13 @@
+id,measure_token,measure,position,score_label,role,source_measure_token,source_measure
+1,1,1,beat1,M1 beat1,opening,1,1
+2,2,2,beat1,M2 beat1,anchor,2,2
+3,25,25,beat4,M25 beat4,transition,25,25
+4,33,33,beat2,M33 beat2,tempo-change,33,33
+5,36,36,beat1,M36 beat1,threshold,36,36
+6,46,46,beat3,M46 beat3,middle-section,46,46
+7,63,63,beat3,M63 beat3,middle-section,63,63
+8,78,78,beat1,M78 beat1,middle-section,78,78
+9,89,89,beat1,M89 beat1,middle-section,89,89
+10,98,98,beat1,M98 beat1,middle-section,98,98
+11,104,104,beat1,M104 beat1,unified-glow,104,104
+12,115,115,beat1,M115 beat1,finale,115,115

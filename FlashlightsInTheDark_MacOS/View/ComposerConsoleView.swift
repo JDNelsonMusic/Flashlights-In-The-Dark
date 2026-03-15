@@ -260,6 +260,9 @@ struct ComposerConsoleView: View {
             TransportPanel(showRouting: $showRouting)
                 .environmentObject(state)
 
+            ValidationPanel()
+                .environmentObject(state)
+
             EnsembleFxPanel(anyTorchOn: anyTorchOn)
                 .environmentObject(state)
 
@@ -350,11 +353,25 @@ struct ComposerConsoleView: View {
                 HStack(spacing: 8) {
                     StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
                     StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
+                    if let profile = state.activeShowProfile {
+                        StatusPill(
+                            title: "Profile",
+                            value: "\(profile.label) · \(profile.triggerCount) triggers",
+                            tint: profile.runtimeReady ? .blue : .orange
+                        )
+                    }
                 }
 
                 VStack(alignment: alignment, spacing: 8) {
                     StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
                     StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
+                    if let profile = state.activeShowProfile {
+                        StatusPill(
+                            title: "Profile",
+                            value: "\(profile.label) · \(profile.triggerCount) triggers",
+                            tint: profile.runtimeReady ? .blue : .orange
+                        )
+                    }
                 }
             }
 
@@ -875,6 +892,109 @@ private struct EnsembleFxPanel: View {
             state.strobeActive.toggle()
         }
         .disabled(!state.isBroadcasting)
+    }
+}
+
+private struct ValidationPanel: View {
+    @EnvironmentObject var state: ConsoleState
+
+    private var latestResults: [TriggerValidationResult] {
+        Array(state.validationResults.suffix(4).reversed())
+    }
+
+    var body: some View {
+        ConsoleSectionCard {
+            VStack(alignment: .leading, spacing: 14) {
+                ConsoleSectionHeader(
+                    title: "Rehearsal Validation",
+                    subtitle: "Sweep all trigger points, wait for acknowledgements, then export a run report."
+                )
+
+                Stepper(
+                    "Dwell per trigger: \(state.validationDwellMs) ms",
+                    value: $state.validationDwellMs,
+                    in: 500...8000,
+                    step: 100
+                )
+
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        startStopButton
+                        exportButton
+                    }
+
+                    VStack(spacing: 10) {
+                        startStopButton
+                        exportButton
+                    }
+                }
+
+                if state.isValidationRunning || !state.validationResults.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(validationStatus)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(state.isValidationRunning ? .orange : .secondary)
+
+                        if !latestResults.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(latestResults) { result in
+                                    HStack {
+                                        Text(result.headline)
+                                            .font(.caption)
+                                            .foregroundStyle(.white)
+                                            .lineLimit(1)
+                                        Spacer()
+                                        Text("\(result.ackedCount)/\(result.slotStatuses.count) acked")
+                                            .font(.caption2.weight(.semibold))
+                                            .foregroundStyle(result.pendingCount == 0 && result.unavailableCount == 0 ? .green : .orange)
+                                    }
+                                }
+                            }
+                            .padding(10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(Color.black.opacity(0.22))
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var validationStatus: String {
+        if state.isValidationRunning {
+            if let current = state.validationCurrentEventID {
+                return "Running… currently checking TP\(current)"
+            }
+            return "Running validation…"
+        }
+        if !state.validationResults.isEmpty {
+            return "Last run captured \(state.validationResults.count) triggers"
+        }
+        return "No validation run yet"
+    }
+
+    private var startStopButton: some View {
+        Button(state.isValidationRunning ? "Stop Validation" : "Run Validation") {
+            if state.isValidationRunning {
+                state.stopValidationRun()
+            } else {
+                state.startValidationRun()
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(state.isValidationRunning ? .red : .green)
+        .disabled(!state.isArmed && !state.isValidationRunning)
+    }
+
+    private var exportButton: some View {
+        Button("Export Validation") {
+            state.exportValidationReport()
+        }
+        .buttonStyle(.bordered)
+        .tint(.blue)
+        .disabled(state.validationResults.isEmpty)
     }
 }
 

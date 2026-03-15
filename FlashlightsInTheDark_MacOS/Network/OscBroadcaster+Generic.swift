@@ -48,6 +48,9 @@ public extension OscBroadcaster {
             if let startAtMs = m.startAtMs {
                 payload.append(Float64(startAtMs))
             }
+            if let componentMode = m.componentMode {
+                payload.append(componentMode.rawValue)
+            }
             try await sendCue(
                 address: .eventTrigger,
                 slot: m.index,

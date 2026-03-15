@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:flashlights_client/model/event_recipe.dart';
+import 'package:flashlights_client/model/show_profile.dart';
 import 'package:flashlights_client/network/osc_packet.dart';
 
 class PrimerColorPlacement {
@@ -137,6 +138,7 @@ class ClientState {
       brightness = ValueNotifier<double>(0.0),
       recentMessages = ValueNotifier<List<OSCMessage>>(<OSCMessage>[]),
       eventRecipes = ValueNotifier<List<EventRecipe>>(<EventRecipe>[]),
+      showProfiles = ValueNotifier<ShowProfileManifest?>(null),
       practiceEventIndex = ValueNotifier<int>(0) {
     myIndex.addListener(() {
       final slot = myIndex.value;
@@ -179,6 +181,9 @@ class ClientState {
 
   /// Cached list of trigger-point recipes used for local practice browsing.
   final ValueNotifier<List<EventRecipe>> eventRecipes;
+
+  /// Profile metadata for the currently bundled runtime.
+  final ValueNotifier<ShowProfileManifest?> showProfiles;
 
   /// Current event index highlighted in the practice strip.
   final ValueNotifier<int> practiceEventIndex;
@@ -328,6 +333,11 @@ class ClientState {
     if (practiceEventIndex.value >= recipes.length) {
       practiceEventIndex.value = 0;
     }
+  }
+
+  Future<void> ensureShowProfilesLoaded() async {
+    if (showProfiles.value != null) return;
+    showProfiles.value = await loadShowProfileManifestAsset();
   }
 
   PrimerAssignment? assignmentForSlot(EventRecipe event, int slot) {

@@ -1,0 +1,29 @@
+{
+  "activeProfileId": "tour_cut",
+  "profiles": [
+    {
+      "id": "tour_cut",
+      "label": "Tour Cut",
+      "shortLabel": "Tour",
+      "runtimeReady": true,
+      "triggerCount": 8,
+      "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
+      "triggerPositionSource": "docs/score-study/tour_cut_trigger_points.csv",
+      "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
+      "lightShowManifest": "docs/score-study/tour_cut_light_show.json",
+      "notes": "Current performance runtime bundle with tour-cut score, 8 trigger points, and TP8 part-specific musique concrete."
+    },
+    {
+      "id": "full_version",
+      "label": "Full Version",
+      "shortLabel": "Full",
+      "runtimeReady": false,
+      "triggerCount": 12,
+      "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
+      "triggerPositionSource": "docs/score-study/full_version_trigger_points.csv",
+      "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
+      "lightShowManifest": "docs/score-study/twelve_trigger_light_show.json",
+      "notes": "Profile is registered and documented, but the shipped runtime currently remains tour-cut only until a dedicated full-version bundle is regenerated."
+    }
+  ]
+}

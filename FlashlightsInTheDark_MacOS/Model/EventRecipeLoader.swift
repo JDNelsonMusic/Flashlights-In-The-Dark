@@ -86,3 +86,66 @@ struct EventRecipeLoader {
         return prefix + fileName
     }
 }
+
+public struct ShowProfileManifest: Decodable {
+    public let activeProfileId: String
+    public let profiles: [ShowProfile]
+
+    public var activeProfile: ShowProfile? {
+        profiles.first(where: { $0.id == activeProfileId })
+    }
+}
+
+public struct ShowProfile: Decodable, Identifiable {
+    public let id: String
+    public let label: String
+    public let shortLabel: String
+    public let runtimeReady: Bool
+    public let triggerCount: Int
+    public let scoreMusicXml: String
+    public let triggerPositionSource: String
+    public let electronicsManifest: String?
+    public let lightShowManifest: String?
+    public let notes: String?
+}
+
+enum ShowProfileLoaderError: Error {
+    case fileNotFound
+    case decodingFailed
+}
+
+struct ShowProfileLoader {
+    private let fileName = "show_profiles"
+    private let fileExtension = "json"
+
+    func loadManifest() throws -> ShowProfileManifest {
+        if let bundled = Bundle.main.url(forResource: fileName, withExtension: fileExtension) {
+            return try decode(from: bundled)
+        }
+
+        let repoRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let fallbackCandidates = [
+            repoRoot
+                .appendingPathComponent("FlashlightsInTheDark_MacOS/Resources")
+                .appendingPathComponent("\(fileName).\(fileExtension)"),
+            repoRoot
+                .appendingPathComponent("docs/show-profiles")
+                .appendingPathComponent("\(fileName).\(fileExtension)")
+        ]
+
+        for candidate in fallbackCandidates where FileManager.default.fileExists(atPath: candidate.path) {
+            return try decode(from: candidate)
+        }
+
+        throw ShowProfileLoaderError.fileNotFound
+    }
+
+    private func decode(from url: URL) throws -> ShowProfileManifest {
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode(ShowProfileManifest.self, from: data)
+        } catch {
+            throw ShowProfileLoaderError.decodingFailed
+        }
+    }
+}

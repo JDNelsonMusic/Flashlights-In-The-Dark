@@ -130,8 +130,9 @@ class EventTrigger implements OscCodable {
   final int index;
   final int eventId;
   final double? startAtMs;
+  final String? componentMode;
 
-  EventTrigger(this.index, this.eventId, [this.startAtMs]);
+  EventTrigger(this.index, this.eventId, [this.startAtMs, this.componentMode]);
 
   @override
   OscAddress get address => OscAddress.eventTrigger;
@@ -141,6 +142,8 @@ class EventTrigger implements OscCodable {
     final args = <Object>[index, eventId];
     final start = startAtMs;
     if (start != null) args.add(start);
+    final mode = componentMode;
+    if (mode != null && mode.isNotEmpty) args.add(mode);
     return OSCMessage(address.value, arguments: args);
   }
 
@@ -153,11 +156,17 @@ class EventTrigger implements OscCodable {
     final arg1 = message.arguments[1];
     if (arg0 is int && arg1 is int) {
       double? start;
+      String? componentMode;
       if (message.arguments.length >= 3) {
         final arg2 = message.arguments[2];
         if (arg2 is num) start = arg2.toDouble();
+        if (arg2 is String) componentMode = arg2;
       }
-      return EventTrigger(arg0, arg1, start);
+      if (message.arguments.length >= 4) {
+        final arg3 = message.arguments[3];
+        if (arg3 is String) componentMode = arg3;
+      }
+      return EventTrigger(arg0, arg1, start, componentMode);
     }
     return null;
   }

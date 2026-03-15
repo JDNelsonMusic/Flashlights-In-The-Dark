@@ -29,6 +29,25 @@ const int _legacySoundEventCount = 32;
 const bool kPrimerPlaybackEnabled = false;
 const Duration _lightSequenceTick = Duration(milliseconds: 40);
 
+enum _EventTriggerComponentMode { all, audioOnly, lightingOnly }
+
+_EventTriggerComponentMode _componentModeFromPayload(List<Object> payload) {
+  for (final value in payload.skip(1)) {
+    if (value is! String) {
+      continue;
+    }
+    switch (value.trim().toLowerCase()) {
+      case 'audio_only':
+        return _EventTriggerComponentMode.audioOnly;
+      case 'lighting_only':
+        return _EventTriggerComponentMode.lightingOnly;
+      case 'all':
+        return _EventTriggerComponentMode.all;
+    }
+  }
+  return _EventTriggerComponentMode.all;
+}
+
 @visibleForTesting
 Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
   if (startAtMs == null) {
@@ -1279,6 +1298,7 @@ class OscListener {
     }
 
     final eventId = envelope.payload[0] as int;
+    final componentMode = _componentModeFromPayload(envelope.payload);
     double? startAtMs;
     if (envelope.payload.length >= 2 && envelope.payload[1] is num) {
       startAtMs = (envelope.payload[1] as num).toDouble();
@@ -1303,23 +1323,32 @@ class OscListener {
     }
 
     final slot = client.myIndex.value;
+    final wantsAudio = componentMode != _EventTriggerComponentMode.lightingOnly;
+    final wantsLighting = componentMode != _EventTriggerComponentMode.audioOnly;
     final primerAssignment =
-        kPrimerPlaybackEnabled ? client.assignmentForSlot(event, slot) : null;
-    final electronicsAssignment = client.electronicsForSlot(event, slot);
-    final lightingAssignment = client.lightingForSlot(event, slot);
+        wantsAudio && kPrimerPlaybackEnabled
+            ? client.assignmentForSlot(event, slot)
+            : null;
+    final electronicsAssignment =
+        wantsAudio ? client.electronicsForSlot(event, slot) : null;
+    final lightingAssignment =
+        wantsLighting ? client.lightingForSlot(event, slot) : null;
     if (primerAssignment == null &&
         electronicsAssignment == null &&
         lightingAssignment == null) {
       _record('event', 'No event media for slot', <String, Object?>{
         'eventId': eventId,
         'slot': slot,
+        'componentMode': componentMode.name,
       });
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
       return;
     }
 
     _record('event', 'Resolved event media', <String, Object?>{
       'eventId': eventId,
       'slot': slot,
+      'componentMode': componentMode.name,
       if (primerAssignment != null) 'primer': primerAssignment.sample,
       if (electronicsAssignment != null)
         'electronics': electronicsAssignment.sample,
@@ -1333,6 +1362,10 @@ class OscListener {
       Future<void>.delayed(delay, () async {
         if (lightingAssignment != null) {
           _startLightSequence(lightingAssignment, eventId: eventId, slot: slot);
+        }
+        if (!wantsAudio || (primerAssignment == null && electronicsAssignment == null)) {
+          _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+          return;
         }
         await _playEventMedia(
           primerFile: primerAssignment?.sample,

@@ -1,13 +1,13 @@
 # Event Timeline And Integration Report
 
-Generated: `2026-03-15T10:10:54+00:00`
+Generated: `2026-03-15T11:24:56+00:00`
 Recipe source: `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 Score source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
 
 ## Timeline Snapshot
 
 - Events: `8`
-- Clip rows: `24`
+- Clip rows: `30`
 - Long events: `0`
 - First event: `0:00.000`
 - Last event: `2:19.902`

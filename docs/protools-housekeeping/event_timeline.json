@@ -1,12 +1,12 @@
 {
-  "generated_utc": "2026-03-15T10:10:54+00:00",
+  "generated_utc": "2026-03-15T11:24:56+00:00",
   "sources": {
     "recipe_json": "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
     "musicxml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml"
   },
   "summary": {
     "event_count": 8,
-    "clip_count": 24,
+    "clip_count": 30,
     "long_event_count": 0,
     "first_event_seconds": 0.0,
     "last_event_seconds": 139.901961,
@@ -1039,23 +1039,23 @@
   "event_recipe_hashes": {
     "recipe_bundle": {
       "path": "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
-      "sha256": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b"
+      "sha256": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211"
     },
     "macos": {
       "path": "FlashlightsInTheDark_MacOS/Resources/event_recipes.json",
-      "sha256": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b"
+      "sha256": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211"
     },
     "flutter": {
       "path": "flashlights_client/assets/event_recipes.json",
-      "sha256": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b"
+      "sha256": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211"
     }
   },
   "event_recipe_copy_check": {
     "all_equal": true,
     "hashes": {
-      "recipe_bundle": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b",
-      "macos": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b",
-      "flutter": "eaea80c63b16d1f617ce4c0b54bb9bfefae8f6f1ace0a139c5baa09f155ec49b"
+      "recipe_bundle": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211",
+      "macos": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211",
+      "flutter": "d8188c0ba8ac65741dc4beefab83eb8b7a1a75801f533f6875aaa5fc24a5c211"
     }
   },
   "primer_asset_check": {
@@ -1351,7 +1351,7 @@
       "tempo_bpm": 72.0,
       "meter": "4/4",
       "primer_count": 0,
-      "electronics_count": 3,
+      "electronics_count": 9,
       "sample_length": "ELECTRONICS",
       "measure_words": [],
       "timing_note": "musicxml_tempo_encoded",
@@ -1388,7 +1388,80 @@
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
       },
-      "electronicsByPart": {}
+      "electronicsByPart": {
+        "soprano_l1": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-08-soprano-l1-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Sop-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "soprano_l2": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-08-soprano-l2-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_2.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Sop-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "tenor_l": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-08-tenor-l-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_3.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Ten-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "bass_l": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-08-bass-l-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_4.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Bass-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "alto_l2": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-08-alto-l2-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_5.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Alto-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        },
+        "alto_l1": {
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-08-alto-l1-musique-concrete.mp3",
+          "channelMode": "part_track",
+          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_6.mp3",
+          "sourceStartMs": 0.0,
+          "sourceEndMs": 3333.333,
+          "durationMs": 3333.333,
+          "fadeInMs": 1666.667,
+          "fadeOutMs": 833.333,
+          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
+          "designNote": "Alto-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+        }
+      }
     },
     {
       "id": 11,
@@ -1836,6 +1909,120 @@
       "note": "",
       "channel_mode": "mono_sum",
       "sample_duration_seconds": 8.333334,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "soprano_l1",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-08-soprano-l1-musique-concrete.mp3",
+      "note": "Sop-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "soprano_l2",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-08-soprano-l2-musique-concrete.mp3",
+      "note": "Sop-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "tenor_l",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-08-tenor-l-musique-concrete.mp3",
+      "note": "Ten-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "bass_l",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-08-bass-l-musique-concrete.mp3",
+      "note": "Bass-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "alto_l2",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-08-alto-l2-musique-concrete.mp3",
+      "note": "Alto-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
+      "present_in_macos_assets": true,
+      "present_in_flutter_assets": true
+    },
+    {
+      "event_id": 8,
+      "measure_token": "38.3",
+      "measure": 38,
+      "position": "beat1",
+      "onset_seconds": 98.235294,
+      "end_seconds": 101.568627,
+      "tempo_bpm": 72.0,
+      "meter": "4/4",
+      "clip_type": "electronics_part",
+      "assignment_key": "alto_l1",
+      "slots": "",
+      "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-08-alto-l1-musique-concrete.mp3",
+      "note": "Alto-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1.",
+      "channel_mode": "part_track",
+      "sample_duration_seconds": 3.333333,
       "present_in_macos_assets": true,
       "present_in_flutter_assets": true
     },

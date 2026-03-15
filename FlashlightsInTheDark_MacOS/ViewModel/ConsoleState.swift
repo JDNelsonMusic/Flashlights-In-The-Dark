@@ -79,6 +79,7 @@ public struct TriggerCueSnapshot {
     public let eventId: Int
     public let measureText: String
     public let beatText: String
+    public let componentMode: EventTrigger.ComponentMode
     public let sentAt: Date
     public let slotStatuses: [TriggerCueSlotStatus]
 
@@ -89,6 +90,17 @@ public struct TriggerCueSnapshot {
 
     public var headline: String {
         "TP\(eventId) • M\(measureText) • \(beatText)"
+    }
+
+    public var componentSummary: String {
+        switch componentMode {
+        case .all:
+            return "Audio + Lights"
+        case .audioOnly:
+            return "Audio only"
+        case .lightingOnly:
+            return "Lights only"
+        }
     }
 
     public var deliverySummary: String {
@@ -113,9 +125,28 @@ private struct TriggerCueContext {
     let eventId: Int
     let measureText: String
     let beatText: String
+    let componentMode: EventTrigger.ComponentMode
     let sentAt: Date
     let targetSlots: [Int]
     let failuresBySlot: [Int: String]
+}
+
+public struct TriggerValidationResult: Identifiable {
+    public let eventId: Int
+    public let measureText: String
+    public let beatText: String
+    public let componentMode: EventTrigger.ComponentMode
+    public let sentAt: Date
+    public let ackedCount: Int
+    public let pendingCount: Int
+    public let unavailableCount: Int
+    public let slotStatuses: [TriggerCueSlotStatus]
+
+    public var id: Int { eventId }
+
+    public var headline: String {
+        "TP\(eventId) • M\(measureText) • \(beatText)"
+    }
 }
 
 // Shared slot mapping data model for console
@@ -136,6 +167,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var runProcesses: [Int: Process] = [:]
     private let midi = MIDIManager()
     private let eventLoader = EventRecipeLoader()
+    private let showProfileLoader = ShowProfileLoader()
     private let primerAudioEngine = PrimerToneAudioEngine()
     /// Base offset so MIDI note 1 corresponds to device 1
     private let midiNoteOffset = 0
@@ -171,6 +203,12 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var currentEventIndex: Int = 0
     @Published public var lastTriggeredEventID: Int?
     @Published public private(set) var lastTriggerCueSnapshot: TriggerCueSnapshot?
+    @Published public var validationDwellMs: Int = 2200
+    @Published public private(set) var isValidationRunning: Bool = false
+    @Published public private(set) var validationCurrentEventID: Int?
+    @Published public private(set) var validationResults: [TriggerValidationResult] = []
+    @Published public private(set) var showProfileManifest: ShowProfileManifest?
+    @Published public private(set) var activeShowProfile: ShowProfile?
     @Published public private(set) var audioOutputDevices: [AudioDeviceInfo] = []
     @Published public var selectedAudioDeviceID: UInt32 = 0 {
         didSet {
@@ -219,6 +257,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         Set(performanceSlots)
     }()
     private var lastTriggerCueContext: TriggerCueContext?
+    private var validationTask: Task<Void, Never>?
     private var isApplyingGroupSanitization = false
 
     private func resetGroupMembersToDefault() {
@@ -295,6 +334,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             eventId: context.eventId,
             measureText: context.measureText,
             beatText: context.beatText,
+            componentMode: context.componentMode,
             sentAt: context.sentAt,
             slotStatuses: slotStatuses
         )
@@ -350,6 +390,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
         refreshMidiDevices()
         resetGroupMembersToDefault()
+        loadShowProfiles()
         loadEventRecipes()
     }
 
@@ -1647,6 +1688,10 @@ extension ConsoleState {
         discoveryRefreshTimer = nil
         discoveryRefreshInFlight = false
         lastDiscoveryRefresh = nil
+        validationTask?.cancel()
+        validationTask = nil
+        isValidationRunning = false
+        validationCurrentEventID = nil
         isArmed = false
     }
 
@@ -1924,6 +1969,17 @@ extension ConsoleState {
         }
     }
 
+    private func loadShowProfiles() {
+        do {
+            let manifest = try showProfileLoader.loadManifest()
+            showProfileManifest = manifest
+            activeShowProfile = manifest.activeProfile
+        } catch {
+            showProfileManifest = nil
+            activeShowProfile = nil
+        }
+    }
+
     public func refreshAudioOutputs() {
         let devices = primerAudioEngine.availableOutputDevices()
         audioOutputDevices = devices
@@ -2071,6 +2127,13 @@ extension ConsoleState {
     }
 
     public func triggerCurrentEvent(advanceAfterTrigger: Bool = true) {
+        triggerCurrentEvent(componentMode: .all, advanceAfterTrigger: advanceAfterTrigger)
+    }
+
+    public func triggerCurrentEvent(
+        componentMode: EventTrigger.ComponentMode,
+        advanceAfterTrigger: Bool = true
+    ) {
         guard ensureArmedForCue("triggering events") else { return }
         guard eventRecipes.indices.contains(currentEventIndex) else {
             lastLog = "⚠️ No event selected"
@@ -2079,11 +2142,19 @@ extension ConsoleState {
         let event = eventRecipes[currentEventIndex]
         lastTriggeredEventID = event.id
         Task { [weak self] in
-            await self?.fire(event: event)
+            await self?.fire(event: event, componentMode: componentMode)
         }
         if advanceAfterTrigger {
             moveToNextEvent()
         }
+    }
+
+    public func triggerCurrentEventAudioOnly(advanceAfterTrigger: Bool = false) {
+        triggerCurrentEvent(componentMode: .audioOnly, advanceAfterTrigger: advanceAfterTrigger)
+    }
+
+    public func triggerCurrentEventLightingOnly(advanceAfterTrigger: Bool = false) {
+        triggerCurrentEvent(componentMode: .lightingOnly, advanceAfterTrigger: advanceAfterTrigger)
     }
 
     public func moveToNextEvent() {
@@ -2125,7 +2196,7 @@ extension ConsoleState {
             return
         }
         Task { [weak self] in
-            await self?.fire(event: event, targetSlots: targetSlots)
+            await self?.fire(event: event, componentMode: snapshot.componentMode, targetSlots: targetSlots)
         }
     }
 
@@ -2148,21 +2219,204 @@ extension ConsoleState {
             return
         }
         Task { [weak self] in
-            await self?.fire(event: event, targetSlots: targetSlots)
+            await self?.fire(event: event, componentMode: snapshot.componentMode, targetSlots: targetSlots)
         }
     }
 
-    private func fire(event: EventRecipe, targetSlots: [Int]? = nil) async {
+    public func resendLastTriggeredAudioToPendingSlots() {
+        guard ensureArmedForCue("resending cues") else { return }
+        guard let snapshot = lastTriggerCueSnapshot else {
+            lastLog = "⚠️ No fired trigger to resend"
+            return
+        }
+        let targetSlots = snapshot.slotStatuses.filter { $0.state != .acked }.map(\.slot)
+        guard !targetSlots.isEmpty else {
+            lastLog = "✅ No missing seats for audio resend"
+            return
+        }
+        guard let event = eventRecipes.first(where: { $0.id == snapshot.eventId }) else {
+            lastLog = "⚠️ Last trigger recipe is no longer loaded"
+            return
+        }
+        Task { [weak self] in
+            await self?.fire(event: event, componentMode: .audioOnly, targetSlots: targetSlots)
+        }
+    }
+
+    public func resendLastTriggeredLightingToPendingSlots() {
+        guard ensureArmedForCue("resending cues") else { return }
+        guard let snapshot = lastTriggerCueSnapshot else {
+            lastLog = "⚠️ No fired trigger to resend"
+            return
+        }
+        let targetSlots = snapshot.slotStatuses.filter { $0.state != .acked }.map(\.slot)
+        guard !targetSlots.isEmpty else {
+            lastLog = "✅ No missing seats for lighting resend"
+            return
+        }
+        guard let event = eventRecipes.first(where: { $0.id == snapshot.eventId }) else {
+            lastLog = "⚠️ Last trigger recipe is no longer loaded"
+            return
+        }
+        Task { [weak self] in
+            await self?.fire(event: event, componentMode: .lightingOnly, targetSlots: targetSlots)
+        }
+    }
+
+    public func startValidationRun() {
+        guard ensureArmedForCue("running validation") else { return }
+        guard !eventRecipes.isEmpty else {
+            lastLog = "⚠️ No trigger bundle loaded for validation"
+            return
+        }
+
+        validationTask?.cancel()
+        validationResults = []
+        isValidationRunning = true
+        validationCurrentEventID = nil
+        let dwellMs = validationDwellMs
+
+        validationTask = Task { [weak self] in
+            guard let self else { return }
+            for event in await MainActor.run(body: { self.eventRecipes }) {
+                if Task.isCancelled { break }
+
+                await MainActor.run {
+                    self.validationCurrentEventID = event.id
+                    if let idx = self.eventRecipes.firstIndex(where: { $0.id == event.id }) {
+                        self.currentEventIndex = idx
+                    }
+                }
+
+                await self.fire(event: event, componentMode: .all)
+                try? await Task.sleep(nanoseconds: UInt64(max(dwellMs, 250)) * 1_000_000)
+                if Task.isCancelled { break }
+
+                await MainActor.run {
+                    guard let snapshot = self.lastTriggerCueSnapshot,
+                          snapshot.eventId == event.id else {
+                        return
+                    }
+                    self.validationResults.append(
+                        TriggerValidationResult(
+                            eventId: snapshot.eventId,
+                            measureText: snapshot.measureText,
+                            beatText: snapshot.beatText,
+                            componentMode: snapshot.componentMode,
+                            sentAt: snapshot.sentAt,
+                            ackedCount: snapshot.ackedCount,
+                            pendingCount: snapshot.pendingCount,
+                            unavailableCount: snapshot.unavailableCount,
+                            slotStatuses: snapshot.slotStatuses
+                        )
+                    )
+                }
+            }
+
+            await MainActor.run {
+                self.isValidationRunning = false
+                self.validationCurrentEventID = nil
+                self.validationTask = nil
+                if self.validationResults.isEmpty {
+                    self.lastLog = "⚠️ Validation run produced no results"
+                } else {
+                    self.lastLog = "✅ Validation complete: \(self.validationResults.count) triggers checked"
+                }
+            }
+        }
+    }
+
+    public func stopValidationRun() {
+        validationTask?.cancel()
+        validationTask = nil
+        isValidationRunning = false
+        validationCurrentEventID = nil
+        lastLog = "⏹ Validation stopped"
+    }
+
+    public func exportValidationReport() {
+        guard !validationResults.isEmpty else {
+            lastLog = "⚠️ No validation results to export"
+            return
+        }
+
+        let timestamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let desktop = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop", isDirectory: true)
+        let jsonURL = desktop.appendingPathComponent("flashlights_validation_\(timestamp).json")
+        let csvURL = desktop.appendingPathComponent("flashlights_validation_\(timestamp).csv")
+
+        let jsonPayload: [[String: Any]] = validationResults.map { result in
+            [
+                "eventId": result.eventId,
+                "measureText": result.measureText,
+                "beatText": result.beatText,
+                "componentMode": result.componentMode.rawValue,
+                "sentAt": ISO8601DateFormatter().string(from: result.sentAt),
+                "ackedCount": result.ackedCount,
+                "pendingCount": result.pendingCount,
+                "unavailableCount": result.unavailableCount,
+                "slots": result.slotStatuses.map { slot in
+                    [
+                        "slot": slot.slot,
+                        "staff": slot.staff?.rawValue ?? "",
+                        "seatNumber": slot.seatNumber ?? NSNull(),
+                        "state": slot.state.rawValue,
+                        "latencyMs": slot.latencyMs ?? NSNull(),
+                        "failureReason": slot.failureReason ?? NSNull(),
+                    ] as [String: Any]
+                }
+            ]
+        }
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonPayload, options: [.prettyPrinted, .sortedKeys])
+            try jsonData.write(to: jsonURL)
+
+            var csv = "event_id,measure_text,beat_text,component_mode,acked_count,pending_count,unavailable_count\n"
+            for result in validationResults {
+                csv += "\(result.eventId),\(result.measureText),\(result.beatText),\(result.componentMode.rawValue),\(result.ackedCount),\(result.pendingCount),\(result.unavailableCount)\n"
+            }
+            try csv.write(to: csvURL, atomically: true, encoding: .utf8)
+            lastLog = "📝 Validation exported to \(jsonURL.lastPathComponent)"
+        } catch {
+            lastLog = "⚠️ Validation export failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func fire(
+        event: EventRecipe,
+        componentMode: EventTrigger.ComponentMode = .all,
+        targetSlots: [Int]? = nil
+    ) async {
         let startAtMs = Date().timeIntervalSince1970 * 1000.0
-        await sendEventTriggers(for: event, startAtMs: startAtMs, targetSlots: targetSlots ?? performanceSlots)
+        await sendEventTriggers(
+            for: event,
+            startAtMs: startAtMs,
+            componentMode: componentMode,
+            targetSlots: targetSlots ?? performanceSlots
+        )
         let measureText = "M\(measureText(for: event))"
         let beatText = beatText(for: event)
         await MainActor.run {
-            lastLog = "▶︎ Trigger #\(event.id) • \(measureText) • \(beatText)"
+            let suffix: String
+            switch componentMode {
+            case .all:
+                suffix = ""
+            case .audioOnly:
+                suffix = " • audio only"
+            case .lightingOnly:
+                suffix = " • lights only"
+            }
+            lastLog = "▶︎ Trigger #\(event.id) • \(measureText) • \(beatText)\(suffix)"
         }
     }
 
-    private func sendEventTriggers(for event: EventRecipe, startAtMs: Double, targetSlots: [Int]) async {
+    private func sendEventTriggers(
+        for event: EventRecipe,
+        startAtMs: Double,
+        componentMode: EventTrigger.ComponentMode,
+        targetSlots: [Int]
+    ) async {
         do {
             let broadcaster = try await broadcasterTask.value
             var sentSlots: [Int] = []
@@ -2170,7 +2424,8 @@ extension ConsoleState {
             for slot in targetSlots {
                 let msg = EventTrigger(index: Int32(slot),
                                        eventId: Int32(event.id),
-                                       startAtMs: startAtMs)
+                                       startAtMs: startAtMs,
+                                       componentMode: componentMode)
                 do {
                     try await broadcaster.send(msg)
                     sentSlots.append(slot)
@@ -2183,6 +2438,7 @@ extension ConsoleState {
                     eventId: event.id,
                     measureText: self.measureText(for: event),
                     beatText: self.beatText(for: event),
+                    componentMode: componentMode,
                     sentAt: Date(timeIntervalSince1970: startAtMs / 1000.0),
                     targetSlots: targetSlots,
                     failuresBySlot: failedSlots
