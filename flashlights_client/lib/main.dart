@@ -100,6 +100,7 @@ class _HeaderSection extends StatelessWidget {
   const _HeaderSection({
     required this.platform,
     required this.compact,
+    required this.dense,
     required this.onTitleTap,
     required this.onPartSelected,
     required this.onRefreshConnection,
@@ -108,6 +109,7 @@ class _HeaderSection extends StatelessWidget {
 
   final String platform;
   final bool compact;
+  final bool dense;
   final VoidCallback onTitleTap;
   final Future<void> Function(LightChorusPart) onPartSelected;
   final VoidCallback onRefreshConnection;
@@ -129,10 +131,10 @@ class _HeaderSection extends StatelessWidget {
                 : '$partLabel · Slot $myIndex';
         return _GlassPanel(
           padding: EdgeInsets.fromLTRB(
-            compact ? 18 : 24,
-            compact ? 18 : 24,
-            compact ? 18 : 24,
-            compact ? 20 : 28,
+            dense ? 14 : compact ? 18 : 24,
+            dense ? 14 : compact ? 18 : 24,
+            dense ? 14 : compact ? 18 : 24,
+            dense ? 16 : compact ? 20 : 28,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,13 +143,16 @@ class _HeaderSection extends StatelessWidget {
                 onTap: onTitleTap,
                 child: Text(
                   'Flashlights In The Dark',
-                  style: textTheme.headlineSmall?.copyWith(
+                  style: (dense
+                          ? textTheme.titleLarge
+                          : textTheme.headlineSmall)
+                      ?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.4,
-                    ),
+                  ),
                 ),
               ),
-              SizedBox(height: compact ? 4 : 6),
+              SizedBox(height: dense ? 2 : compact ? 4 : 6),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
                 builder: (context, connected, _) {
@@ -161,7 +166,7 @@ class _HeaderSection extends StatelessWidget {
                   );
                 },
               ),
-              SizedBox(height: compact ? 12 : 20),
+              SizedBox(height: dense ? 10 : compact ? 12 : 20),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
                 builder: (context, connected, _) {
@@ -177,11 +182,13 @@ class _HeaderSection extends StatelessWidget {
                         icon: Icons.person_rounded,
                         label: 'Singer: $singerLabel',
                         accent: slotColor,
+                        compact: compact || dense,
                       ),
                       _SlotSelectorPill(
                         currentSlot: myIndex,
                         accent: slotColor,
                         onSelect: onPartSelected,
+                        compact: compact || dense,
                       ),
                       _InfoPill(
                         icon:
@@ -191,6 +198,7 @@ class _HeaderSection extends StatelessWidget {
                         label: connected ? 'Connected' : 'Searching…',
                         accent: statusAccent,
                         muted: !connected,
+                        compact: compact || dense,
                       ),
                       ValueListenableBuilder<String?>(
                         valueListenable: client.cueRoutingIssue,
@@ -202,6 +210,7 @@ class _HeaderSection extends StatelessWidget {
                             icon: Icons.warning_amber_rounded,
                             label: issue,
                             accent: const Color(0xFFFFA630),
+                            compact: compact || dense,
                           );
                         },
                       ),
@@ -229,6 +238,20 @@ class _HeaderSection extends StatelessWidget {
                               ? 'Refreshing…'
                               : 'Refresh Connection',
                         ),
+                        style: FilledButton.styleFrom(
+                          visualDensity:
+                              dense
+                                  ? const VisualDensity(
+                                    horizontal: -1,
+                                    vertical: -2,
+                                  )
+                                  : VisualDensity.standard,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: dense ? 12 : 16,
+                            vertical: dense ? 10 : 12,
+                          ),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                       ),
                     ],
                   );
@@ -247,11 +270,13 @@ class _SlotSelectorPill extends StatelessWidget {
     required this.currentSlot,
     required this.accent,
     required this.onSelect,
+    required this.compact,
   });
 
   final int currentSlot;
   final Color accent;
   final Future<void> Function(LightChorusPart) onSelect;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +323,7 @@ class _SlotSelectorPill extends StatelessWidget {
         icon: Icons.apps_rounded,
         label: pillLabel,
         accent: accent,
+        compact: compact,
         trailing: const Icon(
           Icons.keyboard_arrow_down_rounded,
           color: Colors.white,
@@ -313,6 +339,7 @@ class _InfoPill extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
+    required this.compact,
     this.trailing,
     this.muted = false,
   });
@@ -320,6 +347,7 @@ class _InfoPill extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color accent;
+  final bool compact;
   final Widget? trailing;
   final bool muted;
 
@@ -328,7 +356,10 @@ class _InfoPill extends StatelessWidget {
     final displayColor = muted ? Colors.white70 : Colors.white;
     final highlight = accent.withValues(alpha: muted ? 0.35 : 0.6);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 12 : 16,
+        vertical: compact ? 8 : 10,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: Colors.white.withValues(alpha: muted ? 0.04 : 0.08),
@@ -344,8 +375,8 @@ class _InfoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: displayColor),
-          const SizedBox(width: 8),
+          Icon(icon, size: compact ? 16 : 18, color: displayColor),
+          SizedBox(width: compact ? 6 : 8),
           Flexible(
             child: Text(
               label,
@@ -353,6 +384,7 @@ class _InfoPill extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: displayColor,
+                fontSize: compact ? 13 : null,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
               ),
@@ -777,9 +809,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final compact = constraints.maxHeight < 760;
-                      final gap = compact ? 10.0 : 12.0;
-                      final statusHeight = compact ? 108.0 : 124.0;
-                      final sliderHeight = compact ? 108.0 : 124.0;
+                      final dense = constraints.maxHeight < 700;
+                      final gap = dense ? 8.0 : compact ? 10.0 : 12.0;
+                      final statusHeight = dense ? 92.0 : compact ? 104.0 : 124.0;
+                      final sliderHeight = dense ? 92.0 : compact ? 100.0 : 124.0;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -787,6 +820,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                           _HeaderSection(
                             platform: platform,
                             compact: compact,
+                            dense: dense,
                             onTitleTap: _handleTitleTap,
                             onPartSelected: _handlePartSelected,
                             onRefreshConnection:
@@ -819,10 +853,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                             activeColor: const Color(
                                               0xFFFFD166,
                                             ),
-                                            compact: compact,
+                                            compact: compact || dense,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
+                                        SizedBox(width: dense ? 8 : 10),
                                         Expanded(
                                           child: _StatusTile(
                                             icon:
@@ -838,7 +872,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                             activeColor: const Color(
                                               0xFF06D6A0,
                                             ),
-                                            compact: compact,
+                                            compact: compact || dense,
                                           ),
                                         ),
                                       ],
@@ -859,10 +893,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                     Colors.white70;
                                 return _GlassPanel(
                                   padding: EdgeInsets.fromLTRB(
-                                    compact ? 14 : 20,
-                                    compact ? 10 : 18,
-                                    compact ? 14 : 20,
-                                    compact ? 10 : 18,
+                                    dense ? 12 : compact ? 14 : 20,
+                                    dense ? 8 : compact ? 10 : 18,
+                                    dense ? 12 : compact ? 14 : 20,
+                                    dense ? 8 : compact ? 10 : 18,
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -890,6 +924,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                                 .textTheme
                                                 .bodySmall
                                                 ?.copyWith(
+                                                  fontSize: dense ? 11 : null,
                                                   color: Colors.white70,
                                                 ),
                                           ),
@@ -933,7 +968,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                           ),
                           SizedBox(height: gap),
                           Expanded(
-                            child: PracticeEventStrip(compact: compact),
+                            child: PracticeEventStrip(
+                              compact: compact,
+                              dense: dense,
+                            ),
                           ),
                         ],
                       );
@@ -965,19 +1003,24 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
 }
 
 class PracticeEventStrip extends StatefulWidget {
-  const PracticeEventStrip({super.key, required this.compact});
+  const PracticeEventStrip({
+    super.key,
+    required this.compact,
+    required this.dense,
+  });
 
   final bool compact;
+  final bool dense;
 
   @override
   State<PracticeEventStrip> createState() => _PracticeEventStripState();
 }
 
 class _PracticeEventStripState extends State<PracticeEventStrip> {
-  static const double _kItemWidth = 92.0;
-  static const double _kSpacing = 12.0;
-
   final ScrollController _controller = ScrollController();
+
+  double get _itemWidth => widget.dense ? 76.0 : widget.compact ? 84.0 : 92.0;
+  double get _itemSpacing => widget.dense ? 8.0 : 12.0;
 
   @override
   void initState() {
@@ -999,9 +1042,9 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
     if (events.isEmpty) return;
     final i = client.practiceEventIndex.value.clamp(0, events.length - 1);
 
-    final beforeWidth = i * (_kItemWidth + _kSpacing);
+    final beforeWidth = i * (_itemWidth + _itemSpacing);
     final viewport = _controller.position.viewportDimension;
-    final padding = math.max(0.0, (viewport - _kItemWidth) / 2);
+    final padding = math.max(0.0, (viewport - _itemWidth) / 2);
     final target = (beforeWidth - padding).clamp(
       0.0,
       _controller.position.maxScrollExtent,
@@ -1092,13 +1135,23 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                     ? 'No cue assigned for this slot.'
                     : currentAssignment.sample.split('/').last);
             final compact = widget.compact;
+            final dense = widget.dense;
+            final detailChips = <String>[
+              if (!dense)
+                '${selectedPart?.label ?? 'Unassigned'} · Slot $slotForPreview',
+              _routeLabel(currentAssignment),
+              'Clip ${_durationLabel(currentAssignment?.durationMs)}',
+              currentLightingAssignment == null
+                  ? 'No torch cue'
+                  : 'Torch ${_lightLabel(currentLightingAssignment.peakLevel)}',
+            ];
 
             return _GlassPanel(
               padding: EdgeInsets.fromLTRB(
-                compact ? 16 : 18,
-                compact ? 14 : 18,
-                compact ? 16 : 18,
-                compact ? 14 : 18,
+                dense ? 12 : compact ? 16 : 18,
+                dense ? 12 : compact ? 14 : 18,
+                dense ? 12 : compact ? 16 : 18,
+                dense ? 12 : compact ? 14 : 18,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1116,72 +1169,97 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                       Text(
                         '8 triggers',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: dense ? 11 : null,
                           color: Colors.white70,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: compact ? 6 : 8),
+                  SizedBox(height: dense ? 4 : compact ? 6 : 8),
                   Text(
                     'TP ${currentEvent.id} · M${currentEvent.displayMeasureText} · ${_normalisedBeat(currentEvent.position ?? '')}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontSize: dense ? 12 : null,
                       color: Colors.white70,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: compact ? 8 : 10),
+                  SizedBox(height: dense ? 6 : compact ? 8 : 10),
                   Text(
                     detailSummary,
-                    maxLines: compact ? 2 : 3,
+                    maxLines: dense ? 1 : compact ? 2 : 3,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: dense ? 11.5 : null,
                       color: Colors.white70,
                       height: 1.3,
                     ),
                   ),
-                  SizedBox(height: compact ? 8 : 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _EventDetailChip(
-                        label:
-                            '${selectedPart?.label ?? 'Unassigned'} · Slot $slotForPreview',
-                      ),
-                      _EventDetailChip(label: _routeLabel(currentAssignment)),
-                      _EventDetailChip(
-                        label: 'Clip ${_durationLabel(currentAssignment?.durationMs)}',
-                      ),
-                      _EventDetailChip(
-                        label:
-                            currentLightingAssignment == null
-                                ? 'No torch cue'
-                                : 'Torch ${_lightLabel(currentLightingAssignment.peakLevel)}',
-                      ),
-                    ],
+                  SizedBox(height: dense ? 6 : compact ? 8 : 10),
+                  SizedBox(
+                    height: dense ? 28 : 34,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: detailChips.length,
+                      separatorBuilder:
+                          (_, _) => SizedBox(width: dense ? 6 : 8),
+                      itemBuilder:
+                          (context, chipIndex) => _EventDetailChip(
+                            label: detailChips[chipIndex],
+                            compact: dense,
+                          ),
+                    ),
                   ),
                   const Spacer(),
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
+                      if (dense) ...[
+                        _PracticeNavButton(
+                          icon: Icons.chevron_left_rounded,
                           onPressed:
                               clampedIndex > 0
                                   ? () => client.movePracticeEvent(-1)
                                   : null,
-                          icon: const Icon(Icons.chevron_left_rounded),
-                          label: const Text('Prev'),
                         ),
-                      ),
-                      const SizedBox(width: 8),
+                      ] else ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed:
+                                clampedIndex > 0
+                                    ? () => client.movePracticeEvent(-1)
+                                    : null,
+                            icon: const Icon(Icons.chevron_left_rounded),
+                            label: const Text('Prev'),
+                          ),
+                        ),
+                      ],
+                      SizedBox(width: dense ? 6 : 8),
                       Expanded(
-                        flex: 2,
+                        flex: dense ? 1 : 2,
                         child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            minimumSize: Size.fromHeight(dense ? 40 : 48),
+                            visualDensity:
+                                dense
+                                    ? const VisualDensity(
+                                      horizontal: -1,
+                                      vertical: -2,
+                                    )
+                                    : VisualDensity.standard,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: dense ? 10 : 16,
+                              vertical: dense ? 10 : 14,
+                            ),
+                          ),
                           onPressed:
                               () => unawaited(
                                 _handlePlayRequest(events, clampedIndex),
                               ),
-                          icon: const Icon(Icons.play_arrow_rounded),
+                          icon: Icon(
+                            Icons.play_arrow_rounded,
+                            size: dense ? 20 : 24,
+                          ),
                           label: Text(
                             currentAssignment != null ||
                                     currentLightingAssignment != null
@@ -1190,28 +1268,39 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
+                      SizedBox(width: dense ? 6 : 8),
+                      if (dense) ...[
+                        _PracticeNavButton(
+                          icon: Icons.chevron_right_rounded,
                           onPressed:
                               clampedIndex < events.length - 1
                                   ? () => client.movePracticeEvent(1)
                                   : null,
-                          icon: const Icon(Icons.chevron_right_rounded),
-                          label: const Text('Next'),
                         ),
-                      ),
+                      ] else ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed:
+                                clampedIndex < events.length - 1
+                                    ? () => client.movePracticeEvent(1)
+                                    : null,
+                            icon: const Icon(Icons.chevron_right_rounded),
+                            label: const Text('Next'),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                  SizedBox(height: compact ? 10 : 12),
+                  SizedBox(height: dense ? 8 : compact ? 10 : 12),
                   SizedBox(
-                    height: compact ? 58 : 64,
+                    height: dense ? 50 : compact ? 58 : 64,
                     child: ListView.separated(
                       controller: _controller,
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       itemCount: events.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: _kSpacing),
+                      separatorBuilder:
+                          (_, _) => SizedBox(width: _itemSpacing),
                       itemBuilder: (context, i) {
                         final event = events[i];
                         final isCurrent = i == clampedIndex;
@@ -1219,6 +1308,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                           event: event,
                           isCurrent: isCurrent,
                           accent: partAccent,
+                          dense: dense,
                           onTap: () => client.setPracticeEventIndex(i),
                         );
                       },
@@ -1230,6 +1320,30 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
           },
         );
       },
+    );
+  }
+}
+
+class _PracticeNavButton extends StatelessWidget {
+  const _PracticeNavButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 40,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Icon(icon, size: 20),
+      ),
     );
   }
 }
@@ -1266,12 +1380,14 @@ class _PracticeTriggerChip extends StatelessWidget {
     required this.event,
     required this.isCurrent,
     required this.accent,
+    required this.dense,
     required this.onTap,
   });
 
   final EventRecipe event;
   final bool isCurrent;
   final Color accent;
+  final bool dense;
   final VoidCallback onTap;
 
   @override
@@ -1281,8 +1397,11 @@ class _PracticeTriggerChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 92,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        width: dense ? 76 : 92,
+        padding: EdgeInsets.symmetric(
+          horizontal: dense ? 8 : 10,
+          vertical: dense ? 6 : 8,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color:
@@ -1303,6 +1422,7 @@ class _PracticeTriggerChip extends StatelessWidget {
             Text(
               'TP ${event.id}',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontSize: dense ? 12 : null,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1312,6 +1432,7 @@ class _PracticeTriggerChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: dense ? 10.5 : null,
                 color: Colors.white70,
               ),
             ),
@@ -1323,20 +1444,29 @@ class _PracticeTriggerChip extends StatelessWidget {
 }
 
 class _EventDetailChip extends StatelessWidget {
-  const _EventDetailChip({required this.label});
+  const _EventDetailChip({required this.label, this.compact = false});
 
   final String label;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 12,
+        vertical: compact ? 4 : 6,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(compact ? 12 : 14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(fontSize: compact ? 11 : null),
+      ),
     );
   }
 }
