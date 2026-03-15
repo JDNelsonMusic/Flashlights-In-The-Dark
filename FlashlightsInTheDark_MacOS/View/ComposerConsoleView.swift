@@ -14,13 +14,9 @@ private struct StaffModuleDescriptor: Identifiable {
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
 
-    private static let keyToSlot = KeyboardKeyToSlot
-
     @State private var showRouting = false
     @State private var strobeOn = false
     @State private var sidebarPinned = true
-
-    private var typingMapper = TypingMidiMapper(keyToSlot: Self.keyToSlot)
 
     private var stageModules: [StaffModuleDescriptor] {
         LightStaff.stageOrder.map { StaffModuleDescriptor(staff: $0) }
@@ -36,8 +32,11 @@ struct ComposerConsoleView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let wideLayout = geometry.size.width >= 1420
-            let sidebarWidth = min(max(geometry.size.width * 0.26, 340), 430)
+            let wideLayout = geometry.size.width >= 1540
+            let ultraWideLayout = geometry.size.width >= 2400
+            let sidebarWidth = ultraWideLayout
+                ? min(max(geometry.size.width * 0.24, 500), 620)
+                : min(max(geometry.size.width * 0.28, 360), 460)
 
             ZStack {
                 Color.deepPurple.ignoresSafeArea()
@@ -50,7 +49,7 @@ struct ComposerConsoleView: View {
                         if wideLayout {
                             HStack(alignment: .top, spacing: 20) {
                                 if sidebarPinned {
-                                    operatorRail
+                                    operatorRail(availableWidth: sidebarWidth)
                                         .frame(width: sidebarWidth)
                                         .frame(maxWidth: sidebarWidth, alignment: .topLeading)
                                 }
@@ -62,7 +61,7 @@ struct ComposerConsoleView: View {
                             VStack(spacing: 20) {
                                 mainStageColumn(availableWidth: geometry.size.width - 48)
                                 if sidebarPinned {
-                                    operatorRail
+                                    operatorRail(availableWidth: geometry.size.width - 48)
                                 }
                             }
                         }
@@ -88,93 +87,47 @@ struct ComposerConsoleView: View {
                 )
                 .overlay(ColorOverlayVeil())
                 .overlay(
-                    KeyCaptureView(
-                        isEnabled: state.isKeyCaptureEnabled,
-                        onKeyDown: { char in
-                            Task { @MainActor in
-                                handleTypingKeyDown(char)
-                            }
-                        },
-                        onKeyUp: { char in
-                            Task { @MainActor in
-                                handleTypingKeyUp(char)
-                            }
-                        },
-                        onSpecialKeyDown: { event in
-                            Task { @MainActor in
-                                handleSpecialKeyDown(event)
-                            }
-                        }
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .allowsHitTesting(false)
-                )
-
-                Color.purpleNavy
+                    Color.purpleNavy
                     .opacity(0.08)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
+                )
             }
         }
-        .onChange(of: state.strobeActive) { _ in
+        .onChange(of: state.strobeActive) { _, _ in
             updateStrobeAnimation()
         }
-        .onChange(of: state.slowStrobeActive) { _ in
+        .onChange(of: state.slowStrobeActive) { _, _ in
             updateStrobeAnimation()
         }
-        .onChange(of: state.glowRampActive) { _ in
+        .onChange(of: state.glowRampActive) { _, _ in
             updateStrobeAnimation()
         }
-        .onChange(of: state.slowGlowRampActive) { _ in
+        .onChange(of: state.slowGlowRampActive) { _, _ in
             updateStrobeAnimation()
         }
     }
 
     private var headerCard: some View {
         ConsoleSectionCard {
-            HStack(alignment: .top, spacing: 18) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Flashlights in the Dark")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("Conductor Console")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.mintGlow)
-                    Text("Six-stage module view with left-to-right seat numbering and direct trigger control.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 20) {
+                    headerIdentity
+                    Spacer(minLength: 12)
+                    headerControls(alignment: .trailing)
                 }
 
-                Spacer(minLength: 12)
-
-                VStack(alignment: .trailing, spacing: 10) {
-                    HStack(spacing: 8) {
-                        StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
-                        StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
-                    }
-
-                    HStack(spacing: 8) {
-                        Button(sidebarPinned ? "Hide Sidebar" : "Show Sidebar") {
-                            sidebarPinned.toggle()
-                        }
-                        .buttonStyle(.bordered)
-
-                        Button("Routing") {
-                            showRouting = true
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.blue)
-                    }
+                VStack(alignment: .leading, spacing: 16) {
+                    headerIdentity
+                    headerControls(alignment: .leading)
                 }
             }
         }
     }
 
     private func summaryGrid(availableWidth: CGFloat) -> some View {
-        let minimumWidth = max(200, min(280, (availableWidth - 72) / 4))
-
         return LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: minimumWidth, maximum: 320), spacing: 16, alignment: .top)],
+            columns: summaryColumns(for: availableWidth),
             spacing: 16
         ) {
             SummaryCard(
@@ -200,7 +153,7 @@ struct ComposerConsoleView: View {
             )
             SummaryCard(
                 title: "Network Health",
-                value: "\(state.packetRatePerSecond, specifier: "%.1f") PPS",
+                value: String(format: "%.1f PPS", state.packetRatePerSecond),
                 subtitle: "Unknown \(state.unknownSenderEvents) · Failures \(state.totalSendFailures)",
                 tint: .blue,
                 symbol: "waveform.path.ecg"
@@ -247,7 +200,7 @@ struct ComposerConsoleView: View {
                     )
 
                     LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 12, alignment: .top)],
+                        columns: quickFireColumns(for: availableWidth),
                         spacing: 12
                     ) {
                         ForEach(stageModules) { module in
@@ -289,8 +242,14 @@ struct ComposerConsoleView: View {
         }
     }
 
-    private var operatorRail: some View {
-        VStack(alignment: .leading, spacing: 16) {
+    private func operatorRail(availableWidth: CGFloat) -> some View {
+        let twoColumnRail = availableWidth >= 900
+        let columns = Array(
+            repeating: GridItem(.flexible(minimum: twoColumnRail ? 260 : availableWidth), spacing: 16, alignment: .top),
+            count: twoColumnRail ? 2 : 1
+        )
+
+        return LazyVGrid(columns: columns, spacing: 16) {
             TransportPanel(showRouting: $showRouting)
                 .environmentObject(state)
 
@@ -309,10 +268,10 @@ struct ComposerConsoleView: View {
         ConsoleSectionCard {
             HStack(alignment: .center, spacing: 12) {
                 Image(systemName: "terminal")
-                    .foregroundStyle(.mintGlow)
+                    .foregroundStyle(Color.mintGlow)
                 Text(state.lastLog)
                     .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.mintGlow)
+                    .foregroundStyle(Color.mintGlow)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -334,17 +293,99 @@ struct ComposerConsoleView: View {
         return event.measureText + " · " + event.positionLabel
     }
 
+    private var headerIdentity: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Flashlights in the Dark")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+            Text("Conductor Console")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Color.mintGlow)
+            Text("Six-stage module view with left-to-right seat numbering, trigger navigation, and direct section control.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func headerControls(alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 10) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
+                    StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
+                }
+
+                VStack(alignment: alignment, spacing: 8) {
+                    StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
+                    StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
+                }
+            }
+
+            HStack(spacing: 8) {
+                Button(sidebarPinned ? "Hide Sidebar" : "Show Sidebar") {
+                    sidebarPinned.toggle()
+                }
+                .buttonStyle(.bordered)
+
+                Button("Routing") {
+                    showRouting = true
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
+            }
+        }
+    }
+
     private func stageColumns(for availableWidth: CGFloat) -> [GridItem] {
-        let minimumWidth: CGFloat
-        if availableWidth >= 1600 {
-            minimumWidth = 250
-        } else if availableWidth >= 1200 {
-            minimumWidth = 290
+        let columnCount: Int
+        if availableWidth >= 2500 {
+            columnCount = 6
+        } else if availableWidth >= 1500 {
+            columnCount = 3
+        } else if availableWidth >= 980 {
+            columnCount = 2
         } else {
-            minimumWidth = 340
+            columnCount = 1
         }
 
-        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 420), spacing: 16, alignment: .top)]
+        return Array(
+            repeating: GridItem(.flexible(minimum: 280, maximum: .infinity), spacing: 16, alignment: .top),
+            count: columnCount
+        )
+    }
+
+    private func summaryColumns(for availableWidth: CGFloat) -> [GridItem] {
+        let columnCount: Int
+        if availableWidth >= 1760 {
+            columnCount = 4
+        } else if availableWidth >= 920 {
+            columnCount = 2
+        } else {
+            columnCount = 1
+        }
+
+        return Array(
+            repeating: GridItem(.flexible(minimum: 180, maximum: .infinity), spacing: 16, alignment: .top),
+            count: columnCount
+        )
+    }
+
+    private func quickFireColumns(for availableWidth: CGFloat) -> [GridItem] {
+        let columnCount: Int
+        if availableWidth >= 2100 {
+            columnCount = 6
+        } else if availableWidth >= 1200 {
+            columnCount = 3
+        } else if availableWidth >= 700 {
+            columnCount = 2
+        } else {
+            columnCount = 1
+        }
+
+        return Array(
+            repeating: GridItem(.flexible(minimum: 150, maximum: .infinity), spacing: 12, alignment: .top),
+            count: columnCount
+        )
     }
 
     private func routedDevices(for module: StaffModuleDescriptor) -> [ChoirDevice] {
@@ -432,69 +473,6 @@ struct ComposerConsoleView: View {
         }
     }
 
-    @MainActor
-    private func handleTypingKeyDown(_ char: Character) {
-        switch char {
-        case " ":
-            state.triggerCurrentEvent()
-            return
-        case "]":
-            state.glowRampActive.toggle()
-            return
-        case "[":
-            state.slowGlowRampActive.toggle()
-            return
-        case "\\":
-            state.toggleAllTorches()
-            return
-        case "=":
-            state.strobeActive.toggle()
-            return
-        case "-":
-            state.slowStrobeActive.toggle()
-            return
-        default:
-            break
-        }
-
-        if let note = typingMapper.note(for: char) {
-            let slot = Int(note)
-            state.addTriggeredSlot(slot)
-            state.typingNoteOn(note)
-        }
-    }
-
-    @MainActor
-    private func handleTypingKeyUp(_ char: Character) {
-        if let note = typingMapper.note(for: char) {
-            let slot = Int(note)
-            state.removeTriggeredSlot(slot)
-            state.typingNoteOff(note)
-        }
-    }
-
-    @MainActor
-    private func handleSpecialKeyDown(_ event: NSEvent) {
-        guard let key = event.specialKey else { return }
-        let modifiers = event.modifierFlags
-
-        switch key {
-        case .leftArrow:
-            if modifiers.contains(.shift) {
-                state.moveEvents(by: -10)
-            } else {
-                state.moveToPreviousEvent()
-            }
-        case .rightArrow:
-            if modifiers.contains(.shift) {
-                state.moveEvents(by: 10)
-            } else {
-                state.moveToNextEvent()
-            }
-        default:
-            break
-        }
-    }
 }
 
 private struct ConsoleSectionCard<Content: View>: View {
@@ -636,59 +614,44 @@ private struct TransportPanel: View {
             VStack(alignment: .leading, spacing: 14) {
                 ConsoleSectionHeader(title: "Transport", subtitle: "Concert arming, routing, refresh, and emergency actions.")
 
-                HStack(spacing: 10) {
-                    Button("Refresh") {
-                        state.refreshDevices()
-                        Task { await state.startNetwork() }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        refreshButton
+                        refreshConnectionsButton
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.blue)
 
-                    Button("Refresh Connections") {
-                        state.refreshConnections()
+                    VStack(spacing: 10) {
+                        refreshButton
+                        refreshConnectionsButton
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.teal)
-                    .disabled(!state.isBroadcasting)
                 }
 
-                HStack(spacing: 10) {
-                    Button(state.isArmed ? "DISARM" : "ARM") {
-                        if state.isArmed {
-                            state.disarmConcertMode()
-                        } else {
-                            _ = state.armConcertMode()
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        armButton
+                        armOverrideButton
+                        panicButton
+                    }
+
+                    VStack(spacing: 10) {
+                        armButton
+                        HStack(spacing: 10) {
+                            armOverrideButton
+                            panicButton
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(state.isArmed ? .red : (state.canArmStrict ? .green : .orange))
-
-                    Button("ARM Override") {
-                        _ = state.armConcertMode(override: true)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.orange)
-                    .disabled(state.isArmed || state.canArmStrict)
-
-                    Button("PANIC") {
-                        state.panicAllStop()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
                 }
 
-                HStack(spacing: 10) {
-                    Button("Routing") {
-                        showRouting = true
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        routingButton
+                        exportLogButton
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.blue)
 
-                    Button("Export Network Log") {
-                        state.exportNetworkLog()
+                    VStack(spacing: 10) {
+                        routingButton
+                        exportLogButton
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.purple)
                 }
 
                 if let warning = state.preflightWarning {
@@ -698,6 +661,69 @@ private struct TransportPanel: View {
                 }
             }
         }
+    }
+
+    private var refreshButton: some View {
+        Button("Refresh") {
+            state.refreshDevices()
+            Task { await state.startNetwork() }
+        }
+        .buttonStyle(.bordered)
+        .tint(.blue)
+    }
+
+    private var refreshConnectionsButton: some View {
+        Button("Refresh Connections") {
+            state.refreshConnections()
+        }
+        .buttonStyle(.bordered)
+        .tint(.teal)
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var armButton: some View {
+        Button(state.isArmed ? "DISARM" : "ARM") {
+            if state.isArmed {
+                state.disarmConcertMode()
+            } else {
+                _ = state.armConcertMode()
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(state.isArmed ? .red : (state.canArmStrict ? .green : .orange))
+    }
+
+    private var armOverrideButton: some View {
+        Button("ARM Override") {
+            _ = state.armConcertMode(override: true)
+        }
+        .buttonStyle(.bordered)
+        .tint(.orange)
+        .disabled(state.isArmed || state.canArmStrict)
+    }
+
+    private var panicButton: some View {
+        Button("PANIC") {
+            state.panicAllStop()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.red)
+    }
+
+    private var routingButton: some View {
+        Button("Routing") {
+            showRouting = true
+        }
+        .buttonStyle(.bordered)
+        .tint(.blue)
+    }
+
+    private var exportLogButton: some View {
+        Button("Export Network Log") {
+            state.exportNetworkLog()
+        }
+        .buttonStyle(.bordered)
+        .tint(.purple)
     }
 }
 
@@ -711,63 +737,105 @@ private struct EnsembleFxPanel: View {
             VStack(alignment: .leading, spacing: 14) {
                 ConsoleSectionHeader(title: "Ensemble FX", subtitle: "Global torch and diagnostic gestures for quick checks.")
 
-                HStack(spacing: 10) {
-                    Button(anyTorchOn ? "All Off" : "All On") {
-                        state.toggleAllTorches()
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        allTorchButton
+                        playAllTonesButton
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(anyTorchOn ? .red : Color.indigo.opacity(0.65))
-                    .disabled(!state.isBroadcasting)
 
-                    Button("Play All Tones") {
-                        state.playAllTones()
+                    VStack(spacing: 10) {
+                        allTorchButton
+                        playAllTonesButton
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.cyan)
-                    .disabled(!state.isBroadcasting)
                 }
 
-                HStack(spacing: 10) {
-                    ToggleActionButton(
-                        title: state.slowGlowRampActive ? "Stop Slow Glow" : "Slow Glow",
-                        tint: .mintGlow,
-                        isActive: state.slowGlowRampActive
-                    ) {
-                        state.slowGlowRampActive.toggle()
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        slowGlowButton
+                        glowRampButton
                     }
-                    .disabled(!state.isBroadcasting)
 
-                    ToggleActionButton(
-                        title: state.glowRampActive ? "Stop Glow" : "Glow Ramp",
-                        tint: .mintGlow,
-                        isActive: state.glowRampActive
-                    ) {
-                        state.glowRampActive.toggle()
+                    VStack(spacing: 10) {
+                        slowGlowButton
+                        glowRampButton
                     }
-                    .disabled(!state.isBroadcasting)
                 }
 
-                HStack(spacing: 10) {
-                    ToggleActionButton(
-                        title: state.slowStrobeActive ? "Stop Medium" : "Medium Strobe",
-                        tint: .mintGlow,
-                        isActive: state.slowStrobeActive
-                    ) {
-                        state.slowStrobeActive.toggle()
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 10) {
+                        mediumStrobeButton
+                        rapidStrobeButton
                     }
-                    .disabled(!state.isBroadcasting)
 
-                    ToggleActionButton(
-                        title: state.strobeActive ? "Stop Rapid" : "Rapid Strobe",
-                        tint: .mintGlow,
-                        isActive: state.strobeActive
-                    ) {
-                        state.strobeActive.toggle()
+                    VStack(spacing: 10) {
+                        mediumStrobeButton
+                        rapidStrobeButton
                     }
-                    .disabled(!state.isBroadcasting)
                 }
             }
         }
+    }
+
+    private var allTorchButton: some View {
+        Button(anyTorchOn ? "All Off" : "All On") {
+            state.toggleAllTorches()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(anyTorchOn ? .red : Color.indigo.opacity(0.65))
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var playAllTonesButton: some View {
+        Button("Play All Tones") {
+            state.playAllTones()
+        }
+        .buttonStyle(.bordered)
+        .tint(.cyan)
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var slowGlowButton: some View {
+        ToggleActionButton(
+            title: state.slowGlowRampActive ? "Stop Slow Glow" : "Slow Glow",
+            tint: .mintGlow,
+            isActive: state.slowGlowRampActive
+        ) {
+            state.slowGlowRampActive.toggle()
+        }
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var glowRampButton: some View {
+        ToggleActionButton(
+            title: state.glowRampActive ? "Stop Glow" : "Glow Ramp",
+            tint: .mintGlow,
+            isActive: state.glowRampActive
+        ) {
+            state.glowRampActive.toggle()
+        }
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var mediumStrobeButton: some View {
+        ToggleActionButton(
+            title: state.slowStrobeActive ? "Stop Medium" : "Medium Strobe",
+            tint: .mintGlow,
+            isActive: state.slowStrobeActive
+        ) {
+            state.slowStrobeActive.toggle()
+        }
+        .disabled(!state.isBroadcasting)
+    }
+
+    private var rapidStrobeButton: some View {
+        ToggleActionButton(
+            title: state.strobeActive ? "Stop Rapid" : "Rapid Strobe",
+            tint: .mintGlow,
+            isActive: state.strobeActive
+        ) {
+            state.strobeActive.toggle()
+        }
+        .disabled(!state.isBroadcasting)
     }
 }
 
@@ -784,7 +852,7 @@ private struct ManualCuePanel: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
 
-                    HStack(spacing: 8) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 84), spacing: 8), count: 3), spacing: 8) {
                         ForEach(ConsoleState.KeyboardTriggerMode.allCases, id: \.self) { mode in
                             Button {
                                 state.keyboardTriggerMode = mode
@@ -813,7 +881,7 @@ private struct ManualCuePanel: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
 
-                    HStack(spacing: 10) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 84), spacing: 10), count: 3), spacing: 10) {
                         ManualBankChip(set: "B", label: "seL", subtitle: "Blue · Red · Green", isActive: state.activeToneSets.contains("B")) {
                             toggleManualBank("B")
                         }
@@ -847,7 +915,7 @@ private struct ManualCuePanel: View {
                     }
                     .padding(.top, 10)
                 }
-                .tint(.mintGlow)
+                    .tint(Color.mintGlow)
             }
         }
     }
@@ -871,6 +939,7 @@ private struct ManualCuePanel: View {
 
 private struct MidiDiagnosticsPanel: View {
     @EnvironmentObject var state: ConsoleState
+    private let channelColumns = Array(repeating: GridItem(.flexible(minimum: 40), spacing: 8), count: 4)
 
     var body: some View {
         ConsoleSectionCard {
@@ -903,13 +972,27 @@ private struct MidiDiagnosticsPanel: View {
                     Text("Output Channel")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    Picker("Output Channel", selection: $state.outputChannel) {
+                    LazyVGrid(columns: channelColumns, spacing: 8) {
                         ForEach(1...16, id: \.self) { channel in
-                            Text("Ch \(channel)")
+                            Button {
+                                state.outputChannel = channel
+                            } label: {
+                                Text("\(channel)")
+                                    .font(.caption.weight(.semibold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                            }
+                            .buttonStyle(.plain)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(state.outputChannel == channel ? Color.mintGlow.opacity(0.2) : Color.white.opacity(0.05))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(state.outputChannel == channel ? Color.mintGlow.opacity(0.72) : Color.white.opacity(0.08), lineWidth: 1)
+                            )
                         }
                     }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
                     .onAppear {
                         state.refreshMidiDevices()
                     }
@@ -944,7 +1027,7 @@ private struct MidiDiagnosticsPanel: View {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
                                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
                         )
-                        .onChange(of: state.midiLog.count) { _ in
+                        .onChange(of: state.midiLog.count) { _, _ in
                             proxy.scrollTo("midi-bottom", anchor: .bottom)
                         }
                         .onAppear {
@@ -1019,27 +1102,16 @@ private struct StaffModuleCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(module.title)
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(.white)
-                    Text("\(module.staff.routedSeatCount) routed · \(StageConsoleLayout.seatsPerStaff - module.staff.routedSeatCount) open")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top) {
+                    moduleHeader
+                    Spacer(minLength: 8)
+                    moduleStatusCluster
                 }
 
-                Spacer(minLength: 8)
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(connectedCount)/\(module.staff.routedSeatCount) live")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(connectedCount > 0 ? Color.mintGlow : .secondary)
-                    if hasTorch || hasAudio {
-                        Text(hasTorch && hasAudio ? "Torch + Audio" : (hasTorch ? "Torch active" : "Audio active"))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+                VStack(alignment: .leading, spacing: 8) {
+                    moduleHeader
+                    moduleStatusCluster
                 }
             }
 
@@ -1059,44 +1131,24 @@ private struct StaffModuleCard: View {
                 }
             }
 
-            HStack(spacing: 8) {
-                Button {
-                    onPing()
-                } label: {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    pingButton
+                    torchButton
+                    soundButton
+                    bothButton
                 }
-                .buttonStyle(.bordered)
-                .tint(module.accent)
-                .disabled(!hasTargets)
 
-                Button {
-                    onTorch()
-                } label: {
-                    Image(systemName: "flashlight.on.fill")
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 110), spacing: 8), count: 2), spacing: 8) {
+                    pingButton
+                    torchButton
+                    soundButton
+                    bothButton
                 }
-                .buttonStyle(.bordered)
-                .tint(module.accent)
-                .disabled(!hasTargets)
-
-                Button {
-                    onSound()
-                } label: {
-                    Image(systemName: "speaker.wave.2.fill")
-                }
-                .buttonStyle(.bordered)
-                .tint(module.accent)
-                .disabled(!hasTargets)
-
-                Button("Both") {
-                    onBoth()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(module.accent)
-                .disabled(!hasTargets)
             }
         }
         .padding(16)
-        .frame(maxWidth: .infinity, minHeight: 240, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 250, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(module.accent.opacity(0.1))
@@ -1106,6 +1158,106 @@ private struct StaffModuleCard: View {
                 .stroke(module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.95 : 0.28), lineWidth: isTriggered || hasTorch || hasAudio ? 2 : 1)
         )
         .shadow(color: module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.24 : 0.08), radius: isTriggered || hasTorch || hasAudio ? 18 : 8, y: 8)
+    }
+
+    private var moduleHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(module.title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+            Text("\(module.staff.routedSeatCount) routed · \(StageConsoleLayout.seatsPerStaff - module.staff.routedSeatCount) open")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var moduleStatusCluster: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            ModuleMetricPill(
+                title: "Live",
+                value: "\(connectedCount)/\(module.staff.routedSeatCount)",
+                tint: connectedCount > 0 ? Color.mintGlow : Color.secondary
+            )
+            if hasTorch || hasAudio {
+                ModuleMetricPill(
+                    title: "State",
+                    value: hasTorch && hasAudio ? "Torch + Audio" : (hasTorch ? "Torch active" : "Audio active"),
+                    tint: module.accent
+                )
+            }
+        }
+    }
+
+    private var pingButton: some View {
+        Button {
+            onPing()
+        } label: {
+            Label("Ping", systemImage: "antenna.radiowaves.left.and.right")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .tint(module.accent)
+        .disabled(!hasTargets)
+    }
+
+    private var torchButton: some View {
+        Button {
+            onTorch()
+        } label: {
+            Label("Torch", systemImage: "flashlight.on.fill")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .tint(module.accent)
+        .disabled(!hasTargets)
+    }
+
+    private var soundButton: some View {
+        Button {
+            onSound()
+        } label: {
+            Label("Sound", systemImage: "speaker.wave.2.fill")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .tint(module.accent)
+        .disabled(!hasTargets)
+    }
+
+    private var bothButton: some View {
+        Button("Both") {
+            onBoth()
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(module.accent)
+        .disabled(!hasTargets)
+    }
+}
+
+private struct ModuleMetricPill: View {
+    let title: String
+    let value: String
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            Text(title.uppercased())
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(tint)
+            Text(value)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(tint.opacity(0.16))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(tint.opacity(0.32), lineWidth: 1)
+        )
     }
 }
 

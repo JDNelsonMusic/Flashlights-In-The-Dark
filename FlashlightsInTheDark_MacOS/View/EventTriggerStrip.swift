@@ -11,8 +11,6 @@ struct EventTriggerStrip: View {
     var body: some View {
         let previous = previousEvents()
         let next = nextEvents()
-        let leadingPlaceholders = max(0, previewCount - previous.count)
-        let trailingPlaceholders = max(0, previewCount - next.count)
 
         VStack(spacing: 12) {
             HStack(alignment: .bottom, spacing: 12) {
@@ -49,51 +47,84 @@ struct EventTriggerStrip: View {
                 }
             }
             .padding(.horizontal, 4)
-            .onChange(of: jumpFieldFocused, perform: handleFocusChange)
-
-            HStack(alignment: .center, spacing: 16) {
-                ForEach(0..<leadingPlaceholders, id: \.self) { _ in
-                    EventPlaceholderCard()
-                }
-
-                ForEach(previous.reversed(), id: \.id) { event in
-                    EventPreviewCard(event: event,
-                                     emphasis: .previous,
-                                     isCurrent: false,
-                                     isRecent: event.id == state.lastTriggeredEventID)
-                        .onTapGesture { state.focusOnEvent(id: event.id) }
-                }
-
-                if let current = currentEvent() {
-                    CurrentEventCard(event: current,
-                                     isRecent: current.id == state.lastTriggeredEventID,
-                                     triggerAction: { state.triggerCurrentEvent() },
-                                     movePrevious: { state.moveToPreviousEvent() },
-                                     moveNext: { state.moveToNextEvent() })
-                        .transition(.scale)
-                } else {
-                    Text(state.eventLoadError ?? "No trigger-point bundle loaded")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .padding()
-                        .frame(maxWidth: 320)
-                        .background(Color.black.opacity(0.2))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-
-                ForEach(next, id: \.id) { event in
-                    EventPreviewCard(event: event,
-                                     emphasis: .upcoming,
-                                     isCurrent: false,
-                                     isRecent: event.id == state.lastTriggeredEventID)
-                        .onTapGesture { state.focusOnEvent(id: event.id) }
-                }
-
-                ForEach(0..<trailingPlaceholders, id: \.self) { _ in
-                    EventPlaceholderCard()
-                }
+            .onChange(of: jumpFieldFocused) { _, isFocused in
+                handleFocusChange(isFocused)
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.currentEventIndex)
+
+            if let current = currentEvent() {
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 16) {
+                        EventPreviewColumn(
+                            title: "Previous",
+                            events: previous.reversed(),
+                            emphasis: .previous,
+                            recentEventID: state.lastTriggeredEventID,
+                            onSelect: { state.focusOnEvent(id: $0) }
+                        )
+                        .frame(minWidth: 190, maxWidth: 240, alignment: .top)
+
+                        CurrentEventCard(
+                            event: current,
+                            isRecent: current.id == state.lastTriggeredEventID,
+                            triggerAction: { state.triggerCurrentEvent() },
+                            movePrevious: { state.moveToPreviousEvent() },
+                            moveNext: { state.moveToNextEvent() }
+                        )
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        .transition(.scale)
+
+                        EventPreviewColumn(
+                            title: "Upcoming",
+                            events: next,
+                            emphasis: .upcoming,
+                            recentEventID: state.lastTriggeredEventID,
+                            onSelect: { state.focusOnEvent(id: $0) }
+                        )
+                        .frame(minWidth: 190, maxWidth: 240, alignment: .top)
+                    }
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        CurrentEventCard(
+                            event: current,
+                            isRecent: current.id == state.lastTriggeredEventID,
+                            triggerAction: { state.triggerCurrentEvent() },
+                            movePrevious: { state.moveToPreviousEvent() },
+                            moveNext: { state.moveToNextEvent() }
+                        )
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .transition(.scale)
+
+                        if !previous.isEmpty {
+                            EventPreviewGridSection(
+                                title: "Previous",
+                                events: previous.reversed(),
+                                emphasis: .previous,
+                                recentEventID: state.lastTriggeredEventID,
+                                onSelect: { state.focusOnEvent(id: $0) }
+                            )
+                        }
+
+                        if !next.isEmpty {
+                            EventPreviewGridSection(
+                                title: "Upcoming",
+                                events: next,
+                                emphasis: .upcoming,
+                                recentEventID: state.lastTriggeredEventID,
+                                onSelect: { state.focusOnEvent(id: $0) }
+                            )
+                        }
+                    }
+                }
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.currentEventIndex)
+            } else {
+                Text(state.eventLoadError ?? "No trigger-point bundle loaded")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .padding()
+                    .frame(maxWidth: 320)
+                    .background(Color.black.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
         }
         .padding(16)
         .background(
@@ -236,18 +267,74 @@ private struct EventPreviewCard: View {
     }
 }
 
+private struct EventPreviewColumn: View {
+    let title: String
+    let events: [EventRecipe]
+    let emphasis: EventCardEmphasis
+    let recentEventID: Int?
+    let onSelect: (Int) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            ForEach(events, id: \.id) { event in
+                EventPreviewCard(
+                    event: event,
+                    emphasis: emphasis,
+                    isCurrent: false,
+                    isRecent: event.id == recentEventID
+                )
+                .onTapGesture { onSelect(event.id) }
+            }
+
+            ForEach(events.count..<3, id: \.self) { _ in
+                EventPlaceholderCard()
+            }
+        }
+    }
+}
+
+private struct EventPreviewGridSection: View {
+    let title: String
+    let events: [EventRecipe]
+    let emphasis: EventCardEmphasis
+    let recentEventID: Int?
+    let onSelect: (Int) -> Void
+
+    private let columns = [GridItem(.adaptive(minimum: 140, maximum: 220), spacing: 10, alignment: .top)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(events, id: \.id) { event in
+                    EventPreviewCard(
+                        event: event,
+                        emphasis: emphasis,
+                        isCurrent: false,
+                        isRecent: event.id == recentEventID
+                    )
+                    .onTapGesture { onSelect(event.id) }
+                }
+            }
+        }
+    }
+}
+
 private struct CurrentEventCard: View {
     let event: EventRecipe
     let isRecent: Bool
     let triggerAction: () -> Void
     let movePrevious: () -> Void
     let moveNext: () -> Void
-
-    private let columns: [GridItem] = [
-        GridItem(.flexible(minimum: 90), spacing: 6, alignment: .leading),
-        GridItem(.flexible(minimum: 90), spacing: 6, alignment: .leading),
-        GridItem(.flexible(minimum: 90), spacing: 6, alignment: .leading)
-    ]
+    private let tagColumns = [GridItem(.adaptive(minimum: 110, maximum: 220), spacing: 8, alignment: .leading)]
+    private let staffColumns = [GridItem(.adaptive(minimum: 170, maximum: 260), spacing: 8, alignment: .leading)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -281,11 +368,11 @@ private struct CurrentEventCard: View {
                     Text(lighting.summary ?? "No lighting summary")
                         .font(.callout)
                         .foregroundStyle(.white.opacity(0.9))
-                    HStack(spacing: 8) {
+                    LazyVGrid(columns: tagColumns, alignment: .leading, spacing: 8) {
                         MiniTag(color: "Dynamics", detail: lighting.scoreDynamics ?? "—", isInactive: false)
                         MiniTag(color: "Span", detail: durationLabel(lighting.durationMs), isInactive: false)
                     }
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+                    LazyVGrid(columns: staffColumns, alignment: .leading, spacing: 8) {
                         ForEach(LightStaff.stageOrder) { staff in
                             LightStaffPlanCard(
                                 staff: staff,
@@ -300,7 +387,7 @@ private struct CurrentEventCard: View {
                 Text("Electronics routing")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
+                LazyVGrid(columns: tagColumns, alignment: .leading, spacing: 6) {
                     MiniTag(color: "Soprano", detail: "Left", isInactive: false)
                     MiniTag(color: "Alto", detail: "Right", isInactive: false)
                     MiniTag(color: "Ten/Bass", detail: "Mono sum", isInactive: false)
@@ -317,10 +404,10 @@ private struct CurrentEventCard: View {
                 .padding(.horizontal, 12)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.mintGlow)
+            .tint(Color.mintGlow)
         }
         .padding(20)
-        .frame(minWidth: 520)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white.opacity(0.12))

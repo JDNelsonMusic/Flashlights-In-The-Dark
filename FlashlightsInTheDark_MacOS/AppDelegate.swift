@@ -46,14 +46,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // SAFETY: unwrap self once, then ALWAYS use `self.` inside
             // -------------------------------------------------------------
             guard let self = self else { return event }
+            if !self.state.isKeyCaptureEnabled {
+                return event
+            }
             if let group = self.fKeyToGroup[event.keyCode], event.type == .keyDown {
                 if let slots = self.groupSlots[group] {
                     self.state.triggerSlots(realSlots: slots)
                 }
                 return nil
             }
+            if let specialKey = event.specialKey, event.type == .keyDown {
+                switch specialKey {
+                case .leftArrow:
+                    if event.modifierFlags.contains(.shift) {
+                        self.state.moveEvents(by: -10)
+                    } else {
+                        self.state.moveToPreviousEvent()
+                    }
+                    return nil
+                case .rightArrow:
+                    if event.modifierFlags.contains(.shift) {
+                        self.state.moveEvents(by: 10)
+                    } else {
+                        self.state.moveToNextEvent()
+                    }
+                    return nil
+                default:
+                    break
+                }
+            }
             guard let chars = event.charactersIgnoringModifiers?.lowercased(),
                   let c = chars.first else { return event }
+            if c == " " && event.type == .keyDown {
+                self.state.triggerCurrentEvent()
+                return nil
+            }
             // Glow Ramp toggle on "]" and Slow Glow Ramp on "["
             if c == "]" && event.type == .keyDown {
                 self.state.glowRampActive.toggle()
@@ -61,6 +88,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             if c == "[" && event.type == .keyDown {
                 self.state.slowGlowRampActive.toggle()
+                return nil
+            }
+            if c == "\\" && event.type == .keyDown {
+                self.state.toggleAllTorches()
+                return nil
+            }
+            if c == "=" && event.type == .keyDown {
+                self.state.strobeActive.toggle()
+                return nil
+            }
+            if c == "-" && event.type == .keyDown {
+                self.state.slowStrobeActive.toggle()
                 return nil
             }
             // Mapping from keyboard key to real slot number

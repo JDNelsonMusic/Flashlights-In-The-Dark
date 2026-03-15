@@ -3,6 +3,7 @@ import Combine
 import SwiftUI
 import AppKit
 import CoreAudio
+import UniformTypeIdentifiers
 import NIOPosix
 //import Network   // auto-discovery removed
 import Darwin           // for POSIXError & EHOSTDOWN
@@ -1474,7 +1475,9 @@ extension ConsoleState {
             try await broadcaster.start()
 
             heartbeatTimer = Timer.scheduledTimer(withTimeInterval: heartbeatTimerInterval, repeats: true) { [weak self] _ in
-                self?.checkHeartbeats()
+                Task { @MainActor [weak self] in
+                    self?.checkHeartbeats()
+                }
             }
             scheduleDiscoveryRefreshTimer()
             startConductorHelloLoop()
@@ -1572,8 +1575,10 @@ extension ConsoleState {
     private func scheduleDiscoveryRefreshTimer() {
         discoveryRefreshTimer?.invalidate()
         let timer = Timer(timeInterval: discoveryRefreshInterval, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            self.triggerDiscoveryRefresh(reason: .periodic)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.triggerDiscoveryRefresh(reason: .periodic)
+            }
         }
         timer.tolerance = discoveryRefreshInterval * 0.2
         discoveryRefreshTimer = timer
@@ -1585,7 +1590,9 @@ extension ConsoleState {
         conductorHelloStartedAt = Date()
         sendConductorHelloTick()
         let timer = Timer.scheduledTimer(withTimeInterval: conductorHelloInterval, repeats: true) { [weak self] _ in
-            self?.sendConductorHelloTick()
+            Task { @MainActor [weak self] in
+                self?.sendConductorHelloTick()
+            }
         }
         timer.tolerance = conductorHelloInterval * 0.2
         conductorHelloTimer = timer
@@ -1617,7 +1624,9 @@ extension ConsoleState {
     private func startMetricsLoop() {
         metricsTimer?.invalidate()
         metricsTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.refreshMetricsSnapshot()
+            Task { @MainActor [weak self] in
+                self?.refreshMetricsSnapshot()
+            }
         }
         refreshMetricsSnapshot()
     }
@@ -2299,7 +2308,9 @@ extension ConsoleState {
     @MainActor
     public func saveSessionAs() {
         let panel = NSSavePanel()
-        panel.allowedFileTypes = ["flashlights"]
+        if let flashlightsType = UTType(filenameExtension: "flashlights") {
+            panel.allowedContentTypes = [flashlightsType]
+        }
         panel.nameFieldStringValue = "Session.flashlights"
         if panel.runModal() == .OK, let url = panel.url {
             sessionURL = url
@@ -2311,7 +2322,9 @@ extension ConsoleState {
     @MainActor
     public func openSession() {
         let panel = NSOpenPanel()
-        panel.allowedFileTypes = ["flashlights"]
+        if let flashlightsType = UTType(filenameExtension: "flashlights") {
+            panel.allowedContentTypes = [flashlightsType]
+        }
         if panel.runModal() == .OK, let url = panel.url {
             sessionURL = url
             try? readSession(from: url)
