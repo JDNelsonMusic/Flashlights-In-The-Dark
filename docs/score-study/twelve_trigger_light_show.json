@@ -1,0 +1,2829 @@
+{
+  "generated": "2026-03-15T02:38:12+00:00",
+  "sourceMusicXml": "flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
+  "sourceTriggerManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
+  "stageOrder": [
+    {
+      "key": "soprano_l1",
+      "label": "Sop-L1"
+    },
+    {
+      "key": "soprano_l2",
+      "label": "Sop-L2"
+    },
+    {
+      "key": "tenor_l",
+      "label": "Ten-L"
+    },
+    {
+      "key": "bass_l",
+      "label": "Bass-L"
+    },
+    {
+      "key": "alto_l2",
+      "label": "Alto-L2"
+    },
+    {
+      "key": "alto_l1",
+      "label": "Alto-L1"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "measure": 1,
+      "position": "beat1",
+      "scoreLabel": "M1, beat1",
+      "summary": "Darkness loosens from stage left and crosses the ensemble as a first glint.",
+      "scoreDynamics": "Begin in darkness -> first emergence",
+      "designTags": [
+        "left_to_right",
+        "opening_glint",
+        "ppp_to_p"
+      ],
+      "availableWindowMs": 2352.941,
+      "durationMs": 2258.823,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Leads the first glint at the far-left edge.",
+          "motion": "lead-left",
+          "peakLevel": 0.18,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 225.882,
+              "level": 0.05
+            },
+            {
+              "atMs": 587.294,
+              "level": 0.18
+            },
+            {
+              "atMs": 1084.235,
+              "level": 0.08
+            },
+            {
+              "atMs": 1761.882,
+              "level": 0.02
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Answers just right of the opening spark.",
+          "motion": "left-to-right",
+          "peakLevel": 0.16,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 406.588,
+              "level": 0.03
+            },
+            {
+              "atMs": 813.176,
+              "level": 0.16
+            },
+            {
+              "atMs": 1310.117,
+              "level": 0.07
+            },
+            {
+              "atMs": 1897.411,
+              "level": 0.02
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "A low central ember wakes after the sopranos.",
+          "motion": "left-to-right",
+          "peakLevel": 0.13,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 632.47,
+              "level": 0.02
+            },
+            {
+              "atMs": 1129.411,
+              "level": 0.13
+            },
+            {
+              "atMs": 1581.176,
+              "level": 0.05
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass shadow arrives late and remains restrained.",
+          "motion": "left-to-right",
+          "peakLevel": 0.11,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 813.176,
+              "level": 0.01
+            },
+            {
+              "atMs": 1355.294,
+              "level": 0.11
+            },
+            {
+              "atMs": 1807.058,
+              "level": 0.04
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "A small right-side shimmer catches only at the end of the breath.",
+          "motion": "tail-answer",
+          "peakLevel": 0.08,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 1129.411,
+              "level": 0.0
+            },
+            {
+              "atMs": 1671.529,
+              "level": 0.08
+            },
+            {
+              "atMs": 2032.941,
+              "level": 0.03
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge barely lights before the piece tips into Trigger 2.",
+          "motion": "tail-answer",
+          "peakLevel": 0.06,
+          "durationMs": 2258.823,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 1400.47,
+              "level": 0.0
+            },
+            {
+              "atMs": 1942.588,
+              "level": 0.06
+            },
+            {
+              "atMs": 2258.823,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "measure": 2,
+      "position": "beat1",
+      "scoreLabel": "M2, beat1",
+      "summary": "A strong forte shimmer courses left-to-right, hangs in the middle distance, then rebounds right-to-left.",
+      "scoreDynamics": "f",
+      "designTags": [
+        "double_sweep",
+        "forte_shimmer",
+        "cross_stage"
+      ],
+      "availableWindowMs": 55882.353,
+      "durationMs": 52529.412,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Opens the first bright sweep and reignites on the rebound.",
+          "motion": "left-right-left",
+          "peakLevel": 0.86,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2626.471,
+              "level": 0.14
+            },
+            {
+              "atMs": 7354.118,
+              "level": 0.86
+            },
+            {
+              "atMs": 14708.235,
+              "level": 0.22
+            },
+            {
+              "atMs": 25214.118,
+              "level": 0.36
+            },
+            {
+              "atMs": 32568.235,
+              "level": 0.18
+            },
+            {
+              "atMs": 39922.353,
+              "level": 0.72
+            },
+            {
+              "atMs": 47276.471,
+              "level": 0.1
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Tracks the first sweep while holding a brighter mid-span glow.",
+          "motion": "left-right-left",
+          "peakLevel": 0.82,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 4202.353,
+              "level": 0.12
+            },
+            {
+              "atMs": 9455.294,
+              "level": 0.82
+            },
+            {
+              "atMs": 16809.412,
+              "level": 0.24
+            },
+            {
+              "atMs": 27315.294,
+              "level": 0.34
+            },
+            {
+              "atMs": 34669.412,
+              "level": 0.2
+            },
+            {
+              "atMs": 42023.53,
+              "level": 0.66
+            },
+            {
+              "atMs": 48327.059,
+              "level": 0.1
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "The center-left staff takes over the sustained shimmer.",
+          "motion": "central-sustain",
+          "peakLevel": 0.78,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 6303.529,
+              "level": 0.1
+            },
+            {
+              "atMs": 12607.059,
+              "level": 0.78
+            },
+            {
+              "atMs": 19961.177,
+              "level": 0.26
+            },
+            {
+              "atMs": 29416.471,
+              "level": 0.3
+            },
+            {
+              "atMs": 36770.588,
+              "level": 0.18
+            },
+            {
+              "atMs": 44124.706,
+              "level": 0.58
+            },
+            {
+              "atMs": 49377.647,
+              "level": 0.08
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass anchors the middle with the warmest, weightiest pulse.",
+          "motion": "center-anchor",
+          "peakLevel": 0.74,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 8404.706,
+              "level": 0.08
+            },
+            {
+              "atMs": 14708.235,
+              "level": 0.74
+            },
+            {
+              "atMs": 22062.353,
+              "level": 0.28
+            },
+            {
+              "atMs": 31517.647,
+              "level": 0.26
+            },
+            {
+              "atMs": 38871.765,
+              "level": 0.18
+            },
+            {
+              "atMs": 45175.294,
+              "level": 0.54
+            },
+            {
+              "atMs": 49902.941,
+              "level": 0.07
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Catches the end of the first sweep, then brightens earlier on the rebound.",
+          "motion": "rightward-receive",
+          "peakLevel": 0.8,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 11556.471,
+              "level": 0.08
+            },
+            {
+              "atMs": 17860.0,
+              "level": 0.8
+            },
+            {
+              "atMs": 25214.118,
+              "level": 0.24
+            },
+            {
+              "atMs": 30467.059,
+              "level": 0.22
+            },
+            {
+              "atMs": 37821.177,
+              "level": 0.24
+            },
+            {
+              "atMs": 44124.706,
+              "level": 0.6
+            },
+            {
+              "atMs": 49377.647,
+              "level": 0.08
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge receives the bright wave last, then launches the return sweep.",
+          "motion": "right-edge-rebound",
+          "peakLevel": 0.88,
+          "durationMs": 52529.412,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 13657.647,
+              "level": 0.06
+            },
+            {
+              "atMs": 19961.177,
+              "level": 0.88
+            },
+            {
+              "atMs": 27315.294,
+              "level": 0.2
+            },
+            {
+              "atMs": 29416.471,
+              "level": 0.18
+            },
+            {
+              "atMs": 35720.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 40972.941,
+              "level": 0.76
+            },
+            {
+              "atMs": 48327.059,
+              "level": 0.1
+            },
+            {
+              "atMs": 52529.412,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "measure": 25,
+      "position": "beat4",
+      "scoreLabel": "M25, beat4",
+      "summary": "The forte glare breaks into a soft right-to-left drift with long dim tails.",
+      "scoreDynamics": "p",
+      "designTags": [
+        "right_to_left",
+        "soft_drift",
+        "afterimage"
+      ],
+      "availableWindowMs": 20000.0,
+      "durationMs": 18600.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Receives the last portion of the retreat and fades almost immediately.",
+          "motion": "receive",
+          "peakLevel": 0.22,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 8928.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 12276.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 15252.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Lights briefly after the altos, then falls back into dark.",
+          "motion": "receive",
+          "peakLevel": 0.24,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 10416.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 14136.0,
+              "level": 0.09
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Carries the center of the decrescendo for the longest span.",
+          "motion": "center-carry",
+          "peakLevel": 0.28,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 4464.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 8184.0,
+              "level": 0.28
+            },
+            {
+              "atMs": 11532.0,
+              "level": 0.14
+            },
+            {
+              "atMs": 15252.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "A grounded low glow lingers beneath the receding wave.",
+          "motion": "low-anchor",
+          "peakLevel": 0.26,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3348.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 10416.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 14508.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Starts the retreat with a soft but clear right-side lead.",
+          "motion": "lead-right",
+          "peakLevel": 0.3,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 1488.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 4092.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 8556.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 13020.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge speaks first, then withdraws the fastest.",
+          "motion": "lead-right",
+          "peakLevel": 0.34,
+          "durationMs": 18600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 744.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 3348.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 10788.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 18600.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "measure": 33,
+      "position": "beat2",
+      "scoreLabel": "M33, beat2",
+      "summary": "A compact, compressed pulse ignites from the middle and flicks outward.",
+      "scoreDynamics": "p -> mp",
+      "designTags": [
+        "center_out",
+        "compressed_pulse",
+        "brief"
+      ],
+      "availableWindowMs": 6666.667,
+      "durationMs": 6000.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Catches the outermost left splash at the end of the pulse.",
+          "motion": "outer-splash",
+          "peakLevel": 0.26,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3240.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 4320.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 5280.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Follows the central ignition with a short upper-left flicker.",
+          "motion": "outer-splash",
+          "peakLevel": 0.3,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2160.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 3360.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 4560.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Starts the pulse from the left side of the center pair.",
+          "motion": "center-start",
+          "peakLevel": 0.4,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 720.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 1680.0,
+              "level": 0.4
+            },
+            {
+              "atMs": 3000.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Completes the center ignition with a warm bass flash.",
+          "motion": "center-start",
+          "peakLevel": 0.42,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 840.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 1800.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 2880.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Receives the pulse on the right side a beat later.",
+          "motion": "outer-splash",
+          "peakLevel": 0.3,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2520.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 3720.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 4800.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge blinks last, then drops instantly away.",
+          "motion": "outer-splash",
+          "peakLevel": 0.24,
+          "durationMs": 6000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3480.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 4560.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 5400.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 6000.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "measure": 36,
+      "position": "beat1",
+      "scoreLabel": "M36, beat1",
+      "summary": "A moderate breath opens from the center and widens slowly toward both edges.",
+      "scoreDynamics": "mp",
+      "designTags": [
+        "center_out",
+        "breathing_arc",
+        "moderate"
+      ],
+      "availableWindowMs": 35000.0,
+      "durationMs": 32900.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Far-left soprano blooms only after the central pair has opened.",
+          "motion": "center-out",
+          "peakLevel": 0.46,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 11186.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 16450.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 22372.0,
+              "level": 0.46
+            },
+            {
+              "atMs": 27636.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Upper-left line broadens into a rounded secondary crest.",
+          "motion": "center-out",
+          "peakLevel": 0.5,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 7896.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 13160.0,
+              "level": 0.28
+            },
+            {
+              "atMs": 19082.0,
+              "level": 0.5
+            },
+            {
+              "atMs": 26320.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Tenor light initiates the breath with a steady middle glow.",
+          "motion": "center-origin",
+          "peakLevel": 0.58,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2632.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 6580.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 12502.0,
+              "level": 0.58
+            },
+            {
+              "atMs": 21056.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass stays warm and weighted beneath the widening gesture.",
+          "motion": "center-origin",
+          "peakLevel": 0.56,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3290.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 7238.0,
+              "level": 0.4
+            },
+            {
+              "atMs": 13160.0,
+              "level": 0.56
+            },
+            {
+              "atMs": 21714.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Right-middle altos open late and shine a little cleaner than the left edge.",
+          "motion": "center-out",
+          "peakLevel": 0.48,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 9212.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 14476.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 20398.0,
+              "level": 0.48
+            },
+            {
+              "atMs": 26978.0,
+              "level": 0.17
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge closes the breath with the latest bloom.",
+          "motion": "center-out",
+          "peakLevel": 0.44,
+          "durationMs": 32900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 12502.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 17766.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 23688.0,
+              "level": 0.44
+            },
+            {
+              "atMs": 28294.0,
+              "level": 0.14
+            },
+            {
+              "atMs": 32900.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "measure": 46,
+      "position": "beat3",
+      "scoreLabel": "M46, beat3",
+      "summary": "Suspended three-beat rocking shifts weight between the center and the stage edges.",
+      "scoreDynamics": "mp, suspended",
+      "designTags": [
+        "pendulum",
+        "three_beat",
+        "suspension"
+      ],
+      "availableWindowMs": 44166.667,
+      "durationMs": 41075.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Joins only on the leftward swing, then recedes.",
+          "motion": "pendulum-left",
+          "peakLevel": 0.38,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 7393.5,
+              "level": 0.04
+            },
+            {
+              "atMs": 12322.5,
+              "level": 0.38
+            },
+            {
+              "atMs": 18894.5,
+              "level": 0.12
+            },
+            {
+              "atMs": 26288.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 32038.5,
+              "level": 0.3
+            },
+            {
+              "atMs": 37789.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Carries the upper-left lilt across both swings.",
+          "motion": "pendulum-left",
+          "peakLevel": 0.44,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 4929.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 9858.0,
+              "level": 0.44
+            },
+            {
+              "atMs": 16430.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 23823.5,
+              "level": 0.08
+            },
+            {
+              "atMs": 29574.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 36967.5,
+              "level": 0.1
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Tenor drives the first swing and keeps the pulse coherent.",
+          "motion": "center-driver",
+          "peakLevel": 0.54,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2464.5,
+              "level": 0.12
+            },
+            {
+              "atMs": 7393.5,
+              "level": 0.54
+            },
+            {
+              "atMs": 13965.5,
+              "level": 0.2
+            },
+            {
+              "atMs": 21359.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 27931.0,
+              "level": 0.4
+            },
+            {
+              "atMs": 36146.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass gives the rocking motion its weight and deepest glow.",
+          "motion": "center-driver",
+          "peakLevel": 0.56,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3286.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 8215.0,
+              "level": 0.56
+            },
+            {
+              "atMs": 14787.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 22180.5,
+              "level": 0.12
+            },
+            {
+              "atMs": 28752.5,
+              "level": 0.42
+            },
+            {
+              "atMs": 36967.5,
+              "level": 0.1
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Receives the rightward swing with a measured, late crest.",
+          "motion": "pendulum-right",
+          "peakLevel": 0.42,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 10679.5,
+              "level": 0.04
+            },
+            {
+              "atMs": 16430.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 23002.0,
+              "level": 0.14
+            },
+            {
+              "atMs": 29574.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 34503.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 38610.5,
+              "level": 0.06
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge lights only when the pendulum swings fully across.",
+          "motion": "pendulum-right",
+          "peakLevel": 0.36,
+          "durationMs": 41075.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 13965.5,
+              "level": 0.02
+            },
+            {
+              "atMs": 19716.0,
+              "level": 0.36
+            },
+            {
+              "atMs": 25466.5,
+              "level": 0.1
+            },
+            {
+              "atMs": 32860.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 36967.5,
+              "level": 0.24
+            },
+            {
+              "atMs": 40253.5,
+              "level": 0.04
+            },
+            {
+              "atMs": 41075.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "measure": 63,
+      "position": "beat3",
+      "scoreLabel": "M63, beat3",
+      "summary": "A long exhale lets the glow travel right-to-left while steadily thinning toward piano.",
+      "scoreDynamics": "dim. -> p",
+      "designTags": [
+        "right_to_left",
+        "diminuendo",
+        "long_exhale"
+      ],
+      "availableWindowMs": 39166.666,
+      "durationMs": 36424.999,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Receives the final trace of the exhale as it disappears into stage left.",
+          "motion": "receive-fade",
+          "peakLevel": 0.24,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 20397.999,
+              "level": 0.02
+            },
+            {
+              "atMs": 26225.999,
+              "level": 0.24
+            },
+            {
+              "atMs": 31325.499,
+              "level": 0.08
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Softens earlier than Trigger 5 and never quite returns to its former width.",
+          "motion": "receive-fade",
+          "peakLevel": 0.28,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 15298.5,
+              "level": 0.03
+            },
+            {
+              "atMs": 21854.999,
+              "level": 0.28
+            },
+            {
+              "atMs": 28411.499,
+              "level": 0.1
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Holds the center of the diminuendo before letting it go.",
+          "motion": "middle-fade",
+          "peakLevel": 0.34,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 9470.5,
+              "level": 0.05
+            },
+            {
+              "atMs": 16027.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 22583.499,
+              "level": 0.14
+            },
+            {
+              "atMs": 29868.499,
+              "level": 0.04
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Keeps a low ember alive longest, but only barely.",
+          "motion": "low-fade",
+          "peakLevel": 0.3,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 8013.5,
+              "level": 0.05
+            },
+            {
+              "atMs": 13841.5,
+              "level": 0.3
+            },
+            {
+              "atMs": 21126.499,
+              "level": 0.16
+            },
+            {
+              "atMs": 29139.999,
+              "level": 0.05
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Begins the exhale with the clearest right-side release.",
+          "motion": "lead-right",
+          "peakLevel": 0.42,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2185.5,
+              "level": 0.08
+            },
+            {
+              "atMs": 6556.5,
+              "level": 0.42
+            },
+            {
+              "atMs": 13841.5,
+              "level": 0.18
+            },
+            {
+              "atMs": 21854.999,
+              "level": 0.06
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "Starts brightest, then dims fastest as the energy drains away.",
+          "motion": "lead-right",
+          "peakLevel": 0.46,
+          "durationMs": 36424.999,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 1457.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 5828.0,
+              "level": 0.46
+            },
+            {
+              "atMs": 11656.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 19669.499,
+              "level": 0.05
+            },
+            {
+              "atMs": 36424.999,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 8,
+      "measure": 78,
+      "position": "beat1",
+      "scoreLabel": "M78, beat1",
+      "summary": "Separated search-beam gestures alternate between outer edges and the middle pair.",
+      "scoreDynamics": "restrained, searching",
+      "designTags": [
+        "alternation",
+        "outer_inner",
+        "search_beams"
+      ],
+      "availableWindowMs": 35833.333,
+      "durationMs": 33683.333,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Outer-left searches first and returns in the final glance.",
+          "motion": "outer-call",
+          "peakLevel": 0.4,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2694.667,
+              "level": 0.08
+            },
+            {
+              "atMs": 6736.667,
+              "level": 0.4
+            },
+            {
+              "atMs": 11452.333,
+              "level": 0.1
+            },
+            {
+              "atMs": 19536.333,
+              "level": 0.04
+            },
+            {
+              "atMs": 25599.333,
+              "level": 0.3
+            },
+            {
+              "atMs": 30988.666,
+              "level": 0.06
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Bridges the outer-left call back toward the center.",
+          "motion": "bridge",
+          "peakLevel": 0.44,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5389.333,
+              "level": 0.06
+            },
+            {
+              "atMs": 10105.0,
+              "level": 0.44
+            },
+            {
+              "atMs": 15494.333,
+              "level": 0.12
+            },
+            {
+              "atMs": 22904.666,
+              "level": 0.06
+            },
+            {
+              "atMs": 28294.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 32336.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Takes the clearest middle search pass of the trigger.",
+          "motion": "inner-answer",
+          "peakLevel": 0.52,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 8084.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 12799.667,
+              "level": 0.52
+            },
+            {
+              "atMs": 18862.666,
+              "level": 0.14
+            },
+            {
+              "atMs": 24925.666,
+              "level": 0.08
+            },
+            {
+              "atMs": 30315.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "A low center glow answers the search pattern with extra weight.",
+          "motion": "inner-answer",
+          "peakLevel": 0.5,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 9431.333,
+              "level": 0.08
+            },
+            {
+              "atMs": 14147.0,
+              "level": 0.5
+            },
+            {
+              "atMs": 20210.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 26273.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 30988.666,
+              "level": 0.2
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Right-middle staff takes over late and arcs outward.",
+          "motion": "bridge",
+          "peakLevel": 0.42,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 10105.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 15494.333,
+              "level": 0.42
+            },
+            {
+              "atMs": 21557.333,
+              "level": 0.12
+            },
+            {
+              "atMs": 27620.333,
+              "level": 0.08
+            },
+            {
+              "atMs": 31662.333,
+              "level": 0.24
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge answers the far-left opening with its own brief search beam.",
+          "motion": "outer-call",
+          "peakLevel": 0.38,
+          "durationMs": 33683.333,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 12126.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 17515.333,
+              "level": 0.38
+            },
+            {
+              "atMs": 23578.333,
+              "level": 0.1
+            },
+            {
+              "atMs": 29641.333,
+              "level": 0.26
+            },
+            {
+              "atMs": 33009.666,
+              "level": 0.04
+            },
+            {
+              "atMs": 33683.333,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "measure": 89,
+      "position": "beat1",
+      "scoreLabel": "M89, beat1",
+      "summary": "Quiet suspended lanterns appear in separate pockets rather than as a shared wave.",
+      "scoreDynamics": "p",
+      "designTags": [
+        "isolated_pools",
+        "hushed",
+        "asymmetry"
+      ],
+      "availableWindowMs": 30000.0,
+      "durationMs": 27900.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Barely-there high-left glow, almost a memory.",
+          "motion": "isolated",
+          "peakLevel": 0.18,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 11160.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 15624.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "A short reply above the left-middle, then silence.",
+          "motion": "isolated",
+          "peakLevel": 0.2,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3348.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 7812.0,
+              "level": 0.2
+            },
+            {
+              "atMs": 13392.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "The most stable pool of light sits in the tenor staff.",
+          "motion": "held-pool",
+          "peakLevel": 0.28,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2790.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.28
+            },
+            {
+              "atMs": 14508.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 21204.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass glows later and lower, without ever matching tenor brightness.",
+          "motion": "held-pool",
+          "peakLevel": 0.24,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 6696.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 11718.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 16740.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 23436.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "Right-middle light surfaces only briefly, like a distant response.",
+          "motion": "isolated",
+          "peakLevel": 0.22,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 9486.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 14508.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 18972.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge appears last and disappears first.",
+          "motion": "isolated",
+          "peakLevel": 0.16,
+          "durationMs": 27900.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 13392.0,
+              "level": 0.01
+            },
+            {
+              "atMs": 17298.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 21204.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 27900.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 10,
+      "measure": 98,
+      "position": "beat1",
+      "scoreLabel": "M98, beat1",
+      "summary": "A broad crescendo grows from scattered piano embers into the brightest cross-stage surge before Trigger 11.",
+      "scoreDynamics": "p -> ff",
+      "designTags": [
+        "crescendo",
+        "left_to_right",
+        "climax_preparation"
+      ],
+      "availableWindowMs": 20000.0,
+      "durationMs": 19600.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Begins the crescendo early on the far-left edge and returns at the final crest.",
+          "motion": "crescendo-sweep",
+          "peakLevel": 0.96,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 1568.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 4704.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 9016.0,
+              "level": 0.52
+            },
+            {
+              "atMs": 12936.0,
+              "level": 0.82
+            },
+            {
+              "atMs": 16072.0,
+              "level": 0.96
+            },
+            {
+              "atMs": 18032.0,
+              "level": 0.2
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Takes the growing wave and keeps it shining through the center of the build.",
+          "motion": "crescendo-sweep",
+          "peakLevel": 0.94,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 2352.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 5488.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 9800.0,
+              "level": 0.56
+            },
+            {
+              "atMs": 13720.0,
+              "level": 0.84
+            },
+            {
+              "atMs": 16856.0,
+              "level": 0.94
+            },
+            {
+              "atMs": 18424.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Center-left staff becomes the core engine of the crescendo.",
+          "motion": "center-build",
+          "peakLevel": 0.98,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3136.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 6664.0,
+              "level": 0.28
+            },
+            {
+              "atMs": 10976.0,
+              "level": 0.62
+            },
+            {
+              "atMs": 14504.0,
+              "level": 0.9
+            },
+            {
+              "atMs": 17248.0,
+              "level": 0.98
+            },
+            {
+              "atMs": 18816.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass reaches the deepest, fullest brightness at the top of the swell.",
+          "motion": "center-build",
+          "peakLevel": 1.0,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 3528.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 7056.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 11368.0,
+              "level": 0.66
+            },
+            {
+              "atMs": 14896.0,
+              "level": 0.94
+            },
+            {
+              "atMs": 17640.0,
+              "level": 1.0
+            },
+            {
+              "atMs": 18816.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "The right-middle catches late and helps throw the climax back across the stage.",
+          "motion": "crescendo-rebound",
+          "peakLevel": 0.96,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 4704.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 8232.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 12544.0,
+              "level": 0.6
+            },
+            {
+              "atMs": 15680.0,
+              "level": 0.9
+            },
+            {
+              "atMs": 18032.0,
+              "level": 0.96
+            },
+            {
+              "atMs": 19208.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge peaks last, completing the full-range sweep into the next trigger.",
+          "motion": "crescendo-rebound",
+          "peakLevel": 0.98,
+          "durationMs": 19600.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5880.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 9800.0,
+              "level": 0.2
+            },
+            {
+              "atMs": 13720.0,
+              "level": 0.56
+            },
+            {
+              "atMs": 16856.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 18816.0,
+              "level": 0.98
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 11,
+      "measure": 104,
+      "position": "beat1",
+      "scoreLabel": "M104, beat1",
+      "summary": "The only fully unified gesture in the piece: all six staffs begin together in a slow glow ramp up and down, then split into staggered afterglow currents.",
+      "scoreDynamics": "f after ff crest",
+      "designTags": [
+        "unified_slow_glow",
+        "only_unison_torch_moment",
+        "afterglow_split"
+      ],
+      "availableWindowMs": 35000.0,
+      "durationMs": 33250.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "Shares the full-ensemble slow glow, then releases first into a soft left-edge shimmer.",
+          "motion": "unified-then-left-release",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 21280.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 25935.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 30590.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "After the shared glow, soprano L2 keeps a hovering upper-left remnant.",
+          "motion": "unified-then-hover",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 22610.0,
+              "level": 0.38
+            },
+            {
+              "atMs": 27265.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 31255.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Tenor holds the center after the unified crest, acting as the pivot of the split.",
+          "motion": "unified-then-center-pivot",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 21945.0,
+              "level": 0.44
+            },
+            {
+              "atMs": 27265.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 31587.5,
+              "level": 0.08
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass sustains the richest central afterglow once the unison has broken apart.",
+          "motion": "unified-then-center-pivot",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 23275.0,
+              "level": 0.4
+            },
+            {
+              "atMs": 27930.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 31920.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "After the shared ramp, alto L2 takes a delayed rightward shimmer.",
+          "motion": "unified-then-right-release",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 24605.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 29260.0,
+              "level": 0.2
+            },
+            {
+              "atMs": 32585.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge breaks away last, completing the afterglow split.",
+          "motion": "unified-then-right-release",
+          "peakLevel": 0.92,
+          "durationMs": 33250.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5985.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 11305.0,
+              "level": 0.92
+            },
+            {
+              "atMs": 16625.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 25935.0,
+              "level": 0.32
+            },
+            {
+              "atMs": 29925.0,
+              "level": 0.18
+            },
+            {
+              "atMs": 32917.5,
+              "level": 0.04
+            },
+            {
+              "atMs": 33250.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 12,
+      "measure": 115,
+      "position": "beat1",
+      "scoreLabel": "M115, beat1",
+      "summary": "The final section leaves only fragile pockets of light, peeling away from the center and dissolving into a long dark horizon.",
+      "scoreDynamics": "p / pp final release",
+      "designTags": [
+        "finale",
+        "long_fade",
+        "dissolve"
+      ],
+      "availableWindowMs": 116078.665,
+      "durationMs": 98000.0,
+      "parts": {
+        "soprano_l1": {
+          "label": "Sop-L1",
+          "summary": "A last far-left ember returns briefly, then disappears into the final dark.",
+          "motion": "final-echo",
+          "peakLevel": 0.22,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 9800.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 21560.0,
+              "level": 0.22
+            },
+            {
+              "atMs": 37240.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 60760.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 78400.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 90160.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "soprano_l2": {
+          "label": "Sop-L2",
+          "summary": "Upper-left glow lingers a little longer, but never grows again.",
+          "motion": "final-echo",
+          "peakLevel": 0.24,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 7840.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 35280.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 56840.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 74480.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 88200.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "tenor_l": {
+          "label": "Ten-L",
+          "summary": "Tenor preserves the central residue of the piece the longest.",
+          "motion": "center-residue",
+          "peakLevel": 0.28,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 5880.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 17640.0,
+              "level": 0.28
+            },
+            {
+              "atMs": 33320.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 52920.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 70560.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 86240.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "bass_l": {
+          "label": "Bass-L",
+          "summary": "Bass gives the final long low ember before the piece finally empties out.",
+          "motion": "center-residue",
+          "peakLevel": 0.3,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 7840.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 19600.0,
+              "level": 0.3
+            },
+            {
+              "atMs": 39200.0,
+              "level": 0.12
+            },
+            {
+              "atMs": 58800.0,
+              "level": 0.05
+            },
+            {
+              "atMs": 76440.0,
+              "level": 0.1
+            },
+            {
+              "atMs": 90160.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l2": {
+          "label": "Alto-L2",
+          "summary": "A faint right-middle recollection answers the center once more.",
+          "motion": "final-echo",
+          "peakLevel": 0.2,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 17640.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 29400.0,
+              "level": 0.2
+            },
+            {
+              "atMs": 47040.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 68600.0,
+              "level": 0.04
+            },
+            {
+              "atMs": 84280.0,
+              "level": 0.08
+            },
+            {
+              "atMs": 94080.0,
+              "level": 0.02
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        },
+        "alto_l1": {
+          "label": "Alto-L1",
+          "summary": "The far-right edge is reduced to the faintest last glimmer.",
+          "motion": "final-echo",
+          "peakLevel": 0.16,
+          "durationMs": 98000.0,
+          "keyframes": [
+            {
+              "atMs": 0.0,
+              "level": 0.0
+            },
+            {
+              "atMs": 25480.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 37240.0,
+              "level": 0.16
+            },
+            {
+              "atMs": 54880.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 74480.0,
+              "level": 0.03
+            },
+            {
+              "atMs": 88200.0,
+              "level": 0.06
+            },
+            {
+              "atMs": 96040.0,
+              "level": 0.01
+            },
+            {
+              "atMs": 98000.0,
+              "level": 0.0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

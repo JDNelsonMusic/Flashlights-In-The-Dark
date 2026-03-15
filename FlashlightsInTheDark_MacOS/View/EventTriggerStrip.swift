@@ -212,10 +212,17 @@ private struct EventPreviewCard: View {
             Text(event.positionLabel)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+            if let summary = event.lighting?.summary {
+                Text(summary)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
-        .frame(minWidth: 80)
+        .frame(minWidth: 110)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color.white.opacity(0.08))
@@ -266,6 +273,29 @@ private struct CurrentEventCard: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
+            if let lighting = event.lighting {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Light show")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(lighting.summary ?? "No lighting summary")
+                        .font(.callout)
+                        .foregroundStyle(.white.opacity(0.9))
+                    HStack(spacing: 8) {
+                        MiniTag(color: "Dynamics", detail: lighting.scoreDynamics ?? "—", isInactive: false)
+                        MiniTag(color: "Span", detail: durationLabel(lighting.durationMs), isInactive: false)
+                    }
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+                        ForEach(LightStaff.stageOrder) { staff in
+                            LightStaffPlanCard(
+                                staff: staff,
+                                plan: lighting.parts[staff]
+                            )
+                        }
+                    }
+                }
+            }
+
             VStack(alignment: .leading, spacing: 6) {
                 Text("Electronics routing")
                     .font(.caption)
@@ -290,7 +320,7 @@ private struct CurrentEventCard: View {
             .tint(.mintGlow)
         }
         .padding(20)
-        .frame(minWidth: 260)
+        .frame(minWidth: 520)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.white.opacity(0.12))
@@ -349,6 +379,54 @@ private struct MiniTag: View {
     }
 }
 
+private struct LightStaffPlanCard: View {
+    let staff: LightStaff
+    let plan: EventLightPartPlan?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Circle()
+                    .fill(staffAccent)
+                    .frame(width: 8, height: 8)
+                Text(staff.label)
+                    .font(.caption)
+                    .bold()
+            }
+            Text(peakLabel)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(plan?.summary ?? "No cue")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+        )
+    }
+
+    private var peakLabel: String {
+        guard let peak = plan?.peakLevel else { return "—" }
+        return "\(Int((peak * 100).rounded()))% max"
+    }
+
+    private var staffAccent: Color {
+        switch staff {
+        case .sopranoL1: return .slotGreen
+        case .sopranoL2: return .hotMagenta
+        case .tenorL: return .slotYellow
+        case .bassL: return .lightRose
+        case .altoL2: return .brightRed
+        case .altoL1: return .royalBlue
+        }
+    }
+}
+
 private extension EventRecipe {
     var measureText: String {
         if let measure { return "\(measure)" }
@@ -363,4 +441,9 @@ private extension EventRecipe {
         }
         return trimmed
     }
+}
+
+private func durationLabel(_ durationMs: Double?) -> String {
+    guard let durationMs else { return "—" }
+    return String(format: "%.1fs", durationMs / 1000.0)
 }

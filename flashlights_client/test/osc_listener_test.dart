@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flashlights_client/model/event_recipe.dart';
 import 'package:flashlights_client/network/osc_listener.dart';
 
 void main() {
@@ -60,6 +61,30 @@ void main() {
         'available-sounds/sound-events-CENTER/c32.mp3',
       );
       expect(resolveBundledAudioPlayAssetKey('seR-32.mp3'), isNull);
+    });
+  });
+
+  group('interpolateLightLevel', () {
+    final keyframes = <LightingKeyframe>[
+      LightingKeyframe(atMs: 0, level: 0),
+      LightingKeyframe(atMs: 1000, level: 1),
+      LightingKeyframe(atMs: 2000, level: 0.5),
+      LightingKeyframe(atMs: 3000, level: 0),
+    ];
+
+    test('returns first level before sequence begins', () {
+      expect(interpolateLightLevel(keyframes, -100), 0);
+      expect(interpolateLightLevel(keyframes, 0), 0);
+    });
+
+    test('interpolates linearly between keyframes', () {
+      expect(interpolateLightLevel(keyframes, 500), closeTo(0.5, 0.001));
+      expect(interpolateLightLevel(keyframes, 1500), closeTo(0.75, 0.001));
+      expect(interpolateLightLevel(keyframes, 2500), closeTo(0.25, 0.001));
+    });
+
+    test('holds final level after sequence end', () {
+      expect(interpolateLightLevel(keyframes, 3200), 0);
     });
   });
 }

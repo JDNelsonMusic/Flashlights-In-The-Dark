@@ -17,16 +17,24 @@ public struct EventRecipe: Identifiable, Decodable {
     /// Official trigger-score beat position for this event, not the sung-note onset.
     public let position: String?
     public let primerAssignments: [PrimerColor: PrimerAssignment]
+    public let lighting: EventLighting?
 
     enum CodingKeys: String, CodingKey {
-        case id, measure, position, primer
+        case id, measure, position, primer, lighting
     }
 
-    public init(id: Int, measure: Int?, position: String?, primerAssignments: [PrimerColor: PrimerAssignment]) {
+    public init(
+        id: Int,
+        measure: Int?,
+        position: String?,
+        primerAssignments: [PrimerColor: PrimerAssignment],
+        lighting: EventLighting? = nil
+    ) {
         self.id = id
         self.measure = measure
         self.position = position
         self.primerAssignments = primerAssignments
+        self.lighting = lighting
     }
 
     public init(from decoder: Decoder) throws {
@@ -45,7 +53,90 @@ public struct EventRecipe: Identifiable, Decodable {
         } else {
             primerAssignments = [:]
         }
+        lighting = try container.decodeIfPresent(EventLighting.self, forKey: .lighting)
     }
+}
+
+// MARK: - Lighting ------------------------------------------------------------
+public struct EventLighting: Decodable {
+    public let summary: String?
+    public let scoreDynamics: String?
+    public let designTags: [String]
+    public let durationMs: Double?
+    public let parts: [LightStaff: EventLightPartPlan]
+
+    enum CodingKeys: String, CodingKey {
+        case summary
+        case scoreDynamics
+        case designTags
+        case durationMs
+        case parts
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+        scoreDynamics = try container.decodeIfPresent(String.self, forKey: .scoreDynamics)
+        designTags = try container.decodeIfPresent([String].self, forKey: .designTags) ?? []
+        durationMs = try container.decodeIfPresent(Double.self, forKey: .durationMs)
+
+        if let rawParts = try container.decodeIfPresent([String: EventLightPartPlan].self, forKey: .parts) {
+            var mapped: [LightStaff: EventLightPartPlan] = [:]
+            for (key, value) in rawParts {
+                if let staff = LightStaff(rawValue: key) {
+                    mapped[staff] = value
+                }
+            }
+            parts = mapped
+        } else {
+            parts = [:]
+        }
+    }
+}
+
+public struct EventLightPartPlan: Decodable {
+    public let label: String
+    public let summary: String
+    public let motion: String
+    public let peakLevel: Double
+    public let durationMs: Double
+    public let keyframes: [EventLightKeyframe]
+}
+
+public struct EventLightKeyframe: Decodable {
+    public let atMs: Double
+    public let level: Double
+}
+
+public enum LightStaff: String, CaseIterable, Codable, Identifiable {
+    case sopranoL1 = "soprano_l1"
+    case sopranoL2 = "soprano_l2"
+    case tenorL = "tenor_l"
+    case bassL = "bass_l"
+    case altoL2 = "alto_l2"
+    case altoL1 = "alto_l1"
+
+    public var id: String { rawValue }
+
+    public var label: String {
+        switch self {
+        case .sopranoL1: return "Sop-L1"
+        case .sopranoL2: return "Sop-L2"
+        case .tenorL: return "Ten-L"
+        case .bassL: return "Bass-L"
+        case .altoL2: return "Alto-L2"
+        case .altoL1: return "Alto-L1"
+        }
+    }
+
+    public static let stageOrder: [LightStaff] = [
+        .sopranoL1,
+        .sopranoL2,
+        .tenorL,
+        .bassL,
+        .altoL2,
+        .altoL1
+    ]
 }
 
 // MARK: - Primer Assignment ---------------------------------------------------

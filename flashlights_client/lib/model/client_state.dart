@@ -65,6 +65,23 @@ extension LightChorusPartDisplay on LightChorusPart {
   }
 
   String get slotSummary => slots.join(' · ');
+
+  String get recipeKey {
+    switch (this) {
+      case LightChorusPart.sopranoL1:
+        return 'soprano_l1';
+      case LightChorusPart.sopranoL2:
+        return 'soprano_l2';
+      case LightChorusPart.tenorL:
+        return 'tenor_l';
+      case LightChorusPart.bassL:
+        return 'bass_l';
+      case LightChorusPart.altoL2:
+        return 'alto_l2';
+      case LightChorusPart.altoL1:
+        return 'alto_l1';
+    }
+  }
 }
 
 const Map<PrimerColor, PrimerColorPlacement> kPrimerColorPlacements = {
@@ -348,6 +365,14 @@ class ClientState {
       return null;
     }
     return event.electronicsAssignments[family];
+  }
+
+  LightingAssignment? lightingForSlot(EventRecipe event, int slot) {
+    final part = partForSlot(slot);
+    if (part == null) {
+      return null;
+    }
+    return event.lighting?.parts[part.recipeKey];
   }
 
   bool shouldHandleIndex(int messageIndex, {int? slotOverride}) {

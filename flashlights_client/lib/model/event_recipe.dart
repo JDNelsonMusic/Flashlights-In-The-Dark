@@ -168,6 +168,47 @@ class ElectronicsAssignment {
   final String? timingRule;
 }
 
+class LightingKeyframe {
+  LightingKeyframe({required this.atMs, required this.level});
+
+  final double atMs;
+  final double level;
+}
+
+class LightingAssignment {
+  LightingAssignment({
+    required this.label,
+    required this.summary,
+    required this.motion,
+    required this.peakLevel,
+    required this.durationMs,
+    required this.keyframes,
+  });
+
+  final String label;
+  final String summary;
+  final String motion;
+  final double peakLevel;
+  final double durationMs;
+  final List<LightingKeyframe> keyframes;
+}
+
+class EventLighting {
+  EventLighting({
+    required this.summary,
+    required this.scoreDynamics,
+    required this.designTags,
+    required this.durationMs,
+    required this.parts,
+  });
+
+  final String summary;
+  final String scoreDynamics;
+  final List<String> designTags;
+  final double durationMs;
+  final Map<String, LightingAssignment> parts;
+}
+
 String? _canonicalPrimerSample(String? raw) {
   if (raw == null) {
     return null;
@@ -223,6 +264,7 @@ class EventRecipe {
     required this.position,
     required this.primerAssignments,
     required this.electronicsAssignments,
+    required this.lighting,
   });
 
   final int id;
@@ -232,6 +274,7 @@ class EventRecipe {
   final String? position;
   final Map<PrimerColor, PrimerAssignment> primerAssignments;
   final Map<ChoirFamily, ElectronicsAssignment> electronicsAssignments;
+  final EventLighting? lighting;
 
   static EventRecipe fromJson(Map<String, dynamic> json) {
     final primer = <PrimerColor, PrimerAssignment>{};
@@ -278,12 +321,84 @@ class EventRecipe {
       });
     }
 
+    EventLighting? lighting;
+    final lightingJson = json['lighting'] as Map<String, dynamic>?;
+    if (lightingJson != null) {
+      final partAssignments = <String, LightingAssignment>{};
+      final partsJson = lightingJson['parts'] as Map<String, dynamic>?;
+      if (partsJson != null) {
+        partsJson.forEach((key, value) {
+          if (value is! Map<String, dynamic>) {
+            return;
+          }
+          final label = (value['label'] as String?)?.trim();
+          final summary = (value['summary'] as String?)?.trim();
+          final motion = (value['motion'] as String?)?.trim();
+          final peakLevel = (value['peakLevel'] as num?)?.toDouble();
+          final durationMs = (value['durationMs'] as num?)?.toDouble();
+          final rawKeyframes = value['keyframes'] as List<dynamic>? ?? const [];
+          final keyframes = rawKeyframes
+              .whereType<Map<String, dynamic>>()
+              .map((entry) {
+                final atMs = (entry['atMs'] as num?)?.toDouble();
+                final level = (entry['level'] as num?)?.toDouble();
+                if (atMs == null || level == null) {
+                  return null;
+                }
+                return LightingKeyframe(atMs: atMs, level: level);
+              })
+              .whereType<LightingKeyframe>()
+              .toList(growable: false);
+          if (label == null ||
+              summary == null ||
+              motion == null ||
+              peakLevel == null ||
+              durationMs == null ||
+              keyframes.isEmpty) {
+            return;
+          }
+          partAssignments[key] = LightingAssignment(
+            label: label,
+            summary: summary,
+            motion: motion,
+            peakLevel: peakLevel,
+            durationMs: durationMs,
+            keyframes: keyframes,
+          );
+        });
+      }
+
+      final summary = (lightingJson['summary'] as String?)?.trim();
+      final scoreDynamics = (lightingJson['scoreDynamics'] as String?)?.trim();
+      final durationMs = (lightingJson['durationMs'] as num?)?.toDouble();
+      final designTags = (lightingJson['designTags'] as List<dynamic>? ??
+              const [])
+          .whereType<String>()
+          .map((value) => value.trim())
+          .where((value) => value.isNotEmpty)
+          .toList(growable: false);
+
+      if (summary != null &&
+          scoreDynamics != null &&
+          durationMs != null &&
+          partAssignments.isNotEmpty) {
+        lighting = EventLighting(
+          summary: summary,
+          scoreDynamics: scoreDynamics,
+          designTags: designTags,
+          durationMs: durationMs,
+          parts: partAssignments,
+        );
+      }
+    }
+
     return EventRecipe(
       id: json['id'] as int,
       measure: json['measure'] as int?,
       position: json['position'] as String?,
       primerAssignments: primer,
       electronicsAssignments: electronics,
+      lighting: lighting,
     );
   }
 }

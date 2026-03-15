@@ -47,7 +47,8 @@ struct EventRecipeLoader {
             id: event.id,
             measure: event.measure,
             position: event.position,
-            primerAssignments: cleaned
+            primerAssignments: cleaned,
+            lighting: event.lighting
         )
     }
 

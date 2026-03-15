@@ -27,6 +27,7 @@ const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
 const int _legacySoundEventCount = 32;
 const bool kPrimerPlaybackEnabled = false;
+const Duration _lightSequenceTick = Duration(milliseconds: 75);
 
 @visibleForTesting
 Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
@@ -39,6 +40,34 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
           .clamp(0, double.infinity)
           .toInt();
   return Duration(milliseconds: delayMs);
+}
+
+@visibleForTesting
+double interpolateLightLevel(
+  List<LightingKeyframe> keyframes,
+  double elapsedMs,
+) {
+  if (keyframes.isEmpty) {
+    return 0.0;
+  }
+
+  final clampedElapsed = elapsedMs.clamp(0.0, double.infinity);
+  if (clampedElapsed <= keyframes.first.atMs) {
+    return keyframes.first.level;
+  }
+  for (var index = 1; index < keyframes.length; index += 1) {
+    final previous = keyframes[index - 1];
+    final current = keyframes[index];
+    if (clampedElapsed <= current.atMs) {
+      final span = current.atMs - previous.atMs;
+      if (span <= 0) {
+        return current.level;
+      }
+      final t = (clampedElapsed - previous.atMs) / span;
+      return previous.level + (current.level - previous.level) * t;
+    }
+  }
+  return keyframes.last.level;
 }
 
 String? _normaliseAudioPlayToken(String raw) {
@@ -300,8 +329,14 @@ class OscListener {
 
   Future<void> _dispatchQueue = Future<void>.value();
   int _playbackToken = 0;
+  int _lightSequenceToken = 0;
   final Map<String, Timer> _primerDedupTimers = <String, Timer>{};
+  Timer? _lightSequenceTimer;
   static const Duration _primerDedupHold = Duration(seconds: 5);
+  double _lastAppliedLightLevel = -1.0;
+  String? _activeLightingSummary;
+  String? _activeLightingPart;
+  int? _activeLightingEventId;
 
   final List<_NetworkEvent> _eventLog = <_NetworkEvent>[];
   static const int _maxLogEntries = 600;
@@ -773,6 +808,83 @@ class OscListener {
     );
   }
 
+  void _cancelLightSequence({bool turnOff = false, String? reason}) {
+    _lightSequenceToken += 1;
+    _lightSequenceTimer?.cancel();
+    _lightSequenceTimer = null;
+    _activeLightingSummary = null;
+    _activeLightingPart = null;
+    _activeLightingEventId = null;
+    if (reason != null) {
+      _record('lighting', 'Cancelled light sequence', <String, Object?>{
+        'reason': reason,
+      });
+    }
+    if (turnOff) {
+      _lastAppliedLightLevel = -1.0;
+      unawaited(_applyLightLevel(0.0, force: true));
+    }
+  }
+
+  Future<void> _applyLightLevel(double level, {bool force = false}) async {
+    final clamped = level.clamp(0.0, 1.0).toDouble();
+    if (!force && (_lastAppliedLightLevel - clamped).abs() < 0.015) {
+      return;
+    }
+    _lastAppliedLightLevel = clamped;
+    client.brightness.value = clamped;
+    try {
+      await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
+    } catch (_) {
+      // best-effort
+    }
+    await _setTorchLevel(clamped);
+  }
+
+  void _startLightSequence(
+    LightingAssignment assignment, {
+    required int eventId,
+    required int slot,
+  }) {
+    _cancelLightSequence(reason: 'starting Trigger #$eventId');
+    _activeLightingSummary = assignment.summary;
+    _activeLightingPart = assignment.label;
+    _activeLightingEventId = eventId;
+    final token = _lightSequenceToken;
+    final start = DateTime.now();
+
+    Future<void> tick({bool force = false}) async {
+      if (token != _lightSequenceToken) {
+        return;
+      }
+      final elapsedMs =
+          DateTime.now().difference(start).inMilliseconds.toDouble();
+      final level = interpolateLightLevel(assignment.keyframes, elapsedMs);
+      await _applyLightLevel(level, force: force);
+      if (elapsedMs >= assignment.durationMs) {
+        _lightSequenceTimer?.cancel();
+        _lightSequenceTimer = null;
+        _activeLightingSummary = null;
+        _activeLightingPart = null;
+        _activeLightingEventId = null;
+      }
+    }
+
+    _record('lighting', 'Starting light sequence', <String, Object?>{
+      'eventId': eventId,
+      'slot': slot,
+      'part': assignment.label,
+      'summary': assignment.summary,
+      'durationMs': assignment.durationMs.round(),
+      'peakLevel': assignment.peakLevel,
+    });
+
+    unawaited(tick(force: true));
+    _lightSequenceTimer = Timer.periodic(_lightSequenceTick, (_) {
+      unawaited(tick());
+    });
+  }
+
   Future<void> _playEventMedia({
     String? primerFile,
     String? electronicsAssetKey,
@@ -948,7 +1060,10 @@ class OscListener {
     }
   }
 
-  Future<void> setTorchLevel(double level) => _setTorchLevel(level);
+  Future<void> setTorchLevel(double level) async {
+    _cancelLightSequence(reason: 'manual torch control');
+    await _applyLightLevel(level, force: true);
+  }
 
   bool _tryHandleConductorHello(_InboundDatagram datagram) {
     final message = datagram.message;
@@ -1062,6 +1177,7 @@ class OscListener {
         _markConductorHeartbeat();
       }
 
+      _cancelLightSequence(turnOff: false, reason: 'panic/all-stop');
       await _setTorchLevel(0);
       client.brightness.value = 0;
       try {
@@ -1123,12 +1239,9 @@ class OscListener {
 
     final intensity = (envelope.payload[0] as num).toDouble();
     try {
+      _cancelLightSequence(reason: 'direct /flash/on');
       final clamped = intensity.clamp(0.0, 1.0).toDouble();
-      if ((client.brightness.value - clamped).abs() > 0.01) {
-        client.brightness.value = clamped;
-        await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
-      }
-      await _setTorchLevel(clamped);
+      await _applyLightLevel(clamped, force: true);
       _sendAck(cueId: envelope.cueId, seq: envelope.seq);
     } catch (e) {
       _record('torch', 'Torch cue failed', <String, Object?>{
@@ -1148,9 +1261,8 @@ class OscListener {
     }
 
     try {
-      await _setTorchLevel(0);
-      client.brightness.value = 0;
-      await ScreenBrightness.instance.setApplicationScreenBrightness(0);
+      _cancelLightSequence(reason: 'direct /flash/off');
+      await _applyLightLevel(0.0, force: true);
       _sendAck(cueId: envelope.cueId, seq: envelope.seq);
     } catch (e) {
       _record('torch', 'Torch off cue failed', <String, Object?>{
@@ -1201,7 +1313,10 @@ class OscListener {
     final primerAssignment =
         kPrimerPlaybackEnabled ? client.assignmentForSlot(event, slot) : null;
     final electronicsAssignment = client.electronicsForSlot(event, slot);
-    if (primerAssignment == null && electronicsAssignment == null) {
+    final lightingAssignment = client.lightingForSlot(event, slot);
+    if (primerAssignment == null &&
+        electronicsAssignment == null &&
+        lightingAssignment == null) {
       _record('event', 'No event media for slot', <String, Object?>{
         'eventId': eventId,
         'slot': slot,
@@ -1215,6 +1330,7 @@ class OscListener {
       if (primerAssignment != null) 'primer': primerAssignment.sample,
       if (electronicsAssignment != null)
         'electronics': electronicsAssignment.sample,
+      if (lightingAssignment != null) 'lighting': lightingAssignment.summary,
     });
 
     final delay = playbackDelayForStartAtMs(startAtMs);
@@ -1222,6 +1338,9 @@ class OscListener {
 
     unawaited(
       Future<void>.delayed(delay, () async {
+        if (lightingAssignment != null) {
+          _startLightSequence(lightingAssignment, eventId: eventId, slot: slot);
+        }
         await _playEventMedia(
           primerFile: primerAssignment?.sample,
           electronicsAssetKey: electronicsAssignment?.sample,
@@ -1315,6 +1434,7 @@ class OscListener {
     }
 
     _playbackToken++;
+    _cancelLightSequence(turnOff: true, reason: 'audio/stop');
     try {
       await NativeAudio.stopPrimerTone();
     } catch (e) {
@@ -1381,6 +1501,17 @@ class OscListener {
 
   Future<void> playLocalPrimer(String fileName, double gain) async {
     await _playPrimer(fileName, gain, sendAck: false);
+  }
+
+  Future<void> playLocalLightingPreview(
+    LightingAssignment assignment, {
+    required int eventId,
+  }) async {
+    _startLightSequence(
+      assignment,
+      eventId: eventId,
+      slot: client.myIndex.value,
+    );
   }
 
   Future<void> playLocalElectronicsPreview(
@@ -1537,6 +1668,9 @@ class OscListener {
       'cueRoutingIssue': client.cueRoutingIssue.value,
       'lastAcceptedCueAddress': _lastAcceptedCueAddress,
       'lastAcceptedCueId': _lastAcceptedCueId,
+      'activeLightingEventId': _activeLightingEventId,
+      'activeLightingPart': _activeLightingPart,
+      'activeLightingSummary': _activeLightingSummary,
       'helloIntervalSeconds': _currentHelloInterval.inSeconds,
       'events': _eventLog.map((e) => e.toJson()).toList(growable: false),
     };
@@ -1564,6 +1698,8 @@ class OscListener {
     } catch (_) {
       // best-effort
     }
+    _cancelLightSequence(turnOff: false, reason: 'listener stop');
+    _lastAppliedLightLevel = -1.0;
     client.audioPlaying.value = false;
     _running = false;
 

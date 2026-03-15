@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-15T01:18:35+00:00",
+  "generated": "2026-03-15T02:12:40+00:00",
   "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
   "sourceDurationMs": 440147.292,
   "syncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
@@ -8,6 +8,7 @@
   "triggerPointCount": 12,
   "anchorOffsetMs": 9559.059,
   "fadeInMs": 20.0,
+  "firstTriggerStartMs": 2000.0,
   "tailRule": "Each clip ends 2 beats after the next trigger point and fades across those final 2 beats.",
   "events": [
     {
@@ -23,32 +24,32 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 9559.059,
+          "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
-          "durationMs": 3529.412,
+          "durationMs": 11088.471,
           "fadeInMs": 20.0,
           "fadeOutMs": 1176.471,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
+          "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         },
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-01-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 9559.059,
+          "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
-          "durationMs": 3529.412,
+          "durationMs": 11088.471,
           "fadeInMs": 20.0,
           "fadeOutMs": 1176.471,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
+          "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         },
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-01-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 9559.059,
+          "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
-          "durationMs": 3529.412,
+          "durationMs": 11088.471,
           "fadeInMs": 20.0,
           "fadeOutMs": 1176.471,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
+          "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         }
       }
     },

@@ -46,6 +46,7 @@ RECIPE_COPY_PATHS = [
 ]
 DEFAULT_WORKERS = 4
 FADE_IN_MS = 20.0
+FIRST_TRIGGER_START_MS = 2000.0
 
 
 @dataclass(frozen=True)
@@ -246,7 +247,13 @@ def build_trigger_plans(
     plans: list[dict[str, Any]] = []
     for index, trigger in enumerate(trigger_rows):
         file_start_ms = round(float(trigger["onsetMs"]) + offset_ms, 3)
-        if index < len(trigger_rows) - 1:
+        if trigger["id"] == 1:
+            next_trigger = trigger_rows[index + 1]
+            fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
+            file_start_ms = FIRST_TRIGGER_START_MS
+            file_end_ms = round(float(next_trigger["onsetMs"]) + offset_ms + fade_out_ms, 3)
+            timing_rule = "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
+        elif index < len(trigger_rows) - 1:
             next_trigger = trigger_rows[index + 1]
             fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
             file_end_ms = round(float(next_trigger["onsetMs"]) + offset_ms + fade_out_ms, 3)
@@ -332,6 +339,7 @@ def build_manifest(
         "triggerPointCount": len(plans),
         "anchorOffsetMs": offset_ms,
         "fadeInMs": FADE_IN_MS,
+        "firstTriggerStartMs": FIRST_TRIGGER_START_MS,
         "tailRule": "Each clip ends 2 beats after the next trigger point and fades across those final 2 beats.",
         "events": plans,
     }
@@ -393,7 +401,7 @@ def write_recipe_copies(
         "triggerTimingNote": (
             "These 12 trigger points come from the annotated twelve-trigger score. "
             "Trigger Point 2 is locked to 00:11.912 in the stereo-sum electronics export. "
-            "Each derived clip starts at its own beat-mapped onset and ends 2 beats after the next trigger point."
+            "Trigger Point 1 starts at 00:02.000 in the file. All later derived clips start at their beat-mapped onsets and end 2 beats after the next trigger point."
         ),
         "eventCount": len(plans),
         "generated": generated_at,

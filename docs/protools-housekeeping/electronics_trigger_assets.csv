@@ -1,7 +1,7 @@
 id,scoreLabel,measure,position,tempoBpm,variant,channelMode,sourceStartMs,sourceEndMs,durationMs,fadeInMs,fadeOutMs,sample
-1,"M1, beat1",1,beat1,102.0,soprano,left,9559.059,13088.471,3529.412,20.0,1176.471,available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3
-1,"M1, beat1",1,beat1,102.0,alto,right,9559.059,13088.471,3529.412,20.0,1176.471,available-sounds/electronics-trigger-clips/alto/electronics-trigger-01-alto.mp3
-1,"M1, beat1",1,beat1,102.0,tenor_bass,mono_sum,9559.059,13088.471,3529.412,20.0,1176.471,available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-01-tenor-bass.mp3
+1,"M1, beat1",1,beat1,102.0,soprano,left,2000.0,13088.471,11088.471,20.0,1176.471,available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3
+1,"M1, beat1",1,beat1,102.0,alto,right,2000.0,13088.471,11088.471,20.0,1176.471,available-sounds/electronics-trigger-clips/alto/electronics-trigger-01-alto.mp3
+1,"M1, beat1",1,beat1,102.0,tenor_bass,mono_sum,2000.0,13088.471,11088.471,20.0,1176.471,available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-01-tenor-bass.mp3
 2,"M2, beat1",2,beat1,102.0,soprano,left,11912.0,68970.824,57058.824,20.0,1176.471,available-sounds/electronics-trigger-clips/soprano/electronics-trigger-02-soprano.mp3
 2,"M2, beat1",2,beat1,102.0,alto,right,11912.0,68970.824,57058.824,20.0,1176.471,available-sounds/electronics-trigger-clips/alto/electronics-trigger-02-alto.mp3
 2,"M2, beat1",2,beat1,102.0,tenor_bass,mono_sum,11912.0,68970.824,57058.824,20.0,1176.471,available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-02-tenor-bass.mp3

@@ -1278,6 +1278,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
     final event = events[clampedIndex];
     final slot = client.myIndex.value;
     final assignment = client.electronicsForSlot(event, slot);
+    final lightingAssignment = client.lightingForSlot(event, slot);
     if (assignment != null) {
       try {
         await flosc.OscListener.instance.playLocalElectronicsPreview(
@@ -1287,6 +1288,12 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
       } catch (e) {
         debugPrint('[Practice] electronics preview failed: $e');
       }
+    }
+    if (lightingAssignment != null) {
+      await flosc.OscListener.instance.playLocalLightingPreview(
+        lightingAssignment,
+        eventId: event.id,
+      );
     }
 
     if (clampedIndex < events.length - 1) {
@@ -1332,6 +1339,10 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
               currentEvent,
               slotForPreview,
             );
+            final currentLightingAssignment = client.lightingForSlot(
+              currentEvent,
+              slotForPreview,
+            );
             const horizontalInset = 20.0;
             return _GlassPanel(
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 24),
@@ -1349,7 +1360,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         ),
                         const Spacer(),
                         Text(
-                          '12-point electronics map · local clip preview',
+                          '12-point electronics + torch map · local cue preview',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white70),
                         ),
@@ -1374,7 +1385,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Preview uses your current part selection only. Sopranos hear left, Altos hear right, and Ten/Bass hear the mono sum.',
+                            'Preview uses your current part selection only. It plays the routed electronics clip and runs the matching staff-specific torch cue on this device.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.white70),
                           ),
@@ -1393,6 +1404,20 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                       part: selectedPart,
                       slot: slotForPreview,
                       assignment: currentAssignment,
+                      accent: partAccent,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalInset,
+                      12,
+                      horizontalInset,
+                      0,
+                    ),
+                    child: _LightingInfoSection(
+                      event: currentEvent,
+                      part: selectedPart,
+                      assignment: currentLightingAssignment,
                       accent: partAccent,
                     ),
                   ),
@@ -1435,6 +1460,8 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                     event,
                                     slot,
                                   );
+                                  final lightingAssignment = client
+                                      .lightingForSlot(event, slot);
                                   return SizedBox(
                                     width:
                                         isCurrent
@@ -1444,6 +1471,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                       event: event,
                                       isCurrent: isCurrent,
                                       assignment: assignment,
+                                      lightingAssignment: lightingAssignment,
                                       part: selectedPart,
                                       slot: slot,
                                       accent: partAccent,
@@ -1481,6 +1509,7 @@ class _TriggerPointCard extends StatelessWidget {
     required this.event,
     required this.isCurrent,
     required this.assignment,
+    required this.lightingAssignment,
     required this.slot,
     required this.accent,
     this.part,
@@ -1493,6 +1522,7 @@ class _TriggerPointCard extends StatelessWidget {
   final EventRecipe event;
   final bool isCurrent;
   final ElectronicsAssignment? assignment;
+  final LightingAssignment? lightingAssignment;
   final LightChorusPart? part;
   final int slot;
   final Color accent;
@@ -1503,8 +1533,8 @@ class _TriggerPointCard extends StatelessWidget {
 
   static const double _previewWidth = 124.0;
   static const double _currentWidth = 252.0;
-  static const double _previewHeight = 220.0;
-  static const double _currentHeight = 320.0;
+  static const double _previewHeight = 250.0;
+  static const double _currentHeight = 420.0;
 
   static String routeLabel(ElectronicsAssignment? assignment) {
     switch (assignment?.channelMode) {
@@ -1526,6 +1556,13 @@ class _TriggerPointCard extends StatelessWidget {
     return '${(durationMs / 1000).toStringAsFixed(1)}s';
   }
 
+  static String lightLabel(double? peakLevel) {
+    if (peakLevel == null) {
+      return '—';
+    }
+    return '${(peakLevel * 100).round()}%';
+  }
+
   @override
   Widget build(BuildContext context) {
     final measureText = event.measure != null ? 'M${event.measure}' : 'M—';
@@ -1535,9 +1572,19 @@ class _TriggerPointCard extends StatelessWidget {
     final routeLabelText = routeLabel(assignment);
     final durationLabelText = durationLabel(assignment?.durationMs);
     final fadeLabelText = durationLabel(assignment?.fadeOutMs);
+    final lightingPeakText = lightLabel(lightingAssignment?.peakLevel);
+    final lightingDurationText = durationLabel(
+      lightingAssignment?.durationMs ?? event.lighting?.durationMs,
+    );
+    final lightingSummary =
+        lightingAssignment?.summary ??
+        event.lighting?.summary ??
+        'No torch cue';
 
     final textTheme = Theme.of(context).textTheme;
     final hasClip = assignment != null;
+    final hasLighting = lightingAssignment != null;
+    final hasAnyCue = hasClip || hasLighting;
 
     final width = isCurrent ? _currentWidth : _previewWidth;
     final targetHeight = isCurrent ? _currentHeight : _previewHeight;
@@ -1559,10 +1606,10 @@ class _TriggerPointCard extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: onPlay,
             icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(hasClip ? 'Play clip' : 'Advance'),
+            label: Text(hasAnyCue ? 'Play cue' : 'Advance'),
             style: FilledButton.styleFrom(
               backgroundColor:
-                  hasClip
+                  hasAnyCue
                       ? Colors.white.withValues(alpha: 0.18)
                       : Colors.white.withValues(alpha: 0.08),
               foregroundColor: Colors.white,
@@ -1580,10 +1627,10 @@ class _TriggerPointCard extends StatelessWidget {
         child: FilledButton.tonalIcon(
           onPressed: onPlay,
           icon: const Icon(Icons.play_arrow_rounded),
-          label: Text(hasClip ? 'Play' : 'Next'),
+          label: Text(hasAnyCue ? 'Play' : 'Next'),
           style: FilledButton.styleFrom(
             backgroundColor:
-                hasClip
+                hasAnyCue
                     ? Colors.white.withValues(alpha: 0.16)
                     : Colors.white.withValues(alpha: 0.06),
             foregroundColor: Colors.white,
@@ -1680,6 +1727,8 @@ class _TriggerPointCard extends StatelessWidget {
                   _EventDetailChip(label: routeLabelText),
                   _EventDetailChip(label: 'Clip $durationLabelText'),
                   _EventDetailChip(label: 'Fade $fadeLabelText'),
+                  _EventDetailChip(label: 'Torch $lightingPeakText'),
+                  _EventDetailChip(label: 'Light $lightingDurationText'),
                 ],
               ),
               const SizedBox(height: 8),
@@ -1690,22 +1739,33 @@ class _TriggerPointCard extends StatelessWidget {
                 accent: accent,
               ),
               const SizedBox(height: 8),
+              _LightingInfoSection(
+                event: event,
+                part: part,
+                assignment: lightingAssignment,
+                accent: accent,
+              ),
+              const SizedBox(height: 8),
             ] else if (!hasClip) ...[
               Text(
-                'No clip for this slot',
+                hasLighting
+                    ? 'Torch cue only for this slot'
+                    : 'No cue for this slot',
                 style: textTheme.labelSmall?.copyWith(color: Colors.white38),
               ),
               const SizedBox(height: 8),
             ] else ...[
               Text(
-                routeLabelText,
+                hasLighting
+                    ? '$routeLabelText · torch ${lightingAssignment == null ? '—' : lightingPeakText}'
+                    : routeLabelText,
                 style: textTheme.labelSmall?.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: 8),
             ],
             Text(
-              clipLabel,
-              maxLines: isCurrent ? 2 : 1,
+              isCurrent ? lightingSummary : clipLabel,
+              maxLines: isCurrent ? 3 : 1,
               overflow: TextOverflow.ellipsis,
               style: textTheme.bodySmall?.copyWith(
                 color: Colors.white70,
@@ -1781,6 +1841,94 @@ class _ElectronicsInfoSection extends StatelessWidget {
                   children: [
                     Text(routeLabel, style: textTheme.bodySmall),
                     Text(clipLabel, style: textTheme.bodySmall),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LightingInfoSection extends StatelessWidget {
+  const _LightingInfoSection({
+    required this.event,
+    required this.part,
+    required this.assignment,
+    required this.accent,
+  });
+
+  final EventRecipe event;
+  final LightChorusPart? part;
+  final LightingAssignment? assignment;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final partLabel = part?.label ?? 'Unassigned';
+    final summary =
+        assignment?.summary ?? event.lighting?.summary ?? 'No torch cue';
+    final dynamics = event.lighting?.scoreDynamics ?? '—';
+    final peak =
+        assignment == null
+            ? '—'
+            : '${(assignment!.peakLevel * 100).round()}% max brightness';
+    final duration =
+        assignment == null
+            ? '—'
+            : '${(assignment!.durationMs / 1000).toStringAsFixed(1)}s torch arc';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accent.withValues(alpha: 0.9),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$partLabel torch choreography',
+                  style: textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  summary,
+                  style: textTheme.bodySmall?.copyWith(height: 1.35),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Text(dynamics, style: textTheme.bodySmall),
+                    Text(peak, style: textTheme.bodySmall),
+                    Text(duration, style: textTheme.bodySmall),
                   ],
                 ),
               ],
@@ -1975,6 +2123,12 @@ class DebugOverlay extends StatelessWidget {
                   final cueRoutingIssue =
                       snapshot['cueRoutingIssue'] as String?;
                   final currentSlot = snapshot['currentSlot'];
+                  final activeLightingEventId =
+                      snapshot['activeLightingEventId'];
+                  final activeLightingPart =
+                      snapshot['activeLightingPart'] as String?;
+                  final activeLightingSummary =
+                      snapshot['activeLightingSummary'] as String?;
                   final unknown = snapshot['unknownSenderCount'];
                   final duplicates = snapshot['duplicatesDropped'];
                   final outOfOrder = snapshot['outOfOrderDropped'];
@@ -1985,6 +2139,9 @@ class DebugOverlay extends StatelessWidget {
                   return Text(
                     'Trusted: ${trustedIp ?? 'none'} · Session: ${showSessionId ?? 'none'} · v$protocolVersion\\n'
                     'Slot: $currentSlot · Cue routing: ${cueRoutingIssue ?? 'ok'}\\n'
+                    'Active light cue: ${activeLightingEventId == null ? 'none' : 'TP$activeLightingEventId'}'
+                    '${activeLightingPart == null ? '' : ' · $activeLightingPart'}'
+                    '${activeLightingSummary == null ? '' : '\\n$activeLightingSummary'}\\n'
                     'Unknown senders: $unknown · Duplicates dropped: $duplicates · '
                     'Out-of-order dropped: $outOfOrder · Protocol mismatches: $mismatches · '
                     'Slot mismatches: $slotMismatches\\n'
