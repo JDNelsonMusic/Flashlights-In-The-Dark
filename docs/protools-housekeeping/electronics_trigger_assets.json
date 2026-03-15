@@ -1,21 +1,25 @@
 {
-  "source": "FlashlightsInTheDark_v31_TwelveTriggerPoints.pdf",
-  "triggerPositionSource": "FlashlightsInTheDark_v31_TwelveTriggerPoints.pdf",
-  "triggerTimingNote": "These 12 trigger points come from the annotated twelve-trigger score. Trigger Point 2 is locked to 00:11.912 in the stereo-sum electronics export. Each derived clip starts at its own beat-mapped onset and ends 2 beats after the next trigger point.",
-  "eventCount": 12,
   "generated": "2026-03-15T01:18:35+00:00",
-  "electronicsSource": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
-  "electronicsSyncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
-  "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
-  "electronicsGenerated": "2026-03-15T01:18:35+00:00",
+  "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+  "sourceDurationMs": 440147.292,
+  "syncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
+  "triggerPointSource": "FlashlightsInTheDark_v31_TwelveTriggerPoints.pdf",
+  "flutterAssetRoot": "flashlights_client/available-sounds/electronics-trigger-clips",
+  "triggerPointCount": 12,
+  "anchorOffsetMs": 9559.059,
+  "fadeInMs": 20.0,
+  "tailRule": "Each clip ends 2 beats after the next trigger point and fades across those final 2 beats.",
   "events": [
     {
       "id": 1,
       "measure": 1,
       "position": "beat1",
       "scoreLabel": "M1, beat1",
+      "onsetMilliseconds": 0.0,
+      "tempoBpm": 102.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3",
           "channelMode": "left",
@@ -53,8 +57,11 @@
       "measure": 2,
       "position": "beat1",
       "scoreLabel": "M2, beat1",
+      "onsetMilliseconds": 2352.941,
+      "tempoBpm": 102.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-02-soprano.mp3",
           "channelMode": "left",
@@ -92,8 +99,11 @@
       "measure": 25,
       "position": "beat4",
       "scoreLabel": "M25, beat4",
+      "onsetMilliseconds": 58235.294,
+      "tempoBpm": 102.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-03-soprano.mp3",
           "channelMode": "left",
@@ -131,8 +141,11 @@
       "measure": 33,
       "position": "beat2",
       "scoreLabel": "M33, beat2",
+      "onsetMilliseconds": 78235.294,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-04-soprano.mp3",
           "channelMode": "left",
@@ -170,8 +183,11 @@
       "measure": 36,
       "position": "beat1",
       "scoreLabel": "M36, beat1",
+      "onsetMilliseconds": 84901.961,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-05-soprano.mp3",
           "channelMode": "left",
@@ -209,8 +225,11 @@
       "measure": 46,
       "position": "beat3",
       "scoreLabel": "M46, beat3",
+      "onsetMilliseconds": 119901.961,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-06-soprano.mp3",
           "channelMode": "left",
@@ -248,8 +267,11 @@
       "measure": 63,
       "position": "beat3",
       "scoreLabel": "M63, beat3",
+      "onsetMilliseconds": 164068.628,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-07-soprano.mp3",
           "channelMode": "left",
@@ -287,8 +309,11 @@
       "measure": 78,
       "position": "beat1",
       "scoreLabel": "M78, beat1",
+      "onsetMilliseconds": 203235.294,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-08-soprano.mp3",
           "channelMode": "left",
@@ -326,8 +351,11 @@
       "measure": 89,
       "position": "beat1",
       "scoreLabel": "M89, beat1",
+      "onsetMilliseconds": 239068.627,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-09-soprano.mp3",
           "channelMode": "left",
@@ -365,8 +393,11 @@
       "measure": 98,
       "position": "beat1",
       "scoreLabel": "M98, beat1",
+      "onsetMilliseconds": 269068.627,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-10-soprano.mp3",
           "channelMode": "left",
@@ -404,8 +435,11 @@
       "measure": 104,
       "position": "beat1",
       "scoreLabel": "M104, beat1",
+      "onsetMilliseconds": 289068.627,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-11-soprano.mp3",
           "channelMode": "left",
@@ -443,8 +477,11 @@
       "measure": 115,
       "position": "beat1",
       "scoreLabel": "M115, beat1",
+      "onsetMilliseconds": 324068.627,
+      "tempoBpm": 72.0,
+      "sourceOffsetMs": 9559.059,
       "timingNote": "Trigger Point 2 anchored to 00:11.912 in the stereo-sum export; all other clip boundaries are derived from the score beat map.",
-      "electronics": {
+      "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-12-soprano.mp3",
           "channelMode": "left",

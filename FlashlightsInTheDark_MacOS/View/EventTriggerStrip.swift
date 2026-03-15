@@ -17,7 +17,7 @@ struct EventTriggerStrip: View {
         VStack(spacing: 12) {
             HStack(alignment: .bottom, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Event Recipes")
+                    Text("Trigger Points")
                         .font(.title3)
                         .bold()
                         .foregroundStyle(.white)
@@ -28,7 +28,7 @@ struct EventTriggerStrip: View {
                 Spacer(minLength: 12)
                 VStack(alignment: .trailing, spacing: 4) {
                     HStack(spacing: 8) {
-                        TextField("Jump to event #…", text: $jumpQuery)
+                        TextField("Jump to trigger #…", text: $jumpQuery)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 220)
                             .onSubmit(handleQuickJump)
@@ -72,7 +72,7 @@ struct EventTriggerStrip: View {
                                      moveNext: { state.moveToNextEvent() })
                         .transition(.scale)
                 } else {
-                    Text(state.eventLoadError ?? "No timeline loaded")
+                    Text(state.eventLoadError ?? "No trigger-point bundle loaded")
                         .font(.headline)
                         .foregroundStyle(.secondary)
                         .padding()
@@ -139,7 +139,7 @@ struct EventTriggerStrip: View {
         if currentEvent() != nil {
             return "←/→ cue · Shift+←/Shift+→ skip 10 · Space trigger"
         }
-        return "Load event recipes to enable triggers"
+        return "Load the trigger-point bundle to enable cues"
     }
 
     private func handleQuickJump() {
@@ -152,13 +152,13 @@ struct EventTriggerStrip: View {
             }
             if state.eventRecipes.indices.contains(targetIndex) {
                 let event = state.eventRecipes[targetIndex]
-                jumpFeedback = "Jumped to Event #\(event.id)"
+                jumpFeedback = "Jumped to Trigger #\(event.id)"
             } else {
                 jumpFeedback = nil
             }
             jumpQuery = ""
         } else {
-            jumpFeedback = "No event found for ‘\(trimmed)’"
+            jumpFeedback = "No trigger found for ‘\(trimmed)’"
             state.currentEventIndex = previousIndex
         }
         jumpFieldFocused = false
@@ -203,13 +203,13 @@ private struct EventPreviewCard: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text("#\(event.id)")
+            Text("TP\(event.id)")
                 .font(.headline)
                 .foregroundStyle(.white)
             Text(event.measureText)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(event.position ?? "")
+            Text(event.positionLabel)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -245,7 +245,7 @@ private struct CurrentEventCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Event #\(event.id)")
+                Text("Trigger #\(event.id)")
                     .font(.title2)
                     .bold()
                 Spacer()
@@ -262,29 +262,25 @@ private struct CurrentEventCard: View {
                     .foregroundColor(.secondary)
                 }
             }
-            Text("Measure \(event.measureText) · \(event.position ?? "")")
+            Text("Measure \(event.measureText) · \(event.positionLabel)")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 6) {
-                let activeCount = event.primerAssignments.count
-                Text("Primer tones ready: \(activeCount) parts")
+                Text("Electronics routing")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
-                    ForEach(PrimerColor.allCases, id: \.id) { color in
-                        let assignment = event.primerAssignments[color]
-                        MiniTag(color: color.displayName,
-                                detail: assignment?.note ?? "—",
-                                isInactive: assignment == nil)
-                    }
+                    MiniTag(color: "Soprano", detail: "Left", isInactive: false)
+                    MiniTag(color: "Alto", detail: "Right", isInactive: false)
+                    MiniTag(color: "Ten/Bass", detail: "Mono sum", isInactive: false)
                 }
             }
 
             Button(action: triggerAction) {
                 HStack {
                     Image(systemName: "play.circle.fill")
-                    Text("Trigger (Space)")
+                    Text("Fire Trigger (Space)")
                         .bold()
                 }
                 .padding(.vertical, 6)
@@ -357,5 +353,14 @@ private extension EventRecipe {
     var measureText: String {
         if let measure { return "\(measure)" }
         return "—"
+    }
+
+    var positionLabel: String {
+        guard let position, !position.isEmpty else { return "—" }
+        let trimmed = position.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasPrefix("beat") {
+            return trimmed.replacingOccurrences(of: "beat", with: "Beat ")
+        }
+        return trimmed
     }
 }

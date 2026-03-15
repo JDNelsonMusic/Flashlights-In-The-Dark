@@ -1,6 +1,6 @@
 # Electronics Sync Reference
 
-Manual timing anchors in this file are authoritative project assumptions for aligning exported electronics audio against score positions when deriving the `192` event recipes.
+Manual timing anchors in this file are authoritative project assumptions for aligning exported electronics audio against score positions when deriving the reduced `12`-trigger electronics bundle.
 
 Use these anchors against the official trigger positions documented in `docs/official_trigger_positions.md` and stored in `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv`.
 

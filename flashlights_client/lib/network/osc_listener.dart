@@ -25,8 +25,8 @@ const Duration _fastHelloInterval = Duration(seconds: 2);
 const Duration _slowHelloInterval = Duration(seconds: 10);
 const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
-const Duration _soundEventPlaybackDelay = Duration(milliseconds: 365);
 const int _legacySoundEventCount = 32;
+const bool kPrimerPlaybackEnabled = false;
 
 @visibleForTesting
 Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
@@ -39,11 +39,6 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
           .clamp(0, double.infinity)
           .toInt();
   return Duration(milliseconds: delayMs);
-}
-
-@visibleForTesting
-Duration soundEventPlaybackDelay({required bool hasSoundEventClip}) {
-  return hasSoundEventClip ? _soundEventPlaybackDelay : Duration.zero;
 }
 
 String? _normaliseAudioPlayToken(String raw) {
@@ -722,6 +717,16 @@ class OscListener {
     String? cueId,
     int? seq,
   }) async {
+    if (!kPrimerPlaybackEnabled) {
+      _record('audio', 'Ignoring primer playback request', <String, Object?>{
+        'file': fileName,
+      });
+      if (sendAck) {
+        _sendAck(cueId: cueId, seq: seq);
+      }
+      return;
+    }
+
     if (_shouldSkipPrimer(dedupeKey)) {
       _record('dedupe', 'Skipping duplicate primer request', <String, Object?>{
         'key': dedupeKey,
@@ -801,37 +806,12 @@ class OscListener {
       await session.setActive(true);
 
       final playbackToken = ++_playbackToken;
-      final electronicsDelay = soundEventPlaybackDelay(
-        hasSoundEventClip: electronicsAssetKey != null,
-      );
 
-      if (primerFile != null) {
+      if (kPrimerPlaybackEnabled && primerFile != null) {
         await NativeAudio.playPrimerTone(primerFile, 1.0);
       }
       if (electronicsAssetKey != null) {
-        _record('audio', 'Scheduling sound-event clip playback', <String, Object?>{
-          'asset': electronicsAssetKey,
-          'delayMs': electronicsDelay.inMilliseconds,
-        });
-        unawaited(
-          Future<void>.delayed(electronicsDelay, () async {
-            if (_playbackToken != playbackToken) {
-              return;
-            }
-            try {
-              await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
-            } catch (e) {
-              _record(
-                'audio',
-                'Delayed sound-event playback failed',
-                <String, Object?>{
-                  'error': e.toString(),
-                  'electronics': electronicsAssetKey,
-                },
-              );
-            }
-          }),
-        );
+        await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
       }
 
       if (dedupeKey != null) {
@@ -839,9 +819,10 @@ class OscListener {
       }
 
       client.audioPlaying.value = true;
-      final resetMs =
-          (electronicsDurationMs ?? 2000.0).round().clamp(2000, 45000) +
-          electronicsDelay.inMilliseconds;
+      final resetMs = (electronicsDurationMs ?? 2000.0).round().clamp(
+        2000,
+        45000,
+      );
       _scheduleAudioPlayingReset(
         playbackToken,
         Duration(milliseconds: resetMs),
@@ -1217,7 +1198,8 @@ class OscListener {
     }
 
     final slot = client.myIndex.value;
-    final primerAssignment = client.assignmentForSlot(event, slot);
+    final primerAssignment =
+        kPrimerPlaybackEnabled ? client.assignmentForSlot(event, slot) : null;
     final electronicsAssignment = client.electronicsForSlot(event, slot);
     if (primerAssignment == null && electronicsAssignment == null) {
       _record('event', 'No event media for slot', <String, Object?>{
@@ -1281,6 +1263,15 @@ class OscListener {
     final primerFile = resolvePrimerAudioPlayFile(file);
     final bundledAssetKey =
         primerFile == null ? resolveBundledAudioPlayAssetKey(file) : null;
+
+    if (primerFile != null && !kPrimerPlaybackEnabled) {
+      _record('audio', 'Ignoring direct primer cue', <String, Object?>{
+        'file': file,
+        'slot': envelope.slot,
+      });
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+      return;
+    }
 
     if (primerFile == null && bundledAssetKey == null) {
       _record('audio', 'Unsupported /audio/play request', <String, Object?>{
@@ -1390,6 +1381,17 @@ class OscListener {
 
   Future<void> playLocalPrimer(String fileName, double gain) async {
     await _playPrimer(fileName, gain, sendAck: false);
+  }
+
+  Future<void> playLocalElectronicsPreview(
+    String assetKey, {
+    double? durationMs,
+  }) async {
+    await _playEventMedia(
+      electronicsAssetKey: assetKey,
+      electronicsDurationMs: durationMs,
+      sendAck: false,
+    );
   }
 
   void _restartHelloTimer(Duration interval) {

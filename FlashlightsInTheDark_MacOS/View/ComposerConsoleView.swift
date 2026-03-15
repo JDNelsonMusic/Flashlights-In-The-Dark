@@ -102,15 +102,15 @@ struct ComposerConsoleView: View {
 
     /// Human readable labels for MIDI channels
     private static let channelLabels: [Int: String] = [
-        1: "primerTones Blue",
-        2: "primerTones Red",
-        3: "primerTones Green",
-        4: "primerTones Purple",
-        5: "primerTones Yellow",
-        6: "primerTones Pink",
-        7: "primerTones Orange",
-        8: "primerTones Magenta",
-        9: "primerTones Cyan",
+        1: "legacy primer disabled",
+        2: "legacy primer disabled",
+        3: "legacy primer disabled",
+        4: "legacy primer disabled",
+        5: "legacy primer disabled",
+        6: "legacy primer disabled",
+        7: "legacy primer disabled",
+        8: "legacy primer disabled",
+        9: "legacy primer disabled",
         10: "torchSignals",
         11: "seLeft:0-127",
         12: "seLeft:128-255",
@@ -142,82 +142,39 @@ struct ComposerConsoleView: View {
                             .buttonStyle(.bordered)
                     }
                     Divider()
-                    Text("Tone Sets:") .font(.headline)
-                    // Mapping of set identifier to display label
-                    let toneLabels = ["A": "pT",
-                                      "B": "seL",
-                                      "C": "seC",
-                                      "D": "seR"]
-                    let colorGroups = ["A": "primerTones[0-48:short, 50-98:long]",
-                                       "B": "Blue, Red, Green",
-                                       "C": "Purple, Yellow, Pink",
-                                       "D": "Orange, Magenta, Cyan"]
-                    // Primer tones button
-                    HStack(alignment: .center, spacing: 6) {
-                        Button(action: {
-                            if state.activeToneSets.contains("A") {
-                                state.activeToneSets.remove("A")
-                            } else {
-                                state.activeToneSets.insert("A")
-                            }
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(state.activeToneSets.contains("A")
-                                          ? Color.accentColor
-                                          : Color.gray.opacity(0.3))
-                                    .frame(width: 40, height: 40)
-                                Text(toneLabels["A"]!)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .help("Toggle tone set primerTones")
-                        Text(colorGroups["A"]!)
-                            .font(.caption)
-                    }
-                    // Sound Events group
-                    HStack(alignment: .center, spacing: 4) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(["B", "C", "D"], id: \.self) { set in
-                                HStack(alignment: .center, spacing: 6) {
-                                    Button(action: {
-                                        if state.activeToneSets.contains(set) {
-                                            state.activeToneSets.remove(set)
-                                        } else {
-                                            state.activeToneSets.insert(set)
-                                        }
-                                    }) {
-                                        ZStack {
-                                            Circle()
-                                                .fill(state.activeToneSets.contains(set)
-                                                      ? Color.accentColor
-                                                      : Color.gray.opacity(0.3))
-                                                .frame(width: 40, height: 40)
-                                            Text(toneLabels[set]!)
-                                                .font(.headline)
-                                                .foregroundColor(.white)
-                                        }
+                    Text("Manual Sound Banks:") .font(.headline)
+                    let toneLabels = ["B": "seL", "C": "seC", "D": "seR"]
+                    let colorGroups = [
+                        "B": "Blue, Red, Green",
+                        "C": "Purple, Yellow, Pink",
+                        "D": "Orange, Magenta, Cyan"
+                    ]
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(["B", "C", "D"], id: \.self) { set in
+                            HStack(alignment: .center, spacing: 6) {
+                                Button(action: {
+                                    if state.activeToneSets.contains(set) {
+                                        state.activeToneSets.remove(set)
+                                    } else {
+                                        state.activeToneSets.insert(set)
                                     }
-                                    .buttonStyle(.plain)
-                                    .help("Toggle tone set \(toneLabels[set]!)")
-                                    Text(colorGroups[set]!)
-                                        .font(.caption)
+                                }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(state.activeToneSets.contains(set)
+                                                  ? Color.accentColor
+                                                  : Color.gray.opacity(0.3))
+                                            .frame(width: 40, height: 40)
+                                        Text(toneLabels[set]!)
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                    }
                                 }
+                                .buttonStyle(.plain)
+                                .help("Toggle manual bank \(toneLabels[set]!)")
+                                Text(colorGroups[set]!)
+                                    .font(.caption)
                             }
-                        }
-                        VStack(spacing: 0) {
-                            Text("⎫")
-                            Text("⎬")
-                            Text("⎭")
-                        }
-                        .font(.system(size: 40))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sound Events")
-                                .font(.subheadline)
-                            Text("(0-255:LCR)")
-                                .font(.caption)
                         }
                     }
                     // Typing keyboard trigger mode selection
@@ -252,24 +209,6 @@ struct ComposerConsoleView: View {
                             .help("Keyboard: \(mode.rawValue)")
                         }
                     }
-                    Divider()
-                    Text("Audio Output:")
-                        .font(.headline)
-                    Picker("Device", selection: $state.selectedAudioDeviceID) {
-                        Text("System Default").tag(UInt32(0))
-                        ForEach(state.audioOutputDevices, id: \.id) { device in
-                            Text(device.name)
-                                .tag(device.id)
-                        }
-                    }
-                    .labelsHidden()
-                    .onAppear { state.refreshAudioOutputs() }
-                    Button {
-                        state.refreshAudioOutputs()
-                    } label: {
-                        Label("Refresh Outputs", systemImage: "arrow.clockwise")
-                    }
-                    .buttonStyle(.bordered)
                     Divider()
                     HStack(spacing: 4) {
                         Text("MIDI Controls:")

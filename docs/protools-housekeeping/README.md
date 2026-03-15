@@ -8,7 +8,7 @@ This folder contains the first-pass housekeeping outputs for the Pro Tools mater
 - Cue bundle: `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 - Score timing source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
 - Runtime recipe copies: identical across the recipe bundle, macOS resources, and Flutter assets
-- Runtime primer assets: identical across macOS and Flutter, with `98` matched MP3 files and no hash mismatches
+- Runtime primer assets remain archived in the repo, but the Flutter runtime now uses the reduced 12-trigger electronics bundle instead of bundled primer playback
 
 These are recommendations, not destructive edits. Confirm the session choice in Pro Tools before deleting, renaming, or archiving anything.
 
@@ -22,7 +22,7 @@ These are recommendations, not destructive edits. Confirm the session choice in 
 
 ## Manual Sync References
 
-- `electronics_sync_reference.md`: manually maintained timing anchors for aligning rendered electronics audio with score measures while deriving the `192` event recipes
+- `electronics_sync_reference.md`: manually maintained timing anchors for aligning rendered electronics audio with score measures while deriving the reduced `12`-trigger electronics bundle
 - `../official_trigger_positions.md`: authoritative explanation of the official event trigger points and their image/source files
 
 ## Immediate Safe Actions

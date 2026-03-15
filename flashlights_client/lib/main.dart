@@ -23,7 +23,6 @@ import 'model/client_state.dart';
 import 'model/event_recipe.dart';
 // Removed PrimerToneLibrary; native audio handles asset lookup.
 import 'native_audio.dart';
-import 'widgets/event_practice_osmd.dart';
 
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
@@ -51,7 +50,7 @@ Future<void> _bootstrapNative() async {
     }
   }
 
-  // 3. Configure the audio session so primer tones play even in silent mode.
+  // 3. Configure the audio session so event-electronics clips play in silent mode.
   try {
     final session = await audio_session.AudioSession.instance;
     await session.configure(
@@ -76,11 +75,11 @@ Future<void> _bootstrapNative() async {
     debugPrint('[AudioSession] configuration failed: $e');
   }
 
-  // 4. Warm up primer tone library so all audio buffers are ready before use.
+  // 4. Warm up the native audio layer before the first cue arrives.
   try {
     await NativeAudio.ensureInitialized();
   } catch (e) {
-    debugPrint('[Bootstrap] primer preload failed: $e');
+    debugPrint('[Bootstrap] native audio init failed: $e');
   }
 }
 
@@ -745,7 +744,9 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
   Future<void> _handlePartSelected(LightChorusPart part) async {
     final currentSlot = client.myIndex.value;
     final nextSlot =
-        client.partForSlot(currentSlot) == part ? currentSlot : part.defaultSlot;
+        client.partForSlot(currentSlot) == part
+            ? currentSlot
+            : part.defaultSlot;
     client.myIndex.value = nextSlot;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('lastSlot', nextSlot);
@@ -943,10 +944,10 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                           playing
                                               ? Icons.music_note_rounded
                                               : Icons.music_off_rounded,
-                                      title: 'Primer',
+                                      title: 'Electronics',
                                       subtitle:
                                           playing
-                                              ? 'Playing locally'
+                                              ? 'Clip playing'
                                               : 'Standing by',
                                       active: playing,
                                       activeColor: const Color(0xFF06D6A0),
@@ -1111,16 +1112,6 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 28),
                     const PracticeEventStrip(),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        "The TEAL note is what you're tapping to trigger :)",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
-                      ),
-                    ),
                     const SizedBox(height: 24),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1140,7 +1131,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'Heads up: some Event Practice music segments still render with glitches while OSMD interprets the MusicXML score.',
+                                    'The in-app practice strip now mirrors the reduced 12-trigger electronics design. Preview playback uses your currently selected staff routing only.',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -1151,7 +1142,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'If you enjoy tinkering with web canvases or MusicXML and want to help smooth out the viewer, Jon would love to collaborate.',
+                              'Each trigger point starts at its beat-mapped location in the full electronics export, then plays through a 2-beat tail past the next trigger.',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: Colors.white70),
                             ),
@@ -1235,18 +1226,12 @@ class PracticeEventStrip extends StatefulWidget {
 }
 
 class _PracticeEventStripState extends State<PracticeEventStrip> {
-  static const double _kItemWidth = 120.0;
-  static const double _kCurrentWidth = 240.0;
+  static const double _kItemWidth = 124.0;
+  static const double _kCurrentWidth = 252.0;
   static const double _kSpacing = 12.0;
-  static const double _kListHeight = 440.0;
-  static const double _kScoreHeight = 190.0;
+  static const double _kListHeight = 360.0;
 
   final ScrollController _controller = ScrollController();
-  final GlobalKey<EventPracticeOSMDState> _osmdKey =
-      GlobalKey<EventPracticeOSMDState>();
-  int? _lastRenderedMeasure;
-  PrimerColor? _lastRenderedColor;
-  String? _lastRenderedNote;
 
   @override
   void initState() {
@@ -1292,15 +1277,15 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
 
     final event = events[clampedIndex];
     final slot = client.myIndex.value;
-    final assignment = client.assignmentForSlot(event, slot);
+    final assignment = client.electronicsForSlot(event, slot);
     if (assignment != null) {
       try {
-        await flosc.OscListener.instance.playLocalPrimer(
+        await flosc.OscListener.instance.playLocalElectronicsPreview(
           assignment.sample,
-          1.0,
+          durationMs: assignment.durationMs,
         );
       } catch (e) {
-        debugPrint('[Practice] primer playback failed: $e');
+        debugPrint('[Practice] electronics preview failed: $e');
       }
     }
 
@@ -1325,7 +1310,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
                 SizedBox(width: 12),
-                Text('Loading event timeline…'),
+                Text('Loading trigger points…'),
               ],
             ),
           );
@@ -1335,54 +1320,19 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
           builder: (context, index, _) {
             final clampedIndex = index.clamp(0, events.length - 1);
             final mediaHeight = MediaQuery.of(context).size.height;
-            final minListHeight = _PracticeEventCard._currentHeight + 32;
+            final minListHeight = _TriggerPointCard._currentHeight + 32;
             final targetListHeight = math.min(_kListHeight, mediaHeight * 0.48);
             final listHeight = math.max(minListHeight, targetListHeight);
-            final slotForScore = client.myIndex.value;
-            final primerColorForScore = client.colorForSlot(slotForScore);
+            final slotForPreview = client.myIndex.value;
+            final selectedPart = client.partForSlot(slotForPreview);
+            final partAccent =
+                kSlotOutlineColors[slotForPreview] ?? Colors.white70;
             final currentEvent = events[clampedIndex];
-            final assignmentForScore = client.assignmentForSlot(
+            final currentAssignment = client.electronicsForSlot(
               currentEvent,
-              slotForScore,
+              slotForPreview,
             );
-            final rawNoteForScore = assignmentForScore?.note?.trim();
-            final noteForScore =
-                rawNoteForScore == null || rawNoteForScore.isEmpty
-                    ? null
-                    : rawNoteForScore;
             const horizontalInset = 20.0;
-            final measure = currentEvent.measure;
-            if (measure != null && measure > 0) {
-              final shouldUpdateScore =
-                  measure != _lastRenderedMeasure ||
-                  primerColorForScore != _lastRenderedColor ||
-                  noteForScore != _lastRenderedNote;
-              if (shouldUpdateScore) {
-                _lastRenderedMeasure = measure;
-                _lastRenderedColor = primerColorForScore;
-                _lastRenderedNote = noteForScore;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  final color = primerColorForScore;
-                  if (color != null) {
-                    _osmdKey.currentState?.updatePracticeContext(
-                      color: color,
-                      measure: measure,
-                      note: noteForScore,
-                    );
-                  } else {
-                    _osmdKey.currentState?.clearScore();
-                  }
-                });
-              }
-            } else if (_lastRenderedMeasure != null ||
-                _lastRenderedColor != null) {
-              _lastRenderedMeasure = null;
-              _lastRenderedColor = null;
-              _lastRenderedNote = null;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _osmdKey.currentState?.clearScore();
-              });
-            }
             return _GlassPanel(
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 24),
               child: Column(
@@ -1393,13 +1343,13 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                     child: Row(
                       children: [
                         Text(
-                          'Event Practice',
+                          'Trigger Point Practice',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
                         Text(
-                          'Slide or tap · Trigger plays locally',
+                          '12-point electronics map · local clip preview',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white70),
                         ),
@@ -1424,12 +1374,26 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Highlighted notes show the staged primer tone—tap "Play primer" to hear that exact pitch queued for your part.',
+                            'Preview uses your current part selection only. Sopranos hear left, Altos hear right, and Ten/Bass hear the mono sum.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.white70),
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalInset,
+                      12,
+                      horizontalInset,
+                      0,
+                    ),
+                    child: _ElectronicsInfoSection(
+                      part: selectedPart,
+                      slot: slotForPreview,
+                      assignment: currentAssignment,
+                      accent: partAccent,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1466,39 +1430,23 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                 itemBuilder: (context, i) {
                                   final event = events[i];
                                   final isCurrent = i == clampedIndex;
-                                  final slot = slotForScore;
-                                  final assignment = client.assignmentForSlot(
+                                  final slot = slotForPreview;
+                                  final assignment = client.electronicsForSlot(
                                     event,
                                     slot,
                                   );
-                                  final primerColor = primerColorForScore;
-                                  final practiceSlots =
-                                      primerColor == null
-                                          ? const <int>[]
-                                          : client.practiceSlotsForColor(
-                                            primerColor,
-                                          );
-                                  final partLabel =
-                                      primerColor == null
-                                          ? null
-                                          : client.practicePartLabelForColor(
-                                            primerColor,
-                                          );
-                                  final practiceSlotNumber = client
-                                      .practiceSlotNumberForSlot(slot);
                                   return SizedBox(
                                     width:
                                         isCurrent
                                             ? _kCurrentWidth
                                             : _kItemWidth,
-                                    child: _PracticeEventCard(
+                                    child: _TriggerPointCard(
                                       event: event,
                                       isCurrent: isCurrent,
                                       assignment: assignment,
-                                      primerColor: primerColor,
-                                      practiceSlots: practiceSlots,
-                                      practicePartLabel: partLabel,
-                                      practiceSlotNumber: practiceSlotNumber,
+                                      part: selectedPart,
+                                      slot: slot,
+                                      accent: partAccent,
                                       onTap:
                                           () => client.setPracticeEventIndex(i),
                                       onPlay:
@@ -1511,24 +1459,6 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
                                     ),
                                   );
                                 },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: constraints.maxWidth,
-                            child: _GlassPanel(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                              child: SizedBox(
-                                height: math.min(
-                                  _kScoreHeight,
-                                  mediaHeight * 0.26,
-                                ),
-                                width: double.infinity,
-                                child: EventPracticeOSMD(key: _osmdKey),
                               ),
                             ),
                           ),
@@ -1546,15 +1476,14 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   }
 }
 
-class _PracticeEventCard extends StatelessWidget {
-  const _PracticeEventCard({
+class _TriggerPointCard extends StatelessWidget {
+  const _TriggerPointCard({
     required this.event,
     required this.isCurrent,
     required this.assignment,
-    required this.practiceSlots,
-    this.primerColor,
-    this.practicePartLabel,
-    this.practiceSlotNumber,
+    required this.slot,
+    required this.accent,
+    this.part,
     required this.onTap,
     required this.onPlay,
     required this.onPrev,
@@ -1563,58 +1492,52 @@ class _PracticeEventCard extends StatelessWidget {
 
   final EventRecipe event;
   final bool isCurrent;
-  final PrimerAssignment? assignment;
-  final PrimerColor? primerColor;
-  final List<int> practiceSlots;
-  final String? practicePartLabel;
-  final int? practiceSlotNumber;
+  final ElectronicsAssignment? assignment;
+  final LightChorusPart? part;
+  final int slot;
+  final Color accent;
   final VoidCallback onTap;
   final VoidCallback onPlay;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
-  static const double _previewWidth = 110.0;
-  static const double _currentWidth = 220.0;
-  static const double _previewHeight = 250.0;
-  static const double _currentHeight = 380.0;
+  static const double _previewWidth = 124.0;
+  static const double _currentWidth = 252.0;
+  static const double _previewHeight = 220.0;
+  static const double _currentHeight = 320.0;
 
-  static Color _colorForPrimer(PrimerColor color) {
-    switch (color) {
-      case PrimerColor.blue:
-        return SlotColors.royalBlue;
-      case PrimerColor.red:
-        return SlotColors.brightRed;
-      case PrimerColor.green:
-        return SlotColors.slotGreen;
-      case PrimerColor.purple:
-        return SlotColors.slotPurple;
-      case PrimerColor.yellow:
-        return SlotColors.slotYellow;
-      case PrimerColor.pink:
-        return SlotColors.lightRose;
-      case PrimerColor.orange:
-        return SlotColors.slotOrange;
-      case PrimerColor.magenta:
-        return SlotColors.hotMagenta;
-      case PrimerColor.cyan:
-        return SlotColors.skyBlue;
+  static String routeLabel(ElectronicsAssignment? assignment) {
+    switch (assignment?.channelMode) {
+      case 'left':
+        return 'Left channel';
+      case 'right':
+        return 'Right channel';
+      case 'mono_sum':
+        return 'Mono sum';
+      default:
+        return 'No route';
     }
+  }
+
+  static String durationLabel(double? durationMs) {
+    if (durationMs == null) {
+      return '—';
+    }
+    return '${(durationMs / 1000).toStringAsFixed(1)}s';
   }
 
   @override
   Widget build(BuildContext context) {
-    final measureText = event.measure?.toString() ?? '—';
-    final position = event.position ?? '';
-    final sampleName = assignment?.normalizedSample ?? '';
-    final primerLabel = sampleName.isEmpty ? '—' : sampleName.split('/').last;
-    final noteLabel = assignment?.note ?? '—';
+    final measureText = event.measure != null ? 'M${event.measure}' : 'M—';
+    final beatText = _normalisedBeat(event.position ?? '');
+    final clipLabel =
+        assignment == null ? 'No clip' : assignment!.sample.split('/').last;
+    final routeLabelText = routeLabel(assignment);
+    final durationLabelText = durationLabel(assignment?.durationMs);
+    final fadeLabelText = durationLabel(assignment?.fadeOutMs);
 
-    final beatText = _normalisedBeat(position);
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final hasPrimer = sampleName.isNotEmpty;
-    final primerAccent =
-        primerColor != null ? _colorForPrimer(primerColor!) : null;
+    final textTheme = Theme.of(context).textTheme;
+    final hasClip = assignment != null;
 
     final width = isCurrent ? _currentWidth : _previewWidth;
     final targetHeight = isCurrent ? _currentHeight : _previewHeight;
@@ -1636,10 +1559,10 @@ class _PracticeEventCard extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: onPlay,
             icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(hasPrimer ? 'Play primer' : 'Advance'),
+            label: Text(hasClip ? 'Play clip' : 'Advance'),
             style: FilledButton.styleFrom(
               backgroundColor:
-                  hasPrimer
+                  hasClip
                       ? Colors.white.withValues(alpha: 0.18)
                       : Colors.white.withValues(alpha: 0.08),
               foregroundColor: Colors.white,
@@ -1657,10 +1580,10 @@ class _PracticeEventCard extends StatelessWidget {
         child: FilledButton.tonalIcon(
           onPressed: onPlay,
           icon: const Icon(Icons.play_arrow_rounded),
-          label: Text(hasPrimer ? 'Play' : 'Next'),
+          label: Text(hasClip ? 'Play' : 'Next'),
           style: FilledButton.styleFrom(
             backgroundColor:
-                hasPrimer
+                hasClip
                     ? Colors.white.withValues(alpha: 0.16)
                     : Colors.white.withValues(alpha: 0.06),
             foregroundColor: Colors.white,
@@ -1688,7 +1611,10 @@ class _PracticeEventCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: Colors.white.withValues(alpha: isCurrent ? 0.42 : 0.14),
+          color:
+              isCurrent
+                  ? accent.withValues(alpha: 0.65)
+                  : Colors.white.withValues(alpha: 0.14),
           width: isCurrent ? 1.3 : 1.0,
         ),
         boxShadow:
@@ -1711,7 +1637,7 @@ class _PracticeEventCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Event #${event.id}',
+                  'TP ${event.id}',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -1734,13 +1660,13 @@ class _PracticeEventCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Measure $measureText',
+              measureText,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              'Beat $beatText',
+              beatText,
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -1751,26 +1677,41 @@ class _PracticeEventCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 6,
                 children: [
-                  _EventDetailChip(label: 'Note: $noteLabel'),
-                  _EventDetailChip(label: 'Primer: $primerLabel'),
+                  _EventDetailChip(label: routeLabelText),
+                  _EventDetailChip(label: 'Clip $durationLabelText'),
+                  _EventDetailChip(label: 'Fade $fadeLabelText'),
                 ],
               ),
               const SizedBox(height: 8),
-              _PrimerInfoSection(
-                primerColor: primerColor,
-                practiceSlots: practiceSlots,
-                practicePartLabel: practicePartLabel,
-                practiceSlotNumber: practiceSlotNumber,
-                accent: primerAccent,
+              _ElectronicsInfoSection(
+                part: part,
+                slot: slot,
+                assignment: assignment,
+                accent: accent,
               ),
               const SizedBox(height: 8),
-            ] else if (!hasPrimer) ...[
+            ] else if (!hasClip) ...[
               Text(
-                'No primer for your slot',
+                'No clip for this slot',
                 style: textTheme.labelSmall?.copyWith(color: Colors.white38),
               ),
               const SizedBox(height: 8),
+            ] else ...[
+              Text(
+                routeLabelText,
+                style: textTheme.labelSmall?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 8),
             ],
+            Text(
+              clipLabel,
+              maxLines: isCurrent ? 2 : 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.bodySmall?.copyWith(
+                color: Colors.white70,
+                height: 1.3,
+              ),
+            ),
             const Spacer(),
             buildPlayButton(),
           ],
@@ -1780,37 +1721,29 @@ class _PracticeEventCard extends StatelessWidget {
   }
 }
 
-class _PrimerInfoSection extends StatelessWidget {
-  const _PrimerInfoSection({
-    required this.primerColor,
-    required this.practiceSlots,
-    required this.practicePartLabel,
-    required this.practiceSlotNumber,
+class _ElectronicsInfoSection extends StatelessWidget {
+  const _ElectronicsInfoSection({
+    required this.part,
+    required this.slot,
+    required this.assignment,
     required this.accent,
   });
 
-  final PrimerColor? primerColor;
-  final List<int> practiceSlots;
-  final String? practicePartLabel;
-  final int? practiceSlotNumber;
-  final Color? accent;
+  final LightChorusPart? part;
+  final int slot;
+  final ElectronicsAssignment? assignment;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final groupIndex = primerColor?.groupIndex;
-    final colorName = primerColor?.displayName ?? 'Unassigned';
-    final groupLabel =
-        groupIndex != null ? 'Group $groupIndex · $colorName' : colorName;
-    final partLabel =
-        practicePartLabel != null ? 'Part $practicePartLabel' : 'Part —';
-    final slotsLabel =
-        practiceSlots.isEmpty ? 'Slots —' : 'Slots ${practiceSlots.join(', ')}';
-    final youLabel =
-        practiceSlotNumber != null
-            ? 'You → ${practiceSlotNumber!.toString().padLeft(2, '0')}'
-            : null;
-    final swatchColor = accent ?? Colors.white.withValues(alpha: 0.3);
+    final partLabel = part?.label ?? 'Unassigned';
+    final clipLabel =
+        assignment == null
+            ? 'No electronics clip'
+            : assignment!.sample.split('/').last;
+    final routeLabel = _TriggerPointCard.routeLabel(assignment);
+    final swatchColor = accent;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1836,7 +1769,7 @@ class _PrimerInfoSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  groupLabel,
+                  '$partLabel · Slot $slot',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -1846,15 +1779,8 @@ class _PrimerInfoSection extends StatelessWidget {
                   spacing: 12,
                   runSpacing: 4,
                   children: [
-                    Text(partLabel, style: textTheme.bodySmall),
-                    Text(slotsLabel, style: textTheme.bodySmall),
-                    if (youLabel != null)
-                      Text(
-                        youLabel,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
+                    Text(routeLabel, style: textTheme.bodySmall),
+                    Text(clipLabel, style: textTheme.bodySmall),
                   ],
                 ),
               ],
@@ -1889,9 +1815,16 @@ String _normalisedBeat(String rawPosition) {
   if (rawPosition.isEmpty) {
     return '—';
   }
+  final beatMatch = RegExp(
+    r'beat\s*(\d+)',
+    caseSensitive: false,
+  ).firstMatch(rawPosition);
+  if (beatMatch != null) {
+    return 'Beat ${beatMatch.group(1)}';
+  }
   final match = RegExp(r'(\d+)').firstMatch(rawPosition);
   if (match != null) {
-    return match.group(1) ?? rawPosition;
+    return 'Beat ${match.group(1)}';
   }
   return rawPosition;
 }

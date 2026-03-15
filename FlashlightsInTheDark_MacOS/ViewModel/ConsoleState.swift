@@ -49,7 +49,6 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let midi = MIDIManager()
     private let eventLoader = EventRecipeLoader()
     private let primerAudioEngine = PrimerToneAudioEngine()
-    private let primerLeadTimeMs: Double = 180.0
     /// Base offset so MIDI note 1 corresponds to device 1
     private let midiNoteOffset = 0
     private let allInputsLabel = "All MIDI Inputs"
@@ -109,7 +108,7 @@ public final class ConsoleState: ObservableObject, Sendable {
         }
     }
 
-    /// Default slot group mapping for primer tones
+    /// Default slot-group mapping for the live chorus layout.
     private let defaultGroups: [Int: [Int]] = [
         1: [27, 41, 42],
         2: [1, 14, 15],
@@ -213,11 +212,6 @@ public final class ConsoleState: ObservableObject, Sendable {
         refreshMidiDevices()
         resetGroupMembersToDefault()
         loadEventRecipes()
-        refreshAudioOutputs()
-        let audioEngine = primerAudioEngine
-        DispatchQueue.global(qos: .userInitiated).async {
-            audioEngine.preloadPrimerTones()
-        }
     }
 
     @Published public private(set) var devices: [ChoirDevice]
@@ -319,9 +313,8 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
-    /// Active audio tone sets ("A","B","C","D"). All banks are enabled by
-    /// default so the corresponding buttons start in the active state.
-    @Published public var activeToneSets: Set<String> = ["A", "B", "C", "D"]
+    /// Active manual sound-event banks ("B","C","D").
+    @Published public var activeToneSets: Set<String> = ["B", "C", "D"]
     // Envelope parameters (ms, %)
     @Published public var attackMs: Int = 200
     @Published public var decayMs: Int = 200
@@ -628,12 +621,12 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let slotNumber = device.listeningSlot
                 let slot = Int32(slotNumber)
                 let gain: Float32 = 1.0
-                let startAtMs = Date().timeIntervalSince1970 * 1000.0 + self.primerLeadTimeMs
+                let startAtMs = Date().timeIntervalSince1970 * 1000.0
 
                 // --- Collect main-actor data once, then use it ---
                 let toneSets: [String] = await MainActor.run {
                     let raw = self.activeToneSets
-                    return raw.isEmpty ? ["A"] : raw.sorted()
+                    return raw.isEmpty ? ["B"] : raw.sorted()
                 }
 
                 for set in toneSets {
@@ -673,7 +666,7 @@ public final class ConsoleState: ObservableObject, Sendable {
             }
         }
     }
-    /// Play audio on all devices slots based on current activeToneSets
+    /// Play the active manual sound-event banks on all connected devices.
     public func playAllTones() {
         guard ensureArmedForCue("triggering tones") else { return }
         for device in devices where !device.isPlaceholder {
@@ -1763,7 +1756,7 @@ private enum DiscoveryRefreshReason {
     }
 }
 
-// MARK: - Event Timeline & Primer Playback
+// MARK: - Trigger Timeline & Cue Playback
 extension ConsoleState {
     private func loadEventRecipes() {
         do {
@@ -1772,13 +1765,13 @@ extension ConsoleState {
             currentEventIndex = 0
             eventLoadError = nil
             if let first = recipes.first {
-                lastLog = "Loaded \(recipes.count) event recipes · Next: Event #\(first.id)"
+                lastLog = "Loaded \(recipes.count) trigger points · Next: Trigger #\(first.id)"
             }
         } catch {
             eventRecipes = []
             currentEventIndex = 0
-            eventLoadError = "Event recipe file missing or unreadable"
-            lastLog = "⚠️ Unable to load event recipes"
+            eventLoadError = "Trigger-point bundle missing or unreadable"
+            lastLog = "⚠️ Unable to load trigger points"
         }
     }
 
@@ -1966,15 +1959,12 @@ extension ConsoleState {
     }
 
     private func fire(event: EventRecipe) async {
-        let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
-        if !event.primerAssignments.isEmpty {
-            primerAudioEngine.play(assignments: event.primerAssignments, startAt: startAtMs)
-        }
+        let startAtMs = Date().timeIntervalSince1970 * 1000.0
         await sendEventTriggers(for: event, startAtMs: startAtMs)
         let measureText = event.measure.map { "M\($0)" } ?? "M?"
         let beatText = event.position ?? "?"
         await MainActor.run {
-            lastLog = "▶︎ Event #\(event.id) • \(measureText) • \(beatText)"
+            lastLog = "▶︎ Trigger #\(event.id) • \(measureText) • \(beatText)"
         }
     }
 
@@ -1996,11 +1986,11 @@ extension ConsoleState {
             }
             await MainActor.run {
                 if sentSlots.isEmpty {
-                    self.lastLog = "⚠️ No event triggers sent for Event #\(event.id) (\(failedSlots.count) slots unavailable)"
+                    self.lastLog = "⚠️ No trigger cues sent for Trigger #\(event.id) (\(failedSlots.count) slots unavailable)"
                 } else if failedSlots.isEmpty {
-                    self.lastLog = "▶︎ Sent event trigger for Event #\(event.id)"
+                    self.lastLog = "▶︎ Sent Trigger #\(event.id)"
                 } else {
-                    self.lastLog = "▶︎ Sent Event #\(event.id) to \(sentSlots.count) slots (\(failedSlots.count) unavailable)"
+                    self.lastLog = "▶︎ Sent Trigger #\(event.id) to \(sentSlots.count) slots (\(failedSlots.count) unavailable)"
                 }
             }
         } catch {
@@ -2058,30 +2048,10 @@ extension ConsoleState {
             return
         }
 
-        // Primer tones triggered by group channels 1–9
+        // Primer tones are retired in the 12-trigger workflow.
         if (1...9).contains(ch),
            (0...48).contains(val) || (50...98).contains(val) {
-            let fileName = val < 50 ? "short\(val).mp3" : "long\(val).mp3"
-            let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
-            if let slots = groupMembers[ch] {
-                for slot in slots {
-                    let idx = slot - 1
-                    guard idx >= 0 && idx < devices.count else { continue }
-                    let device = devices[idx]
-                    if device.midiChannels.contains(ch) {
-                        Task.detached { [weak self] in
-                            guard let self = self else { return }
-                            do {
-                                let osc = try await self.broadcasterTask.value
-                                try await osc.send(AudioPlay(index: Int32(slot), file: fileName, gain: 1.0, startAtMs: startAtMs))
-                            } catch {
-                                print("Error sending primer tone to slot \(slot): \(error)")
-                            }
-                        }
-                    }
-                }
-            }
-            logMidi("Primer \(val) -> Group \(ch)")
+            logMidi("PrimerDisabled \(val) -> Group \(ch)")
             return
         }
 
@@ -2090,7 +2060,7 @@ extension ConsoleState {
             var slots: [Int] = []
             var prefix = ""
             var eventId = val
-            let startAtMs = Date().timeIntervalSince1970 * 1000.0 + primerLeadTimeMs
+            let startAtMs = Date().timeIntervalSince1970 * 1000.0
 
             switch ch {
             case 11:
@@ -2199,27 +2169,10 @@ extension ConsoleState {
             return
         }
 
-        // Stop primer tones for group channels 1–9
+        // Primer-stop traffic is ignored because primer playback is retired.
         if (1...9).contains(ch),
-           (0...48).contains(val) || (50...98).contains(val),
-           let slots = groupMembers[ch] {
-            for slot in slots {
-                let idx = slot - 1
-                guard idx >= 0 && idx < devices.count else { continue }
-                let device = devices[idx]
-                if device.midiChannels.contains(ch) {
-                    Task.detached { [weak self] in
-                        guard let self = self else { return }
-                        do {
-                            let osc = try await self.broadcasterTask.value
-                            try await osc.send(AudioStop(index: Int32(slot)))
-                        } catch {
-                            print("Error stopping primer tone on slot \(slot): \(error)")
-                        }
-                    }
-                }
-            }
-            logMidi("PrimerStop \(val) -> Group \(ch)")
+           (0...48).contains(val) || (50...98).contains(val) {
+            logMidi("PrimerStopIgnored \(val) -> Group \(ch)")
             return
         }
 

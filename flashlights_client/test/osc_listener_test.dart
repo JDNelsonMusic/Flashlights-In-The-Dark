@@ -21,19 +21,6 @@ void main() {
     });
   });
 
-  group('soundEventPlaybackDelay', () {
-    test('adds 365ms only when a sound-event clip is present', () {
-      expect(
-        soundEventPlaybackDelay(hasSoundEventClip: false),
-        Duration.zero,
-      );
-      expect(
-        soundEventPlaybackDelay(hasSoundEventClip: true),
-        const Duration(milliseconds: 365),
-      );
-    });
-  });
-
   group('resolvePrimerAudioPlayFile', () {
     test('normalises short and long primer names', () {
       expect(resolvePrimerAudioPlayFile('short24.mp3'), 'short24.mp3');

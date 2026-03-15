@@ -10,14 +10,7 @@ class PrimerColorPlacement {
   final List<int> slots;
 }
 
-enum LightChorusPart {
-  sopranoL1,
-  sopranoL2,
-  tenorL,
-  bassL,
-  altoL2,
-  altoL1,
-}
+enum LightChorusPart { sopranoL1, sopranoL2, tenorL, bassL, altoL2, altoL1 }
 
 extension LightChorusPartDisplay on LightChorusPart {
   String get label {
@@ -167,7 +160,7 @@ class ClientState {
   /// Most recent OSC messages (capped at 10 entries).
   final ValueNotifier<List<OSCMessage>> recentMessages;
 
-  /// Cached list of 192 event recipes used for practice browsing.
+  /// Cached list of trigger-point recipes used for local practice browsing.
   final ValueNotifier<List<EventRecipe>> eventRecipes;
 
   /// Current event index highlighted in the practice strip.
