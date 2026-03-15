@@ -836,11 +836,6 @@ class OscListener {
     }
     _lastAppliedLightLevel = clamped;
     client.brightness.value = clamped;
-    try {
-      await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
-    } catch (_) {
-      // best-effort
-    }
     await _setTorchLevel(clamped);
   }
 
@@ -1183,11 +1178,6 @@ class OscListener {
       _cancelLightSequence(turnOff: false, reason: 'panic/all-stop');
       await _setTorchLevel(0);
       client.brightness.value = 0;
-      try {
-        await ScreenBrightness.instance.setApplicationScreenBrightness(0);
-      } catch (_) {
-        // best-effort
-      }
       _playbackToken++;
       try {
         await NativeAudio.stopPrimerTone();

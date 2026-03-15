@@ -10,7 +10,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:screen_brightness/screen_brightness.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flashlights_client/network/osc_listener.dart' as flosc;
 import 'package:flashlights_client/network/osc_packet.dart';
@@ -24,11 +23,22 @@ import 'model/event_recipe.dart';
 // Removed PrimerToneLibrary; native audio handles asset lookup.
 import 'native_audio.dart';
 
+Future<void> _setAppScreenToMaximum() async {
+  if (!(Platform.isIOS || Platform.isAndroid)) {
+    return;
+  }
+  try {
+    await ScreenBrightness.instance.setApplicationScreenBrightness(1.0);
+  } catch (e) {
+    debugPrint('[ScreenBrightness] max-screen set failed: $e');
+  }
+}
+
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
   if (Platform.isIOS || Platform.isAndroid) {
-    // 1. Ask for runtime permissions (camera + microphone).
-    await [Permission.camera, Permission.microphone].request();
+    // 1. Ask only for camera permission, which is required for torch control.
+    await [Permission.camera].request();
   }
 
   // 2. On Android, spin up the foreground service so we survive backgrounding.
@@ -81,11 +91,15 @@ Future<void> _bootstrapNative() async {
   } catch (e) {
     debugPrint('[Bootstrap] native audio init failed: $e');
   }
+
+  // 5. Keep the singer-facing screen fully lit while the app is active.
+  await _setAppScreenToMaximum();
 }
 
 class _HeaderSection extends StatelessWidget {
   const _HeaderSection({
     required this.platform,
+    required this.compact,
     required this.onTitleTap,
     required this.onPartSelected,
     required this.onRefreshConnection,
@@ -93,6 +107,7 @@ class _HeaderSection extends StatelessWidget {
   });
 
   final String platform;
+  final bool compact;
   final VoidCallback onTitleTap;
   final Future<void> Function(LightChorusPart) onPartSelected;
   final VoidCallback onRefreshConnection;
@@ -113,7 +128,12 @@ class _HeaderSection extends StatelessWidget {
                 ? 'Slot $myIndex'
                 : '$partLabel · Slot $myIndex';
         return _GlassPanel(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+          padding: EdgeInsets.fromLTRB(
+            compact ? 18 : 24,
+            compact ? 18 : 24,
+            compact ? 18 : 24,
+            compact ? 20 : 28,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -124,10 +144,10 @@ class _HeaderSection extends StatelessWidget {
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.4,
-                  ),
+                    ),
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: compact ? 4 : 6),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
                 builder: (context, connected, _) {
@@ -141,7 +161,7 @@ class _HeaderSection extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: compact ? 12 : 20),
               ValueListenableBuilder<bool>(
                 valueListenable: client.connected,
                 builder: (context, connected, _) {
@@ -150,8 +170,8 @@ class _HeaderSection extends StatelessWidget {
                           ? const Color(0xFF06D6A0)
                           : const Color(0xFFFFA630);
                   return Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+                    spacing: compact ? 8 : 12,
+                    runSpacing: compact ? 8 : 12,
                     children: [
                       _InfoPill(
                         icon: Icons.person_rounded,
@@ -352,6 +372,7 @@ class _StatusTile extends StatelessWidget {
     required this.subtitle,
     required this.active,
     required this.activeColor,
+    this.compact = false,
   });
 
   final IconData icon;
@@ -359,6 +380,7 @@ class _StatusTile extends StatelessWidget {
   final String subtitle;
   final bool active;
   final Color activeColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -367,14 +389,71 @@ class _StatusTile extends StatelessWidget {
         active
             ? activeColor.withValues(alpha: 0.35)
             : Colors.white.withValues(alpha: 0.08);
+    if (compact) {
+      return _GlassPanel(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              height: 34,
+              width: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconBackground,
+                boxShadow:
+                    active
+                        ? [
+                          BoxShadow(
+                            color: activeColor.withValues(alpha: 0.28),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ]
+                        : null,
+              ),
+              child: Icon(icon, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return _GlassPanel(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 16 : 24,
+        compact ? 16 : 24,
+        compact ? 16 : 24,
+        compact ? 18 : 28,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 48,
-            width: 48,
+            height: compact ? 38 : 48,
+            width: compact ? 38 : 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: iconBackground,
@@ -389,14 +468,15 @@ class _StatusTile extends StatelessWidget {
                       ]
                       : null,
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Colors.white, size: compact ? 20 : 24),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: compact ? 10 : 14),
           Text(
             title,
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: (compact ? textTheme.titleSmall : textTheme.titleMedium)
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: compact ? 4 : 6),
           Text(
             subtitle,
             style: textTheme.bodySmall?.copyWith(color: Colors.white70),
@@ -437,53 +517,6 @@ class _GlassPanel extends StatelessWidget {
           child: child,
         ),
       ),
-    );
-  }
-}
-
-class _FooterNote extends StatelessWidget {
-  const _FooterNote();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'By Jon D. Nelson',
-          textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(color: Colors.white70),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'In collaboration with the Philharmonic Chorus of Madison',
-          textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(color: Colors.white38),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChecklistItem extends StatelessWidget {
-  const _ChecklistItem({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(
-      context,
-    ).textTheme.bodySmall?.copyWith(color: Colors.white70);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: Colors.white70),
-        const SizedBox(width: 10),
-        Expanded(child: Text(label, style: textStyle)),
-      ],
     );
   }
 }
@@ -573,13 +606,6 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
   int _titleTapCount = 0;
   Timer? _tapResetTimer;
   bool _refreshingConnection = false;
-  static final Uri _resourceUri = Uri.parse('https://simphoni.ai/flashlights');
-  static final Uri _githubRepoUri = Uri.parse(
-    'https://github.com/JDNelsonMusic/Flashlights-In-The-Dark',
-  );
-  static final Uri _supportEmailUri = Uri.parse(
-    'mailto:jdnelsonmusic@gmail.com?subject=Flashlights%20Client%20Feedback',
-  );
 
   @override
   void initState() {
@@ -587,6 +613,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     flosc.OscListener.instance.start();
     unawaited(client.ensureEventRecipesLoaded());
+    unawaited(_setAppScreenToMaximum());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _keyboardFocusNode.requestFocus();
@@ -666,6 +693,7 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
   }
 
   Future<void> _handleAppResumed() async {
+    await _setAppScreenToMaximum();
     try {
       final session = await audio_session.AudioSession.instance;
       await session.setActive(true);
@@ -684,39 +712,6 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _openResourceLink() async {
-    final launched = await launchUrl(
-      _resourceUri,
-      mode: LaunchMode.externalApplication,
-    );
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open simphoni.ai/flashlights')),
-      );
-    }
-  }
-
-  Future<void> _openGithubRepo() async {
-    final launched = await launchUrl(
-      _githubRepoUri,
-      mode: LaunchMode.externalApplication,
-    );
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open GitHub repository')),
-      );
-    }
-  }
-
-  Future<void> _openSupportEmail() async {
-    final launched = await launchUrl(_supportEmailUri);
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('No email app available')));
-    }
-  }
-
   Future<void> _setBrightness(double target) async {
     final current = client.brightness.value;
     final clamped = target.clamp(0.0, 1.0).toDouble();
@@ -724,11 +719,6 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
       return;
     }
     client.brightness.value = clamped;
-    try {
-      await ScreenBrightness.instance.setApplicationScreenBrightness(clamped);
-    } catch (e) {
-      debugPrint('[UI] Screen brightness set failed: $e');
-    }
     try {
       await flosc.OscListener.instance.setTorchLevel(clamped);
     } catch (e) {
@@ -782,417 +772,173 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
           child: SafeArea(
             child: Stack(
               children: [
-                ListView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(top: 24, bottom: 36),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _HeaderSection(
-                        platform: platform,
-                        onTitleTap: _handleTitleTap,
-                        onPartSelected: _handlePartSelected,
-                        onRefreshConnection:
-                            () => unawaited(_refreshConnection()),
-                        refreshingConnection: _refreshingConnection,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _GlassPanel(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Use the Part button above to choose your light-chorus staff. The exact seat slot can still be assigned from the macOS console when needed.',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.wifi_protected_setup_rounded,
-                                  color: Colors.white70,
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Jon triggers every cue over the network during rehearsals and performances, so you can keep the app hands-free. The built-in practice controls are just there to let you preview your part on your own time.',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: Colors.white70),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Practice resources',
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 8),
-                            TextButton.icon(
-                              onPressed: _openResourceLink,
-                              icon: const Icon(Icons.open_in_new_rounded),
-                              label: const Text('simphoni.ai/flashlights'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Resource page with practice guidance, schedules, and materials for every choir member.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "Don't know your slot number? Tap simphoni.ai/flashlights, open the Documentation tab, and the first graphic shows every assignment.",
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _GlassPanel(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Before rehearsal',
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 12),
-                            const _ChecklistItem(
-                              icon: Icons.check_circle_outline_rounded,
-                              label:
-                                  'Confirm your slot matches your assigned number and color for this seating.',
-                            ),
-                            const SizedBox(height: 10),
-                            const _ChecklistItem(
-                              icon: Icons.volume_up_rounded,
-                              label:
-                                  'Set device volume to 100% and make sure mute / silent switches are off.',
-                            ),
-                            const SizedBox(height: 10),
-                            const _ChecklistItem(
-                              icon: Icons.battery_charging_full_rounded,
-                              label:
-                                  'Charge fully before call time and keep a cable or battery pack in your folder.',
-                            ),
-                            const SizedBox(height: 10),
-                            const _ChecklistItem(
-                              icon: Icons.do_not_disturb_on_rounded,
-                              label:
-                                  'Enable Do Not Disturb or Focus mode so alerts stay quiet once the run begins.',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: client.flashOn,
-                        builder: (context, flashOn, _) {
-                          return ValueListenableBuilder<bool>(
-                            valueListenable: client.audioPlaying,
-                            builder: (context, playing, _) {
-                              return Row(
-                                children: [
-                                  Expanded(
-                                    child: _StatusTile(
-                                      icon:
-                                          flashOn
-                                              ? Icons.bolt_rounded
-                                              : Icons.bolt_outlined,
-                                      title: 'Flashlight',
-                                      subtitle:
-                                          flashOn
-                                              ? 'Torch active'
-                                              : 'Awaiting cue',
-                                      active: flashOn,
-                                      activeColor: const Color(0xFFFFD166),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: _StatusTile(
-                                      icon:
-                                          playing
-                                              ? Icons.music_note_rounded
-                                              : Icons.music_off_rounded,
-                                      title: 'Electronics',
-                                      subtitle:
-                                          playing
-                                              ? 'Clip playing'
-                                              : 'Standing by',
-                                      active: playing,
-                                      activeColor: const Color(0xFF06D6A0),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _GlassPanel(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.router_rounded,
-                                  color: Colors.white70,
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Jon is providing the offline router, which has been modded for this project. The full-stack is designed for this piece to minimize audience-facing risks.',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: Colors.white70),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'We have several rehearsals to shake out bugs, which is a rare luxury for tech-forward premieres these days; your patience with the process is greatly appreciated!',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "Thank you for being part of this beta run. Please reach out to Jon with any concerns, tech questions, or score corrections so we can adjust quickly. It's a real treat to explore this project with you.",
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ValueListenableBuilder<int>(
-                        valueListenable: client.myIndex,
-                        builder: (context, myIndex, _) {
-                          if (myIndex != 5) {
-                            return const SizedBox.shrink();
-                          }
-                          return Column(
-                            children: [
-                              _GlassPanel(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Tap Trigger',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: FilledButton(
-                                        onPressed: () {
-                                          flosc.OscListener.instance.sendCustom(
-                                            '/tap',
-                                            [],
-                                          );
-                                        },
-                                        style: FilledButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 16,
-                                          ),
-                                          textStyle: const TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.w700,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compact = constraints.maxHeight < 760;
+                      final gap = compact ? 10.0 : 12.0;
+                      final statusHeight = compact ? 108.0 : 124.0;
+                      final sliderHeight = compact ? 108.0 : 124.0;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _HeaderSection(
+                            platform: platform,
+                            compact: compact,
+                            onTitleTap: _handleTitleTap,
+                            onPartSelected: _handlePartSelected,
+                            onRefreshConnection:
+                                () => unawaited(_refreshConnection()),
+                            refreshingConnection: _refreshingConnection,
+                          ),
+                          SizedBox(height: gap),
+                          SizedBox(
+                            height: statusHeight,
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: client.flashOn,
+                              builder: (context, flashOn, _) {
+                                return ValueListenableBuilder<bool>(
+                                  valueListenable: client.audioPlaying,
+                                  builder: (context, playing, _) {
+                                    return Row(
+                                      children: [
+                                        Expanded(
+                                          child: _StatusTile(
+                                            icon:
+                                                flashOn
+                                                    ? Icons.bolt_rounded
+                                                    : Icons.bolt_outlined,
+                                            title: 'Flashlight',
+                                            subtitle:
+                                                flashOn
+                                                    ? 'Torch active'
+                                                    : 'Awaiting cue',
+                                            active: flashOn,
+                                            activeColor: const Color(
+                                              0xFFFFD166,
+                                            ),
+                                            compact: compact,
                                           ),
                                         ),
-                                        child: const Text('TAP'),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _StatusTile(
+                                            icon:
+                                                playing
+                                                    ? Icons.music_note_rounded
+                                                    : Icons.music_off_rounded,
+                                            title: 'Electronics',
+                                            subtitle:
+                                                playing
+                                                    ? 'Clip playing'
+                                                    : 'Standing by',
+                                            active: playing,
+                                            activeColor: const Color(
+                                              0xFF06D6A0,
+                                            ),
+                                            compact: compact,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: gap),
+                          SizedBox(
+                            height: sliderHeight,
+                            child: ValueListenableBuilder<double>(
+                              valueListenable: client.brightness,
+                              builder: (context, brightness, _) {
+                                final slotColor =
+                                    kSlotOutlineColors[client.myIndex.value] ??
+                                    Colors.white70;
+                                return _GlassPanel(
+                                  padding: EdgeInsets.fromLTRB(
+                                    compact ? 14 : 20,
+                                    compact ? 10 : 18,
+                                    compact ? 14 : 20,
+                                    compact ? 10 : 18,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Torch Level',
+                                            style: (compact
+                                                    ? Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall
+                                                    : Theme.of(context)
+                                                        .textTheme
+                                                        .titleMedium)
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            '${(brightness * 100).round()}% torch · screen 100%',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: Colors.white70,
+                                                ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ValueListenableBuilder<double>(
-                        valueListenable: client.brightness,
-                        builder: (context, brightness, _) {
-                          final slotColor =
-                              kSlotOutlineColors[client.myIndex.value] ??
-                              Colors.white70;
-                          return _GlassPanel(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Torch Brightness',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(height: 12),
-                                SliderTheme(
-                                  data: SliderTheme.of(context).copyWith(
-                                    activeTrackColor: slotColor,
-                                    thumbColor: slotColor,
-                                    overlayColor: slotColor.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    inactiveTrackColor: Colors.white24,
+                                      Expanded(
+                                        child: Center(
+                                          child: SliderTheme(
+                                            data: SliderTheme.of(
+                                              context,
+                                            ).copyWith(
+                                              activeTrackColor: slotColor,
+                                              thumbColor: slotColor,
+                                              overlayColor:
+                                                  slotColor.withValues(
+                                                    alpha: 0.12,
+                                                  ),
+                                              inactiveTrackColor:
+                                                  Colors.white24,
+                                            ),
+                                            child: Slider(
+                                              value: brightness.clamp(0.0, 1.0),
+                                              min: 0.0,
+                                              max: 1.0,
+                                              onChanged: (value) {
+                                                client.brightness.value = value;
+                                              },
+                                              onChangeEnd:
+                                                  (value) => unawaited(
+                                                    _setBrightness(value),
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: Slider(
-                                    value: brightness.clamp(0.0, 1.0),
-                                    min: 0.0,
-                                    max: 1.0,
-                                    onChanged: (value) {
-                                      client.brightness.value = value;
-                                    },
-                                    onChangeEnd:
-                                        (value) =>
-                                            unawaited(_setBrightness(value)),
-                                  ),
-                                ),
-                                Text(
-                                  '${(brightness * 100).round()}% intensity',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: Colors.white70),
-                                ),
-                              ],
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    const PracticeEventStrip(),
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _GlassPanel(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.music_note_outlined,
-                                  color: Colors.white70,
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'The in-app practice strip now mirrors the reduced tour-cut electronics design. Preview playback uses your currently selected staff routing only.',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: Colors.white70),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Each trigger point starts at its beat-mapped location in the full electronics export, then plays through a 2-beat tail past the next trigger.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 8,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: _openGithubRepo,
-                                  icon: const Icon(Icons.code_rounded),
-                                  label: const Text('Request GitHub access'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 10,
-                                    ),
-                                  ),
-                                ),
-                                TextButton.icon(
-                                  onPressed: _openSupportEmail,
-                                  icon: const Icon(Icons.mail_outline_rounded),
-                                  label: const Text('Email Jon'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 10,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Tap GitHub to request repo access or email Jon directly with questions, corrections, or ideas. Collaboration is always welcome.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 36),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: const _FooterNote(),
-                    ),
-                  ],
+                          ),
+                          SizedBox(height: gap),
+                          Expanded(
+                            child: PracticeEventStrip(compact: compact),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 if (_showDebugOverlay)
                   Positioned.fill(
@@ -1219,17 +965,17 @@ class _BootstrapState extends State<Bootstrap> with WidgetsBindingObserver {
 }
 
 class PracticeEventStrip extends StatefulWidget {
-  const PracticeEventStrip({super.key});
+  const PracticeEventStrip({super.key, required this.compact});
+
+  final bool compact;
 
   @override
   State<PracticeEventStrip> createState() => _PracticeEventStripState();
 }
 
 class _PracticeEventStripState extends State<PracticeEventStrip> {
-  static const double _kItemWidth = 124.0;
-  static const double _kCurrentWidth = 252.0;
+  static const double _kItemWidth = 92.0;
   static const double _kSpacing = 12.0;
-  static const double _kListHeight = 360.0;
 
   final ScrollController _controller = ScrollController();
 
@@ -1255,7 +1001,7 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
 
     final beforeWidth = i * (_kItemWidth + _kSpacing);
     final viewport = _controller.position.viewportDimension;
-    final padding = math.max(0.0, (viewport - _kCurrentWidth) / 2);
+    final padding = math.max(0.0, (viewport - _kItemWidth) / 2);
     final target = (beforeWidth - padding).clamp(
       0.0,
       _controller.position.maxScrollExtent,
@@ -1326,10 +1072,6 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
           valueListenable: client.practiceEventIndex,
           builder: (context, index, _) {
             final clampedIndex = index.clamp(0, events.length - 1);
-            final mediaHeight = MediaQuery.of(context).size.height;
-            final minListHeight = _TriggerPointCard._currentHeight + 32;
-            final targetListHeight = math.min(_kListHeight, mediaHeight * 0.48);
-            final listHeight = math.max(minListHeight, targetListHeight);
             final slotForPreview = client.myIndex.value;
             final selectedPart = client.partForSlot(slotForPreview);
             final partAccent =
@@ -1343,156 +1085,144 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
               currentEvent,
               slotForPreview,
             );
-            const horizontalInset = 20.0;
+            final detailSummary =
+                currentLightingAssignment?.summary ??
+                currentEvent.lighting?.summary ??
+                (currentAssignment == null
+                    ? 'No cue assigned for this slot.'
+                    : currentAssignment.sample.split('/').last);
+            final compact = widget.compact;
+
             return _GlassPanel(
-              padding: const EdgeInsets.fromLTRB(0, 20, 0, 24),
+              padding: EdgeInsets.fromLTRB(
+                compact ? 16 : 18,
+                compact ? 14 : 18,
+                compact ? 16 : 18,
+                compact ? 14 : 18,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalInset),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Trigger Point Practice',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '12-point electronics + torch map · local cue preview',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalInset,
-                      8,
-                      horizontalInset,
-                      0,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.info_outline_rounded,
-                          size: 18,
+                  Row(
+                    children: [
+                      Text(
+                        'Trigger Practice',
+                        style: (compact
+                                ? Theme.of(context).textTheme.titleSmall
+                                : Theme.of(context).textTheme.titleMedium)
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '8 triggers',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white70,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Preview uses your current part selection only. It plays the routed electronics clip and runs the matching staff-specific torch cue on this device.',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: compact ? 6 : 8),
+                  Text(
+                    'TP ${currentEvent.id} · M${currentEvent.displayMeasureText} · ${_normalisedBeat(currentEvent.position ?? '')}',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 8 : 10),
+                  Text(
+                    detailSummary,
+                    maxLines: compact ? 2 : 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white70,
+                      height: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 8 : 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _EventDetailChip(
+                        label:
+                            '${selectedPart?.label ?? 'Unassigned'} · Slot $slotForPreview',
+                      ),
+                      _EventDetailChip(label: _routeLabel(currentAssignment)),
+                      _EventDetailChip(
+                        label: 'Clip ${_durationLabel(currentAssignment?.durationMs)}',
+                      ),
+                      _EventDetailChip(
+                        label:
+                            currentLightingAssignment == null
+                                ? 'No torch cue'
+                                : 'Torch ${_lightLabel(currentLightingAssignment.peakLevel)}',
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              clampedIndex > 0
+                                  ? () => client.movePracticeEvent(-1)
+                                  : null,
+                          icon: const Icon(Icons.chevron_left_rounded),
+                          label: const Text('Prev'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          onPressed:
+                              () => unawaited(
+                                _handlePlayRequest(events, clampedIndex),
+                              ),
+                          icon: const Icon(Icons.play_arrow_rounded),
+                          label: Text(
+                            currentAssignment != null ||
+                                    currentLightingAssignment != null
+                                ? 'Play Cue'
+                                : 'Advance',
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              clampedIndex < events.length - 1
+                                  ? () => client.movePracticeEvent(1)
+                                  : null,
+                          icon: const Icon(Icons.chevron_right_rounded),
+                          label: const Text('Next'),
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalInset,
-                      12,
-                      horizontalInset,
-                      0,
+                  SizedBox(height: compact ? 10 : 12),
+                  SizedBox(
+                    height: compact ? 58 : 64,
+                    child: ListView.separated(
+                      controller: _controller,
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: events.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: _kSpacing),
+                      itemBuilder: (context, i) {
+                        final event = events[i];
+                        final isCurrent = i == clampedIndex;
+                        return _PracticeTriggerChip(
+                          event: event,
+                          isCurrent: isCurrent,
+                          accent: partAccent,
+                          onTap: () => client.setPracticeEventIndex(i),
+                        );
+                      },
                     ),
-                    child: _ElectronicsInfoSection(
-                      part: selectedPart,
-                      slot: slotForPreview,
-                      assignment: currentAssignment,
-                      accent: partAccent,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalInset,
-                      12,
-                      horizontalInset,
-                      0,
-                    ),
-                    child: _LightingInfoSection(
-                      event: currentEvent,
-                      part: selectedPart,
-                      assignment: currentLightingAssignment,
-                      accent: partAccent,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final contentWidth = math.max(
-                        0.0,
-                        constraints.maxWidth - horizontalInset * 2,
-                      );
-                      final horizontalPadding = math.max(
-                        0.0,
-                        (contentWidth - _kCurrentWidth) / 2,
-                      );
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: horizontalInset,
-                            ),
-                            child: SizedBox(
-                              height: listHeight,
-                              child: ListView.separated(
-                                controller: _controller,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: horizontalPadding,
-                                ),
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: events.length,
-                                clipBehavior: Clip.none,
-                                separatorBuilder:
-                                    (_, _) => const SizedBox(width: _kSpacing),
-                                itemBuilder: (context, i) {
-                                  final event = events[i];
-                                  final isCurrent = i == clampedIndex;
-                                  final slot = slotForPreview;
-                                  final assignment = client.electronicsForSlot(
-                                    event,
-                                    slot,
-                                  );
-                                  final lightingAssignment = client
-                                      .lightingForSlot(event, slot);
-                                  return SizedBox(
-                                    width:
-                                        isCurrent
-                                            ? _kCurrentWidth
-                                            : _kItemWidth,
-                                    child: _TriggerPointCard(
-                                      event: event,
-                                      isCurrent: isCurrent,
-                                      assignment: assignment,
-                                      lightingAssignment: lightingAssignment,
-                                      part: selectedPart,
-                                      slot: slot,
-                                      accent: partAccent,
-                                      onTap:
-                                          () => client.setPracticeEventIndex(i),
-                                      onPlay:
-                                          () => unawaited(
-                                            _handlePlayRequest(events, i),
-                                          ),
-                                      onPrev:
-                                          () => client.movePracticeEvent(-1),
-                                      onNext: () => client.movePracticeEvent(1),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
                   ),
                 ],
               ),
@@ -1504,437 +1234,89 @@ class _PracticeEventStripState extends State<PracticeEventStrip> {
   }
 }
 
-class _TriggerPointCard extends StatelessWidget {
-  const _TriggerPointCard({
+String _routeLabel(ElectronicsAssignment? assignment) {
+  switch (assignment?.channelMode) {
+    case 'left':
+      return 'Left channel';
+    case 'right':
+      return 'Right channel';
+    case 'mono_sum':
+      return 'Mono sum';
+    default:
+      return 'No route';
+  }
+}
+
+String _durationLabel(double? durationMs) {
+  if (durationMs == null) {
+    return '—';
+  }
+  return '${(durationMs / 1000).toStringAsFixed(1)}s';
+}
+
+String _lightLabel(double? peakLevel) {
+  if (peakLevel == null) {
+    return '—';
+  }
+  return '${(peakLevel * 100).round()}%';
+}
+
+class _PracticeTriggerChip extends StatelessWidget {
+  const _PracticeTriggerChip({
     required this.event,
     required this.isCurrent,
-    required this.assignment,
-    required this.lightingAssignment,
-    required this.slot,
     required this.accent,
-    this.part,
     required this.onTap,
-    required this.onPlay,
-    required this.onPrev,
-    required this.onNext,
   });
 
   final EventRecipe event;
   final bool isCurrent;
-  final ElectronicsAssignment? assignment;
-  final LightingAssignment? lightingAssignment;
-  final LightChorusPart? part;
-  final int slot;
   final Color accent;
   final VoidCallback onTap;
-  final VoidCallback onPlay;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
-
-  static const double _previewWidth = 124.0;
-  static const double _currentWidth = 252.0;
-  static const double _previewHeight = 250.0;
-  static const double _currentHeight = 420.0;
-
-  static String routeLabel(ElectronicsAssignment? assignment) {
-    switch (assignment?.channelMode) {
-      case 'left':
-        return 'Left channel';
-      case 'right':
-        return 'Right channel';
-      case 'mono_sum':
-        return 'Mono sum';
-      default:
-        return 'No route';
-    }
-  }
-
-  static String durationLabel(double? durationMs) {
-    if (durationMs == null) {
-      return '—';
-    }
-    return '${(durationMs / 1000).toStringAsFixed(1)}s';
-  }
-
-  static String lightLabel(double? peakLevel) {
-    if (peakLevel == null) {
-      return '—';
-    }
-    return '${(peakLevel * 100).round()}%';
-  }
 
   @override
   Widget build(BuildContext context) {
-    final measureText = 'M${event.displayMeasureText}';
-    final beatText = _normalisedBeat(event.position ?? '');
-    final clipLabel =
-        assignment == null ? 'No clip' : assignment!.sample.split('/').last;
-    final routeLabelText = routeLabel(assignment);
-    final durationLabelText = durationLabel(assignment?.durationMs);
-    final fadeLabelText = durationLabel(assignment?.fadeOutMs);
-    final lightingPeakText = lightLabel(lightingAssignment?.peakLevel);
-    final lightingDurationText = durationLabel(
-      lightingAssignment?.durationMs ?? event.lighting?.durationMs,
-    );
-    final lightingSummary =
-        lightingAssignment?.summary ??
-        event.lighting?.summary ??
-        'No torch cue';
-
-    final textTheme = Theme.of(context).textTheme;
-    final hasClip = assignment != null;
-    final hasLighting = lightingAssignment != null;
-    final hasAnyCue = hasClip || hasLighting;
-
-    final width = isCurrent ? _currentWidth : _previewWidth;
-    final targetHeight = isCurrent ? _currentHeight : _previewHeight;
-    final gradientColors =
-        isCurrent
-            ? [
-              Colors.white.withValues(alpha: 0.22),
-              Colors.white.withValues(alpha: 0.06),
-            ]
-            : [
-              Colors.white.withValues(alpha: 0.10),
-              Colors.white.withValues(alpha: 0.02),
-            ];
-
-    Widget buildPlayButton() {
-      if (isCurrent) {
-        return SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onPlay,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(hasAnyCue ? 'Play cue' : 'Advance'),
-            style: FilledButton.styleFrom(
-              backgroundColor:
-                  hasAnyCue
-                      ? Colors.white.withValues(alpha: 0.18)
-                      : Colors.white.withValues(alpha: 0.08),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        );
-      }
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton.tonalIcon(
-          onPressed: onPlay,
-          icon: const Icon(Icons.play_arrow_rounded),
-          label: Text(hasAnyCue ? 'Play' : 'Next'),
-          style: FilledButton.styleFrom(
-            backgroundColor:
-                hasAnyCue
-                    ? Colors.white.withValues(alpha: 0.16)
-                    : Colors.white.withValues(alpha: 0.06),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-      width: width,
-      constraints: BoxConstraints(minHeight: targetHeight),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 92,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
           color:
               isCurrent
-                  ? accent.withValues(alpha: 0.65)
-                  : Colors.white.withValues(alpha: 0.14),
-          width: isCurrent ? 1.3 : 1.0,
+                  ? accent.withValues(alpha: 0.22)
+                  : Colors.white.withValues(alpha: 0.06),
+          border: Border.all(
+            color:
+                isCurrent
+                    ? accent.withValues(alpha: 0.7)
+                    : Colors.white.withValues(alpha: 0.16),
+          ),
         ),
-        boxShadow:
-            isCurrent
-                ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 22,
-                    offset: const Offset(0, 12),
-                  ),
-                ]
-                : null,
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Text(
-                  'TP ${event.id}',
-                  style: textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                if (isCurrent) ...[
-                  IconButton.filledTonal(
-                    onPressed: onPrev,
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filledTonal(
-                    onPressed: onNext,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 8),
             Text(
-              measureText,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              beatText,
-              style: textTheme.headlineSmall?.copyWith(
+              'TP ${event.id}',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
-            if (isCurrent) ...[
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: [
-                  _EventDetailChip(label: routeLabelText),
-                  _EventDetailChip(label: 'Clip $durationLabelText'),
-                  _EventDetailChip(label: 'Fade $fadeLabelText'),
-                  _EventDetailChip(label: 'Torch $lightingPeakText'),
-                  _EventDetailChip(label: 'Light $lightingDurationText'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              _ElectronicsInfoSection(
-                part: part,
-                slot: slot,
-                assignment: assignment,
-                accent: accent,
-              ),
-              const SizedBox(height: 8),
-              _LightingInfoSection(
-                event: event,
-                part: part,
-                assignment: lightingAssignment,
-                accent: accent,
-              ),
-              const SizedBox(height: 8),
-            ] else if (!hasClip) ...[
-              Text(
-                hasLighting
-                    ? 'Torch cue only for this slot'
-                    : 'No cue for this slot',
-                style: textTheme.labelSmall?.copyWith(color: Colors.white38),
-              ),
-              const SizedBox(height: 8),
-            ] else ...[
-              Text(
-                hasLighting
-                    ? '$routeLabelText · torch ${lightingAssignment == null ? '—' : lightingPeakText}'
-                    : routeLabelText,
-                style: textTheme.labelSmall?.copyWith(color: Colors.white70),
-              ),
-              const SizedBox(height: 8),
-            ],
+            const SizedBox(height: 2),
             Text(
-              isCurrent ? lightingSummary : clipLabel,
-              maxLines: isCurrent ? 3 : 1,
+              'M${event.displayMeasureText}',
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.white70,
-                height: 1.3,
               ),
             ),
-            const Spacer(),
-            buildPlayButton(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ElectronicsInfoSection extends StatelessWidget {
-  const _ElectronicsInfoSection({
-    required this.part,
-    required this.slot,
-    required this.assignment,
-    required this.accent,
-  });
-
-  final LightChorusPart? part;
-  final int slot;
-  final ElectronicsAssignment? assignment;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final partLabel = part?.label ?? 'Unassigned';
-    final clipLabel =
-        assignment == null
-            ? 'No electronics clip'
-            : assignment!.sample.split('/').last;
-    final routeLabel = _TriggerPointCard.routeLabel(assignment);
-    final swatchColor = accent;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: swatchColor,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$partLabel · Slot $slot',
-                  style: textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 4,
-                  children: [
-                    Text(routeLabel, style: textTheme.bodySmall),
-                    Text(clipLabel, style: textTheme.bodySmall),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LightingInfoSection extends StatelessWidget {
-  const _LightingInfoSection({
-    required this.event,
-    required this.part,
-    required this.assignment,
-    required this.accent,
-  });
-
-  final EventRecipe event;
-  final LightChorusPart? part;
-  final LightingAssignment? assignment;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final partLabel = part?.label ?? 'Unassigned';
-    final summary =
-        assignment?.summary ?? event.lighting?.summary ?? 'No torch cue';
-    final dynamics = event.lighting?.scoreDynamics ?? '—';
-    final peak =
-        assignment == null
-            ? '—'
-            : '${(assignment!.peakLevel * 100).round()}% max brightness';
-    final duration =
-        assignment == null
-            ? '—'
-            : '${(assignment!.durationMs / 1000).toStringAsFixed(1)}s torch arc';
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: accent.withValues(alpha: 0.9),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.35),
-                  blurRadius: 14,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$partLabel torch choreography',
-                  style: textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  summary,
-                  style: textTheme.bodySmall?.copyWith(height: 1.35),
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 4,
-                  children: [
-                    Text(dynamics, style: textTheme.bodySmall),
-                    Text(peak, style: textTheme.bodySmall),
-                    Text(duration, style: textTheme.bodySmall),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -2040,7 +1422,7 @@ class DebugOverlay extends StatelessWidget {
                 valueListenable: client.brightness,
                 builder:
                     (context, brightness, _) => Text(
-                      'Brightness: ${brightness.toStringAsFixed(2)}',
+                      'Torch level: ${brightness.toStringAsFixed(2)}',
                       style: const TextStyle(color: Colors.white70),
                     ),
               ),

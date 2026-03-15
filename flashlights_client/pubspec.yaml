@@ -17,12 +17,9 @@ dependencies:
   screen_brightness: ^2.1.5 # Control screen brightness for strobe dimming
   audio_session: ^0.1.25 # Ensure playback works in silent mode on iOS/Android
   # Native audio playback is handled through platform method channels.
-  permission_handler: ^11.4.0  # camera / mic permissions (iOS / Android only)
+  permission_handler: ^11.4.0  # camera permission (iOS / Android only)
   wakelock_plus: ^1.2.5     # Keep the screen awake during performances
   shared_preferences: ^2.5.3  # Persist selected slot between launches
-  webview_flutter: ^4.7.0  # Embed OSMD via WebView
-  xml: ^6.5.0  # Parse and trim MusicXML assets
-  url_launcher: ^6.3.1  # Open rehearsal resources in the system browser
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -34,9 +31,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/event_recipes.json
-    - assets/FlashlightsInTheDark_v32_TourCut.musicxml
-    - assets/osmd_view.html
-    - assets/opensheetmusicdisplay.min.js
     - available-sounds/sound-events-LEFT/
     - available-sounds/sound-events-CENTER/
     - available-sounds/sound-events-RIGHT/

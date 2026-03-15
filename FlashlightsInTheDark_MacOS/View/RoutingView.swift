@@ -153,6 +153,7 @@ struct RoutingView: View {
             let haystack = [
                 "#\(device.id + 1)",
                 "slot \(device.listeningSlot)",
+                StageConsoleLayout.seat(for: device.listeningSlot)?.routingLabel ?? "",
                 device.name,
                 device.ip,
                 device.udid
@@ -190,13 +191,26 @@ private struct DeviceCard: View {
     let slotBinding: Binding<Int>
     let onPing: () -> Void
 
+    private var stageSeat: LightStaffSeat? {
+        StageConsoleLayout.seat(for: device.listeningSlot)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Slot #\(device.listeningSlot)")
-                        .font(.title3)
-                        .bold()
+                    if let stageSeat {
+                        Text(stageSeat.displayLabel)
+                            .font(.title3)
+                            .bold()
+                        Text("Legacy Slot #\(device.listeningSlot)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Slot #\(device.listeningSlot)")
+                            .font(.title3)
+                            .bold()
+                    }
                     if !device.name.isEmpty {
                         Text(device.name)
                             .font(.headline)
@@ -245,8 +259,10 @@ private struct DeviceCard: View {
             Divider()
 
             Picker("Listening Slot", selection: slotBinding) {
-                ForEach(1...state.devices.count, id: \.self) { slot in
-                    Text("\(slot)").tag(slot)
+                ForEach(StageConsoleLayout.routeableSeats) { seat in
+                    if let legacySlot = seat.legacySlot {
+                        Text(seat.routingLabel).tag(legacySlot)
+                    }
                 }
             }
             .pickerStyle(.menu)

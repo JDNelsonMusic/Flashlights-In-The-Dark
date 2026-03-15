@@ -162,7 +162,7 @@ class ClientState {
   /// Whether the flashlight is currently on.
   final ValueNotifier<bool> flashOn;
 
-  /// Current screen brightness (0–1).
+  /// Current torch brightness (0–1).
   final ValueNotifier<double> brightness;
 
   /// Whether audio is currently playing.

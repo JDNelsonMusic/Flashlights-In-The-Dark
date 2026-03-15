@@ -1,519 +1,121 @@
-import SwiftUI
 import AppKit
+import SwiftUI
+
+private struct StaffModuleDescriptor: Identifiable {
+    let staff: LightStaff
+
+    var id: String { staff.rawValue }
+    var title: String { staff.label }
+    var accent: Color { staff.accentColor }
+    var seats: [LightStaffSeat] { staff.seats }
+    var legacySlots: [Int] { staff.legacySlots }
+}
 
 struct ComposerConsoleView: View {
     @EnvironmentObject var state: ConsoleState
-    
-    private struct StaffModule: Identifiable {
-        let id: String
-        let title: String
-        let accent: Color
-        let slots: [Int]
-        
-        var slotSummary: String {
-            slots.map(String.init).joined(separator: " · ")
-        }
-    }
-    
-    private let staffModules: [StaffModule] = [
-        StaffModule(id: "sop-l1", title: "Sop-L1", accent: .slotGreen, slots: [16, 29, 44]),
-        StaffModule(id: "sop-l2", title: "Sop-L2", accent: .hotMagenta, slots: [12, 24, 25, 23, 38, 51]),
-        StaffModule(id: "ten-l", title: "Ten-L", accent: .slotYellow, slots: [7, 19, 34]),
-        StaffModule(id: "bass-l", title: "Bass-L", accent: .lightRose, slots: [9, 20, 21, 3, 4, 18]),
-        StaffModule(id: "alto-l2", title: "Alto-L2", accent: .brightRed, slots: [1, 14, 15, 40, 53, 54]),
-        StaffModule(id: "alto-l1", title: "Alto-L1", accent: .royalBlue, slots: [27, 41, 42])
-    ]
 
-    /// Returns true if any device's torch is currently on
+    private static let keyToSlot = KeyboardKeyToSlot
+
+    @State private var showRouting = false
+    @State private var strobeOn = false
+    @State private var sidebarPinned = true
+
+    private var typingMapper = TypingMidiMapper(keyToSlot: Self.keyToSlot)
+
+    private var stageModules: [StaffModuleDescriptor] {
+        LightStaff.stageOrder.map { StaffModuleDescriptor(staff: $0) }
+    }
+
     private var anyTorchOn: Bool {
         state.devices.contains { $0.torchOn }
     }
+
     private var preflightLabel: String {
         "\(state.connectedPerformanceDeviceCount)/\(state.expectedDeviceCount) connected"
     }
-    @State private var showRouting: Bool = false
 
-    // Strobe effect state
-    @State private var strobeOn: Bool = false
-    private let columns = Array(repeating: GridItem(.flexible()), count: 8)
-    // Mapping from keyboard key to real slot number
-    private static let keyToSlot = KeyboardKeyToSlot
-    // Reverse lookup so each slot can display its bound key
-    private var keyLabels: [Int: String] {
-        Dictionary(uniqueKeysWithValues: Self.keyToSlot.map { ($0.value, String($0.key)) })
-    }
-    // Mapper converting typed characters to MIDI note numbers
-    private var typingMapper = TypingMidiMapper(keyToSlot: Self.keyToSlot)
-    private let slotRows: [[Int]] = [
-        Array(1...12),
-        Array(13...26),
-        Array(27...40),
-        Array(41...54)
-    ]
-
-    private let slotOutlineColors: [Int: Color] = [
-        27: .royalBlue, 41: .royalBlue, 42: .royalBlue,
-        1: .brightRed, 14: .brightRed, 15: .brightRed,
-        16: .slotGreen, 29: .slotGreen, 44: .slotGreen,
-        3: .slotPurple, 4: .slotPurple, 18: .slotPurple,
-        7: .slotYellow, 19: .slotYellow, 34: .slotYellow,
-        9: .lightRose, 20: .lightRose, 21: .lightRose,
-        23: .slotOrange, 38: .slotOrange, 51: .slotOrange,
-        12: .hotMagenta, 24: .hotMagenta, 25: .hotMagenta,
-        40: .skyBlue, 53: .skyBlue, 54: .skyBlue,
-        5: .white
-    ]
-
-    private let tripleTriggers: [Int: [Int]] = [
-        1: [27, 41, 42],
-        2: [1, 14, 15],
-        3: [16, 29, 44],
-        4: [3, 4, 18],
-        5: [7, 19, 34],
-        6: [9, 20, 21],
-        7: [23, 38, 51],
-        8: [12, 24, 25],
-        9: [40, 53, 54]
-    ]
-
-    private let tripleColors: [Int: Color] = [
-        1: .royalBlue,
-        2: .brightRed,
-        3: .slotGreen,
-        4: .slotPurple,
-        5: .slotYellow,
-        6: .lightRose,
-        7: .slotOrange,
-        8: .hotMagenta,
-        9: .skyBlue
-    ]
-
-    private let tripleLabels: [Int: String] = [
-        1: "Blue",
-        2: "Red",
-        3: "Green",
-        4: "Purple",
-        5: "Yellow",
-        6: "Pink",
-        7: "Orange",
-        8: "Magenta",
-        9: "Cyan"
-    ]
-
-    /// Human readable labels for MIDI channels
-    private static let channelLabels: [Int: String] = [
-        1: "legacy primer disabled",
-        2: "legacy primer disabled",
-        3: "legacy primer disabled",
-        4: "legacy primer disabled",
-        5: "legacy primer disabled",
-        6: "legacy primer disabled",
-        7: "legacy primer disabled",
-        8: "legacy primer disabled",
-        9: "legacy primer disabled",
-        10: "torchSignals",
-        11: "seLeft:0-127",
-        12: "seLeft:128-255",
-        13: "seCenter:0-127",
-        14: "seCenter:128-255",
-        15: "seRight:0-127",
-        16: "seRight:128-255"
-    ]
-
-    @State private var leftPanelWidth: CGFloat = 300
-    @State private var startLeftPanelWidth: CGFloat?
-    @State private var midiLogHeight: CGFloat = 100
-    @State private var startMidiLogHeight: CGFloat?
     var body: some View {
-        ZStack {
-            HStack(alignment: .top, spacing: 0) {
-                // Envelope & tone-set controls
-                VStack(alignment: .leading, spacing: 12) {
-                    Group {
-                        Stepper("Attack: \(state.attackMs) ms", value: $state.attackMs, in: 0...2000, step: 50)
-                        Stepper("Decay: \(state.decayMs) ms", value: $state.decayMs, in: 0...2000, step: 50)
-                        Stepper("Sustain: \(state.sustainPct)%", value: $state.sustainPct, in: 0...100, step: 10)
-                        Stepper("Release: \(state.releaseMs) ms", value: $state.releaseMs, in: 0...2000, step: 50)
-                    }
-                    HStack {
-                        Button("0 Envelope") { state.startEnvelopeAll() }
-                            .buttonStyle(.borderedProminent)
-                        Button("Release Envelope") { state.releaseEnvelopeAll() }
-                            .buttonStyle(.bordered)
-                    }
-                    Divider()
-                    Text("Manual Sound Banks:") .font(.headline)
-                    let toneLabels = ["B": "seL", "C": "seC", "D": "seR"]
-                    let colorGroups = [
-                        "B": "Blue, Red, Green",
-                        "C": "Purple, Yellow, Pink",
-                        "D": "Orange, Magenta, Cyan"
-                    ]
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(["B", "C", "D"], id: \.self) { set in
-                            HStack(alignment: .center, spacing: 6) {
-                                Button(action: {
-                                    if state.activeToneSets.contains(set) {
-                                        state.activeToneSets.remove(set)
-                                    } else {
-                                        state.activeToneSets.insert(set)
-                                    }
-                                }) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(state.activeToneSets.contains(set)
-                                                  ? Color.accentColor
-                                                  : Color.gray.opacity(0.3))
-                                            .frame(width: 40, height: 40)
-                                        Text(toneLabels[set]!)
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                    }
+        GeometryReader { geometry in
+            let wideLayout = geometry.size.width >= 1420
+            let sidebarWidth = min(max(geometry.size.width * 0.26, 340), 430)
+
+            ZStack {
+                Color.deepPurple.ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        headerCard
+                        summaryGrid(availableWidth: geometry.size.width)
+
+                        if wideLayout {
+                            HStack(alignment: .top, spacing: 20) {
+                                if sidebarPinned {
+                                    operatorRail
+                                        .frame(width: sidebarWidth)
+                                        .frame(maxWidth: sidebarWidth, alignment: .topLeading)
                                 }
-                                .buttonStyle(.plain)
-                                .help("Toggle manual bank \(toneLabels[set]!)")
-                                Text(colorGroups[set]!)
-                                    .font(.caption)
+
+                                mainStageColumn(availableWidth: geometry.size.width - (sidebarPinned ? sidebarWidth + 68 : 48))
+                                    .frame(maxWidth: .infinity, alignment: .topLeading)
                             }
-                        }
-                    }
-                    // Typing keyboard trigger mode selection
-                    Divider()
-                    Text("Typing Keyboard Mode:")
-                        .font(.headline)
-                    HStack(spacing: 12) {
-                        ForEach(ConsoleState.KeyboardTriggerMode.allCases, id: \.self) { mode in
-                            Button(action: { state.keyboardTriggerMode = mode }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(state.keyboardTriggerMode == mode
-                                              ? Color.accentColor
-                                              : Color.gray.opacity(0.3))
-                                        .frame(width: 40, height: 40)
-                                    Group {
-                                        if mode == .torch {
-                                            Image(systemName: "flashlight.on.fill")
-                                        } else if mode == .sound {
-                                            Image(systemName: "speaker.wave.2.fill")
-                                        } else {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "flashlight.on.fill")
-                                                Image(systemName: "speaker.wave.2.fill")
-                                            }
-                                        }
-                                    }
-                                    .foregroundColor(.white)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .help("Keyboard: \(mode.rawValue)")
-                        }
-                    }
-                    Divider()
-                    HStack(spacing: 4) {
-                        Text("MIDI Controls:")
-                        Image(systemName: "info.circle")
-                            .font(.subheadline)
-                            .foregroundColor(.accentColor)
-                            .help("Select a Pro Tools MIDI output here to receive cues from your DAW in real time. This app will respond to MIDI notes and mod-wheel (CC1) from your Pro Tools track. Likewise, choosing a Pro Tools input as MIDI Output will send triggers performed here back to your DAW as MIDI events.")
-                    }
-                    .font(.headline)
-                    Picker("MIDI Input", selection: $state.selectedMidiInput) {
-                        ForEach(state.midiInputNames, id: \.self) { name in
-                            Text(name)
-                        }
-                    }
-                    Picker("MIDI Output", selection: $state.selectedMidiOutput) {
-                        ForEach(state.midiOutputNames, id: \.self) { name in
-                            Text(name)
-                        }
-                    }
-                    Picker("Output Channel", selection: $state.outputChannel) {
-                        ForEach(1...16, id: \.self) { ch in
-                            Text("\(ch)")
-                        }
-                    }
-                    .onAppear { state.refreshMidiDevices() }
-                    Divider()
-                    Text("MIDI Log:")
-                        .font(.headline)
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 2) {
-                                ForEach(state.midiLog.indices, id: \.self) { idx in
-                                    Text(state.midiLog[idx])
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Color.clear.frame(height: 1).id("midiBottom")
-                            }
-                        }
-                        .onChange(of: state.midiLog.count) { _ in
-                            proxy.scrollTo("midiBottom", anchor: .bottom)
-                        }
-                        .onAppear {
-                            proxy.scrollTo("midiBottom", anchor: .bottom)
-                        }
-                    }
-                    .frame(height: midiLogHeight)
-                    .border(Color.gray.opacity(0.3))
-                    .overlay(
-                        GeometryReader { geo in
-                            // grab handle bottom-right
-                            Image(systemName: "arrow.up.left.and.arrow.down.right")
-                                .resizable()
-                                .frame(width: 12, height: 12)
-                                .foregroundColor(.secondary)
-                                .position(x: geo.size.width - 8, y: geo.size.height - 8)
-                                .gesture(
-                                    DragGesture(minimumDistance: 1)
-                                        .onChanged { value in
-                                            if startMidiLogHeight == nil {
-                                                startMidiLogHeight = midiLogHeight
-                                            }
-                                            let newHeight = (startMidiLogHeight ?? midiLogHeight) - value.translation.height
-                                            midiLogHeight = max(80, min(newHeight, 500))
-                                        }
-                                        .onEnded { _ in
-                                            startMidiLogHeight = nil
-                                        }
-                                )
-                        }
-                    )
-                    Spacer()
-                }
-                .frame(width: leftPanelWidth)
-                .padding()
-                // Draggable divider
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 4)
-                    .onHover { hovering in
-                        if hovering {
-                            NSCursor.resizeLeftRight.push()
                         } else {
-                            NSCursor.pop()
-                        }
-                    }
-                    .gesture(
-                        DragGesture(minimumDistance: 2)
-                            .onChanged { value in
-                                if startLeftPanelWidth == nil {
-                                    startLeftPanelWidth = leftPanelWidth
+                            VStack(spacing: 20) {
+                                mainStageColumn(availableWidth: geometry.size.width - 48)
+                                if sidebarPinned {
+                                    operatorRail
                                 }
-                                let newWidth = (startLeftPanelWidth ?? leftPanelWidth) + value.translation.width
-                                leftPanelWidth = max(150, min(newWidth, 600))
-                            }
-                            .onEnded { _ in
-                                startLeftPanelWidth = nil
-                            }
-                    )
-                // Main console content
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack(spacing: 12) {
-                        // Refresh device list and resend hello packets
-                        Button("Refresh") {
-                            state.refreshDevices()
-                            Task { await state.startNetwork() }
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.blue)
-
-                        Text(preflightLabel)
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(state.canArmStrict ? Color.green.opacity(0.2) : Color.orange.opacity(0.25))
-                            .clipShape(Capsule())
-
-                        Text("PPS \(state.packetRatePerSecond, specifier: "%.1f")")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text("Unknown \(state.unknownSenderEvents)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        Button(state.isArmed ? "DISARM" : "ARM") {
-                            if state.isArmed {
-                                state.disarmConcertMode()
-                            } else {
-                                _ = state.armConcertMode()
                             }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(state.isArmed ? .red : (state.canArmStrict ? .green : .orange))
 
-                        Button("ARM Override") {
-                            _ = state.armConcertMode(override: true)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.orange)
-                        .disabled(state.isArmed || state.canArmStrict)
-
-                        Button("PANIC") {
-                            state.panicAllStop()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-
-                        Spacer(minLength: 20)
-                        Button(anyTorchOn ? "All Off" : "All On") {
-                            state.toggleAllTorches()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(anyTorchOn ? .red : Color.indigo.opacity(0.6))
-                        .disabled(!state.isBroadcasting)
-
-                        Button(state.slowGlowRampActive ? "Stop Slow Glow" : "Slow Glow Ramp") {
-                            state.slowGlowRampActive.toggle()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.mintGlow)
-                        .disabled(!state.isBroadcasting)
-                        Button(state.glowRampActive ? "Stop Glow" : "Glow Ramp") {
-                            state.glowRampActive.toggle()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.mintGlow)
-                        .disabled(!state.isBroadcasting)
-
-                        Button(state.slowStrobeActive ? "Stop Medium" : "Medium Strobe") {
-                            state.slowStrobeActive.toggle()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.mintGlow)
-                        .disabled(!state.isBroadcasting)
-
-                        Button(state.strobeActive ? "Stop Rapid" : "Rapid Strobe") {
-                            state.strobeActive.toggle()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.mintGlow)
-                        .disabled(!state.isBroadcasting)
-                        // Play all tones
-                        Button("Play All Tones") {
-                            state.playAllTones()
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.cyan)
-                        .disabled(!state.isBroadcasting)
-
-                        Button("Refresh Connections") {
-                            state.refreshConnections()
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.teal)
-                        .disabled(!state.isBroadcasting)
-                        .help("Rebinds the UDP socket and rebroadcasts /discover.")
-
-                        Button("Export Network Log") {
-                            state.exportNetworkLog()
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.purple)
-                        .help("Save a JSON log of all network activity to Documents/FlashlightsLogs.")
-
-                        // Open routing control panel
-                        Button("Routing") {
-                            showRouting = true
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.blue)
-                        .disabled(!state.isBroadcasting)
+                        footerCard
                     }
-
-                    if let warning = state.preflightWarning {
-                        Text("⚠️ \(warning)")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                    }
-
-                    // Heading
-                    VStack(spacing: 2) {
-                        Text("Flashlights in the Dark")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Text("MIDI-to-ChorusOfSmartphones Control Interface")
-                            .font(.title3)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-                    .background(Color.black.opacity(0.2))
-
-                    staffModuleSection
-                    groupTriggerStripe
-                    Spacer(minLength: 8)
-                    // Status bar
-                    Text(state.lastLog)
-                        .font(.caption2)
-                        .foregroundStyle(Color.mintGlow)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(24)
                 }
-                .padding()
-                .background(Color.deepPurple.ignoresSafeArea())
-            }
-            
-            
-
-            // Routing sheet
-            .sheet(isPresented: $showRouting) {
-                RoutingView()
-                // size to 80% of main screen
-                    .frame(
-                        width: (NSScreen.main?.visibleFrame.width ?? 1024) * 0.8,
-                        height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
+                .sheet(isPresented: $showRouting) {
+                    RoutingView()
+                        .frame(
+                            width: (NSScreen.main?.visibleFrame.width ?? 1200) * 0.82,
+                            height: (NSScreen.main?.visibleFrame.height ?? 860) * 0.82
+                        )
+                        .environmentObject(state)
+                }
+                .overlay(
+                    FullScreenFlashView(
+                        strobeActive: state.strobeActive || state.slowStrobeActive || state.glowRampActive || state.slowGlowRampActive,
+                        strobeOn: strobeOn
                     )
                     .environmentObject(state)
-            }
-            // Overlay effects stacked above console content
-            .overlay(
-                FullScreenFlashView(strobeActive: state.strobeActive || state.slowStrobeActive || state.glowRampActive || state.slowGlowRampActive, strobeOn: strobeOn)
-                    .environmentObject(state)
-            )
-            .overlay(
-                ColorOverlayVeil()
-            )
-            .overlay(
-                KeyCaptureView(
-                    isEnabled: state.isKeyCaptureEnabled,
-                    onKeyDown: { char in
-                        Task { @MainActor in
-                            handleTypingKeyDown(char)
-                        }
-                    },
-                    onKeyUp: { char in
-                        Task { @MainActor in
-                            handleTypingKeyUp(char)
-                        }
-                    },
-                    onSpecialKeyDown: { event in
-                        Task { @MainActor in
-                            handleSpecialKeyDown(event)
-                        }
-                    }
                 )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .allowsHitTesting(false)
-            )
-            // Routing sheet
-            .sheet(isPresented: $showRouting) {
-                RoutingView()
-                // size to 80% of main screen
-                    .frame(
-                        width: (NSScreen.main?.visibleFrame.width ?? 1024) * 0.8,
-                        height: (NSScreen.main?.visibleFrame.height ?? 768) * 0.8
+                .overlay(ColorOverlayVeil())
+                .overlay(
+                    KeyCaptureView(
+                        isEnabled: state.isKeyCaptureEnabled,
+                        onKeyDown: { char in
+                            Task { @MainActor in
+                                handleTypingKeyDown(char)
+                            }
+                        },
+                        onKeyUp: { char in
+                            Task { @MainActor in
+                                handleTypingKeyUp(char)
+                            }
+                        },
+                        onSpecialKeyDown: { event in
+                            Task { @MainActor in
+                                handleSpecialKeyDown(event)
+                            }
+                        }
                     )
-                    .environmentObject(state)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
+                )
+
+                Color.purpleNavy
+                    .opacity(0.08)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
             }
-            // Always-on purple/navy veil overlay
-            Color.purpleNavy
-                // Subtler overlay to reduce intensity
-                .opacity(0.1)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-                .zIndex(1)
         }
-        // Respond to strobe state changes
         .onChange(of: state.strobeActive) { _ in
             updateStrobeAnimation()
         }
@@ -528,6 +130,289 @@ struct ComposerConsoleView: View {
         }
     }
 
+    private var headerCard: some View {
+        ConsoleSectionCard {
+            HStack(alignment: .top, spacing: 18) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Flashlights in the Dark")
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("Conductor Console")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.mintGlow)
+                    Text("Six-stage module view with left-to-right seat numbering and direct trigger control.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 12)
+
+                VStack(alignment: .trailing, spacing: 10) {
+                    HStack(spacing: 8) {
+                        StatusPill(title: state.isArmed ? "ARMED" : "SAFE", value: state.isArmed ? "Concert cues live" : "Cues blocked", tint: state.isArmed ? .red : .orange)
+                        StatusPill(title: "Preflight", value: preflightLabel, tint: state.canArmStrict ? .green : .orange)
+                    }
+
+                    HStack(spacing: 8) {
+                        Button(sidebarPinned ? "Hide Sidebar" : "Show Sidebar") {
+                            sidebarPinned.toggle()
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Routing") {
+                            showRouting = true
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.blue)
+                    }
+                }
+            }
+        }
+    }
+
+    private func summaryGrid(availableWidth: CGFloat) -> some View {
+        let minimumWidth = max(200, min(280, (availableWidth - 72) / 4))
+
+        return LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: minimumWidth, maximum: 320), spacing: 16, alignment: .top)],
+            spacing: 16
+        ) {
+            SummaryCard(
+                title: "Connected Devices",
+                value: "\(state.connectedPerformanceDeviceCount)",
+                subtitle: "Expected \(state.expectedDeviceCount)",
+                tint: state.canArmStrict ? .green : .orange,
+                symbol: "dot.radiowaves.left.and.right"
+            )
+            SummaryCard(
+                title: "Current Trigger",
+                value: currentTriggerSummary,
+                subtitle: currentMeasureSummary,
+                tint: .mintGlow,
+                symbol: "sparkles.rectangle.stack"
+            )
+            SummaryCard(
+                title: "Torch State",
+                value: anyTorchOn ? "Active" : "Dark",
+                subtitle: anyTorchOn ? "At least one staff lit" : "All torches off",
+                tint: anyTorchOn ? .mintGlow : .secondary,
+                symbol: anyTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"
+            )
+            SummaryCard(
+                title: "Network Health",
+                value: "\(state.packetRatePerSecond, specifier: "%.1f") PPS",
+                subtitle: "Unknown \(state.unknownSenderEvents) · Failures \(state.totalSendFailures)",
+                tint: .blue,
+                symbol: "waveform.path.ecg"
+            )
+        }
+    }
+
+    private func mainStageColumn(availableWidth: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            ConsoleSectionCard {
+                VStack(alignment: .leading, spacing: 16) {
+                    sectionHeader(
+                        title: "Stage Modules",
+                        subtitle: "Six visible seats per staff. Large numbers show conductor-facing seat positions; small labels preserve legacy route IDs."
+                    )
+
+                    LazyVGrid(columns: stageColumns(for: availableWidth), spacing: 16) {
+                        ForEach(stageModules) { module in
+                            let devices = routedDevices(for: module)
+                            StaffModuleCard(
+                                module: module,
+                                deviceBySlot: Dictionary(uniqueKeysWithValues: devices.map { ($0.listeningSlot, $0) }),
+                                connectedCount: connectedDeviceCount(for: module),
+                                hasTorch: devices.contains(where: \.torchOn),
+                                hasAudio: devices.contains(where: \.audioPlaying),
+                                isTriggered: module.legacySlots.contains(where: { state.triggeredSlots.contains($0) || state.glowingSlots.contains($0) }),
+                                hasTargets: !actionDevices(for: module).isEmpty,
+                                onTorch: { toggleModuleTorch(module) },
+                                onSound: { triggerModuleSound(module) },
+                                onBoth: { triggerModule(module) },
+                                onPing: { pingModule(module) }
+                            )
+                            .environmentObject(state)
+                        }
+                    }
+                }
+            }
+
+            ConsoleSectionCard {
+                VStack(alignment: .leading, spacing: 16) {
+                    sectionHeader(
+                        title: "Quick Fire",
+                        subtitle: "Trigger an entire staff using the current keyboard mode."
+                    )
+
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 12, alignment: .top)],
+                        spacing: 12
+                    ) {
+                        ForEach(stageModules) { module in
+                            Button {
+                                triggerModule(module)
+                            } label: {
+                                HStack {
+                                    Circle()
+                                        .fill(module.accent)
+                                        .frame(width: 10, height: 10)
+                                    Text(module.title)
+                                        .font(.headline)
+                                    Spacer()
+                                    Text("\(connectedDeviceCount(for: module))/\(module.staff.routedSeatCount)")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 12)
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.plain)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(module.accent.opacity(0.14))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                            .stroke(module.accent.opacity(0.42), lineWidth: 1)
+                                    )
+                            )
+                            .disabled(actionDevices(for: module).isEmpty)
+                        }
+                    }
+                }
+            }
+
+            EventTriggerStrip()
+                .environmentObject(state)
+        }
+    }
+
+    private var operatorRail: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            TransportPanel(showRouting: $showRouting)
+                .environmentObject(state)
+
+            EnsembleFxPanel(anyTorchOn: anyTorchOn)
+                .environmentObject(state)
+
+            ManualCuePanel()
+                .environmentObject(state)
+
+            MidiDiagnosticsPanel()
+                .environmentObject(state)
+        }
+    }
+
+    private var footerCard: some View {
+        ConsoleSectionCard {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "terminal")
+                    .foregroundStyle(.mintGlow)
+                Text(state.lastLog)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.mintGlow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var currentTriggerSummary: String {
+        guard state.eventRecipes.indices.contains(state.currentEventIndex) else {
+            return "No trigger"
+        }
+        let event = state.eventRecipes[state.currentEventIndex]
+        return "TP\(event.id)"
+    }
+
+    private var currentMeasureSummary: String {
+        guard state.eventRecipes.indices.contains(state.currentEventIndex) else {
+            return "Trigger-point bundle missing"
+        }
+        let event = state.eventRecipes[state.currentEventIndex]
+        return event.measureText + " · " + event.positionLabel
+    }
+
+    private func stageColumns(for availableWidth: CGFloat) -> [GridItem] {
+        let minimumWidth: CGFloat
+        if availableWidth >= 1600 {
+            minimumWidth = 250
+        } else if availableWidth >= 1200 {
+            minimumWidth = 290
+        } else {
+            minimumWidth = 340
+        }
+
+        return [GridItem(.adaptive(minimum: minimumWidth, maximum: 420), spacing: 16, alignment: .top)]
+    }
+
+    private func routedDevices(for module: StaffModuleDescriptor) -> [ChoirDevice] {
+        state.devices
+            .filter { !$0.isPlaceholder && module.legacySlots.contains($0.listeningSlot) }
+            .sorted { lhs, rhs in
+                let lhsIndex = module.legacySlots.firstIndex(of: lhs.listeningSlot) ?? .max
+                let rhsIndex = module.legacySlots.firstIndex(of: rhs.listeningSlot) ?? .max
+                return lhsIndex < rhsIndex
+            }
+    }
+
+    private func actionDevices(for module: StaffModuleDescriptor) -> [ChoirDevice] {
+        routedDevices(for: module).filter { device in
+            let status = state.statuses[device.id] ?? .clean
+            return status == .live || !device.ip.isEmpty
+        }
+    }
+
+    private func connectedDeviceCount(for module: StaffModuleDescriptor) -> Int {
+        routedDevices(for: module).reduce(into: 0) { count, device in
+            if (state.statuses[device.id] ?? .clean) == .live {
+                count += 1
+            }
+        }
+    }
+
+    private func pingModule(_ module: StaffModuleDescriptor) {
+        for slot in module.legacySlots {
+            state.pingSlot(slot)
+        }
+    }
+
+    private func toggleModuleTorch(_ module: StaffModuleDescriptor) {
+        for device in actionDevices(for: module) {
+            _ = state.toggleTorch(id: device.id, allowWhenDisarmed: true)
+        }
+    }
+
+    private func triggerModuleSound(_ module: StaffModuleDescriptor) {
+        for device in actionDevices(for: module) {
+            state.triggerSound(device: device, allowWhenDisarmed: true)
+        }
+    }
+
+    private func triggerModule(_ module: StaffModuleDescriptor) {
+        switch state.keyboardTriggerMode {
+        case .torch:
+            toggleModuleTorch(module)
+        case .sound:
+            triggerModuleSound(module)
+        case .both:
+            toggleModuleTorch(module)
+            triggerModuleSound(module)
+        }
+    }
+
+    private func sectionHeader(title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private func updateStrobeAnimation() {
         let isActive = state.strobeActive || state.slowStrobeActive || state.glowRampActive || state.slowGlowRampActive
         let duration: Double = {
@@ -537,6 +422,7 @@ struct ComposerConsoleView: View {
             if state.slowGlowRampActive { return 1.6 }
             return 0.1
         }()
+
         if isActive {
             withAnimation(Animation.linear(duration: duration).repeatForever(autoreverses: true)) {
                 strobeOn.toggle()
@@ -591,6 +477,7 @@ struct ComposerConsoleView: View {
     private func handleSpecialKeyDown(_ event: NSEvent) {
         guard let key = event.specialKey else { return }
         let modifiers = event.modifierFlags
+
         switch key {
         case .leftArrow:
             if modifiers.contains(.shift) {
@@ -608,461 +495,753 @@ struct ComposerConsoleView: View {
             break
         }
     }
+}
 
-    private var staffModuleSection: some View {
-        LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(minimum: 150), spacing: 16), count: 6),
-            spacing: 16
-        ) {
-            ForEach(staffModules) { module in
-                StaffModuleCard(
-                    module: module,
-                    devices: orderedDevices(for: module),
-                    connectedCount: connectedDeviceCount(for: module),
-                    hasTorch: orderedDevices(for: module).contains(where: \.torchOn),
-                    hasAudio: orderedDevices(for: module).contains(where: \.audioPlaying),
-                    isTriggered: module.slots.contains(where: { state.triggeredSlots.contains($0) || state.glowingSlots.contains($0) }),
-                    hasTargets: !actionDevices(for: module).isEmpty,
-                    onTorch: { toggleModuleTorch(module) },
-                    onSound: { triggerModuleSound(module) },
-                    onBoth: { triggerModule(module) }
+private struct ConsoleSectionCard<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            content
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.1), Color.white.opacity(0.04)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                 )
-                .environmentObject(state)
-            }
-        }
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.09), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.18), radius: 16, y: 8)
     }
+}
 
-    private func orderedDevices(for module: StaffModule) -> [ChoirDevice] {
-        state.devices
-            .filter { !$0.isPlaceholder && module.slots.contains($0.listeningSlot) }
-            .sorted { lhs, rhs in
-                let lhsIndex = module.slots.firstIndex(of: lhs.listeningSlot) ?? .max
-                let rhsIndex = module.slots.firstIndex(of: rhs.listeningSlot) ?? .max
-                return lhsIndex < rhsIndex
-            }
-    }
+private struct SummaryCard: View {
+    let title: String
+    let value: String
+    let subtitle: String
+    let tint: Color
+    let symbol: String
 
-    private func actionDevices(for module: StaffModule) -> [ChoirDevice] {
-        orderedDevices(for: module).filter { device in
-            let status = state.statuses[device.id] ?? .clean
-            return status == .live || !device.ip.isEmpty
-        }
-    }
-
-    private func connectedDeviceCount(for module: StaffModule) -> Int {
-        orderedDevices(for: module).reduce(into: 0) { count, device in
-            if (state.statuses[device.id] ?? .clean) == .live {
-                count += 1
-            }
-        }
-    }
-
-    private func toggleModuleTorch(_ module: StaffModule) {
-        for device in actionDevices(for: module) {
-            _ = state.toggleTorch(id: device.id, allowWhenDisarmed: true)
-        }
-    }
-
-    private func triggerModuleSound(_ module: StaffModule) {
-        for device in actionDevices(for: module) {
-            state.triggerSound(device: device, allowWhenDisarmed: true)
-        }
-    }
-
-    private func triggerModule(_ module: StaffModule) {
-        switch state.keyboardTriggerMode {
-        case .torch:
-            toggleModuleTorch(module)
-        case .sound:
-            triggerModuleSound(module)
-        case .both:
-            toggleModuleTorch(module)
-            triggerModuleSound(module)
-        }
-    }
-
-#if DEBUG
-    struct ComposerConsoleView_Previews: PreviewProvider {
-        static var previews: some View {
-            ComposerConsoleView()
-                .environmentObject(ConsoleState())
-        }
-    }
-#endif
-
-
-    private var groupTriggerStripe: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                ForEach(staffModules) { module in
-                    Button(module.title) {
-                        triggerModule(module)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(module.accent)
-                    .controlSize(.large)
-                    .disabled(actionDevices(for: module).isEmpty)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            EventTriggerStrip()
-                .environmentObject(state)
-        }
-    }
-
-    private struct StaffModuleCard: View {
-        @EnvironmentObject var state: ConsoleState
-
-        let module: StaffModule
-        let devices: [ChoirDevice]
-        let connectedCount: Int
-        let hasTorch: Bool
-        let hasAudio: Bool
-        let isTriggered: Bool
-        let hasTargets: Bool
-        let onTorch: () -> Void
-        let onSound: () -> Void
-        let onBoth: () -> Void
-
-        var body: some View {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(module.title)
-                        .font(.headline)
-                    Spacer()
-                    Text("\(connectedCount)/\(devices.count)")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(connectedCount > 0 ? Color.mintGlow : .secondary)
-                }
-
-                Text("Slots \(module.slotSummary)")
-                    .font(.caption2)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: symbol)
+                    .foregroundStyle(tint)
+                Text(title)
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
+            }
 
-                HStack(spacing: 8) {
-                    Label(hasTorch ? "Torch on" : "Torch idle", systemImage: hasTorch ? "flashlight.on.fill" : "flashlight.off.fill")
-                        .font(.caption2)
-                    Label(hasAudio ? "Audio" : "Idle", systemImage: "speaker.wave.2.fill")
-                        .font(.caption2)
-                }
+            Text(value)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+
+            Text(subtitle)
+                .font(.caption)
                 .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(tint.opacity(0.12))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(tint.opacity(0.32), lineWidth: 1)
+        )
+    }
+}
 
-                Divider()
+private struct StatusPill: View {
+    let title: String
+    let value: String
+    let tint: Color
 
-                HStack(spacing: 8) {
-                    ForEach(devices) { device in
-                        ModuleMemberBadge(
-                            slot: device.listeningSlot,
-                            status: state.statuses[device.id] ?? .clean,
-                            accent: module.accent,
-                            torchOn: device.torchOn,
-                            audioPlaying: device.audioPlaying
-                        )
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(tint)
+            Text(value)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(tint.opacity(0.15))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(tint.opacity(0.35), lineWidth: 1)
+        )
+    }
+}
+
+private struct ToggleActionButton: View {
+    let title: String
+    let tint: Color
+    let isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(title, action: action)
+            .buttonStyle(.borderedProminent)
+            .tint(isActive ? tint : tint.opacity(0.72))
+            .frame(maxWidth: .infinity)
+    }
+}
+
+private struct ConsoleSectionHeader: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct TransportPanel: View {
+    @EnvironmentObject var state: ConsoleState
+
+    @Binding var showRouting: Bool
+
+    var body: some View {
+        ConsoleSectionCard {
+            VStack(alignment: .leading, spacing: 14) {
+                ConsoleSectionHeader(title: "Transport", subtitle: "Concert arming, routing, refresh, and emergency actions.")
+
+                HStack(spacing: 10) {
+                    Button("Refresh") {
+                        state.refreshDevices()
+                        Task { await state.startNetwork() }
                     }
+                    .buttonStyle(.bordered)
+                    .tint(.blue)
+
+                    Button("Refresh Connections") {
+                        state.refreshConnections()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.teal)
+                    .disabled(!state.isBroadcasting)
                 }
 
-                Spacer(minLength: 0)
-
-                HStack(spacing: 8) {
-                    Button {
-                        onTorch()
-                    } label: {
-                        Image(systemName: "flashlight.on.fill")
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(module.accent)
-                    .disabled(!hasTargets)
-
-                    Button {
-                        onSound()
-                    } label: {
-                        Image(systemName: "speaker.wave.2.fill")
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(module.accent)
-                    .disabled(!hasTargets)
-
-                    Button("Both") {
-                        onBoth()
+                HStack(spacing: 10) {
+                    Button(state.isArmed ? "DISARM" : "ARM") {
+                        if state.isArmed {
+                            state.disarmConcertMode()
+                        } else {
+                            _ = state.armConcertMode()
+                        }
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(module.accent)
-                    .disabled(!hasTargets)
+                    .tint(state.isArmed ? .red : (state.canArmStrict ? .green : .orange))
+
+                    Button("ARM Override") {
+                        _ = state.armConcertMode(override: true)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+                    .disabled(state.isArmed || state.canArmStrict)
+
+                    Button("PANIC") {
+                        state.panicAllStop()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                }
+
+                HStack(spacing: 10) {
+                    Button("Routing") {
+                        showRouting = true
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.blue)
+
+                    Button("Export Network Log") {
+                        state.exportNetworkLog()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.purple)
+                }
+
+                if let warning = state.preflightWarning {
+                    Text("⚠️ \(warning)")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
                 }
             }
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.black.opacity(0.2))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.95 : 0.45), lineWidth: 2)
-            )
-            .shadow(
-                color: module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.35 : 0.12),
-                radius: isTriggered || hasTorch || hasAudio ? 18 : 10
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 18))
-            .onTapGesture {
-                guard hasTargets else { return }
-                onBoth()
-            }
         }
     }
+}
 
-    private struct ModuleMemberBadge: View {
-        let slot: Int
-        let status: DeviceStatus
-        let accent: Color
-        let torchOn: Bool
-        let audioPlaying: Bool
+private struct EnsembleFxPanel: View {
+    @EnvironmentObject var state: ConsoleState
 
-        var body: some View {
-            VStack(spacing: 4) {
-                Circle()
-                    .fill(torchOn ? accent : status.color.opacity(0.7))
-                    .frame(width: 12, height: 12)
-                    .overlay(
-                        Circle()
-                            .stroke(accent.opacity(audioPlaying ? 1 : 0.35), lineWidth: audioPlaying ? 2 : 1)
-                    )
-                Text("\(slot)")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-        }
-    }
+    let anyTorchOn: Bool
 
-    // MARK: - Slot Cell View
-    struct SlotCell: View {
-        @EnvironmentObject var state: ConsoleState
-        let device: ChoirDevice
-        let keyLabel: String?
-        let outline: Color?
-        let isTriggered: Bool
+    var body: some View {
+        ConsoleSectionCard {
+            VStack(alignment: .leading, spacing: 14) {
+                ConsoleSectionHeader(title: "Ensemble FX", subtitle: "Global torch and diagnostic gestures for quick checks.")
 
-        /// Convenience accessors for the device’s status text & color
-        private var statusText: String {
-            state.statuses[device.id]?.rawValue ?? ""
-        }
-        private var statusColor: Color {
-            state.statuses[device.id]?.color ?? .clear
-        }
-
-        var body: some View {
-            if device.isPlaceholder {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 28, height: 28)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-            } else {
-                ZStack(alignment: .topTrailing) {
-                    VStack(spacing: 4) {
-                        if let keyLabel = keyLabel {
-                            Text(keyLabel)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        Image(systemName: "flashlight.on.fill")
-                            .font(.system(size: 28))
-                            .foregroundStyle(device.torchOn ? Color.mintGlow : .gray)
-                            .shadow(color: device.torchOn ? Color.mintGlow.opacity(0.9) : .clear,
-                                    radius: device.torchOn ? 12 : 0)
-                        Text("#\(device.id + 1)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text(device.name)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text(statusText)
-                            .font(.caption2)
-                            .foregroundStyle(statusColor)
-                        Button {
-                            state.triggerSound(device: device, allowWhenDisarmed: true)
-                        } label: {
-                            Image(systemName: "speaker.wave.2.fill")
-                                .foregroundStyle(Color.mintGlow)
-                                .help("Trigger sound on \(device.name)…")
-                        }
-                        .buttonStyle(.plain)
+                HStack(spacing: 10) {
+                    Button(anyTorchOn ? "All Off" : "All On") {
+                        state.toggleAllTorches()
                     }
-                    .padding(8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(outline ?? .clear, lineWidth: 3)
-                            .shadow(color: outline?.opacity(0.8) ?? .clear, radius: 12)
-                    )
-                    .overlay(
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        gradient: Gradient(colors: [Color.white.opacity(0.95), .clear]),
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 36
+                    .buttonStyle(.borderedProminent)
+                    .tint(anyTorchOn ? .red : Color.indigo.opacity(0.65))
+                    .disabled(!state.isBroadcasting)
+
+                    Button("Play All Tones") {
+                        state.playAllTones()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.cyan)
+                    .disabled(!state.isBroadcasting)
+                }
+
+                HStack(spacing: 10) {
+                    ToggleActionButton(
+                        title: state.slowGlowRampActive ? "Stop Slow Glow" : "Slow Glow",
+                        tint: .mintGlow,
+                        isActive: state.slowGlowRampActive
+                    ) {
+                        state.slowGlowRampActive.toggle()
+                    }
+                    .disabled(!state.isBroadcasting)
+
+                    ToggleActionButton(
+                        title: state.glowRampActive ? "Stop Glow" : "Glow Ramp",
+                        tint: .mintGlow,
+                        isActive: state.glowRampActive
+                    ) {
+                        state.glowRampActive.toggle()
+                    }
+                    .disabled(!state.isBroadcasting)
+                }
+
+                HStack(spacing: 10) {
+                    ToggleActionButton(
+                        title: state.slowStrobeActive ? "Stop Medium" : "Medium Strobe",
+                        tint: .mintGlow,
+                        isActive: state.slowStrobeActive
+                    ) {
+                        state.slowStrobeActive.toggle()
+                    }
+                    .disabled(!state.isBroadcasting)
+
+                    ToggleActionButton(
+                        title: state.strobeActive ? "Stop Rapid" : "Rapid Strobe",
+                        tint: .mintGlow,
+                        isActive: state.strobeActive
+                    ) {
+                        state.strobeActive.toggle()
+                    }
+                    .disabled(!state.isBroadcasting)
+                }
+            }
+        }
+    }
+}
+
+private struct ManualCuePanel: View {
+    @EnvironmentObject var state: ConsoleState
+
+    var body: some View {
+        ConsoleSectionCard {
+            VStack(alignment: .leading, spacing: 14) {
+                ConsoleSectionHeader(title: "Manual Cueing", subtitle: "Typing-mode behavior plus direct sound-bank toggles.")
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Keyboard Mode")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 8) {
+                        ForEach(ConsoleState.KeyboardTriggerMode.allCases, id: \.self) { mode in
+                            Button {
+                                state.keyboardTriggerMode = mode
+                            } label: {
+                                Label(mode.rawValue, systemImage: iconName(for: mode))
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.plain)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(state.keyboardTriggerMode == mode ? Color.accentColor.opacity(0.22) : Color.white.opacity(0.05))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(state.keyboardTriggerMode == mode ? Color.accentColor.opacity(0.7) : Color.white.opacity(0.08), lineWidth: 1)
                                     )
-                                )
-                            LightRaysView(color: .mintGlow)
+                            )
                         }
-                        .opacity((isTriggered || device.torchOn || state.glowingSlots.contains(device.listeningSlot)) ? 1 : 0)
-                        .allowsHitTesting(false)
-                    )
-                    Menu {
-                        ForEach(1...16, id: \.self) { ch in
-                            Button(action: { state.toggleDeviceChannel(device.id, ch) }) {
-                                ChannelMenuItem(channel: ch, selected: device.midiChannels.contains(ch))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Manual Sound Banks")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 10) {
+                        ManualBankChip(set: "B", label: "seL", subtitle: "Blue · Red · Green", isActive: state.activeToneSets.contains("B")) {
+                            toggleManualBank("B")
+                        }
+                        ManualBankChip(set: "C", label: "seC", subtitle: "Purple · Yellow · Pink", isActive: state.activeToneSets.contains("C")) {
+                            toggleManualBank("C")
+                        }
+                        ManualBankChip(set: "D", label: "seR", subtitle: "Orange · Magenta · Cyan", isActive: state.activeToneSets.contains("D")) {
+                            toggleManualBank("D")
+                        }
+                    }
+                }
+
+                DisclosureGroup("Envelope Controls") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Stepper("Attack: \(state.attackMs) ms", value: $state.attackMs, in: 0...2000, step: 50)
+                        Stepper("Decay: \(state.decayMs) ms", value: $state.decayMs, in: 0...2000, step: 50)
+                        Stepper("Sustain: \(state.sustainPct)%", value: $state.sustainPct, in: 0...100, step: 10)
+                        Stepper("Release: \(state.releaseMs) ms", value: $state.releaseMs, in: 0...2000, step: 50)
+
+                        HStack(spacing: 10) {
+                            Button("0 Envelope") {
+                                state.startEnvelopeAll()
+                            }
+                            .buttonStyle(.borderedProminent)
+
+                            Button("Release Envelope") {
+                                state.releaseEnvelopeAll()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.top, 10)
+                }
+                .tint(.mintGlow)
+            }
+        }
+    }
+
+    private func toggleManualBank(_ set: String) {
+        if state.activeToneSets.contains(set) {
+            state.activeToneSets.remove(set)
+        } else {
+            state.activeToneSets.insert(set)
+        }
+    }
+
+    private func iconName(for mode: ConsoleState.KeyboardTriggerMode) -> String {
+        switch mode {
+        case .torch: return "flashlight.on.fill"
+        case .sound: return "speaker.wave.2.fill"
+        case .both: return "sparkles"
+        }
+    }
+}
+
+private struct MidiDiagnosticsPanel: View {
+    @EnvironmentObject var state: ConsoleState
+
+    var body: some View {
+        ConsoleSectionCard {
+            VStack(alignment: .leading, spacing: 14) {
+                ConsoleSectionHeader(title: "MIDI + Diagnostics", subtitle: "Device selection, I/O routing, and scrollback log.")
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("MIDI Input")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Picker("MIDI Input", selection: $state.selectedMidiInput) {
+                        ForEach(state.midiInputNames, id: \.self) { name in
+                            Text(name)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+
+                    Text("MIDI Output")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Picker("MIDI Output", selection: $state.selectedMidiOutput) {
+                        ForEach(state.midiOutputNames, id: \.self) { name in
+                            Text(name)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+
+                    Text("Output Channel")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Picker("Output Channel", selection: $state.outputChannel) {
+                        ForEach(1...16, id: \.self) { channel in
+                            Text("Ch \(channel)")
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .onAppear {
+                        state.refreshMidiDevices()
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("MIDI Log")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 4) {
+                                ForEach(state.midiLog.indices, id: \.self) { idx in
+                                    Text(state.midiLog[idx])
+                                        .font(.system(.caption, design: .monospaced))
+                                        .foregroundStyle(.secondary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                Color.clear
+                                    .frame(height: 1)
+                                    .id("midi-bottom")
                             }
                         }
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .imageScale(.small)
-                    }
-                    .menuStyle(BorderlessButtonMenuStyle())
-                    .menuIndicator(.hidden)
-                    .help("Assign MIDI channel for this slot")
-                    .padding(4)
-                }
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    switch state.keyboardTriggerMode {
-                    case .torch:
-                        state.toggleTorch(id: device.id, allowWhenDisarmed: true)
-                    case .sound:
-                        state.triggerSound(device: device, allowWhenDisarmed: true)
-                    case .both:
-                        state.toggleTorch(id: device.id, allowWhenDisarmed: true)
-                        state.triggerSound(device: device, allowWhenDisarmed: true)
-                    }
-                }
-            }
-        }
-    }
-
-    private struct LightRaysView: View {
-        var color: Color
-        var body: some View {
-            ZStack {
-                ForEach(0..<8, id: \.self) { i in
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [color.opacity(0.8), .clear]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
+                        .frame(minHeight: 160, maxHeight: 220)
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.black.opacity(0.22))
                         )
-                        .frame(width: 2, height: 24)
-                        .offset(y: -12)
-                        .rotationEffect(.degrees(Double(i) / 8 * 360))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                        .onChange(of: state.midiLog.count) { _ in
+                            proxy.scrollTo("midi-bottom", anchor: .bottom)
+                        }
+                        .onAppear {
+                            proxy.scrollTo("midi-bottom", anchor: .bottom)
+                        }
+                    }
                 }
             }
         }
     }
+}
 
-    /// Menu item for channel selection with trailing checkmark
-    private struct ChannelMenuItem: View {
-        var channel: Int
-        var selected: Bool
+private struct ManualBankChip: View {
+    let set: String
+    let label: String
+    let subtitle: String
+    let isActive: Bool
+    let action: () -> Void
 
-        var body: some View {
-            HStack {
-                if let label = ComposerConsoleView.channelLabels[channel] {
-                    Text("Ch \(channel) (\(label))")
-                } else {
-                    Text("Ch \(channel)")
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(set)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(isActive ? Color.black : .secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule()
+                                .fill(isActive ? Color.white.opacity(0.85) : Color.white.opacity(0.08))
+                        )
+                    Spacer()
+                    Text(label)
+                        .font(.headline.weight(.bold))
                 }
-                Spacer()
-                if selected {
-                    Image(systemName: "checkmark")
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(isActive ? Color.accentColor.opacity(0.26) : Color.white.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isActive ? Color.accentColor.opacity(0.68) : Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+}
+
+private struct StaffModuleCard: View {
+    @EnvironmentObject var state: ConsoleState
+
+    let module: StaffModuleDescriptor
+    let deviceBySlot: [Int: ChoirDevice]
+    let connectedCount: Int
+    let hasTorch: Bool
+    let hasAudio: Bool
+    let isTriggered: Bool
+    let hasTargets: Bool
+    let onTorch: () -> Void
+    let onSound: () -> Void
+    let onBoth: () -> Void
+    let onPing: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(module.title)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(.white)
+                    Text("\(module.staff.routedSeatCount) routed · \(StageConsoleLayout.seatsPerStaff - module.staff.routedSeatCount) open")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("\(connectedCount)/\(module.staff.routedSeatCount) live")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(connectedCount > 0 ? Color.mintGlow : .secondary)
+                    if hasTorch || hasAudio {
+                        Text(hasTorch && hasAudio ? "Torch + Audio" : (hasTorch ? "Torch active" : "Audio active"))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(minimum: 40), spacing: 8, alignment: .top), count: 6),
+                spacing: 8
+            ) {
+                ForEach(module.seats) { seat in
+                    let device = seat.legacySlot.flatMap { deviceBySlot[$0] }
+                    ModuleSeatBadge(
+                        seat: seat,
+                        device: device,
+                        status: device.flatMap { state.statuses[$0.id] } ?? .clean,
+                        accent: module.accent,
+                        isTriggered: seat.legacySlot.map { state.glowingSlots.contains($0) || state.triggeredSlots.contains($0) } ?? false
+                    )
+                }
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    onPing()
+                } label: {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                }
+                .buttonStyle(.bordered)
+                .tint(module.accent)
+                .disabled(!hasTargets)
+
+                Button {
+                    onTorch()
+                } label: {
+                    Image(systemName: "flashlight.on.fill")
+                }
+                .buttonStyle(.bordered)
+                .tint(module.accent)
+                .disabled(!hasTargets)
+
+                Button {
+                    onSound()
+                } label: {
+                    Image(systemName: "speaker.wave.2.fill")
+                }
+                .buttonStyle(.bordered)
+                .tint(module.accent)
+                .disabled(!hasTargets)
+
+                Button("Both") {
+                    onBoth()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(module.accent)
+                .disabled(!hasTargets)
+            }
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 240, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(module.accent.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.95 : 0.28), lineWidth: isTriggered || hasTorch || hasAudio ? 2 : 1)
+        )
+        .shadow(color: module.accent.opacity(isTriggered || hasTorch || hasAudio ? 0.24 : 0.08), radius: isTriggered || hasTorch || hasAudio ? 18 : 8, y: 8)
+    }
+}
+
+private struct ModuleSeatBadge: View {
+    let seat: LightStaffSeat
+    let device: ChoirDevice?
+    let status: DeviceStatus
+    let accent: Color
+    let isTriggered: Bool
+
+    private var isRouteable: Bool {
+        seat.legacySlot != nil
     }
 
-    // MARK: - Keyboard event capture for typing-trigger
-    fileprivate struct KeyCaptureView: NSViewRepresentable {
-        var isEnabled: Bool
-        var onKeyDown: (Character) -> Void
-        var onKeyUp: (Character) -> Void
-        var onSpecialKeyDown: ((NSEvent) -> Void)? = nil
-        var onSpecialKeyUp: ((NSEvent) -> Void)? = nil
-        
-        func makeNSView(context: Context) -> KeyCaptureNSView {
-            let view = KeyCaptureNSView()
-            view.isEnabled = isEnabled
-            view.onKeyDown = onKeyDown
-            view.onKeyUp = onKeyUp
-            view.onSpecialKeyDown = onSpecialKeyDown
-            view.onSpecialKeyUp = onSpecialKeyUp
-            return view
-        }
-        
-        func updateNSView(_ nsView: KeyCaptureNSView, context: Context) {
-            nsView.isEnabled = isEnabled
-        }
+    private var torchOn: Bool {
+        device?.torchOn == true
     }
-    
-    fileprivate class KeyCaptureNSView: NSView {
-        var isEnabled: Bool = true {
-            didSet {
-                if isEnabled {
-                    window?.makeFirstResponder(self)
-                } else if window?.firstResponder == self {
-                    _ = window?.makeFirstResponder(nil)
-                }
-            }
+
+    private var audioPlaying: Bool {
+        device?.audioPlaying == true
+    }
+
+    private var footerText: String {
+        if let legacySlot = seat.legacySlot {
+            return "#\(legacySlot)"
         }
-        var onKeyDown: ((Character) -> Void)?
-        var onKeyUp: ((Character) -> Void)?
-        var onSpecialKeyDown: ((NSEvent) -> Void)?
-        var onSpecialKeyUp: ((NSEvent) -> Void)?
-        
-        override var acceptsFirstResponder: Bool { isEnabled }
-        override func resignFirstResponder() -> Bool { true }
-        
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
-            if isEnabled {
-                window?.makeFirstResponder(self)
+        return "Open"
+    }
+
+    private var helpText: String {
+        if let legacySlot = seat.legacySlot {
+            if let device, !device.name.isEmpty {
+                return "\(seat.displayLabel) · Legacy slot \(legacySlot) · \(device.name)"
             }
+            return "\(seat.displayLabel) · Legacy slot \(legacySlot)"
         }
-        
-        override func keyDown(with event: NSEvent) {
-            guard isEnabled else {
-                nextResponder?.keyDown(with: event)
-                return
+        return "\(seat.displayLabel) · No legacy route assigned"
+    }
+
+    var body: some View {
+        VStack(spacing: 5) {
+            Text("\(seat.seatNumber)")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            ZStack {
+                Circle()
+                    .fill(circleFill)
+                    .frame(width: 18, height: 18)
+
+                Circle()
+                    .stroke(accent.opacity(audioPlaying ? 1 : 0.22), lineWidth: audioPlaying ? 2 : 1)
+                    .frame(width: 22, height: 22)
             }
-            if event.specialKey != nil {
-                onSpecialKeyDown?(event)
-                _ = window?.makeFirstResponder(self)
-                return
-            }
-            if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
-                onKeyDown?(c)
-            }
-            _ = window?.makeFirstResponder(self)
+
+            Text(footerText)
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundStyle(isRouteable ? .secondary : Color.white.opacity(0.6))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
-        
-        override func keyUp(with event: NSEvent) {
-            guard isEnabled else {
-                nextResponder?.keyUp(with: event)
-                return
-            }
-            if event.specialKey != nil {
-                onSpecialKeyUp?(event)
-                _ = window?.makeFirstResponder(self)
-                return
-            }
-            if let chars = event.charactersIgnoringModifiers?.lowercased(), let c = chars.first {
-                onKeyUp?(c)
-            }
-            _ = window?.makeFirstResponder(self)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, minHeight: 86)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(backgroundFill)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(borderColor, lineWidth: isTriggered ? 2 : 1)
+        )
+        .help(helpText)
+    }
+
+    private var circleFill: Color {
+        if torchOn || isTriggered {
+            return accent
         }
-        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+        if isRouteable {
+            return status.color.opacity(0.82)
+        }
+        return Color.white.opacity(0.12)
+    }
+
+    private var backgroundFill: Color {
+        if !isRouteable {
+            return Color.white.opacity(0.04)
+        }
+        if torchOn || audioPlaying || isTriggered {
+            return accent.opacity(0.18)
+        }
+        return Color.black.opacity(0.18)
+    }
+
+    private var borderColor: Color {
+        if !isRouteable {
+            return Color.white.opacity(0.08)
+        }
+        if isTriggered {
+            return accent.opacity(0.95)
+        }
+        if audioPlaying {
+            return accent.opacity(0.55)
+        }
+        return Color.white.opacity(0.08)
+    }
+}
+
+#if DEBUG
+struct ComposerConsoleView_Previews: PreviewProvider {
+    static var previews: some View {
+        ComposerConsoleView()
+            .environmentObject(ConsoleState())
+            .frame(width: 1600, height: 980)
+    }
+}
+#endif
+
+private extension EventRecipe {
+    var measureText: String {
+        if let token = measureToken?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !token.isEmpty {
+            return token
+        }
+        if let measure {
+            return "\(measure)"
+        }
+        return "—"
+    }
+
+    var positionLabel: String {
+        guard let position, !position.isEmpty else { return "—" }
+        let trimmed = position.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasPrefix("beat") {
+            return trimmed.replacingOccurrences(of: "beat", with: "Beat ")
+        }
+        return trimmed
     }
 }
