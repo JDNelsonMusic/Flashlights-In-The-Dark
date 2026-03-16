@@ -710,6 +710,18 @@ private struct TransportPanel: View {
                     }
                 }
 
+                VStack(alignment: .leading, spacing: 8) {
+                    Stepper(
+                        "Cue lead: \(state.eventTriggerLeadTimeMs) ms",
+                        value: $state.eventTriggerLeadTimeMs,
+                        in: 0...500,
+                        step: 10
+                    )
+                    Text("How far ahead event triggers are scheduled when you press Space. Higher values trade a bit more fixed delay for tighter device alignment.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 if let warning = state.preflightWarning {
                     Text("⚠️ \(warning)")
                         .font(.caption)

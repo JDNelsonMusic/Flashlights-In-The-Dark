@@ -42,6 +42,23 @@ import AVFoundation
       }
     }
 
+    let clientChannel = FlutterMethodChannel(
+      name: "ai.keex.flashlights/client",
+      binaryMessenger: controller.binaryMessenger
+    )
+    clientChannel.setMethodCallHandler { [weak self] call, result in
+      guard let self else {
+        result(FlutterError(code: "NO_CONTROLLER", message: nil, details: nil))
+        return
+      }
+      switch call.method {
+      case "requestCameraPermission":
+        self.requestCameraPermission(result: result)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
     let audioChannel = FlutterMethodChannel(
       name: "ai.keex.flashlights/audio",
       binaryMessenger: controller.binaryMessenger
@@ -91,6 +108,23 @@ import AVFoundation
         }
 
         self.primerAudio.initialize(with: controller, manifest: manifest) { initResult in
+          switch initResult {
+          case .success(let payload):
+            result(payload)
+          case .failure(let error):
+            result(FlutterError(code: "INIT_FAILED", message: error.localizedDescription, details: nil))
+          }
+        }
+      case "initializeElectronicsLibrary":
+        guard
+          let args = call.arguments as? [String: Any],
+          let assets = args["assets"] as? [String]
+        else {
+          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected electronics assets", details: nil))
+          return
+        }
+
+        self.electronicsAudio.initialize(with: controller, assetKeys: assets) { initResult in
           switch initResult {
           case .success(let payload):
             result(payload)
@@ -184,6 +218,23 @@ import AVFoundation
       try session.setActive(false, options: [.notifyOthersOnDeactivation])
     } catch {
       NSLog("Audio session reset error: \(error)")
+    }
+  }
+
+  private func requestCameraPermission(result: @escaping FlutterResult) {
+    switch AVCaptureDevice.authorizationStatus(for: .video) {
+    case .authorized:
+      result(true)
+    case .notDetermined:
+      AVCaptureDevice.requestAccess(for: .video) { granted in
+        DispatchQueue.main.async {
+          result(granted)
+        }
+      }
+    case .denied, .restricted:
+      result(false)
+    @unknown default:
+      result(false)
     }
   }
 
@@ -681,15 +732,102 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     qos: .userInitiated
   )
   private weak var flutterController: FlutterViewController?
+  private var assetURLs: [String: URL] = [:]
+  private var idlePlayers: [String: [AVAudioPlayer]] = [:]
   private var activePlayers: [ObjectIdentifier: AVAudioPlayer] = [:]
+  private var playerAssets: [ObjectIdentifier: String] = [:]
+  private var initialised = false
+  private var requestedAssets = 0
+  private var totalDurationSec: TimeInterval = 0
   private var sessionConfigured = false
+  private var currentAssetKey: String?
   private var lastRequestedAssetKey: String?
   private var lastResolvedAssetPath: String?
   private var lastPlaybackError: String?
   private var lastPlaybackStartedAtMs: Double = 0
+  private var currentStatus: String = "not_initialized"
 
   func attachFlutterController(_ controller: FlutterViewController) {
     flutterController = controller
+  }
+
+  func initialize(
+    with controller: FlutterViewController,
+    assetKeys: [String],
+    completion: @escaping (Result<[String: Any], Error>) -> Void
+  ) {
+    queue.async {
+      if self.initialised {
+        let payload = self.diagnosticsPayloadLocked()
+        DispatchQueue.main.async {
+          completion(.success(payload))
+        }
+        return
+      }
+
+      self.flutterController = controller
+
+      do {
+        try self.configureSession()
+        self.stopActivePlayersLocked()
+        self.assetURLs.removeAll(keepingCapacity: true)
+        self.idlePlayers.removeAll(keepingCapacity: true)
+        self.playerAssets.removeAll(keepingCapacity: true)
+        self.totalDurationSec = 0
+        self.requestedAssets = assetKeys.count
+        self.currentAssetKey = nil
+        self.lastRequestedAssetKey = nil
+        self.lastResolvedAssetPath = nil
+        self.lastPlaybackError = nil
+        self.lastPlaybackStartedAtMs = 0
+        self.currentStatus = "initializing"
+
+        var loaded = 0
+        for assetKey in assetKeys {
+          let trimmed = assetKey.trimmingCharacters(in: .whitespacesAndNewlines)
+          guard !trimmed.isEmpty else { continue }
+          guard let url = self.locateAssetURL(assetKey: trimmed) else {
+            continue
+          }
+          self.assetURLs[trimmed] = url
+          do {
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.delegate = self
+            player.numberOfLoops = 0
+            player.currentTime = 0
+            player.prepareToPlay()
+            self.totalDurationSec += player.duration
+            self.enqueueIdle(player, assetKey: trimmed)
+            loaded += 1
+          } catch {
+            NSLog("[ElectronicsClipEngine] Failed to warm \(trimmed): \(error)")
+          }
+        }
+
+        if assetKeys.isEmpty {
+          self.currentStatus = "empty"
+        } else if loaded == 0 {
+          self.currentStatus = "failed"
+        } else if loaded == assetKeys.count {
+          self.currentStatus = "ok"
+        } else {
+          self.currentStatus = "partial"
+        }
+        self.initialised = self.currentStatus != "failed"
+
+        let payload = self.diagnosticsPayloadLocked()
+        DispatchQueue.main.async {
+          completion(.success(payload))
+        }
+      } catch {
+        self.initialised = false
+        self.currentStatus = "failed"
+        self.sessionConfigured = false
+        DispatchQueue.main.async {
+          completion(.failure(error))
+        }
+      }
+    }
   }
 
   func handleAppWillResignActive() {
@@ -703,6 +841,7 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     queue.async {
       do {
         try self.configureSession()
+        self.prepareIdlePlayersLocked()
       } catch {
         NSLog("[ElectronicsClipEngine] Failed to reactivate audio session: \(error)")
       }
@@ -716,29 +855,31 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
 
     queue.async {
       self.lastRequestedAssetKey = trimmed
-      guard let url = self.locateAssetURL(assetKey: trimmed) else {
+      let url = self.assetURLs[trimmed] ?? self.locateAssetURL(assetKey: trimmed)
+      guard let url else {
         self.lastResolvedAssetPath = nil
         self.lastPlaybackError = "Asset not found"
         NSLog("[ElectronicsClipEngine] Asset not found for \(trimmed)")
         return
       }
+      self.assetURLs[trimmed] = url
 
       do {
         if !self.sessionConfigured {
           try self.configureSession()
         }
+        let player = try self.dequeuePlayer(for: trimmed)
         self.lastResolvedAssetPath = url.path
-        let player = try AVAudioPlayer(contentsOf: url)
-        player.delegate = self
-        player.numberOfLoops = 0
         player.volume = Float(capped)
-        player.prepareToPlay()
         let identifier = ObjectIdentifier(player)
         self.activePlayers[identifier] = player
+        self.playerAssets[identifier] = trimmed
+        self.currentAssetKey = trimmed
         self.lastPlaybackError = nil
         self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
 
         DispatchQueue.main.async {
+          player.currentTime = 0
           player.play()
         }
       } catch {
@@ -751,44 +892,74 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
   func stopAll() {
     queue.async {
       self.stopActivePlayersLocked()
+      self.currentAssetKey = nil
     }
   }
 
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
     queue.async {
-      self.activePlayers.removeValue(forKey: ObjectIdentifier(player))
+      let identifier = ObjectIdentifier(player)
+      self.activePlayers.removeValue(forKey: identifier)
+      if let assetKey = self.playerAssets[identifier] {
+        player.currentTime = 0
+        player.prepareToPlay()
+        self.enqueueIdle(player, assetKey: assetKey)
+      }
+      if self.activePlayers.isEmpty {
+        self.currentAssetKey = nil
+      }
     }
   }
 
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     queue.async {
-      self.activePlayers.removeValue(forKey: ObjectIdentifier(player))
+      let identifier = ObjectIdentifier(player)
+      self.activePlayers.removeValue(forKey: identifier)
       self.lastPlaybackError = error?.localizedDescription ?? "Decode error"
       NSLog("[ElectronicsClipEngine] Decode error: \(String(describing: error))")
+      if self.activePlayers.isEmpty {
+        self.currentAssetKey = nil
+      }
     }
   }
 
   func diagnosticsPayload() -> [String: Any] {
     var payload: [String: Any] = [:]
     queue.sync {
-      payload = [
-        "electronicsPlayers": self.activePlayers.count,
-        "lastElectronicsAssetKey": self.lastRequestedAssetKey ?? NSNull(),
-        "lastElectronicsResolvedPath": self.lastResolvedAssetPath ?? NSNull(),
-        "lastElectronicsError": self.lastPlaybackError ?? NSNull(),
-        "lastElectronicsPlaybackStartedAtMs": self.lastPlaybackStartedAtMs
-      ]
+      payload = self.diagnosticsPayloadLocked()
     }
     return payload
   }
 
   private func stopActivePlayersLocked() {
-    let players = Array(activePlayers.values)
+    let entries = Array(activePlayers)
     activePlayers.removeAll(keepingCapacity: true)
-    for player in players {
+    for (identifier, player) in entries {
       player.stop()
       player.currentTime = 0
+      player.prepareToPlay()
+      if let assetKey = playerAssets[identifier] {
+        enqueueIdle(player, assetKey: assetKey)
+      }
     }
+  }
+
+  private func diagnosticsPayloadLocked() -> [String: Any] {
+    let idleCount = idlePlayers.values.reduce(0) { $0 + $1.count }
+    return [
+      "electronicsStatus": currentStatus,
+      "electronicsInitialised": initialised,
+      "electronicsPlayers": activePlayers.count,
+      "electronicsIdlePlayers": idleCount,
+      "electronicsAssets": assetURLs.count,
+      "electronicsRequested": requestedAssets,
+      "electronicsBufferedDurationSec": totalDurationSec,
+      "currentElectronicsAssetKey": currentAssetKey ?? NSNull(),
+      "lastElectronicsAssetKey": lastRequestedAssetKey ?? NSNull(),
+      "lastElectronicsResolvedPath": lastResolvedAssetPath ?? NSNull(),
+      "lastElectronicsError": lastPlaybackError ?? NSNull(),
+      "lastElectronicsPlaybackStartedAtMs": lastPlaybackStartedAtMs
+    ]
   }
 
   private func configureSession() throws {
@@ -823,6 +994,48 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
       sessionConfigured = false
       throw error
     }
+  }
+
+  private func prepareIdlePlayersLocked() {
+    if idlePlayers.isEmpty { return }
+    let players = idlePlayers.values.flatMap { $0 }
+    DispatchQueue.main.async {
+      for player in players {
+        player.stop()
+        player.currentTime = 0
+        player.prepareToPlay()
+      }
+    }
+  }
+
+  private func dequeuePlayer(for assetKey: String) throws -> AVAudioPlayer {
+    if var players = idlePlayers[assetKey], let player = players.popLast() {
+      idlePlayers[assetKey] = players
+      playerAssets[ObjectIdentifier(player)] = assetKey
+      return player
+    }
+    guard let url = assetURLs[assetKey] ?? locateAssetURL(assetKey: assetKey) else {
+      throw NSError(
+        domain: "ai.keex.flashlights",
+        code: -9,
+        userInfo: [NSLocalizedDescriptionKey: "No electronics asset cached for \(assetKey)"]
+      )
+    }
+    assetURLs[assetKey] = url
+    let player = try AVAudioPlayer(contentsOf: url)
+    player.delegate = self
+    player.numberOfLoops = 0
+    player.currentTime = 0
+    player.prepareToPlay()
+    playerAssets[ObjectIdentifier(player)] = assetKey
+    return player
+  }
+
+  private func enqueueIdle(_ player: AVAudioPlayer, assetKey: String) {
+    playerAssets[ObjectIdentifier(player)] = assetKey
+    var players = idlePlayers[assetKey, default: []]
+    players.append(player)
+    idlePlayers[assetKey] = players
   }
 
   private func locateAssetURL(assetKey: String) -> URL? {

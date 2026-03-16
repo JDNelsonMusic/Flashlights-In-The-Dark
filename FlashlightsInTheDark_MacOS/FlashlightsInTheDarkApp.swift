@@ -13,15 +13,11 @@ struct FlashlightsInTheDarkApp: App {
     @StateObject private var state = ConsoleState()
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-    init() {
-        // Provide state reference to AppDelegate for keyboard handling
-        appDelegate.state = state
-    }
-
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .onAppear {
+                    appDelegate.state = state
                     // Immediately bootstrap network
                     Task { await state.startNetwork() }
                 }

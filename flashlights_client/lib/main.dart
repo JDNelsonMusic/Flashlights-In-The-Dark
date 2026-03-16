@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:audio_session/audio_session.dart' as audio_session;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -23,6 +22,8 @@ import 'model/event_recipe.dart';
 // Removed PrimerToneLibrary; native audio handles asset lookup.
 import 'native_audio.dart';
 
+const MethodChannel _clientChannel = MethodChannel('ai.keex.flashlights/client');
+
 Future<void> _setAppScreenToMaximum() async {
   if (!(Platform.isIOS || Platform.isAndroid)) {
     return;
@@ -34,18 +35,29 @@ Future<void> _setAppScreenToMaximum() async {
   }
 }
 
+Future<void> _requestTorchPermission() async {
+  if (!(Platform.isIOS || Platform.isAndroid)) {
+    return;
+  }
+
+  try {
+    await _clientChannel.invokeMethod<bool>('requestCameraPermission');
+  } on PlatformException catch (e) {
+    debugPrint('[Permissions] camera request failed: $e');
+  }
+}
+
 /// Native bootstrap that must finish **before** the widget tree is built.
 Future<void> _bootstrapNative() async {
   if (Platform.isIOS || Platform.isAndroid) {
     // 1. Ask only for camera permission, which is required for torch control.
-    await [Permission.camera].request();
+    await _requestTorchPermission();
   }
 
   // 2. On Android, spin up the foreground service so we survive backgrounding.
   if (Platform.isAndroid) {
-    const MethodChannel ch = MethodChannel('ai.keex.flashlights/client');
     try {
-      await ch.invokeMethod('startService');
+      await _clientChannel.invokeMethod('startService');
     } on PlatformException catch (e) {
       debugPrint('[KeepAliveService] start failed: $e');
     }

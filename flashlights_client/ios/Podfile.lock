@@ -4,8 +4,6 @@ PODS:
   - Flutter (1.0.0)
   - package_info_plus (0.4.5):
     - Flutter
-  - permission_handler_apple (9.3.0):
-    - Flutter
   - screen_brightness_ios (0.1.0):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -20,7 +18,6 @@ DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - Flutter (from `Flutter`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - torch_light (from `.symlinks/plugins/torch_light/ios`)
@@ -33,8 +30,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  permission_handler_apple:
-    :path: ".symlinks/plugins/permission_handler_apple/ios"
   screen_brightness_ios:
     :path: ".symlinks/plugins/screen_brightness_ios/ios"
   shared_preferences_foundation:
@@ -48,12 +43,11 @@ SPEC CHECKSUMS:
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   screen_brightness_ios: 9953fd7da5bd480f1a93990daeec2eb42d4f3b52
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   torch_light: d093d579a221a59ef8a6b8c0eca20d52f7178087
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
 
-PODFILE CHECKSUM: b230f8c64c287498651592e56cd753e26c6057de
+PODFILE CHECKSUM: b427c9db8e353b0ced7c836fcce64c70e71b43ca
 
 COCOAPODS: 1.16.2

@@ -55,7 +55,8 @@ public extension OscBroadcaster {
                 address: .eventTrigger,
                 slot: m.index,
                 payload: payload,
-                allowWhenDisarmed: allowWhenDisarmed
+                allowWhenDisarmed: allowWhenDisarmed,
+                maxAttempts: 1
             )
 
         case let m as MicRecord:

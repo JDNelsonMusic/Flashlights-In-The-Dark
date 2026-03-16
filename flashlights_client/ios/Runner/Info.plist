@@ -52,6 +52,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Allows Flashlights-in-the-Dark to control the device torch during the performance.</string>
 
+	<!-- Present for App Store static privacy scanning. The app does not
+	     request microphone permission in normal performance use. -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is never used for performance playback; this string exists only to satisfy Apple privacy scanning for bundled AVFoundation APIs.</string>
+
         <key>NSLocalNetworkUsageDescription</key>
         <string>This app needs access to the local network to connect with the chorus controller and synchronize lights/audio.</string>
         <key>NSBonjourServices</key>

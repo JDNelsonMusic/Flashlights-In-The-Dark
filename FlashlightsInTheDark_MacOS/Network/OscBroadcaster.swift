@@ -104,7 +104,7 @@ public actor OscBroadcaster {
     private var nextSequence: Int64 = 1
     private var isArmed: Bool = false
 
-    private let resendAttempts: Int = 3
+    private let defaultCueSendAttempts: Int = 3
     private let resendIntervalNs: UInt64 = 30_000_000
 
     private var packetTimestamps: [Date] = []
@@ -271,7 +271,8 @@ public actor OscBroadcaster {
         address: OscAddress,
         slot: Int32,
         payload: [any OSCValue],
-        allowWhenDisarmed: Bool = false
+        allowWhenDisarmed: Bool = false,
+        maxAttempts: Int? = nil
     ) async throws {
         guard isArmed || allowWhenDisarmed else {
             throw NSError(
@@ -280,6 +281,8 @@ public actor OscBroadcaster {
                 userInfo: [NSLocalizedDescriptionKey: "Concert mode is not armed"]
             )
         }
+
+        let attempts = max(1, maxAttempts ?? defaultCueSendAttempts)
 
         let meta = nextCueMeta()
         var values: [any OSCValue] = [
@@ -317,7 +320,7 @@ public actor OscBroadcaster {
             )
         }
 
-        for attempt in 1...resendAttempts {
+        for attempt in 1...attempts {
             do {
                 try await sendUnicast(
                     message,
@@ -327,14 +330,22 @@ public actor OscBroadcaster {
                     routeLabel: "unicast"
                 )
             } catch {
-                if attempt == resendAttempts {
+                if attempt == attempts {
                     throw error
                 }
             }
-            if attempt < resendAttempts {
+            if attempt < attempts {
                 try? await Task.sleep(nanoseconds: resendIntervalNs)
             }
         }
+    }
+
+    public func broadcastSync(timestampMs: Int64) async throws {
+        let message = OSCMessage(
+            OSCAddressPattern(OscAddress.sync.rawValue),
+            values: [timestampMs]
+        )
+        try await sendBroadcast(message, cueId: nil, routeLabel: "broadcast-sync")
     }
 
     public func broadcastConductorHello() async throws {

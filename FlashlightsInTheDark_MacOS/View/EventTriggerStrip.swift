@@ -34,6 +34,7 @@ struct EventTriggerStrip: View {
                             .onTapGesture {
                                 ignoreOutsideTap = true
                                 state.isKeyCaptureEnabled = false
+                                state.isTransportShortcutSuspended = true
                                 jumpFieldFocused = true
                             }
                         Button("Jump") { handleQuickJump() }
@@ -161,6 +162,7 @@ struct EventTriggerStrip: View {
                     jumpFieldFocused = false
                 }
                 state.isKeyCaptureEnabled = true
+                state.isTransportShortcutSuspended = false
             }
         )
     }
@@ -213,10 +215,12 @@ struct EventTriggerStrip: View {
         }
         jumpFieldFocused = false
         state.isKeyCaptureEnabled = true
+        state.isTransportShortcutSuspended = false
     }
 
     private func handleFocusChange(_ isFocused: Bool) {
         state.isKeyCaptureEnabled = !isFocused
+        state.isTransportShortcutSuspended = isFocused
     }
 
     private func resolveEventIndex(from query: String) -> Int? {

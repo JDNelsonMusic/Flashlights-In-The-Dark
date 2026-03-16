@@ -54,8 +54,10 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
     return Duration.zero;
   }
   final reference = now ?? DateTime.now();
+  final alignedNowMs =
+      reference.millisecondsSinceEpoch + client.clockOffsetMs.value;
   final delayMs =
-      (startAtMs - reference.millisecondsSinceEpoch)
+      (startAtMs - alignedNowMs)
           .clamp(0, double.infinity)
           .toInt();
   return Duration(milliseconds: delayMs);
@@ -410,6 +412,42 @@ class OscListener {
       return;
     }
     client.cueRoutingIssue.value = issue;
+  }
+
+  void _updateClockOffsetFromSync(OSCMessage message) {
+    if (message.arguments.isEmpty) {
+      return;
+    }
+
+    final raw = message.arguments.first;
+    double? remoteMs;
+    if (raw is int) {
+      remoteMs = raw.toDouble();
+    } else if (raw is double) {
+      remoteMs = raw;
+    } else if (raw is BigInt) {
+      remoteMs = raw.toDouble();
+    }
+    if (remoteMs == null) {
+      return;
+    }
+
+    final localNowMs = DateTime.now().millisecondsSinceEpoch.toDouble();
+    final measuredOffsetMs = remoteMs - localNowMs;
+    final current = client.clockOffsetMs.value;
+    final nextOffsetMs =
+        current == 0
+            ? measuredOffsetMs
+            : (measuredOffsetMs - current).abs() > 250
+            ? measuredOffsetMs
+            : current + ((measuredOffsetMs - current) * 0.2);
+
+    client.clockOffsetMs.value = nextOffsetMs;
+    _record('sync', 'Updated clock offset', <String, Object?>{
+      'remoteMs': remoteMs.round(),
+      'offsetMs': nextOffsetMs.round(),
+      'measuredOffsetMs': measuredOffsetMs.round(),
+    });
   }
 
   void _unlockConductor({required String reason}) {
@@ -931,9 +969,6 @@ class OscListener {
     }
 
     try {
-      final session = await audio_session.AudioSession.instance;
-      await session.setActive(true);
-
       final playbackToken = ++_playbackToken;
 
       if (kPrimerPlaybackEnabled && primerFile != null) {
@@ -1177,9 +1212,7 @@ class OscListener {
 
     if (message.address == '/sync') {
       _markConductorHeartbeat();
-      if (client.clockOffsetMs.value != 0) {
-        client.clockOffsetMs.value = 0;
-      }
+      _updateClockOffsetFromSync(message);
       return;
     }
 

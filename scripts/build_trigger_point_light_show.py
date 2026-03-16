@@ -119,6 +119,21 @@ def _dedupe_fraction_points(
     return [deduped[key] for key in sorted(deduped)]
 
 
+def _beats_to_points(
+    total_beats: float,
+    points: list[tuple[float, float] | tuple[float, float, str]],
+) -> list[tuple[float, float] | tuple[float, float, str]]:
+    converted: list[tuple[float, float] | tuple[float, float, str]] = []
+    for point in points:
+        beat_position = point[0]
+        fraction = beat_position / total_beats if total_beats else 0.0
+        if len(point) > 2:
+            converted.append((fraction, point[1], point[2]))
+        else:
+            converted.append((fraction, point[1]))
+    return converted
+
+
 def _measure_base_number(raw: str | None) -> int | None:
     if raw is None:
         return None
@@ -302,18 +317,102 @@ def _build_event_plans() -> dict[int, EventPlan]:
             },
         ),
         5: EventPlan(
-            summary="The ensemble narrows into a held threshold, preparing the cut-bridge.",
-            score_dynamics="mp -> p",
-            design_tags=["threshold", "narrowing", "pre_bridge"],
-            duration_scale=0.94,
-            fixed_duration_ms=None,
+            summary="The tour-cut bridge grows for eight beats, erupts into the most complex cross-ensemble activity of the piece, then drops to a shared blackout on beat 25.",
+            score_dynamics="mp -> fff -> blackout",
+            design_tags=["tour_cut", "extended_bridge", "max_complexity", "blackout"],
+            duration_scale=None,
+            fixed_duration_ms=21666.667,
             parts={
-                "soprano_l1": PartPlan("Holds a narrow left edge of light.", "narrow-hold", 0.24, [(0.00, 0.0), (0.14, 0.18), (0.46, 0.24), (0.80, 0.12), (1.00, 0.0)]),
-                "soprano_l2": PartPlan("Keeps the left-center suspended just under the sopranos.", "narrow-hold", 0.22, [(0.00, 0.0), (0.16, 0.16), (0.48, 0.22), (0.82, 0.10), (1.00, 0.0)]),
-                "tenor_l": PartPlan("Acts as the center seam of the threshold.", "center-seam", 0.20, [(0.00, 0.0), (0.18, 0.12), (0.50, 0.20), (0.82, 0.08), (1.00, 0.0)]),
-                "bass_l": PartPlan("Bass stays dim and grounded, barely moving.", "center-seam", 0.18, [(0.00, 0.0), (0.20, 0.10), (0.54, 0.18), (0.84, 0.07), (1.00, 0.0)]),
-                "alto_l2": PartPlan("Right-middle remains present but subdued.", "narrow-hold", 0.18, [(0.00, 0.0), (0.22, 0.08), (0.54, 0.18), (0.84, 0.08), (1.00, 0.0)]),
-                "alto_l1": PartPlan("The far-right edge becomes the faintest active contour.", "narrow-hold", 0.16, [(0.00, 0.0), (0.24, 0.06), (0.58, 0.16), (0.86, 0.08), (1.00, 0.0)]),
+                "soprano_l1": PartPlan(
+                    "Rises first on the far left, then becomes a fast-leading edge in the dense central field.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.08), (4.0, 0.18), (6.0, 0.30), (7.5, 0.44),
+                        (8.0, 0.96, "step"), (8.5, 0.22, "step"), (9.25, 0.84, "step"), (9.75, 0.18, "step"),
+                        (10.5, 1.0, "step"), (11.0, 0.30, "step"), (11.75, 0.78, "step"), (12.25, 0.14, "step"),
+                        (13.0, 0.92, "step"), (13.5, 0.26, "step"), (14.5, 0.74, "step"), (15.0, 0.12, "step"),
+                        (16.0, 1.0, "step"), (16.25, 0.36, "step"), (17.0, 0.82, "step"), (17.5, 0.20, "step"),
+                        (18.25, 0.94, "step"), (18.75, 0.16, "step"), (19.5, 0.72, "step"), (20.0, 0.24, "step"),
+                        (21.0, 0.88, "step"), (21.5, 0.18, "step"), (22.25, 0.64, "step"), (22.75, 0.12, "step"),
+                        (23.5, 0.52, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
+                "soprano_l2": PartPlan(
+                    "Builds just inside the left edge, then trades rapid staggered bursts with the center.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.06), (4.0, 0.16), (6.0, 0.28), (7.5, 0.40),
+                        (8.25, 0.76, "step"), (8.75, 0.14, "step"), (9.5, 0.94, "step"), (10.0, 0.22, "step"),
+                        (10.75, 0.68, "step"), (11.25, 0.10, "step"), (12.0, 1.0, "step"), (12.5, 0.28, "step"),
+                        (13.25, 0.86, "step"), (13.75, 0.16, "step"), (14.75, 0.72, "step"), (15.25, 0.12, "step"),
+                        (16.25, 0.96, "step"), (16.75, 0.30, "step"), (17.5, 0.80, "step"), (18.0, 0.18, "step"),
+                        (18.75, 0.92, "step"), (19.25, 0.14, "step"), (20.25, 0.66, "step"), (20.75, 0.20, "step"),
+                        (21.5, 0.88, "step"), (22.0, 0.12, "step"), (22.75, 0.58, "step"), (23.25, 0.10, "step"),
+                        (23.75, 0.46, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
+                "tenor_l": PartPlan(
+                    "Acts as a volatile hinge, repeatedly relaunching the most intricate cross-stage exchanges.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.05), (4.0, 0.14), (6.0, 0.26), (7.5, 0.38),
+                        (8.5, 0.64, "step"), (9.0, 0.10, "step"), (9.75, 0.98, "step"), (10.25, 0.24, "step"),
+                        (11.0, 0.74, "step"), (11.5, 0.12, "step"), (12.25, 1.0, "step"), (12.75, 0.34, "step"),
+                        (13.5, 0.88, "step"), (14.0, 0.16, "step"), (14.75, 0.70, "step"), (15.25, 0.14, "step"),
+                        (16.0, 0.96, "step"), (16.5, 0.28, "step"), (17.25, 0.78, "step"), (17.75, 0.12, "step"),
+                        (18.5, 1.0, "step"), (19.0, 0.22, "step"), (19.75, 0.84, "step"), (20.25, 0.18, "step"),
+                        (21.0, 0.68, "step"), (21.5, 0.10, "step"), (22.25, 0.92, "step"), (22.75, 0.14, "step"),
+                        (23.5, 0.54, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
+                "bass_l": PartPlan(
+                    "Throws the heaviest center-left cuts, creating the deepest pulses in the complex field.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.04), (4.0, 0.12), (6.0, 0.24), (7.5, 0.34),
+                        (8.75, 0.58, "step"), (9.25, 0.08, "step"), (10.0, 0.90, "step"), (10.5, 0.20, "step"),
+                        (11.25, 0.70, "step"), (11.75, 0.12, "step"), (12.5, 0.96, "step"), (13.0, 0.30, "step"),
+                        (13.75, 0.78, "step"), (14.25, 0.16, "step"), (15.0, 1.0, "step"), (15.5, 0.24, "step"),
+                        (16.25, 0.74, "step"), (16.75, 0.10, "step"), (17.5, 0.88, "step"), (18.0, 0.18, "step"),
+                        (18.75, 0.66, "step"), (19.25, 0.10, "step"), (20.0, 0.94, "step"), (20.5, 0.22, "step"),
+                        (21.25, 0.72, "step"), (21.75, 0.14, "step"), (22.5, 0.84, "step"), (23.0, 0.16, "step"),
+                        (23.6, 0.50, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
+                "alto_l2": PartPlan(
+                    "Right-middle initiates several of the lateral surges and keeps the right flank unstable.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.06), (4.0, 0.15), (6.0, 0.27), (7.5, 0.40),
+                        (8.0, 0.54, "step"), (8.5, 0.08, "step"), (9.0, 0.82, "step"), (9.5, 0.12, "step"),
+                        (10.25, 1.0, "step"), (10.75, 0.26, "step"), (11.5, 0.72, "step"), (12.0, 0.10, "step"),
+                        (12.75, 0.94, "step"), (13.25, 0.22, "step"), (14.0, 0.78, "step"), (14.5, 0.14, "step"),
+                        (15.25, 0.98, "step"), (15.75, 0.30, "step"), (16.5, 0.70, "step"), (17.0, 0.12, "step"),
+                        (17.75, 0.88, "step"), (18.25, 0.18, "step"), (19.0, 0.64, "step"), (19.5, 0.10, "step"),
+                        (20.25, 0.96, "step"), (20.75, 0.20, "step"), (21.5, 0.74, "step"), (22.0, 0.12, "step"),
+                        (22.75, 0.86, "step"), (23.25, 0.18, "step"), (23.75, 0.52, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
+                "alto_l1": PartPlan(
+                    "The far right launches the brightest returns and completes the blackout release.",
+                    "tour-cut-ramp-and-maelstrom",
+                    1.0,
+                    _beats_to_points(26.0, [
+                        (0.0, 0.0), (2.0, 0.07), (4.0, 0.16), (6.0, 0.29), (7.5, 0.42),
+                        (8.0, 0.48, "step"), (8.5, 0.06, "step"), (9.25, 0.88, "step"), (9.75, 0.14, "step"),
+                        (10.5, 0.70, "step"), (11.0, 0.10, "step"), (11.75, 0.96, "step"), (12.25, 0.24, "step"),
+                        (13.0, 0.76, "step"), (13.5, 0.12, "step"), (14.25, 1.0, "step"), (14.75, 0.28, "step"),
+                        (15.5, 0.72, "step"), (16.0, 0.10, "step"), (16.75, 0.90, "step"), (17.25, 0.16, "step"),
+                        (18.0, 0.66, "step"), (18.5, 0.08, "step"), (19.25, 0.98, "step"), (19.75, 0.20, "step"),
+                        (20.5, 0.74, "step"), (21.0, 0.10, "step"), (21.75, 0.92, "step"), (22.25, 0.16, "step"),
+                        (23.0, 0.60, "step"), (23.5, 0.12, "step"), (23.9, 0.40, "step"), (24.0, 0.0, "step"), (26.0, 0.0),
+                    ]),
+                ),
             },
         ),
         6: EventPlan(
@@ -472,9 +571,11 @@ def _inject_lighting_into_recipes(light_manifest: dict[str, Any]) -> None:
         bundle["lightingManifest"] = str(LIGHT_SHOW_MANIFEST_PATH.relative_to(REPO_ROOT))
         bundle["lightingGenerated"] = generated
         bundle["lightingDesignNote"] = (
-            "Tour-cut six-staff torch choreography preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. "
-            "Trigger Point 11 begins with the piece's only fully unified slow glow before the staves separate again; "
-            "Trigger Point 12 is strictly locked to light-chorus note onsets."
+            "Tour-cut six-staff torch choreography preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
+            "Trigger Point 5 now carries its own extended bridge light show: an eight-beat global ramp, the piece's "
+            "most complex lighting field across beats 9-24, and a hard blackout on beat 25. Trigger Point 11 begins "
+            "with the piece's only fully unified slow glow before the staves separate again; Trigger Point 12 is "
+            "strictly locked to light-chorus note onsets."
         )
 
         for event in bundle.get("events", []):

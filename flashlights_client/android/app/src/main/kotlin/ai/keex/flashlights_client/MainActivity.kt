@@ -1,5 +1,7 @@
 package ai.keex.flashlights_client
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
@@ -30,8 +32,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : FlutterActivity() {
+    private var pendingCameraPermissionResult: MethodChannel.Result? = null
     private var multicastLock: WifiManager.MulticastLock? = null
     private lateinit var primerAudio: PrimerToneManager
     private lateinit var electronicsAudio: ElectronicsClipManager
@@ -62,11 +67,17 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             "ai.keex.flashlights/client"
         ).setMethodCallHandler { call, result ->
-            if (call.method == "startService") {
-                KeepAliveService.start(this)
-                result.success(null)
-            } else {
-                result.notImplemented()
+            when (call.method) {
+                "startService" -> {
+                    KeepAliveService.start(this)
+                    result.success(null)
+                }
+                "requestCameraPermission" -> {
+                    requestCameraPermission(result)
+                }
+                else -> {
+                    result.notImplemented()
+                }
             }
         }
 
@@ -89,6 +100,16 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
                 "initializePrimerLibrary" -> {
                     primerAudio.initialize { outcome ->
+                        outcome.onSuccess { payload ->
+                            result.success(payload)
+                        }.onFailure { error ->
+                            result.error("INIT_FAILED", error.message, null)
+                        }
+                    }
+                }
+                "initializeElectronicsLibrary" -> {
+                    val assets = call.argument<List<String>>("assets") ?: emptyList()
+                    electronicsAudio.initialize(assets) { outcome ->
                         outcome.onSuccess { payload ->
                             result.success(payload)
                         }.onFailure { error ->
@@ -171,6 +192,44 @@ class MainActivity : FlutterActivity() {
         multicastLock = lock
     }
 
+    private fun requestCameraPermission(result: MethodChannel.Result) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            result.success(true)
+            return
+        }
+
+        if (pendingCameraPermissionResult != null) {
+            result.error("PERMISSION_IN_PROGRESS", "Camera permission request already pending", null)
+            return
+        }
+
+        pendingCameraPermissionResult = result
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.CAMERA),
+            CAMERA_PERMISSION_REQUEST_CODE
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode != CAMERA_PERMISSION_REQUEST_CODE) {
+            return
+        }
+
+        val granted = grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        pendingCameraPermissionResult?.success(granted)
+        pendingCameraPermissionResult = null
+    }
+
     override fun onDestroy() {
         multicastLock?.let {
             if (it.isHeld) {
@@ -188,6 +247,7 @@ class MainActivity : FlutterActivity() {
     }
 }
 
+private const val CAMERA_PERMISSION_REQUEST_CODE = 1407
 private class PrimerToneManager(context: Context) {
     private val appContext = context.applicationContext
     private val assetManager = appContext.assets
@@ -557,7 +617,49 @@ private class ElectronicsClipManager(context: Context) {
     private val executor: ExecutorService = Executors.newCachedThreadPool()
     private val lock = Any()
     private val activePlayers: MutableMap<Int, MediaPlayer> = mutableMapOf()
+    private val assetFiles: MutableMap<String, File> = mutableMapOf()
     private var nextPlayerId: Int = 1
+    private var initialised = false
+    private var initialising = false
+    private var requestedAssets = 0
+    private val pendingCallbacks = mutableListOf<(Result<Map<String, Any?>>) -> Unit>()
+
+    fun initialize(assetKeys: List<String>, callback: (Result<Map<String, Any?>>) -> Unit) {
+        val startInitialisation: Boolean
+        synchronized(lock) {
+            if (initialised) {
+                callback(Result.success(diagnosticsLocked()))
+                return
+            }
+            pendingCallbacks.add(callback)
+            if (initialising) {
+                return
+            }
+            initialising = true
+            requestedAssets = assetKeys.size
+            startInitialisation = true
+        }
+
+        if (!startInitialisation) {
+            return
+        }
+
+        executor.execute {
+            val outcome = runCatching { performInitialization(assetKeys) }
+            val callbacks = mutableListOf<(Result<Map<String, Any?>>) -> Unit>()
+            synchronized(lock) {
+                initialising = false
+                if (outcome.isSuccess) {
+                    initialised = true
+                }
+                callbacks.addAll(pendingCallbacks)
+                pendingCallbacks.clear()
+            }
+            callbacks.forEach { cb ->
+                Handler(Looper.getMainLooper()).post { cb(outcome) }
+            }
+        }
+    }
 
     fun play(assetKey: String, volume: Float) {
         val trimmed = assetKey.trim()
@@ -581,14 +683,22 @@ private class ElectronicsClipManager(context: Context) {
                         .build()
                 )
 
-                val lookupKey = flutterLoader.getLookupKeyForAsset(trimmed)
-                try {
-                    assetManager.openFd(lookupKey).use { afd ->
-                        player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                val cachedFile = synchronized(lock) { assetFiles[trimmed] }
+                if (cachedFile != null) {
+                    player.setDataSource(cachedFile.absolutePath)
+                } else {
+                    val lookupKey = flutterLoader.getLookupKeyForAsset(trimmed)
+                    try {
+                        assetManager.openFd(lookupKey).use { afd ->
+                            player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                        }
+                    } catch (openError: IOException) {
+                        val cached = materialiseAsset(lookupKey, trimmed)
+                        synchronized(lock) {
+                            assetFiles[trimmed] = cached
+                        }
+                        player.setDataSource(cached.absolutePath)
                     }
-                } catch (openError: IOException) {
-                    val cached = materialiseAsset(lookupKey, trimmed)
-                    player.setDataSource(cached.absolutePath)
                 }
 
                 player.setVolume(clamped, clamped)
@@ -635,7 +745,56 @@ private class ElectronicsClipManager(context: Context) {
 
     fun release() {
         stopAll()
+        synchronized(lock) {
+            assetFiles.clear()
+            pendingCallbacks.clear()
+            initialised = false
+            initialising = false
+            requestedAssets = 0
+        }
         executor.shutdownNow()
+    }
+
+    private fun performInitialization(assetKeys: List<String>): Map<String, Any?> {
+        synchronized(lock) {
+            assetFiles.clear()
+        }
+        var warmed = 0
+        for (assetKey in assetKeys) {
+            val trimmed = assetKey.trim()
+            if (trimmed.isEmpty()) {
+                continue
+            }
+            try {
+                val lookupKey = flutterLoader.getLookupKeyForAsset(trimmed)
+                val file = materialiseAsset(lookupKey, trimmed)
+                synchronized(lock) {
+                    assetFiles[trimmed] = file
+                }
+                warmMediaPlayer(file)
+                warmed += 1
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to prewarm electronics clip $trimmed", e)
+            }
+        }
+        val diagnostics = diagnosticsLocked().toMutableMap()
+        diagnostics["count"] = warmed
+        diagnostics["status"] = when {
+            assetKeys.isEmpty() -> "empty"
+            warmed == 0 -> "failed"
+            warmed == assetKeys.size -> "ok"
+            else -> "partial"
+        }
+        return diagnostics
+    }
+
+    private fun diagnosticsLocked(): HashMap<String, Any?> {
+        return hashMapOf(
+            "electronicsInitialised" to initialised,
+            "electronicsAssets" to assetFiles.size,
+            "electronicsRequested" to requestedAssets,
+            "electronicsPlayers" to activePlayers.size
+        )
     }
 
     private fun removePlayer(playerId: Int, player: MediaPlayer) {
@@ -664,6 +823,26 @@ private class ElectronicsClipManager(context: Context) {
             }
         }
         return target
+    }
+
+    private fun warmMediaPlayer(file: File) {
+        val player = MediaPlayer()
+        try {
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            )
+            player.setDataSource(file.absolutePath)
+            player.prepare()
+        } finally {
+            try {
+                player.reset()
+            } catch (_: Exception) {
+            }
+            player.release()
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-15T11:24:52+00:00",
+  "generated": "2026-03-16T06:59:37+00:00",
   "sourceMusicXml": "flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml",
   "sourceTriggerManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
   "stageOrder": [
@@ -1130,461 +1130,1011 @@
       "scoreMeasureOrdinal": 36,
       "position": "beat1",
       "scoreLabel": "M36, beat1",
-      "summary": "The ensemble narrows into a held threshold, preparing the cut-bridge.",
-      "scoreDynamics": "mp -> p",
+      "summary": "The tour-cut bridge grows for eight beats, erupts into the most complex cross-ensemble activity of the piece, then drops to a shared blackout on beat 25.",
+      "scoreDynamics": "mp -> fff -> blackout",
       "designTags": [
-        "threshold",
-        "narrowing",
-        "pre_bridge"
+        "tour_cut",
+        "extended_bridge",
+        "max_complexity",
+        "blackout"
       ],
-      "availableWindowMs": 13333.333,
-      "durationMs": 12533.333,
+      "availableWindowMs": 20000.0,
+      "durationMs": 21666.667,
       "parts": {
         "soprano_l1": {
           "label": "Sop-L1",
-          "summary": "Holds a narrow left edge of light.",
-          "motion": "narrow-hold",
-          "peakLevel": 0.24,
-          "durationMs": 12533.333,
+          "summary": "Rises first on the far left, then becomes a fast-leading edge in the dense central field.",
+          "motion": "tour-cut-ramp-and-maelstrom",
+          "peakLevel": 1.0,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 1754.667,
+              "atMs": 1666.667,
+              "level": 0.08
+            },
+            {
+              "atMs": 3333.333,
               "level": 0.18
             },
             {
-              "atMs": 5765.333,
-              "level": 0.24
+              "atMs": 5000.0,
+              "level": 0.3
             },
             {
-              "atMs": 10026.666,
-              "level": 0.12
+              "atMs": 6250.0,
+              "level": 0.44
             },
             {
-              "atMs": 12533.333,
+              "atMs": 6666.667,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7083.333,
+              "level": 0.22,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7708.333,
+              "level": 0.84,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8125.0,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8750.0,
+              "level": 1.0,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9166.667,
+              "level": 0.3,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9791.667,
+              "level": 0.78,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10208.333,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10833.334,
+              "level": 0.92,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11250.0,
+              "level": 0.26,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12083.334,
+              "level": 0.74,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12500.0,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13333.334,
+              "level": 1.0,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13541.667,
+              "level": 0.36,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14166.667,
+              "level": 0.82,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14583.334,
+              "level": 0.2,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15208.334,
+              "level": 0.94,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15625.0,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16250.0,
+              "level": 0.72,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16666.667,
+              "level": 0.24,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17500.0,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17916.667,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18541.667,
+              "level": 0.64,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18958.334,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19583.334,
+              "level": 0.52,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
+              "level": 0.0,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
         },
         "soprano_l2": {
           "label": "Sop-L2",
-          "summary": "Keeps the left-center suspended just under the sopranos.",
-          "motion": "narrow-hold",
-          "peakLevel": 0.22,
-          "durationMs": 12533.333,
+          "summary": "Builds just inside the left edge, then trades rapid staggered bursts with the center.",
+          "motion": "tour-cut-ramp-and-maelstrom",
+          "peakLevel": 1.0,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 2005.333,
-              "level": 0.16
-            },
-            {
-              "atMs": 6016.0,
-              "level": 0.22
-            },
-            {
-              "atMs": 10277.333,
-              "level": 0.1
-            },
-            {
-              "atMs": 12533.333,
-              "level": 0.0
-            }
-          ]
-        },
-        "tenor_l": {
-          "label": "Ten-L",
-          "summary": "Acts as the center seam of the threshold.",
-          "motion": "center-seam",
-          "peakLevel": 0.2,
-          "durationMs": 12533.333,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 2256.0,
-              "level": 0.12
-            },
-            {
-              "atMs": 6266.667,
-              "level": 0.2
-            },
-            {
-              "atMs": 10277.333,
-              "level": 0.08
-            },
-            {
-              "atMs": 12533.333,
-              "level": 0.0
-            }
-          ]
-        },
-        "bass_l": {
-          "label": "Bass-L",
-          "summary": "Bass stays dim and grounded, barely moving.",
-          "motion": "center-seam",
-          "peakLevel": 0.18,
-          "durationMs": 12533.333,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 2506.667,
-              "level": 0.1
-            },
-            {
-              "atMs": 6768.0,
-              "level": 0.18
-            },
-            {
-              "atMs": 10528.0,
-              "level": 0.07
-            },
-            {
-              "atMs": 12533.333,
-              "level": 0.0
-            }
-          ]
-        },
-        "alto_l2": {
-          "label": "Alto-L2",
-          "summary": "Right-middle remains present but subdued.",
-          "motion": "narrow-hold",
-          "peakLevel": 0.18,
-          "durationMs": 12533.333,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 2757.333,
-              "level": 0.08
-            },
-            {
-              "atMs": 6768.0,
-              "level": 0.18
-            },
-            {
-              "atMs": 10528.0,
-              "level": 0.08
-            },
-            {
-              "atMs": 12533.333,
-              "level": 0.0
-            }
-          ]
-        },
-        "alto_l1": {
-          "label": "Alto-L1",
-          "summary": "The far-right edge becomes the faintest active contour.",
-          "motion": "narrow-hold",
-          "peakLevel": 0.16,
-          "durationMs": 12533.333,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 3008.0,
+              "atMs": 1666.667,
               "level": 0.06
             },
             {
-              "atMs": 7269.333,
+              "atMs": 3333.333,
               "level": 0.16
             },
             {
-              "atMs": 10778.666,
-              "level": 0.08
+              "atMs": 5000.0,
+              "level": 0.28
             },
             {
-              "atMs": 12533.333,
-              "level": 0.0
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": 8,
-      "measure": 38,
-      "measureToken": "38.3",
-      "scoreMeasureOrdinal": 40,
-      "position": "beat1",
-      "scoreLabel": "M38.3, beat1",
-      "summary": "A denser bridge crest sweeps right-to-left, still strictly max-brightness or off.",
-      "scoreDynamics": "mf",
-      "designTags": [
-        "bridge",
-        "binary_glitter",
-        "right_to_left"
-      ],
-      "availableWindowMs": 6666.667,
-      "durationMs": 6533.334,
-      "parts": {
-        "soprano_l1": {
-          "label": "Sop-L1",
-          "summary": "Receives the returning sweep last, after the center has already flashed.",
-          "motion": "binary-sweep",
-          "peakLevel": 1.0,
-          "durationMs": 6533.334,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
+              "atMs": 6250.0,
+              "level": 0.4
             },
             {
-              "atMs": 3005.334,
+              "atMs": 6875.0,
+              "level": 0.76,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7291.667,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7916.667,
+              "level": 0.94,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8333.333,
+              "level": 0.22,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8958.333,
+              "level": 0.68,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9375.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10000.0,
               "level": 1.0,
               "interpolation": "step"
             },
             {
-              "atMs": 3332.0,
+              "atMs": 10416.667,
+              "level": 0.28,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11041.667,
+              "level": 0.86,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11458.334,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12291.667,
+              "level": 0.72,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12708.334,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13541.667,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13958.334,
+              "level": 0.3,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14583.334,
+              "level": 0.8,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15000.0,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15625.0,
+              "level": 0.92,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16041.667,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16875.0,
+              "level": 0.66,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17291.667,
+              "level": 0.2,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17916.667,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18333.334,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18958.334,
+              "level": 0.58,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19375.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19791.667,
+              "level": 0.46,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
               "level": 0.0,
               "interpolation": "step"
             },
             {
-              "atMs": 4834.667,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 5161.334,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
-              "level": 0.0
-            }
-          ]
-        },
-        "soprano_l2": {
-          "label": "Sop-L2",
-          "summary": "Upper-left joins late in the return sweep.",
-          "motion": "binary-sweep",
-          "peakLevel": 1.0,
-          "durationMs": 6533.334,
-          "keyframes": [
-            {
-              "atMs": 0.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 2352.0,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 2678.667,
-              "level": 0.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 4181.334,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 4508.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
         },
         "tenor_l": {
           "label": "Ten-L",
-          "summary": "Tenor catches the wave after the altos but before the sopranos.",
-          "motion": "binary-sweep",
+          "summary": "Acts as a volatile hinge, repeatedly relaunching the most intricate cross-stage exchanges.",
+          "motion": "tour-cut-ramp-and-maelstrom",
           "peakLevel": 1.0,
-          "durationMs": 6533.334,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 1829.334,
+              "atMs": 1666.667,
+              "level": 0.05
+            },
+            {
+              "atMs": 3333.333,
+              "level": 0.14
+            },
+            {
+              "atMs": 5000.0,
+              "level": 0.26
+            },
+            {
+              "atMs": 6250.0,
+              "level": 0.38
+            },
+            {
+              "atMs": 7083.333,
+              "level": 0.64,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7500.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8125.0,
+              "level": 0.98,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8541.667,
+              "level": 0.24,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9166.667,
+              "level": 0.74,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9583.333,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10208.333,
               "level": 1.0,
               "interpolation": "step"
             },
             {
-              "atMs": 2156.0,
+              "atMs": 10625.0,
+              "level": 0.34,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11250.0,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11666.667,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12291.667,
+              "level": 0.7,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12708.334,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13333.334,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13750.0,
+              "level": 0.28,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14375.0,
+              "level": 0.78,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14791.667,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15416.667,
+              "level": 1.0,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15833.334,
+              "level": 0.22,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16458.334,
+              "level": 0.84,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16875.0,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17500.0,
+              "level": 0.68,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17916.667,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18541.667,
+              "level": 0.92,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18958.334,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19583.334,
+              "level": 0.54,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
               "level": 0.0,
               "interpolation": "step"
             },
             {
-              "atMs": 3658.667,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 3985.334,
-              "level": 0.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 5357.334,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 5684.001,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
         },
         "bass_l": {
           "label": "Bass-L",
-          "summary": "Bass carries the heaviest middle-stage cuts.",
-          "motion": "binary-sweep",
+          "summary": "Throws the heaviest center-left cuts, creating the deepest pulses in the complex field.",
+          "motion": "tour-cut-ramp-and-maelstrom",
           "peakLevel": 1.0,
-          "durationMs": 6533.334,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 1437.333,
+              "atMs": 1666.667,
+              "level": 0.04
+            },
+            {
+              "atMs": 3333.333,
+              "level": 0.12
+            },
+            {
+              "atMs": 5000.0,
+              "level": 0.24
+            },
+            {
+              "atMs": 6250.0,
+              "level": 0.34
+            },
+            {
+              "atMs": 7291.667,
+              "level": 0.58,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7708.333,
+              "level": 0.08,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8333.333,
+              "level": 0.9,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8750.0,
+              "level": 0.2,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9375.0,
+              "level": 0.7,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9791.667,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10416.667,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10833.334,
+              "level": 0.3,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11458.334,
+              "level": 0.78,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11875.0,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12500.0,
               "level": 1.0,
               "interpolation": "step"
             },
             {
-              "atMs": 1829.334,
+              "atMs": 12916.667,
+              "level": 0.24,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13541.667,
+              "level": 0.74,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13958.334,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14583.334,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15000.0,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15625.0,
+              "level": 0.66,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16041.667,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16666.667,
+              "level": 0.94,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17083.334,
+              "level": 0.22,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17708.334,
+              "level": 0.72,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18125.0,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18750.0,
+              "level": 0.84,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19166.667,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19666.667,
+              "level": 0.5,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
               "level": 0.0,
               "interpolation": "step"
             },
             {
-              "atMs": 3005.334,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 3397.334,
-              "level": 0.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 4573.334,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 4965.334,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
         },
         "alto_l2": {
           "label": "Alto-L2",
-          "summary": "Right-middle launches the sweep with repeated bright cuts.",
-          "motion": "binary-sweep",
+          "summary": "Right-middle initiates several of the lateral surges and keeps the right flank unstable.",
+          "motion": "tour-cut-ramp-and-maelstrom",
           "peakLevel": 1.0,
-          "durationMs": 6533.334,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 522.667,
+              "atMs": 1666.667,
+              "level": 0.06
+            },
+            {
+              "atMs": 3333.333,
+              "level": 0.15
+            },
+            {
+              "atMs": 5000.0,
+              "level": 0.27
+            },
+            {
+              "atMs": 6250.0,
+              "level": 0.4
+            },
+            {
+              "atMs": 6666.667,
+              "level": 0.54,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7083.333,
+              "level": 0.08,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7500.0,
+              "level": 0.82,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7916.667,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8541.667,
               "level": 1.0,
               "interpolation": "step"
             },
             {
-              "atMs": 914.667,
+              "atMs": 8958.333,
+              "level": 0.26,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9583.333,
+              "level": 0.72,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10000.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10625.0,
+              "level": 0.94,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11041.667,
+              "level": 0.22,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11666.667,
+              "level": 0.78,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12083.334,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12708.334,
+              "level": 0.98,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13125.0,
+              "level": 0.3,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13750.0,
+              "level": 0.7,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14166.667,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14791.667,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15208.334,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15833.334,
+              "level": 0.64,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16250.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16875.0,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17291.667,
+              "level": 0.2,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17916.667,
+              "level": 0.74,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18333.334,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18958.334,
+              "level": 0.86,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19375.0,
+              "level": 0.18,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19791.667,
+              "level": 0.52,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
               "level": 0.0,
               "interpolation": "step"
             },
             {
-              "atMs": 1960.0,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 2352.0,
-              "level": 0.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 3789.334,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 4181.334,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
         },
         "alto_l1": {
           "label": "Alto-L1",
-          "summary": "The far-right edge begins the crest in the starkest cuts.",
-          "motion": "binary-sweep",
+          "summary": "The far right launches the brightest returns and completes the blackout release.",
+          "motion": "tour-cut-ramp-and-maelstrom",
           "peakLevel": 1.0,
-          "durationMs": 6533.334,
+          "durationMs": 21666.667,
           "keyframes": [
             {
               "atMs": 0.0,
               "level": 0.0
             },
             {
-              "atMs": 261.333,
+              "atMs": 1666.667,
+              "level": 0.07
+            },
+            {
+              "atMs": 3333.333,
+              "level": 0.16
+            },
+            {
+              "atMs": 5000.0,
+              "level": 0.29
+            },
+            {
+              "atMs": 6250.0,
+              "level": 0.42
+            },
+            {
+              "atMs": 6666.667,
+              "level": 0.48,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7083.333,
+              "level": 0.06,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 7708.333,
+              "level": 0.88,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8125.0,
+              "level": 0.14,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 8750.0,
+              "level": 0.7,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9166.667,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 9791.667,
+              "level": 0.96,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10208.333,
+              "level": 0.24,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 10833.334,
+              "level": 0.76,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11250.0,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 11875.0,
               "level": 1.0,
               "interpolation": "step"
             },
             {
-              "atMs": 653.333,
+              "atMs": 12291.667,
+              "level": 0.28,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 12916.667,
+              "level": 0.72,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13333.334,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 13958.334,
+              "level": 0.9,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 14375.0,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15000.0,
+              "level": 0.66,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 15416.667,
+              "level": 0.08,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16041.667,
+              "level": 0.98,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 16458.334,
+              "level": 0.2,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17083.334,
+              "level": 0.74,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 17500.0,
+              "level": 0.1,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18125.0,
+              "level": 0.92,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 18541.667,
+              "level": 0.16,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19166.667,
+              "level": 0.6,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19583.334,
+              "level": 0.12,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 19916.667,
+              "level": 0.4,
+              "interpolation": "step"
+            },
+            {
+              "atMs": 20000.0,
               "level": 0.0,
               "interpolation": "step"
             },
             {
-              "atMs": 1568.0,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 1960.0,
-              "level": 0.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 3136.0,
-              "level": 1.0,
-              "interpolation": "step"
-            },
-            {
-              "atMs": 3528.0,
-              "level": 0.0
-            },
-            {
-              "atMs": 6533.334,
+              "atMs": 21666.667,
               "level": 0.0
             }
           ]
@@ -1847,15 +2397,15 @@
         "rhythmic_lock",
         "tour_cut"
       ],
-      "availableWindowMs": 116078.664,
-      "durationMs": 106792.371,
+      "availableWindowMs": 300245.331,
+      "durationMs": 276225.705,
       "parts": {
         "soprano_l1": {
           "label": "Sop-L1",
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.29,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -2283,7 +2833,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]
@@ -2293,7 +2843,7 @@
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.31,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -2721,7 +3271,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]
@@ -2731,7 +3281,7 @@
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.35,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -3249,7 +3799,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]
@@ -3259,7 +3809,7 @@
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.39,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -3777,7 +4327,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]
@@ -3787,7 +4337,7 @@
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.27,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -4305,7 +4855,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]
@@ -4315,7 +4865,7 @@
           "summary": "Every flash is locked to actual note onsets from measure 115 onward, with no interpolated swell between attacks.",
           "motion": "note-synchronous",
           "peakLevel": 0.25,
-          "durationMs": 106792.371,
+          "durationMs": 276225.705,
           "keyframes": [
             {
               "atMs": 0.0,
@@ -4833,7 +5383,7 @@
               "interpolation": "step"
             },
             {
-              "atMs": 106792.371,
+              "atMs": 276225.705,
               "level": 0.0
             }
           ]

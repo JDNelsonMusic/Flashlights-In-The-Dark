@@ -46,16 +46,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // SAFETY: unwrap self once, then ALWAYS use `self.` inside
             // -------------------------------------------------------------
             guard let self = self else { return event }
-            if !self.state.isKeyCaptureEnabled {
-                return event
-            }
-            if let group = self.fKeyToGroup[event.keyCode], event.type == .keyDown {
-                if let slots = self.groupSlots[group] {
-                    self.state.triggerSlots(realSlots: slots)
-                }
+            if event.keyCode == 49 && event.type == .keyDown && !self.state.isTransportShortcutSuspended {
+                self.state.triggerCurrentEvent()
                 return nil
             }
-            if let specialKey = event.specialKey, event.type == .keyDown {
+            if let specialKey = event.specialKey, event.type == .keyDown, !self.state.isTransportShortcutSuspended {
                 switch specialKey {
                 case .leftArrow:
                     if event.modifierFlags.contains(.shift) {
@@ -75,12 +70,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     break
                 }
             }
-            guard let chars = event.charactersIgnoringModifiers?.lowercased(),
-                  let c = chars.first else { return event }
-            if c == " " && event.type == .keyDown {
-                self.state.triggerCurrentEvent()
+            if !self.state.isKeyCaptureEnabled {
+                return event
+            }
+            if let group = self.fKeyToGroup[event.keyCode], event.type == .keyDown {
+                if let slots = self.groupSlots[group] {
+                    self.state.triggerSlots(realSlots: slots)
+                }
                 return nil
             }
+            guard let chars = event.charactersIgnoringModifiers?.lowercased(),
+                  let c = chars.first else { return event }
             // Glow Ramp toggle on "]" and Slow Glow Ramp on "["
             if c == "]" && event.type == .keyDown {
                 self.state.glowRampActive.toggle()

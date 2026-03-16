@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Thin wrapper around the platform method channel that plays primer tone
-/// assets via native audio APIs.
+/// Thin wrapper around the platform method channel that prewarms and plays
+/// bundled audio assets via native audio APIs.
 class NativeAudio {
   NativeAudio._();
 
@@ -33,7 +33,7 @@ class NativeAudio {
     }
   }
 
-  /// Returns whether the native layer reports the primer library as prepared.
+  /// Returns whether the native layer reports the native audio libraries as prepared.
   static bool get isReady => _readyCompleter?.isCompleted ?? false;
 
   /// Last diagnostics snapshot provided by the platform after initialisation.
@@ -42,7 +42,7 @@ class NativeAudio {
   /// Last initialisation error surfaced by the native layer, if any.
   static Object? get lastInitError => _lastInitError;
 
-  /// Ensures the native audio engine has loaded every primer tone into memory.
+  /// Ensures the native audio engine has preloaded its bundled libraries.
   static Future<void> ensureInitialized() {
     if (!_isSupportedPlatform) {
       final ready = _readyCompleter ??= Completer<void>()..complete();
@@ -56,26 +56,39 @@ class NativeAudio {
       _initialising = true;
       () async {
         try {
-          final manifest = await _primeAssets();
-          final value = await _channel.invokeMapMethod<String, dynamic>(
+          final primerManifest = await _primePrimerAssets();
+          final primerValue = await _channel.invokeMapMethod<String, dynamic>(
             'initializePrimerLibrary',
-            manifest,
+            primerManifest,
+          );
+          final electronicsManifest = await _primeElectronicsAssets();
+          final electronicsValue = await _channel.invokeMapMethod<String, dynamic>(
+            'initializeElectronicsLibrary',
+            electronicsManifest,
           );
 
-          if (value != null) {
-            final snapshot = Map<String, dynamic>.unmodifiable(value);
-            _lastInitSnapshot = snapshot;
+          if (primerValue != null || electronicsValue != null) {
+            final snapshot = <String, dynamic>{
+              if (primerValue != null) ...primerValue,
+              if (electronicsValue != null) 'electronics': electronicsValue,
+            };
+            final frozenSnapshot = Map<String, dynamic>.unmodifiable(snapshot);
+            _lastInitSnapshot = frozenSnapshot;
             final status = snapshot['status'] as String?;
             final count = snapshot['count'] ?? snapshot['sounds'];
             debugPrint(
               '[NativeAudio] Primer library ready (${count ?? 'n/a'} assets, status=${status ?? 'unknown'})',
             );
 
-            if (status == 'failed') {
+            final electronicsStatus =
+                electronicsValue == null
+                    ? null
+                    : electronicsValue['status'] as String?;
+            if (status == 'failed' || electronicsStatus == 'failed') {
               throw PlatformException(
                 code: 'INIT_FAILED',
-                message: 'Primer preload returned failed status',
-                details: snapshot,
+                message: 'Native audio preload returned failed status',
+                details: frozenSnapshot,
               );
             }
           } else {
@@ -110,7 +123,7 @@ class NativeAudio {
     return completer.future;
   }
 
-  static Future<Map<String, dynamic>> _primeAssets() async {
+  static Future<Map<String, dynamic>> _primePrimerAssets() async {
     final decoded = await _loadAssetManifest();
     final primerAssets =
         decoded.keys
@@ -125,6 +138,26 @@ class NativeAudio {
       'assets': primerAssets,
       'canonical': canonical,
       'requested': primerAssets.length,
+      'bundledAssetCount': decoded.length,
+      'generatedAt': DateTime.now().toIso8601String(),
+    };
+  }
+
+  static Future<Map<String, dynamic>> _primeElectronicsAssets() async {
+    final decoded = await _loadAssetManifest();
+    final electronicsAssets =
+        decoded.keys
+            .where(
+              (key) =>
+                  key.startsWith('available-sounds/electronics-trigger-clips/') &&
+                  key.toLowerCase().endsWith('.mp3'),
+            )
+            .toList()
+          ..sort();
+
+    return <String, dynamic>{
+      'assets': electronicsAssets,
+      'requested': electronicsAssets.length,
       'bundledAssetCount': decoded.length,
       'generatedAt': DateTime.now().toIso8601String(),
     };
@@ -164,6 +197,7 @@ class NativeAudio {
     String assetKey,
     double volume,
   ) async {
+    await ensureInitialized();
     final trimmed = assetKey.trim();
     if (trimmed.isEmpty) {
       debugPrint('[NativeAudio] Ignoring empty electronics clip request');

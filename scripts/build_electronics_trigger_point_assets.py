@@ -61,9 +61,18 @@ RECIPE_COPY_PATHS = [
 ]
 FADE_IN_MS = 20.0
 FIRST_TRIGGER_START_MS = 2000.0
-CROSSFADE_BEATS = 1.0
-TP8_CONCRETE_FADE_IN_BEATS = 2.0
-TP8_CONCRETE_FADE_OUT_BEATS = 1.0
+TP5_TOTAL_BEATS = 26.0
+TP5_BASE_BEATS = 12.0
+TP5_BASE_FADE_OUT_BEATS = 4.0
+TP5_CONCRETE_START_BEAT = 5.0
+TP5_CONCRETE_END_BEAT = 24.0
+TP5_CONCRETE_FADE_IN_BEATS = 4.0
+TP5_CONCRETE_FADE_OUT_BEATS = 4.0
+TP5_REENTRY_START_BEAT = 9.0
+TP5_REENTRY_FADE_IN_BEATS = 14.0
+TP5_REENTRY_FADE_OUT_BEATS = 2.0
+TP5_REENTRY_SOURCE_START_MEASURE = "100"
+TP5_REENTRY_SOURCE_END_MEASURE = "104"
 
 
 @dataclass(frozen=True)
@@ -260,6 +269,25 @@ def part_concrete_output_path(trigger_id: int, variant: PartConcreteVariant) -> 
     return ROOT / "flashlights_client" / part_concrete_asset_key(trigger_id, variant)
 
 
+def part_variant_asset_key(trigger_id: int, variant: PartConcreteVariant) -> str:
+    return (
+        "available-sounds/electronics-trigger-clips/part-specific/"
+        f"{variant.directory}/electronics-trigger-{trigger_id:02d}-{variant.directory}-tour-cut-composite.mp3"
+    )
+
+
+def part_variant_output_path(trigger_id: int, variant: PartConcreteVariant) -> Path:
+    return ROOT / "flashlights_client" / part_variant_asset_key(trigger_id, variant)
+
+
+def choir_variant_for_part(part_key: str) -> ChoirVariant:
+    if part_key.startswith("soprano"):
+        return CHOIR_VARIANTS[0]
+    if part_key.startswith("alto"):
+        return CHOIR_VARIANTS[1]
+    return CHOIR_VARIANTS[2]
+
+
 def render_variant(
     *,
     source_path: Path,
@@ -350,81 +378,64 @@ def render_passthrough_variant(
     )
 
 
-def render_cut_source(
+def render_tp5_tour_cut_part_variant(
     *,
     full_source_path: Path,
+    concrete_source_path: Path,
     output_path: Path,
-    full_token_lookup: dict[str, dict[str, Any]],
-    cut_token_lookup: dict[str, dict[str, Any]],
-    trigger_specs: list[TriggerPointSpec],
+    base_channel_expression: str,
+    base_start_ms: float,
+    reentry_start_ms: float,
+    reentry_end_ms: float,
+    total_duration_ms: float,
 ) -> None:
-    trigger_by_id = {trigger.id: trigger for trigger in trigger_specs}
-    trigger5 = trigger_by_id[5]
-    trigger8 = trigger_by_id[8]
-    trigger11 = trigger_by_id[11]
-
-    full_5_ms, _, _ = trigger_onset_ms(
-        full_token_lookup,
-        TriggerPointSpec(
-            id=trigger5.id,
-            measure_token=trigger5.source_measure_token,
-            measure=trigger5.source_measure,
-            position_label=trigger5.position_label,
-            score_label=trigger5.score_label,
-            role=trigger5.role,
-            source_measure_token=trigger5.source_measure_token,
-            source_measure=trigger5.source_measure,
-        ),
-    )
-    full_8_ms, _, _ = trigger_onset_ms(
-        full_token_lookup,
-        TriggerPointSpec(
-            id=trigger8.id,
-            measure_token=trigger8.source_measure_token,
-            measure=trigger8.source_measure,
-            position_label=trigger8.position_label,
-            score_label=trigger8.score_label,
-            role=trigger8.role,
-            source_measure_token=trigger8.source_measure_token,
-            source_measure=trigger8.source_measure,
-        ),
-    )
-    full_11_ms, _, _ = trigger_onset_ms(
-        full_token_lookup,
-        TriggerPointSpec(
-            id=trigger11.id,
-            measure_token=trigger11.source_measure_token,
-            measure=trigger11.source_measure,
-            position_label=trigger11.position_label,
-            score_label=trigger11.score_label,
-            role=trigger11.role,
-            source_measure_token=trigger11.source_measure_token,
-            source_measure=trigger11.source_measure,
-        ),
-    )
-
-    cut_5_ms, _, _ = trigger_onset_ms(cut_token_lookup, trigger5)
-    cut_8_ms, tempo_8_bpm, _ = trigger_onset_ms(cut_token_lookup, trigger8)
-    cut_11_ms, _, _ = trigger_onset_ms(cut_token_lookup, trigger11)
-
-    span_5_to_8_ms = round(cut_8_ms - cut_5_ms, 3)
-    span_8_to_11_ms = round(cut_11_ms - cut_8_ms, 3)
-    if span_5_to_8_ms <= 0 or span_8_to_11_ms <= 0:
-        raise ValueError("Tour-cut trigger ordering is invalid for 5 -> 8 -> 11")
-
-    crossfade_ms = round((60000.0 / tempo_8_bpm) * CROSSFADE_BEATS, 3)
-    segment_5_ms = span_5_to_8_ms + crossfade_ms
-    segment_8_ms = span_8_to_11_ms
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    filter_graph = (
-        f"[0:a]atrim=start=0:end={full_5_ms / 1000.0:.6f},asetpts=PTS-STARTPTS[pre];"
-        f"[0:a]atrim=start={full_5_ms / 1000.0:.6f}:end={(full_5_ms + segment_5_ms) / 1000.0:.6f},asetpts=PTS-STARTPTS[seg5];"
-        f"[0:a]atrim=start={full_8_ms / 1000.0:.6f}:end={(full_8_ms + segment_8_ms) / 1000.0:.6f},asetpts=PTS-STARTPTS[seg8];"
-        f"[seg5][seg8]acrossfade=d={crossfade_ms / 1000.0:.6f}[bridge];"
-        f"[0:a]atrim=start={full_11_ms / 1000.0:.6f},asetpts=PTS-STARTPTS[tail];"
-        "[pre][bridge][tail]concat=n=3:v=0:a=1[out]"
+
+    beat_duration_ms = beat_ms(72.0)
+    base_duration_ms = round(beat_duration_ms * TP5_BASE_BEATS, 3)
+    base_fade_out_ms = round(beat_duration_ms * TP5_BASE_FADE_OUT_BEATS, 3)
+    base_fade_out_start_ms = round(base_duration_ms - base_fade_out_ms, 3)
+
+    concrete_delay_ms = round(beat_duration_ms * (TP5_CONCRETE_START_BEAT - 1.0), 3)
+    concrete_duration_ms = round(
+        beat_duration_ms * (TP5_CONCRETE_END_BEAT - TP5_CONCRETE_START_BEAT + 1.0),
+        3,
     )
+    concrete_fade_out_start_ms = round(
+        concrete_duration_ms - beat_duration_ms * TP5_CONCRETE_FADE_OUT_BEATS,
+        3,
+    )
+
+    reentry_delay_ms = round(beat_duration_ms * (TP5_REENTRY_START_BEAT - 1.0), 3)
+    reentry_duration_ms = round(reentry_end_ms - reentry_start_ms, 3)
+    reentry_fade_in_ms = round(beat_duration_ms * TP5_REENTRY_FADE_IN_BEATS, 3)
+    reentry_fade_out_ms = round(beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS, 3)
+    reentry_fade_out_start_ms = round(reentry_duration_ms - reentry_fade_out_ms, 3)
+
+    filter_graph = (
+        f"[0:a]atrim=start={base_start_ms / 1000.0:.6f}:end={(base_start_ms + base_duration_ms) / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        f"pan=mono|{base_channel_expression},"
+        f"afade=t=in:st=0:d={FADE_IN_MS / 1000.0:.6f},"
+        f"afade=t=out:st={base_fade_out_start_ms / 1000.0:.6f}:d={base_fade_out_ms / 1000.0:.6f}[base];"
+        f"[1:a]atrim=start=0:end={concrete_duration_ms / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        "pan=mono|c0=0.5*c0+0.5*c1,"
+        f"afade=t=in:st=0:d={(beat_duration_ms * TP5_CONCRETE_FADE_IN_BEATS) / 1000.0:.6f},"
+        f"afade=t=out:st={concrete_fade_out_start_ms / 1000.0:.6f}:d={(beat_duration_ms * TP5_CONCRETE_FADE_OUT_BEATS) / 1000.0:.6f},"
+        f"adelay={int(round(concrete_delay_ms))}:all=1[concrete];"
+        f"[0:a]atrim=start={reentry_start_ms / 1000.0:.6f}:end={reentry_end_ms / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        f"pan=mono|{base_channel_expression},"
+        f"afade=t=in:st=0:d={reentry_fade_in_ms / 1000.0:.6f},"
+        f"afade=t=out:st={reentry_fade_out_start_ms / 1000.0:.6f}:d={reentry_fade_out_ms / 1000.0:.6f},"
+        f"adelay={int(round(reentry_delay_ms))}:all=1[reentry];"
+        f"[base][concrete][reentry]amix=inputs=3:normalize=0:dropout_transition=0,"
+        f"apad=whole_dur={total_duration_ms / 1000.0:.6f},"
+        f"atrim=duration={total_duration_ms / 1000.0:.6f},"
+        "alimiter=limit=0.97[out]"
+    )
+
     subprocess.run(
         [
             "ffmpeg",
@@ -433,6 +444,8 @@ def render_cut_source(
             "-y",
             "-i",
             str(full_source_path),
+            "-i",
+            str(concrete_source_path),
             "-filter_complex",
             filter_graph,
             "-map",
@@ -453,15 +466,37 @@ def clear_output_root(output_root: Path) -> None:
     output_root.mkdir(parents=True, exist_ok=True)
 
 
+def trigger_source_onset_ms(
+    token_lookup: dict[str, dict[str, Any]],
+    trigger: TriggerPointSpec,
+    offset_ms: float,
+) -> float:
+    onset_ms, _, _ = trigger_onset_ms(
+        token_lookup,
+        TriggerPointSpec(
+            id=trigger.id,
+            measure_token=trigger.source_measure_token,
+            measure=trigger.source_measure,
+            position_label=trigger.position_label,
+            score_label=trigger.score_label,
+            role=trigger.role,
+            source_measure_token=trigger.source_measure_token,
+            source_measure=trigger.source_measure,
+        ),
+    )
+    return round(onset_ms + offset_ms, 3)
+
+
 def build_trigger_plans(
     *,
-    token_lookup: dict[str, dict[str, Any]],
+    cut_token_lookup: dict[str, dict[str, Any]],
+    full_token_lookup: dict[str, dict[str, Any]],
     source_duration_ms: float,
     trigger_specs: list[TriggerPointSpec],
 ) -> tuple[list[dict[str, Any]], float]:
     trigger_rows: list[dict[str, Any]] = []
     for trigger in trigger_specs:
-        onset_ms, tempo_bpm, ordinal = trigger_onset_ms(token_lookup, trigger)
+        onset_ms, tempo_bpm, ordinal = trigger_onset_ms(cut_token_lookup, trigger)
         trigger_rows.append(
             {
                 "id": trigger.id,
@@ -481,42 +516,120 @@ def build_trigger_plans(
 
     plans: list[dict[str, Any]] = []
     for index, trigger in enumerate(trigger_rows):
-        file_start_ms = round(float(trigger["onsetMs"]) + offset_ms, 3)
-        if trigger["id"] == 1:
-            next_trigger = trigger_rows[index + 1]
-            fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
-            file_start_ms = FIRST_TRIGGER_START_MS
-            file_end_ms = round(float(next_trigger["onsetMs"]) + offset_ms + fade_out_ms, 3)
-            timing_rule = "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
-        elif index < len(trigger_rows) - 1:
-            next_trigger = trigger_rows[index + 1]
-            fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
-            file_end_ms = round(float(next_trigger["onsetMs"]) + offset_ms + fade_out_ms, 3)
-            timing_rule = "trigger_to_next_trigger_plus_two_beats"
-        else:
-            fade_out_ms = two_beats_ms(float(trigger["tempoBpm"]))
-            file_end_ms = source_duration_ms
-            timing_rule = "final_trigger_to_track_end"
-
-        file_end_ms = min(file_end_ms, source_duration_ms)
-        duration_ms = round(file_end_ms - file_start_ms, 3)
-        if duration_ms <= 0:
-            raise ValueError(
-                f"Trigger point {trigger['id']} produced invalid duration {duration_ms}"
-            )
+        trigger_spec = trigger_specs[index]
+        timing_note = (
+            "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
+            "Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: "
+            "the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, "
+            "and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1."
+        )
 
         variant_payload: dict[str, dict[str, Any]] = {}
-        for variant in CHOIR_VARIANTS:
-            variant_payload[variant.key] = {
-                "sample": variant_asset_key(int(trigger["id"]), variant),
-                "channelMode": variant.channel_mode,
-                "sourceStartMs": file_start_ms,
-                "sourceEndMs": file_end_ms,
-                "durationMs": duration_ms,
-                "fadeInMs": FADE_IN_MS,
-                "fadeOutMs": min(fade_out_ms, duration_ms),
-                "timingRule": timing_rule,
-            }
+        part_variants: dict[str, dict[str, Any]] = {}
+
+        if trigger["id"] == 5:
+            beat_duration_ms = beat_ms(float(trigger["tempoBpm"]))
+            total_duration_ms = round(beat_duration_ms * TP5_TOTAL_BEATS, 3)
+            base_start_ms = trigger_source_onset_ms(
+                full_token_lookup,
+                trigger_spec,
+                offset_ms,
+            )
+            base_end_ms = round(base_start_ms + beat_duration_ms * TP5_BASE_BEATS, 3)
+            reentry_start_ms = round(
+                float(full_token_lookup[TP5_REENTRY_SOURCE_START_MEASURE]["start_seconds"]) * 1000.0
+                + offset_ms,
+                3,
+            )
+            reentry_end_ms = round(
+                float(full_token_lookup[TP5_REENTRY_SOURCE_END_MEASURE]["start_seconds"]) * 1000.0
+                + offset_ms
+                + beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS,
+                3,
+            )
+
+            for part_variant in PART_CONCRETE_VARIANTS:
+                choir_variant = choir_variant_for_part(part_variant.part_key)
+                concrete_source = MUSIQUE_CONCRETE_SOURCE_ROOT / part_variant.source_name
+                if not concrete_source.exists():
+                    raise FileNotFoundError(concrete_source)
+
+                part_variants[part_variant.part_key] = {
+                    "sample": part_variant_asset_key(5, part_variant),
+                    "channelMode": "part_track",
+                    "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+                    "sourceStartMs": 0.0,
+                    "sourceEndMs": total_duration_ms,
+                    "durationMs": total_duration_ms,
+                    "fadeInMs": FADE_IN_MS,
+                    "fadeOutMs": beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS,
+                    "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+                    "designNote": (
+                        f"{part_variant.label} receives a dedicated TP5 composite: "
+                        "12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, "
+                        "and the mm100-103 preview from beats 9-26."
+                    ),
+                    "renderMode": "tp5_part_mix",
+                    "baseChannelExpression": choir_variant.pan_expression,
+                    "baseStartMs": base_start_ms,
+                    "baseEndMs": base_end_ms,
+                    "concreteSourceFile": str(concrete_source.relative_to(ROOT)),
+                    "concreteStartBeat": TP5_CONCRETE_START_BEAT,
+                    "concreteEndBeat": TP5_CONCRETE_END_BEAT,
+                    "reentrySourceStartMs": reentry_start_ms,
+                    "reentrySourceEndMs": reentry_end_ms,
+                }
+        else:
+            file_start_ms = trigger_source_onset_ms(
+                full_token_lookup,
+                trigger_spec,
+                offset_ms,
+            )
+            if trigger["id"] == 1:
+                next_trigger = trigger_rows[index + 1]
+                next_trigger_spec = trigger_specs[index + 1]
+                fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
+                file_start_ms = FIRST_TRIGGER_START_MS
+                file_end_ms = round(
+                    trigger_source_onset_ms(full_token_lookup, next_trigger_spec, offset_ms)
+                    + fade_out_ms,
+                    3,
+                )
+                timing_rule = "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
+            elif index < len(trigger_rows) - 1:
+                next_trigger = trigger_rows[index + 1]
+                next_trigger_spec = trigger_specs[index + 1]
+                fade_out_ms = two_beats_ms(float(next_trigger["tempoBpm"]))
+                file_end_ms = round(
+                    trigger_source_onset_ms(full_token_lookup, next_trigger_spec, offset_ms)
+                    + fade_out_ms,
+                    3,
+                )
+                timing_rule = "trigger_to_next_trigger_plus_two_beats"
+            else:
+                fade_out_ms = two_beats_ms(float(trigger["tempoBpm"]))
+                file_end_ms = source_duration_ms
+                timing_rule = "final_trigger_to_track_end"
+
+            file_end_ms = min(file_end_ms, source_duration_ms)
+            duration_ms = round(file_end_ms - file_start_ms, 3)
+            if duration_ms <= 0:
+                raise ValueError(
+                    f"Trigger point {trigger['id']} produced invalid duration {duration_ms}"
+                )
+
+            for variant in CHOIR_VARIANTS:
+                variant_payload[variant.key] = {
+                    "sample": variant_asset_key(int(trigger["id"]), variant),
+                    "channelMode": variant.channel_mode,
+                    "sourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
+                    "sourceStartMs": file_start_ms,
+                    "sourceEndMs": file_end_ms,
+                    "durationMs": duration_ms,
+                    "fadeInMs": FADE_IN_MS,
+                    "fadeOutMs": min(fade_out_ms, duration_ms),
+                    "timingRule": timing_rule,
+                }
 
         plans.append(
             {
@@ -530,58 +643,10 @@ def build_trigger_plans(
                 "onsetMilliseconds": trigger["onsetMs"],
                 "tempoBpm": trigger["tempoBpm"],
                 "sourceOffsetMs": offset_ms,
-                "timingNote": (
-                    "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. "
-                    "Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates "
-                    "full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11."
-                ),
+                "timingNote": timing_note,
                 "variants": variant_payload,
+                "partVariants": part_variants,
             }
-        )
-
-    trigger8_plan = next((plan for plan in plans if plan["id"] == 8), None)
-    m38_4_entry = token_lookup.get("38.4")
-    if trigger8_plan is not None and m38_4_entry is not None:
-        trigger8_onset_ms = float(trigger8_plan["onsetMilliseconds"])
-        trigger8_end_ms = round(float(m38_4_entry["start_seconds"]) * 1000.0, 3)
-        trigger8_duration_ms = round(trigger8_end_ms - trigger8_onset_ms, 3)
-        trigger8_tempo_bpm = float(trigger8_plan["tempoBpm"])
-        if trigger8_duration_ms <= 0:
-            raise ValueError(
-                f"Trigger 8 concrete window is invalid: {trigger8_duration_ms} ms"
-            )
-
-        concrete_variants: dict[str, dict[str, Any]] = {}
-        for part_variant in PART_CONCRETE_VARIANTS:
-            source_path = MUSIQUE_CONCRETE_SOURCE_ROOT / part_variant.source_name
-            if not source_path.exists():
-                raise FileNotFoundError(source_path)
-
-            source_duration = ffprobe_duration_ms(source_path)
-            clip_end_ms = min(trigger8_duration_ms, source_duration)
-            fade_in_ms = min(beat_ms(trigger8_tempo_bpm, TP8_CONCRETE_FADE_IN_BEATS), clip_end_ms)
-            fade_out_ms = min(beat_ms(trigger8_tempo_bpm, TP8_CONCRETE_FADE_OUT_BEATS), clip_end_ms)
-            concrete_variants[part_variant.part_key] = {
-                "sample": part_concrete_asset_key(8, part_variant),
-                "channelMode": "part_track",
-                "sourceFile": str(source_path.relative_to(ROOT)),
-                "sourceStartMs": 0.0,
-                "sourceEndMs": clip_end_ms,
-                "durationMs": clip_end_ms,
-                "fadeInMs": fade_in_ms,
-                "fadeOutMs": fade_out_ms,
-                "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-                "designNote": (
-                    f"{part_variant.label} receives its own musique-concrete strand at Trigger 8. "
-                    "The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
-                ),
-            }
-
-        trigger8_plan["partVariants"] = concrete_variants
-        trigger8_plan["timingNote"] = (
-            trigger8_plan["timingNote"]
-            + " Trigger 8 is a deliberate exception: six independent musique-concrete stems are assigned "
-            + "to the six light-staff parts and each is forced to end at M38.4 beat 1."
         )
 
     return plans, offset_ms
@@ -589,14 +654,15 @@ def build_trigger_plans(
 
 def render_assets(
     *,
-    source_path: Path,
     plans: list[dict[str, Any]],
 ) -> None:
     for plan in plans:
         for variant in CHOIR_VARIANTS:
-            payload = plan["variants"][variant.key]
+            payload = plan["variants"].get(variant.key)
+            if payload is None:
+                continue
             render_variant(
-                source_path=source_path,
+                source_path=ROOT / payload.get("sourceFile", str(FULL_SOURCE_MP3.relative_to(ROOT))),
                 output_path=variant_output_path(plan["id"], variant),
                 start_ms=float(payload["sourceStartMs"]),
                 end_ms=float(payload["sourceEndMs"]),
@@ -609,14 +675,26 @@ def render_assets(
             payload = plan.get("partVariants", {}).get(part_variant.part_key)
             if payload is None:
                 continue
-            render_passthrough_variant(
-                source_path=ROOT / payload["sourceFile"],
-                output_path=part_concrete_output_path(plan["id"], part_variant),
-                start_ms=float(payload["sourceStartMs"]),
-                end_ms=float(payload["sourceEndMs"]),
-                fade_in_ms=float(payload["fadeInMs"]),
-                fade_out_ms=float(payload["fadeOutMs"]),
-            )
+            if payload.get("renderMode") == "tp5_part_mix":
+                render_tp5_tour_cut_part_variant(
+                    full_source_path=FULL_SOURCE_MP3,
+                    concrete_source_path=ROOT / payload["concreteSourceFile"],
+                    output_path=part_variant_output_path(plan["id"], part_variant),
+                    base_channel_expression=str(payload["baseChannelExpression"]),
+                    base_start_ms=float(payload["baseStartMs"]),
+                    reentry_start_ms=float(payload["reentrySourceStartMs"]),
+                    reentry_end_ms=float(payload["reentrySourceEndMs"]),
+                    total_duration_ms=float(payload["durationMs"]),
+                )
+            else:
+                render_passthrough_variant(
+                    source_path=ROOT / payload["sourceFile"],
+                    output_path=part_concrete_output_path(plan["id"], part_variant),
+                    start_ms=float(payload["sourceStartMs"]),
+                    end_ms=float(payload["sourceEndMs"]),
+                    fade_in_ms=float(payload["fadeInMs"]),
+                    fade_out_ms=float(payload["fadeOutMs"]),
+                )
 
 
 def build_manifest(
@@ -628,7 +706,7 @@ def build_manifest(
 ) -> dict[str, Any]:
     return {
         "generated": generated_at,
-        "sourceFile": str(CUT_SOURCE_MP3.relative_to(ROOT)),
+        "sourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "fullSourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "sourceDurationMs": source_duration_ms,
         "syncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
@@ -642,8 +720,8 @@ def build_manifest(
         "specialPartSpecificTriggerIds": [
             plan["id"] for plan in plans if plan.get("partVariants")
         ],
-        "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
-        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
+        "tailRule": "Standard clips end 2 beats after the next surviving trigger point. Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats.",
+        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
         "events": plans,
     }
 
@@ -732,16 +810,17 @@ def write_recipe_copies(
         "source": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
         "triggerPositionSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
         "triggerTimingNote": (
-            "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 8, 11, 12. "
-            "Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4, with Trigger 8 landing at 38.3. "
+            "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 11, 12. "
+            "Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4. "
             "Trigger Point 2 remains locked to 00:11.912 in the tour-cut electronics master. "
-            "The master truncates Trigger 5, crossfades into Trigger 8, and rejoins the source at Trigger 11. "
-            "Trigger Point 1 starts at 00:02.000 in the file. All later clips start at their beat-mapped tour-cut onsets and end 2 beats after the next surviving trigger."
+            "Trigger Point 5 is now a custom 26-beat tour-cut composite: its own electronics sound for 12 beats, "
+            "six musique-concrete strands enter on beats 5-24, and a mm100-103 layer crescendos across beats 9-26. "
+            "Trigger Point 11 stays at M104 beat 1 and overlaps TP5 by 2 beats. Trigger Point 1 starts at 00:02.000 in the file."
         ),
         "eventCount": len(plans),
         "generated": generated_at,
         "scoreMusicXml": str(CUT_SCORE_XML.relative_to(ROOT)),
-        "electronicsSource": str(CUT_SOURCE_MP3.relative_to(ROOT)),
+        "electronicsSource": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "electronicsSyncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
         "electronicsManifest": str(MANIFEST_JSON_PATH.relative_to(ROOT)),
         "electronicsGenerated": generated_at,
@@ -802,22 +881,10 @@ def main() -> None:
     _, full_token_lookup, _ = build_measure_token_map(FULL_SCORE_XML)
     _, cut_token_lookup, _ = build_measure_token_map(CUT_SCORE_XML)
     trigger_specs = load_trigger_specs(TRIGGER_POINT_SOURCE)
-
-    if not args.skip_render and not args.skip_cut_source:
-        render_cut_source(
-            full_source_path=FULL_SOURCE_MP3,
-            output_path=CUT_SOURCE_MP3,
-            full_token_lookup=full_token_lookup,
-            cut_token_lookup=cut_token_lookup,
-            trigger_specs=trigger_specs,
-        )
-
-    if not CUT_SOURCE_MP3.exists():
-        raise FileNotFoundError(CUT_SOURCE_MP3)
-
-    source_duration_ms = ffprobe_duration_ms(CUT_SOURCE_MP3)
+    source_duration_ms = ffprobe_duration_ms(FULL_SOURCE_MP3)
     plans, offset_ms = build_trigger_plans(
-        token_lookup=cut_token_lookup,
+        cut_token_lookup=cut_token_lookup,
+        full_token_lookup=full_token_lookup,
         source_duration_ms=source_duration_ms,
         trigger_specs=trigger_specs,
     )
@@ -825,7 +892,7 @@ def main() -> None:
 
     if not args.skip_render:
         clear_output_root(FLUTTER_ASSET_ROOT)
-        render_assets(source_path=CUT_SOURCE_MP3, plans=plans)
+        render_assets(plans=plans)
 
     manifest = build_manifest(
         generated_at=generated_at,
@@ -836,11 +903,10 @@ def main() -> None:
     write_manifest(manifest)
     write_recipe_copies(generated_at=generated_at, plans=plans)
 
-    part_specific_asset_count = sum(
-        len(plan.get("partVariants", {})) for plan in plans
-    )
-    print(f"Rendered {len(plans) * len(CHOIR_VARIANTS) + part_specific_asset_count} assets")
-    print(f"Tour-cut source: {CUT_SOURCE_MP3.relative_to(ROOT)}")
+    choir_asset_count = sum(len(plan.get("variants", {})) for plan in plans)
+    part_specific_asset_count = sum(len(plan.get("partVariants", {})) for plan in plans)
+    print(f"Rendered {choir_asset_count + part_specific_asset_count} assets")
+    print(f"Primary source: {FULL_SOURCE_MP3.relative_to(ROOT)}")
     print(f"Manifest: {MANIFEST_JSON_PATH.relative_to(ROOT)}")
     print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")
 

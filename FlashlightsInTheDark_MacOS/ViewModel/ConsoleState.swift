@@ -398,6 +398,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var statuses: [Int: DeviceStatus] = [:]
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
     @Published public var isKeyCaptureEnabled: Bool = true
+    @Published public var isTransportShortcutSuspended: Bool = false
     @Published public private(set) var showSessionId: String = UUID().uuidString
     @Published public private(set) var protocolVersion: Int = Int(ConcertProtocol.version)
     @Published public var expectedDeviceCount: Int = ConcertProtocol.expectedDeviceCount
@@ -431,11 +432,15 @@ public final class ConsoleState: ObservableObject, Sendable {
     private let heartbeatGraceInterval: TimeInterval = 18
     private let heartbeatProbeSpacing: TimeInterval = 20
     private let conductorHelloInterval: TimeInterval = 1.5
+    private let syncInterval: TimeInterval = 1.0
     private let conductorHandshakeTimeout: TimeInterval = 45
+    private let eventTriggerAckWaitNs: UInt64 = 35_000_000
+    private let eventTriggerResendPasses: Int = 2
     /// When we last probed a given slot with a /discover ping.
     private var lastHelloProbe: [Int: Date] = [:]
     private var conductorHelloTimer: Timer?
     private var conductorHelloStartedAt: Date?
+    private var syncTimer: Timer?
     private var metricsTimer: Timer?
 
     private var sessionURL: URL?
@@ -500,6 +505,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var decayMs: Int = 200
     @Published public var sustainPct: Int = 50
     @Published public var releaseMs: Int = 200
+    @Published public var eventTriggerLeadTimeMs: Int = 120
     /// How typing keyboard triggers devices: torch only, sound only, or both
     public enum KeyboardTriggerMode: String, CaseIterable {
         case torch = "Torch"
@@ -1662,6 +1668,7 @@ extension ConsoleState {
             }
             scheduleDiscoveryRefreshTimer()
             startConductorHelloLoop()
+            startSyncLoop()
             startMetricsLoop()
             lastLog = "🛰  Session \(showSessionId.prefix(8)) live · SAFE"
         } catch let err as POSIXError where err.code == .EHOSTDOWN {
@@ -1682,6 +1689,8 @@ extension ConsoleState {
         conductorHelloTimer?.invalidate()
         conductorHelloTimer = nil
         conductorHelloStartedAt = nil
+        syncTimer?.invalidate()
+        syncTimer = nil
         metricsTimer?.invalidate()
         metricsTimer = nil
         discoveryRefreshTimer?.invalidate()
@@ -1783,6 +1792,18 @@ extension ConsoleState {
         conductorHelloTimer = timer
     }
 
+    private func startSyncLoop() {
+        syncTimer?.invalidate()
+        sendSyncTick()
+        let timer = Timer.scheduledTimer(withTimeInterval: syncInterval, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.sendSyncTick()
+            }
+        }
+        timer.tolerance = syncInterval * 0.2
+        syncTimer = timer
+    }
+
     private func sendConductorHelloTick() {
         let connected = connectedPerformanceDeviceCount
         if connected >= expectedDeviceCount {
@@ -1801,6 +1822,22 @@ extension ConsoleState {
                 await self.diagnostics.record(
                     .sendFailed,
                     message: "Conductor /hello failed: \(error.localizedDescription)"
+                )
+            }
+        }
+    }
+
+    private func sendSyncTick(referenceMs: Double? = nil) {
+        let timestampMs = Int64((referenceMs ?? (Date().timeIntervalSince1970 * 1000.0)).rounded())
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                try await broadcaster.broadcastSync(timestampMs: timestampMs)
+            } catch {
+                await self.diagnostics.record(
+                    .sendFailed,
+                    message: "Conductor /sync failed: \(error.localizedDescription)"
                 )
             }
         }
@@ -2388,9 +2425,12 @@ extension ConsoleState {
         componentMode: EventTrigger.ComponentMode = .all,
         targetSlots: [Int]? = nil
     ) async {
-        let startAtMs = Date().timeIntervalSince1970 * 1000.0
+        let dispatchMs = Date().timeIntervalSince1970 * 1000.0
+        let startAtMs = dispatchMs + Double(eventTriggerLeadTimeMs)
+        sendSyncTick(referenceMs: dispatchMs)
         await sendEventTriggers(
             for: event,
+            dispatchedAt: Date(),
             startAtMs: startAtMs,
             componentMode: componentMode,
             targetSlots: targetSlots ?? performanceSlots
@@ -2413,49 +2453,120 @@ extension ConsoleState {
 
     private func sendEventTriggers(
         for event: EventRecipe,
+        dispatchedAt: Date,
         startAtMs: Double,
         componentMode: EventTrigger.ComponentMode,
         targetSlots: [Int]
     ) async {
         do {
             let broadcaster = try await broadcasterTask.value
-            var sentSlots: [Int] = []
-            var failedSlots: [Int: String] = [:]
-            for slot in targetSlots {
-                let msg = EventTrigger(index: Int32(slot),
-                                       eventId: Int32(event.id),
-                                       startAtMs: startAtMs,
-                                       componentMode: componentMode)
-                do {
-                    try await broadcaster.send(msg)
-                    sentSlots.append(slot)
-                } catch {
-                    failedSlots[slot] = error.localizedDescription
-                }
-            }
+            var sentSlots: Set<Int> = []
+            var failedSlots = await sendEventTriggerWave(
+                broadcaster: broadcaster,
+                event: event,
+                startAtMs: startAtMs,
+                componentMode: componentMode,
+                slots: targetSlots,
+                sentSlots: &sentSlots
+            )
+
             await MainActor.run {
                 self.lastTriggerCueContext = TriggerCueContext(
                     eventId: event.id,
                     measureText: self.measureText(for: event),
                     beatText: self.beatText(for: event),
                     componentMode: componentMode,
-                    sentAt: Date(timeIntervalSince1970: startAtMs / 1000.0),
+                    sentAt: dispatchedAt,
                     targetSlots: targetSlots,
                     failuresBySlot: failedSlots
                 )
                 self.rebuildLastTriggerCueSnapshot()
+            }
+
+            for _ in 0..<eventTriggerResendPasses {
+                try? await Task.sleep(nanoseconds: eventTriggerAckWaitNs)
+                let pendingSlots = await MainActor.run {
+                    self.lastTriggerCueSnapshot?.slotStatuses
+                        .filter { $0.state == .pending }
+                        .map(\.slot) ?? []
+                }
+                if pendingSlots.isEmpty {
+                    break
+                }
+                let resendFailures = await sendEventTriggerWave(
+                    broadcaster: broadcaster,
+                    event: event,
+                    startAtMs: startAtMs,
+                    componentMode: componentMode,
+                    slots: pendingSlots,
+                    sentSlots: &sentSlots
+                )
+                failedSlots.merge(resendFailures) { _, newest in newest }
+                await MainActor.run {
+                    self.lastTriggerCueContext = TriggerCueContext(
+                        eventId: event.id,
+                        measureText: self.measureText(for: event),
+                        beatText: self.beatText(for: event),
+                        componentMode: componentMode,
+                        sentAt: dispatchedAt,
+                        targetSlots: targetSlots,
+                        failuresBySlot: failedSlots
+                    )
+                    self.rebuildLastTriggerCueSnapshot()
+                }
+            }
+            await MainActor.run {
+                let snapshot = self.lastTriggerCueSnapshot
                 if sentSlots.isEmpty {
                     self.lastLog = "⚠️ No trigger cues sent for Trigger #\(event.id) (\(failedSlots.count) slots unavailable)"
-                } else if failedSlots.isEmpty {
-                    self.lastLog = "▶︎ Sent Trigger #\(event.id) to \(sentSlots.count) slots"
                 } else {
-                    self.lastLog = "▶︎ Sent Trigger #\(event.id) to \(sentSlots.count) slots (\(failedSlots.count) unavailable)"
+                    let ackedCount = snapshot?.ackedCount ?? 0
+                    let pendingCount = snapshot?.pendingCount ?? 0
+                    self.lastLog = "▶︎ Trigger #\(event.id) queued to \(sentSlots.count) slots · acked \(ackedCount) · pending \(pendingCount) · unavailable \(failedSlots.count)"
                 }
             }
         } catch {
             await MainActor.run {
                 lastLog = "⚠️ Failed to send event: \(error.localizedDescription)"
             }
+        }
+    }
+
+    private func sendEventTriggerWave(
+        broadcaster: OscBroadcaster,
+        event: EventRecipe,
+        startAtMs: Double,
+        componentMode: EventTrigger.ComponentMode,
+        slots: [Int],
+        sentSlots: inout Set<Int>
+    ) async -> [Int: String] {
+        await withTaskGroup(of: (Int, String?).self) { group in
+            for slot in slots {
+                group.addTask {
+                    let message = EventTrigger(
+                        index: Int32(slot),
+                        eventId: Int32(event.id),
+                        startAtMs: startAtMs,
+                        componentMode: componentMode
+                    )
+                    do {
+                        try await broadcaster.send(message)
+                        return (slot, nil)
+                    } catch {
+                        return (slot, error.localizedDescription)
+                    }
+                }
+            }
+
+            var failures: [Int: String] = [:]
+            for await (slot, failure) in group {
+                if let failure {
+                    failures[slot] = failure
+                } else {
+                    sentSlots.insert(slot)
+                }
+            }
+            return failures
         }
     }
 

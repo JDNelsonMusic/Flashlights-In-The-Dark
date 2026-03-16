@@ -1,21 +1,21 @@
 {
-  "generated": "2026-03-15T11:24:46+00:00",
-  "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3",
+  "generated": "2026-03-16T06:59:29+00:00",
+  "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
   "fullSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
-  "sourceDurationMs": 255980.625,
+  "sourceDurationMs": 440147.292,
   "syncReference": "docs/protools-housekeeping/electronics_sync_reference.md",
   "triggerPointSource": "docs/score-study/tour_cut_trigger_points.csv",
   "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
   "flutterAssetRoot": "flashlights_client/available-sounds/electronics-trigger-clips",
-  "triggerPointCount": 8,
+  "triggerPointCount": 7,
   "anchorOffsetMs": 9559.059,
   "fadeInMs": 20.0,
   "firstTriggerStartMs": 2000.0,
   "specialPartSpecificTriggerIds": [
-    8
+    5
   ],
-  "tailRule": "Each clip ends 2 beats after the next trigger point in the tour-cut timeline and fades across those final 2 beats.",
-  "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. The electronics master truncates full Trigger 5, crossfades for 1 beat into full Trigger 8, then rejoins the source at full Trigger 11.",
+  "tailRule": "Standard clips end 2 beats after the next surviving trigger point. Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats.",
+  "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
   "events": [
     {
       "id": 1,
@@ -28,11 +28,12 @@
       "onsetMilliseconds": 0.0,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3",
           "channelMode": "left",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -43,6 +44,7 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-01-alto.mp3",
           "channelMode": "right",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -53,6 +55,7 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-01-tenor-bass.mp3",
           "channelMode": "mono_sum",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -60,7 +63,8 @@
           "fadeOutMs": 1176.471,
           "timingRule": "trigger_1_fixed_start_to_trigger_2_plus_two_beats"
         }
-      }
+      },
+      "partVariants": {}
     },
     {
       "id": 2,
@@ -73,11 +77,12 @@
       "onsetMilliseconds": 2352.941,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-02-soprano.mp3",
           "channelMode": "left",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -88,6 +93,7 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-02-alto.mp3",
           "channelMode": "right",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -98,6 +104,7 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-02-tenor-bass.mp3",
           "channelMode": "mono_sum",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -105,7 +112,8 @@
           "fadeOutMs": 1176.471,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "partVariants": {}
     },
     {
       "id": 3,
@@ -118,11 +126,12 @@
       "onsetMilliseconds": 58235.294,
       "tempoBpm": 102.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-03-soprano.mp3",
           "channelMode": "left",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -133,6 +142,7 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-03-alto.mp3",
           "channelMode": "right",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -143,6 +153,7 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-03-tenor-bass.mp3",
           "channelMode": "mono_sum",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -150,7 +161,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "partVariants": {}
     },
     {
       "id": 4,
@@ -163,11 +175,12 @@
       "onsetMilliseconds": 78235.294,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-04-soprano.mp3",
           "channelMode": "left",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -178,6 +191,7 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-04-alto.mp3",
           "channelMode": "right",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -188,6 +202,7 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-04-tenor-bass.mp3",
           "channelMode": "mono_sum",
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -195,7 +210,8 @@
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "partVariants": {}
     },
     {
       "id": 5,
@@ -208,156 +224,134 @@
       "onsetMilliseconds": 84901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-05-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 94461.02,
-          "sourceEndMs": 109461.02,
-          "durationMs": 15000.0,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-05-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 94461.02,
-          "sourceEndMs": 109461.02,
-          "durationMs": 15000.0,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-05-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 94461.02,
-          "sourceEndMs": 109461.02,
-          "durationMs": 15000.0,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      }
-    },
-    {
-      "id": 8,
-      "measure": 38,
-      "measureToken": "38.3",
-      "scoreMeasureOrdinal": 40,
-      "position": "beat1",
-      "scoreLabel": "M38.3, beat1",
-      "role": "bridge_crossfade",
-      "onsetMilliseconds": 98235.294,
-      "tempoBpm": 72.0,
-      "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11. Trigger 8 is a deliberate exception: six independent musique-concrete stems are assigned to the six light-staff parts and each is forced to end at M38.4 beat 1.",
-      "variants": {
-        "soprano": {
-          "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-08-soprano.mp3",
-          "channelMode": "left",
-          "sourceStartMs": 107794.353,
-          "sourceEndMs": 116127.687,
-          "durationMs": 8333.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "alto": {
-          "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-08-alto.mp3",
-          "channelMode": "right",
-          "sourceStartMs": 107794.353,
-          "sourceEndMs": 116127.687,
-          "durationMs": 8333.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        },
-        "tenor_bass": {
-          "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-08-tenor-bass.mp3",
-          "channelMode": "mono_sum",
-          "sourceStartMs": 107794.353,
-          "sourceEndMs": 116127.687,
-          "durationMs": 8333.334,
-          "fadeInMs": 20.0,
-          "fadeOutMs": 1666.667,
-          "timingRule": "trigger_to_next_trigger_plus_two_beats"
-        }
-      },
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
+      "variants": {},
       "partVariants": {
         "soprano_l1": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-08-soprano-l1-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-05-soprano-l1-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Sop-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Sop-L1 receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=c0",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         },
         "soprano_l2": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-08-soprano-l2-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-05-soprano-l2-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_2.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Sop-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Sop-L2 receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=c0",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_2.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         },
         "tenor_l": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-08-tenor-l-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-05-tenor-l-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_3.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Ten-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Ten-L receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=0.5*c0+0.5*c1",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_3.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         },
         "bass_l": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-08-bass-l-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-05-bass-l-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_4.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Bass-L receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Bass-L receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=0.5*c0+0.5*c1",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_4.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         },
         "alto_l2": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-08-alto-l2-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-05-alto-l2-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_5.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Alto-L2 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Alto-L2 receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=c1",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_5.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         },
         "alto_l1": {
-          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-08-alto-l1-musique-concrete.mp3",
+          "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-05-alto-l1-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_6.mp3",
+          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
-          "sourceEndMs": 3333.333,
-          "durationMs": 3333.333,
-          "fadeInMs": 1666.667,
-          "fadeOutMs": 833.333,
-          "timingRule": "tp8_part_specific_concrete_fade_in_to_m38_4_downbeat",
-          "designNote": "Alto-L1 receives its own musique-concrete strand at Trigger 8. The strand blooms in over the first two beats and is fully faded out by M38.4 beat 1."
+          "sourceEndMs": 21666.658,
+          "durationMs": 21666.658,
+          "fadeInMs": 20.0,
+          "fadeOutMs": 1666.666,
+          "timingRule": "tp5_custom_26_beat_tour_cut_composite",
+          "designNote": "Alto-L1 receives a dedicated TP5 composite: 12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26.",
+          "renderMode": "tp5_part_mix",
+          "baseChannelExpression": "c0=c1",
+          "baseStartMs": 94461.02,
+          "baseEndMs": 104461.016,
+          "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_6.mp3",
+          "concreteStartBeat": 5.0,
+          "concreteEndBeat": 24.0,
+          "reentrySourceStartMs": 285294.353,
+          "reentrySourceEndMs": 300294.352
         }
       }
     },
@@ -372,13 +366,14 @@
       "onsetMilliseconds": 104901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-11-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 114461.02,
-          "sourceEndMs": 151127.687,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 298627.686,
+          "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
@@ -387,8 +382,9 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-11-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 114461.02,
-          "sourceEndMs": 151127.687,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 298627.686,
+          "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
@@ -397,14 +393,16 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-11-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 114461.02,
-          "sourceEndMs": 151127.687,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 298627.686,
+          "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "trigger_to_next_trigger_plus_two_beats"
         }
-      }
+      },
+      "partVariants": {}
     },
     {
       "id": 12,
@@ -417,14 +415,15 @@
       "onsetMilliseconds": 139901.961,
       "tempoBpm": 72.0,
       "sourceOffsetMs": 9559.059,
-      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 8, 11, 12. Trigger Point 2 remains anchored to 00:11.912. The tour-cut electronics master truncates full Trigger 5, crossfades into truncated Trigger 8, then rejoins the original source at Trigger 11.",
+      "timingNote": "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1.",
       "variants": {
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-12-soprano.mp3",
           "channelMode": "left",
-          "sourceStartMs": 149461.02,
-          "sourceEndMs": 255980.625,
-          "durationMs": 106519.605,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 333627.686,
+          "sourceEndMs": 440147.292,
+          "durationMs": 106519.606,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
@@ -432,9 +431,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-12-alto.mp3",
           "channelMode": "right",
-          "sourceStartMs": 149461.02,
-          "sourceEndMs": 255980.625,
-          "durationMs": 106519.605,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 333627.686,
+          "sourceEndMs": 440147.292,
+          "durationMs": 106519.606,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
@@ -442,14 +442,16 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-12-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceStartMs": 149461.02,
-          "sourceEndMs": 255980.625,
-          "durationMs": 106519.605,
+          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceStartMs": 333627.686,
+          "sourceEndMs": 440147.292,
+          "durationMs": 106519.606,
           "fadeInMs": 20.0,
           "fadeOutMs": 1666.667,
           "timingRule": "final_trigger_to_track_end"
         }
-      }
+      },
+      "partVariants": {}
     }
   ]
 }
