@@ -30,6 +30,7 @@ CUT_SOURCE_MP3 = (
     / "electronics"
     / "2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7_TourCut.mp3"
 )
+PRIMER_STEM_EXPORT_ROOT = ROOT / "audio" / "protools-exports" / "primer-stems"
 MUSIQUE_CONCRETE_SOURCE_ROOT = (
     ROOT / "audio" / "protools-exports" / "musique-concrete"
 )
@@ -60,6 +61,7 @@ RECIPE_COPY_PATHS = [
     ROOT / "flashlights_client" / "assets" / "event_recipes.json",
 ]
 FADE_IN_MS = 20.0
+PRIMER_STEM_GAIN_DB = 6.0
 FIRST_TRIGGER_START_MS = 2000.0
 TP5_TOTAL_BEATS = 26.0
 TP5_BASE_BEATS = 12.0
@@ -108,6 +110,14 @@ class PartConcreteVariant:
     directory: str
     source_name: str
     label: str
+
+
+@dataclass(frozen=True)
+class PrimerStemSource:
+    key: str
+    label: str
+    wav_path: Path
+    export_mp3_path: Path
 
 
 CHOIR_VARIANTS = (
@@ -170,6 +180,27 @@ PART_CONCRETE_VARIANTS = (
     ),
 )
 
+PRIMER_STEM_SOURCES = {
+    "soprano": PrimerStemSource(
+        key="soprano",
+        label="Sops Primertones",
+        wav_path=ROOT / "2026_0316_Sops_Primertones_2.wav",
+        export_mp3_path=PRIMER_STEM_EXPORT_ROOT / "2026_0316_Sops_Primertones_2.mp3",
+    ),
+    "alto": PrimerStemSource(
+        key="alto",
+        label="Altos Primertones",
+        wav_path=ROOT / "2026_0316_Altos_Primertones_2.wav",
+        export_mp3_path=PRIMER_STEM_EXPORT_ROOT / "2026_0316_Altos_Primertones_2.mp3",
+    ),
+    "tenor_bass": PrimerStemSource(
+        key="tenor_bass",
+        label="Ten/Bass Primertones",
+        wav_path=ROOT / "2026_0316_TenBass_Primertones_2.wav",
+        export_mp3_path=PRIMER_STEM_EXPORT_ROOT / "2026_0316_TenBass_Primertones_2.mp3",
+    ),
+}
+
 
 def iso_now() -> str:
     return datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
@@ -192,6 +223,46 @@ def ffprobe_duration_ms(path: Path) -> float:
         text=True,
     )
     return round(float(result.stdout.strip()) * 1000.0, 3)
+
+
+def convert_wav_to_mp3(source_wav: Path, target_mp3: Path) -> None:
+    target_mp3.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            str(source_wav),
+            "-codec:a",
+            "libmp3lame",
+            "-q:a",
+            "2",
+            str(target_mp3),
+        ],
+        check=True,
+    )
+
+
+def ensure_primer_stem_exports() -> dict[str, dict[str, Any]]:
+    exports: dict[str, dict[str, Any]] = {}
+    for key, source in PRIMER_STEM_SOURCES.items():
+        if source.wav_path.exists():
+            convert_wav_to_mp3(source.wav_path, source.export_mp3_path)
+        elif not source.export_mp3_path.exists():
+            raise FileNotFoundError(
+                f"Missing primer stem WAV and exported MP3 for {source.label}: "
+                f"{source.wav_path} / {source.export_mp3_path}"
+            )
+
+        exports[key] = {
+            "label": source.label,
+            "wavSourceFile": str(source.wav_path.relative_to(ROOT)) if source.wav_path.exists() else None,
+            "mp3SourceFile": str(source.export_mp3_path.relative_to(ROOT)),
+            "durationMs": ffprobe_duration_ms(source.export_mp3_path),
+        }
+    return exports
 
 
 def two_beats_ms(tempo_bpm: float) -> float:
@@ -334,6 +405,79 @@ def render_variant(
     )
 
 
+def render_family_composite_variant(
+    *,
+    source_path: Path,
+    primer_source_path: Path,
+    primer_source_duration_ms: float,
+    output_path: Path,
+    start_ms: float,
+    end_ms: float,
+    fade_in_ms: float,
+    fade_out_ms: float,
+    variant: ChoirVariant,
+) -> None:
+    duration_ms = round(end_ms - start_ms, 3)
+    if duration_ms <= 0:
+        raise ValueError(f"Non-positive clip duration for {output_path.name}: {duration_ms}")
+
+    if start_ms >= primer_source_duration_ms:
+        render_variant(
+            source_path=source_path,
+            output_path=output_path,
+            start_ms=start_ms,
+            end_ms=end_ms,
+            fade_in_ms=fade_in_ms,
+            fade_out_ms=fade_out_ms,
+            variant=variant,
+        )
+        return
+
+    primer_end_ms = min(end_ms, primer_source_duration_ms)
+    fade_out_ms = min(fade_out_ms, duration_ms)
+    fade_out_start_ms = round(duration_ms - fade_out_ms, 3)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    filter_graph = (
+        f"[0:a]atrim=start={start_ms / 1000.0:.6f}:end={end_ms / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        f"pan=mono|{variant.pan_expression}[electronics];"
+        f"[1:a]atrim=start={start_ms / 1000.0:.6f}:end={primer_end_ms / 1000.0:.6f},"
+        "asetpts=PTS-STARTPTS,"
+        "pan=mono|c0=0.5*c0+0.5*c1,"
+        f"volume={PRIMER_STEM_GAIN_DB:.1f}dB[primer];"
+        "[electronics][primer]amix=inputs=2:normalize=0:dropout_transition=0,"
+        f"apad=whole_dur={duration_ms / 1000.0:.6f},"
+        f"atrim=duration={duration_ms / 1000.0:.6f},"
+        f"afade=t=in:st=0:d={fade_in_ms / 1000.0:.6f},"
+        f"afade=t=out:st={fade_out_start_ms / 1000.0:.6f}:d={fade_out_ms / 1000.0:.6f},"
+        "alimiter=limit=0.97[out]"
+    )
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            str(source_path),
+            "-i",
+            str(primer_source_path),
+            "-filter_complex",
+            filter_graph,
+            "-map",
+            "[out]",
+            "-codec:a",
+            "libmp3lame",
+            "-q:a",
+            "2",
+            str(output_path),
+        ],
+        check=True,
+    )
+
+
 def render_passthrough_variant(
     *,
     source_path: Path,
@@ -382,6 +526,8 @@ def render_tp5_tour_cut_part_variant(
     *,
     full_source_path: Path,
     concrete_source_path: Path,
+    primer_source_path: Path | None,
+    primer_source_duration_ms: float | None,
     output_path: Path,
     base_channel_expression: str,
     base_start_ms: float,
@@ -412,25 +558,57 @@ def render_tp5_tour_cut_part_variant(
     reentry_fade_out_ms = round(beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS, 3)
     reentry_fade_out_start_ms = round(reentry_duration_ms - reentry_fade_out_ms, 3)
 
-    filter_graph = (
+    filter_parts = [
         f"[0:a]atrim=start={base_start_ms / 1000.0:.6f}:end={(base_start_ms + base_duration_ms) / 1000.0:.6f},"
         "asetpts=PTS-STARTPTS,"
         f"pan=mono|{base_channel_expression},"
         f"afade=t=in:st=0:d={FADE_IN_MS / 1000.0:.6f},"
-        f"afade=t=out:st={base_fade_out_start_ms / 1000.0:.6f}:d={base_fade_out_ms / 1000.0:.6f}[base];"
+        f"afade=t=out:st={base_fade_out_start_ms / 1000.0:.6f}:d={base_fade_out_ms / 1000.0:.6f}[base]",
         f"[1:a]atrim=start=0:end={concrete_duration_ms / 1000.0:.6f},"
         "asetpts=PTS-STARTPTS,"
         "pan=mono|c0=0.5*c0+0.5*c1,"
         f"afade=t=in:st=0:d={(beat_duration_ms * TP5_CONCRETE_FADE_IN_BEATS) / 1000.0:.6f},"
         f"afade=t=out:st={concrete_fade_out_start_ms / 1000.0:.6f}:d={(beat_duration_ms * TP5_CONCRETE_FADE_OUT_BEATS) / 1000.0:.6f},"
-        f"adelay={int(round(concrete_delay_ms))}:all=1[concrete];"
+        f"adelay={int(round(concrete_delay_ms))}:all=1[concrete]",
         f"[0:a]atrim=start={reentry_start_ms / 1000.0:.6f}:end={reentry_end_ms / 1000.0:.6f},"
         "asetpts=PTS-STARTPTS,"
         f"pan=mono|{base_channel_expression},"
         f"afade=t=in:st=0:d={reentry_fade_in_ms / 1000.0:.6f},"
         f"afade=t=out:st={reentry_fade_out_start_ms / 1000.0:.6f}:d={reentry_fade_out_ms / 1000.0:.6f},"
-        f"adelay={int(round(reentry_delay_ms))}:all=1[reentry];"
-        f"[base][concrete][reentry]amix=inputs=3:normalize=0:dropout_transition=0,"
+        f"adelay={int(round(reentry_delay_ms))}:all=1[reentry]",
+    ]
+    mix_inputs = "[base][concrete][reentry]"
+    input_args = ["-i", str(full_source_path), "-i", str(concrete_source_path)]
+    mix_count = 3
+
+    if (
+        primer_source_path is not None
+        and primer_source_duration_ms is not None
+        and base_start_ms < primer_source_duration_ms
+    ):
+        primer_end_ms = min(base_start_ms + total_duration_ms, primer_source_duration_ms)
+        primer_duration_ms = round(primer_end_ms - base_start_ms, 3)
+        if primer_duration_ms > 0:
+            primer_fade_out_ms = round(beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS, 3)
+            primer_fade_out_start_ms = round(total_duration_ms - primer_fade_out_ms, 3)
+            filter_parts.append(
+                f"[2:a]atrim=start={base_start_ms / 1000.0:.6f}:end={primer_end_ms / 1000.0:.6f},"
+                "asetpts=PTS-STARTPTS,"
+                "pan=mono|c0=0.5*c0+0.5*c1,"
+                f"volume={PRIMER_STEM_GAIN_DB:.1f}dB,"
+                f"apad=whole_dur={total_duration_ms / 1000.0:.6f},"
+                f"atrim=duration={total_duration_ms / 1000.0:.6f},"
+                f"afade=t=in:st=0:d={FADE_IN_MS / 1000.0:.6f},"
+                f"afade=t=out:st={primer_fade_out_start_ms / 1000.0:.6f}:d={primer_fade_out_ms / 1000.0:.6f}[primer]"
+            )
+            input_args += ["-i", str(primer_source_path)]
+            mix_inputs += "[primer]"
+            mix_count += 1
+
+    filter_graph = (
+        ";".join(filter_parts)
+        + ";"
+        + f"{mix_inputs}amix=inputs={mix_count}:normalize=0:dropout_transition=0,"
         f"apad=whole_dur={total_duration_ms / 1000.0:.6f},"
         f"atrim=duration={total_duration_ms / 1000.0:.6f},"
         "alimiter=limit=0.97[out]"
@@ -442,10 +620,7 @@ def render_tp5_tour_cut_part_variant(
             "-v",
             "error",
             "-y",
-            "-i",
-            str(full_source_path),
-            "-i",
-            str(concrete_source_path),
+            *input_args,
             "-filter_complex",
             filter_graph,
             "-map",
@@ -493,6 +668,7 @@ def build_trigger_plans(
     full_token_lookup: dict[str, dict[str, Any]],
     source_duration_ms: float,
     trigger_specs: list[TriggerPointSpec],
+    primer_stem_exports: dict[str, dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], float]:
     trigger_rows: list[dict[str, Any]] = []
     for trigger in trigger_specs:
@@ -519,8 +695,10 @@ def build_trigger_plans(
         trigger_spec = trigger_specs[index]
         timing_note = (
             "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
-            "Trigger Point 2 remains anchored to 00:11.912. Trigger 5 is a custom 26-beat composite: "
-            "the opening electronics speak for 12 beats, six musique-concrete strands bloom from beats 5-24, "
+            "Trigger Point 2 remains anchored to 00:11.912. A family-specific primer stem is baked into each trigger clip "
+            "using the same source timings as the electronics track. Trigger 5 is a custom 26-beat composite: "
+            "the opening electronics speak for 12 beats, the matching family primer stem spans the full TP5 window, "
+            "six musique-concrete strands bloom from beats 5-24, "
             "and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1."
         )
 
@@ -557,7 +735,7 @@ def build_trigger_plans(
                 part_variants[part_variant.part_key] = {
                     "sample": part_variant_asset_key(5, part_variant),
                     "channelMode": "part_track",
-                    "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+                    "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
                     "sourceStartMs": 0.0,
                     "sourceEndMs": total_duration_ms,
                     "durationMs": total_duration_ms,
@@ -573,6 +751,8 @@ def build_trigger_plans(
                     "baseChannelExpression": choir_variant.pan_expression,
                     "baseStartMs": base_start_ms,
                     "baseEndMs": base_end_ms,
+                    "primerStemSourceFile": primer_stem_exports[choir_variant.key]["mp3SourceFile"],
+                    "primerStemDurationMs": primer_stem_exports[choir_variant.key]["durationMs"],
                     "concreteSourceFile": str(concrete_source.relative_to(ROOT)),
                     "concreteStartBeat": TP5_CONCRETE_START_BEAT,
                     "concreteEndBeat": TP5_CONCRETE_END_BEAT,
@@ -619,10 +799,14 @@ def build_trigger_plans(
                 )
 
             for variant in CHOIR_VARIANTS:
+                primer_export = primer_stem_exports[variant.key]
                 variant_payload[variant.key] = {
                     "sample": variant_asset_key(int(trigger["id"]), variant),
                     "channelMode": variant.channel_mode,
-                    "sourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
+                    "sourceFile": "composite:full_electronics+family_primer_stem",
+                    "electronicsSourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
+                    "primerStemSourceFile": primer_export["mp3SourceFile"],
+                    "primerStemDurationMs": primer_export["durationMs"],
                     "sourceStartMs": file_start_ms,
                     "sourceEndMs": file_end_ms,
                     "durationMs": duration_ms,
@@ -661,15 +845,28 @@ def render_assets(
             payload = plan["variants"].get(variant.key)
             if payload is None:
                 continue
-            render_variant(
-                source_path=ROOT / payload.get("sourceFile", str(FULL_SOURCE_MP3.relative_to(ROOT))),
-                output_path=variant_output_path(plan["id"], variant),
-                start_ms=float(payload["sourceStartMs"]),
-                end_ms=float(payload["sourceEndMs"]),
-                fade_in_ms=float(payload["fadeInMs"]),
-                fade_out_ms=float(payload["fadeOutMs"]),
-                variant=variant,
-            )
+            if payload.get("primerStemSourceFile"):
+                render_family_composite_variant(
+                    source_path=ROOT / payload["electronicsSourceFile"],
+                    primer_source_path=ROOT / payload["primerStemSourceFile"],
+                    primer_source_duration_ms=float(payload["primerStemDurationMs"]),
+                    output_path=variant_output_path(plan["id"], variant),
+                    start_ms=float(payload["sourceStartMs"]),
+                    end_ms=float(payload["sourceEndMs"]),
+                    fade_in_ms=float(payload["fadeInMs"]),
+                    fade_out_ms=float(payload["fadeOutMs"]),
+                    variant=variant,
+                )
+            else:
+                render_variant(
+                    source_path=ROOT / payload.get("electronicsSourceFile", str(FULL_SOURCE_MP3.relative_to(ROOT))),
+                    output_path=variant_output_path(plan["id"], variant),
+                    start_ms=float(payload["sourceStartMs"]),
+                    end_ms=float(payload["sourceEndMs"]),
+                    fade_in_ms=float(payload["fadeInMs"]),
+                    fade_out_ms=float(payload["fadeOutMs"]),
+                    variant=variant,
+                )
 
         for part_variant in PART_CONCRETE_VARIANTS:
             payload = plan.get("partVariants", {}).get(part_variant.part_key)
@@ -679,6 +876,8 @@ def render_assets(
                 render_tp5_tour_cut_part_variant(
                     full_source_path=FULL_SOURCE_MP3,
                     concrete_source_path=ROOT / payload["concreteSourceFile"],
+                    primer_source_path=ROOT / payload["primerStemSourceFile"],
+                    primer_source_duration_ms=float(payload["primerStemDurationMs"]),
                     output_path=part_variant_output_path(plan["id"], part_variant),
                     base_channel_expression=str(payload["baseChannelExpression"]),
                     base_start_ms=float(payload["baseStartMs"]),
@@ -703,11 +902,13 @@ def build_manifest(
     source_duration_ms: float,
     offset_ms: float,
     plans: list[dict[str, Any]],
+    primer_stem_exports: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     return {
         "generated": generated_at,
         "sourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "fullSourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
+        "primerStemExports": primer_stem_exports,
         "sourceDurationMs": source_duration_ms,
         "syncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
         "triggerPointSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
@@ -721,7 +922,7 @@ def build_manifest(
             plan["id"] for plan in plans if plan.get("partVariants")
         ],
         "tailRule": "Standard clips end 2 beats after the next surviving trigger point. Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats.",
-        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
+        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, a family-specific primer stem, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
         "events": plans,
     }
 
@@ -768,7 +969,7 @@ def write_manifest(manifest: dict[str, Any]) -> None:
                         "assignmentScope": "choir_family",
                         "assignmentKey": variant_key,
                         "channelMode": variant_payload["channelMode"],
-                        "sourceFile": manifest["sourceFile"],
+                        "sourceFile": variant_payload.get("sourceFile", manifest["sourceFile"]),
                         "sourceStartMs": variant_payload["sourceStartMs"],
                         "sourceEndMs": variant_payload["sourceEndMs"],
                         "durationMs": variant_payload["durationMs"],
@@ -813,8 +1014,10 @@ def write_recipe_copies(
             "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 11, 12. "
             "Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4. "
             "Trigger Point 2 remains locked to 00:11.912 in the tour-cut electronics master. "
+            "A family-specific primer stem is now baked into every trigger asset using the same source timings as the electronics track. "
             "Trigger Point 5 is now a custom 26-beat tour-cut composite: its own electronics sound for 12 beats, "
-            "six musique-concrete strands enter on beats 5-24, and a mm100-103 layer crescendos across beats 9-26. "
+            "the matching family primer stem spans the full TP5 window, six musique-concrete strands enter on beats 5-24, "
+            "and a mm100-103 layer crescendos across beats 9-26. "
             "Trigger Point 11 stays at M104 beat 1 and overlaps TP5 by 2 beats. Trigger Point 1 starts at 00:02.000 in the file."
         ),
         "eventCount": len(plans),
@@ -878,6 +1081,7 @@ def main() -> None:
         if not path.exists():
             raise FileNotFoundError(path)
 
+    primer_stem_exports = ensure_primer_stem_exports()
     _, full_token_lookup, _ = build_measure_token_map(FULL_SCORE_XML)
     _, cut_token_lookup, _ = build_measure_token_map(CUT_SCORE_XML)
     trigger_specs = load_trigger_specs(TRIGGER_POINT_SOURCE)
@@ -887,6 +1091,7 @@ def main() -> None:
         full_token_lookup=full_token_lookup,
         source_duration_ms=source_duration_ms,
         trigger_specs=trigger_specs,
+        primer_stem_exports=primer_stem_exports,
     )
     generated_at = iso_now()
 
@@ -899,6 +1104,7 @@ def main() -> None:
         source_duration_ms=source_duration_ms,
         offset_ms=offset_ms,
         plans=plans,
+        primer_stem_exports=primer_stem_exports,
     )
     write_manifest(manifest)
     write_recipe_copies(generated_at=generated_at, plans=plans)

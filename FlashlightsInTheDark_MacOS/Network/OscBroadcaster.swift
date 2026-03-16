@@ -44,6 +44,15 @@ public struct ConcertHelloSnapshot: Sendable {
     public let isArmed: Bool
 }
 
+public struct ClientSyncReply: Sendable {
+    public let slot: Int
+    public let requestId: String
+    public let conductorSentAtMs: Int64
+    public let clientReceivedAtMs: Int64
+    public let clientSentAtMs: Int64
+    public let deviceId: String?
+}
+
 private struct BroadcastTarget: Sendable {
     let interfaceName: String
     let address: SocketAddress
@@ -94,6 +103,7 @@ public actor OscBroadcaster {
     private var helloHandler: ((Int, String, String?) -> Void)?
     private var ackHandler: ((Int) -> Void)?
     private var tapHandler: (() -> Void)?
+    private var syncReplyHandler: ((ClientSyncReply, String) -> Void)?
 
     private var dynamicIPs: [Int: String] = [:]
     private var dynamicDeviceIds: [Int: String] = [:]
@@ -340,12 +350,26 @@ public actor OscBroadcaster {
         }
     }
 
-    public func broadcastSync(timestampMs: Int64) async throws {
+    public func broadcastSync(requestId: String, timestampMs: Int64) async throws {
         let message = OSCMessage(
             OSCAddressPattern(OscAddress.sync.rawValue),
-            values: [timestampMs]
+            values: ["request", requestId, timestampMs]
         )
         try await sendBroadcast(message, cueId: nil, routeLabel: "broadcast-sync")
+    }
+
+    public func sendSyncCalibration(
+        toSlot slot: Int,
+        requestId: String,
+        offsetMs: Int64,
+        rttMs: Int64,
+        conductorNowMs: Int64
+    ) async throws {
+        let message = OSCMessage(
+            OSCAddressPattern(OscAddress.sync.rawValue),
+            values: ["calibration", requestId, offsetMs, rttMs, conductorNowMs]
+        )
+        try await sendUnicast(message, toSlot: slot)
     }
 
     public func broadcastConductorHello() async throws {
@@ -468,6 +492,10 @@ public actor OscBroadcaster {
 
     public func registerTapHandler(_ handler: @escaping () -> Void) {
         tapHandler = handler
+    }
+
+    public func registerSyncReplyHandler(_ handler: @escaping (ClientSyncReply, String) -> Void) {
+        syncReplyHandler = handler
     }
 
     // MARK: - Private send internals
@@ -809,6 +837,16 @@ public actor OscBroadcaster {
         await diagnostics?.record(.tapReceived, message: "/tap received")
         tapHandler?()
     }
+
+    func emitSyncReply(_ reply: ClientSyncReply, ip: String) async {
+        await diagnostics?.record(
+            .broadcasterInterfaceRefresh,
+            slot: reply.slot,
+            ipAddress: ip,
+            message: "Sync reply \(reply.requestId)"
+        )
+        syncReplyHandler?(reply, ip)
+    }
 }
 
 // MARK: - Datagram parsing
@@ -850,6 +888,32 @@ extension OscBroadcaster {
     fileprivate func parseTap(_ bytes: [UInt8]) -> Bool {
         guard let (address, _) = parseAddressAndValues(bytes) else { return false }
         return address == "/tap"
+    }
+
+    fileprivate func parseSyncReply(_ bytes: [UInt8]) -> ClientSyncReply? {
+        guard let (address, values) = parseAddressAndValues(bytes), address == "/sync" else {
+            return nil
+        }
+        guard values.count >= 6,
+              let mode = values[0] as? String,
+              mode == "reply",
+              let slot = values[1] as? Int,
+              let requestId = values[2] as? String,
+              let conductorSentAtMs = values[3] as? Int,
+              let clientReceivedAtMs = values[4] as? Int,
+              let clientSentAtMs = values[5] as? Int
+        else {
+            return nil
+        }
+        let deviceId = values.count > 6 ? values[6] as? String : nil
+        return ClientSyncReply(
+            slot: slot,
+            requestId: requestId,
+            conductorSentAtMs: Int64(conductorSentAtMs),
+            clientReceivedAtMs: Int64(clientReceivedAtMs),
+            clientSentAtMs: Int64(clientSentAtMs),
+            deviceId: deviceId
+        )
     }
 
     private func parseAddressAndValues(_ bytes: [UInt8]) -> (String, [Any])? {
@@ -899,6 +963,22 @@ extension OscBroadcaster {
             return (string, next)
         }
 
+        func readFloat32(at idx: Int) -> Float? {
+            guard idx + 3 < bytes.count else { return nil }
+            let value = bytes[idx..<(idx + 4)].reduce(UInt32(0)) { partial, byte in
+                (partial << 8) | UInt32(byte)
+            }
+            return Float(bitPattern: value)
+        }
+
+        func readFloat64(at idx: Int) -> Double? {
+            guard idx + 7 < bytes.count else { return nil }
+            let value = bytes[idx..<(idx + 8)].reduce(UInt64(0)) { partial, byte in
+                (partial << 8) | UInt64(byte)
+            }
+            return Double(bitPattern: value)
+        }
+
         var position = index
         for tag in tags.dropFirst() {
             switch tag {
@@ -914,6 +994,14 @@ extension OscBroadcaster {
                 guard let (s, next) = readString(at: position) else { return nil }
                 values.append(s)
                 position = next
+            case "f":
+                guard let v = readFloat32(at: position) else { return nil }
+                values.append(Double(v))
+                position += 4
+            case "d":
+                guard let v = readFloat64(at: position) else { return nil }
+                values.append(v)
+                position += 8
             default:
                 return nil
             }
@@ -949,6 +1037,10 @@ final class HelloDatagramHandler: ChannelInboundHandler, @unchecked Sendable {
             }
             if let slot = await owner.parseAck(bytes) {
                 await owner.emitAck(slot: slot)
+                return
+            }
+            if let reply = await owner.parseSyncReply(bytes) {
+                await owner.emitSyncReply(reply, ip: ip)
                 return
             }
             if await owner.parseTap(bytes) {

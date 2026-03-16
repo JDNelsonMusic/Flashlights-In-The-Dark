@@ -126,45 +126,60 @@ struct ComposerConsoleView: View {
     }
 
     private func summaryGrid(availableWidth: CGFloat) -> some View {
-        return LazyVGrid(
-            columns: summaryColumns(for: availableWidth),
-            spacing: 16
-        ) {
-            SummaryCard(
-                title: "Connected Devices",
-                value: "\(state.connectedPerformanceDeviceCount)",
-                subtitle: "Expected \(state.expectedDeviceCount)",
-                tint: state.canArmStrict ? .green : .orange,
-                symbol: "dot.radiowaves.left.and.right"
-            )
-            SummaryCard(
-                title: "Current Trigger",
-                value: currentTriggerSummary,
-                subtitle: currentMeasureSummary,
-                tint: .mintGlow,
-                symbol: "sparkles.rectangle.stack"
-            )
-            SummaryCard(
-                title: "Cue Delivery",
-                value: cueDeliveryValue,
-                subtitle: cueDeliverySubtitle,
-                tint: cueDeliveryTint,
-                symbol: "checkmark.circle"
-            )
-            SummaryCard(
-                title: "Torch State",
-                value: anyTorchOn ? "Active" : "Dark",
-                subtitle: anyTorchOn ? "At least one staff lit" : "All torches off",
-                tint: anyTorchOn ? .mintGlow : .secondary,
-                symbol: anyTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"
-            )
-            SummaryCard(
-                title: "Network Health",
-                value: String(format: "%.1f PPS", state.packetRatePerSecond),
-                subtitle: "Unknown \(state.unknownSenderEvents) · Failures \(state.totalSendFailures)",
-                tint: .blue,
-                symbol: "waveform.path.ecg"
-            )
+        let cardWidth = min(max((availableWidth - 128) / 6.0, 210), 320)
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 16) {
+                SummaryCard(
+                    title: "Connected Devices",
+                    value: "\(state.connectedPerformanceDeviceCount)",
+                    subtitle: "Expected \(state.expectedDeviceCount)",
+                    tint: state.canArmStrict ? .green : .orange,
+                    symbol: "dot.radiowaves.left.and.right"
+                )
+                .frame(width: cardWidth)
+                SummaryCard(
+                    title: "Current Trigger",
+                    value: currentTriggerSummary,
+                    subtitle: currentMeasureSummary,
+                    tint: .mintGlow,
+                    symbol: "sparkles.rectangle.stack"
+                )
+                .frame(width: cardWidth)
+                SummaryCard(
+                    title: "Cue Delivery",
+                    value: cueDeliveryValue,
+                    subtitle: cueDeliverySubtitle,
+                    tint: cueDeliveryTint,
+                    symbol: "checkmark.circle"
+                )
+                .frame(width: cardWidth)
+                SummaryCard(
+                    title: "Torch State",
+                    value: anyTorchOn ? "Active" : "Dark",
+                    subtitle: anyTorchOn ? "At least one staff lit" : "All torches off",
+                    tint: anyTorchOn ? .mintGlow : .secondary,
+                    symbol: anyTorchOn ? "flashlight.on.fill" : "flashlight.off.fill"
+                )
+                .frame(width: cardWidth)
+                SummaryCard(
+                    title: "Network Health",
+                    value: String(format: "%.1f PPS", state.packetRatePerSecond),
+                    subtitle: "Unknown \(state.unknownSenderEvents) · Failures \(state.totalSendFailures)",
+                    tint: .blue,
+                    symbol: "waveform.path.ecg"
+                )
+                .frame(width: cardWidth)
+                SummaryCard(
+                    title: "Sync RTT",
+                    value: state.syncCalibratedDeviceCount == 0 ? "Waiting" : String(format: "%.0f ms", state.averageSyncRttMs),
+                    subtitle: state.syncCalibratedDeviceCount == 0
+                        ? "No client sync samples yet"
+                        : "Max \(Int(state.maxSyncRttMs.rounded())) ms · \(state.syncCalibratedDeviceCount) phones",
+                    tint: .teal,
+                    symbol: "clock.arrow.trianglehead.counterclockwise.rotate.90"
+                )
+                .frame(width: cardWidth)
+            }
         }
     }
 
@@ -174,7 +189,7 @@ struct ComposerConsoleView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     sectionHeader(
                         title: "Stage Modules",
-                        subtitle: "Six visible seats per staff. Large numbers show conductor-facing seat positions; small labels preserve legacy route IDs."
+                        subtitle: "Each staff now owns six fixed seats. Large numbers show conductor-facing seat positions and route directly to the singer devices assigned there."
                     )
 
                     LazyVGrid(columns: stageColumns(for: availableWidth), spacing: 16) {
@@ -408,24 +423,6 @@ struct ComposerConsoleView: View {
         )
     }
 
-    private func summaryColumns(for availableWidth: CGFloat) -> [GridItem] {
-        let columnCount: Int
-        if availableWidth >= 2200 {
-            columnCount = 5
-        } else if availableWidth >= 1760 {
-            columnCount = 4
-        } else if availableWidth >= 920 {
-            columnCount = 2
-        } else {
-            columnCount = 1
-        }
-
-        return Array(
-            repeating: GridItem(.flexible(minimum: 180, maximum: .infinity), spacing: 16, alignment: .top),
-            count: columnCount
-        )
-    }
-
     private func quickFireColumns(for availableWidth: CGFloat) -> [GridItem] {
         let columnCount: Int
         if availableWidth >= 2100 {
@@ -519,6 +516,11 @@ struct ComposerConsoleView: View {
             if state.slowGlowRampActive { return 1.6 }
             return 0.1
         }()
+
+        guard !state.showModeEnabled else {
+            strobeOn = isActive
+            return
+        }
 
         if isActive {
             withAnimation(Animation.linear(duration: duration).repeatForever(autoreverses: true)) {
@@ -721,6 +723,21 @@ private struct TransportPanel: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Show Mode (reduced motion)", isOn: $state.showModeEnabled)
+                    Text("Turns off nonessential console motion and slows diagnostics refresh slightly while keeping cue transport and acknowledgements active.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Text(
+                    state.syncCalibratedDeviceCount == 0
+                        ? "Sync waiting for live reply samples."
+                        : "Sync RTT avg \(Int(state.averageSyncRttMs.rounded())) ms · max \(Int(state.maxSyncRttMs.rounded())) ms · cue dispatch \(state.lastTriggerDispatchDurationMs) ms · ack median \(state.medianCueAckLatencyMs) ms"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
                 if let warning = state.preflightWarning {
                     Text("⚠️ \(warning)")
@@ -1336,7 +1353,7 @@ private struct StaffModuleCard: View {
             Text(module.title)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.white)
-            Text("\(module.staff.routedSeatCount) routed · \(StageConsoleLayout.seatsPerStaff - module.staff.routedSeatCount) open")
+            Text("Six available seats · stage-routed")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -1346,7 +1363,7 @@ private struct StaffModuleCard: View {
         VStack(alignment: .trailing, spacing: 6) {
             ModuleMetricPill(
                 title: "Live",
-                value: "\(connectedCount)/\(module.staff.routedSeatCount)",
+                value: "\(connectedCount)/\(StageConsoleLayout.seatsPerStaff)",
                 tint: connectedCount > 0 ? Color.mintGlow : Color.secondary
             )
             if hasTorch || hasAudio {
@@ -1453,7 +1470,7 @@ private struct ModuleSeatBadge: View {
 
     private var footerText: String {
         if let legacySlot = seat.legacySlot {
-            return "#\(legacySlot)"
+            return "Slot \(legacySlot)"
         }
         return "Open"
     }
@@ -1461,11 +1478,11 @@ private struct ModuleSeatBadge: View {
     private var helpText: String {
         if let legacySlot = seat.legacySlot {
             if let device, !device.name.isEmpty {
-                return "\(seat.displayLabel) · Legacy slot \(legacySlot) · \(device.name)"
+                return "\(seat.displayLabel) · System slot \(legacySlot) · \(device.name)"
             }
-            return "\(seat.displayLabel) · Legacy slot \(legacySlot)"
+            return "\(seat.displayLabel) · System slot \(legacySlot)"
         }
-        return "\(seat.displayLabel) · No legacy route assigned"
+        return "\(seat.displayLabel) · No slot assigned"
     }
 
     var body: some View {

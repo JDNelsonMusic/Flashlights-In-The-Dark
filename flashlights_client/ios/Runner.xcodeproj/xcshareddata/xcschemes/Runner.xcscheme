@@ -97,5 +97,23 @@
    <ArchiveAction
       buildConfiguration = "Release"
       revealArchiveInOrganizer = "YES">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Bump Flutter iOS Archive Build"
+               scriptText = "set -e&#10;if [ &quot;${ACTION}&quot; != &quot;install&quot; ]; then&#10;  echo &quot;[ios-version] Skipping auto-bump for ACTION=${ACTION}&quot;&#10;  exit 0&#10;fi&#10;if [ &quot;${SKIP_IOS_ARCHIVE_VERSION_BUMP}&quot; = &quot;1&quot; ]; then&#10;  echo &quot;[ios-version] Auto-bump skipped by SKIP_IOS_ARCHIVE_VERSION_BUMP=1&quot;&#10;  exit 0&#10;fi&#10;python3 &quot;${SRCROOT}/../../scripts/bump_flutter_ios_archive_version.py&quot; --pubspec &quot;${SRCROOT}/../pubspec.yaml&quot; --generated-xcconfig &quot;${SRCROOT}/Flutter/Generated.xcconfig&quot;&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+                     BuildableName = "Runner.app"
+                     BlueprintName = "Runner"
+                     ReferencedContainer = "container:Runner.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
    </ArchiveAction>
 </Scheme>

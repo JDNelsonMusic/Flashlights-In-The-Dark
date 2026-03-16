@@ -29,10 +29,16 @@ class OSCMessage {
 
     final typeTags = StringBuffer(',');
     for (final arg in arguments) {
-      if (arg is int) {
-        typeTags.write('i');
+      if (arg is BigInt) {
+        typeTags.write('h');
+      } else if (arg is int) {
+        if (arg < -2147483648 || arg > 2147483647) {
+          typeTags.write('h');
+        } else {
+          typeTags.write('i');
+        }
       } else if (arg is double) {
-        typeTags.write('f');
+        typeTags.write('d');
       } else if (arg is String) {
         typeTags.write('s');
       } else {
@@ -44,14 +50,26 @@ class OSCMessage {
     builder.add(_stringBytes(typeTags.toString()));
 
     for (final arg in arguments) {
-      if (arg is int) {
-        final b = ByteData(4)..setInt32(0, arg, Endian.big);
+      if (arg is BigInt) {
+        final b = ByteData(8)..setInt64(0, arg.toInt(), Endian.big);
         builder.add(b.buffer.asUint8List());
+      } else if (arg is int) {
+        if (arg < -2147483648 || arg > 2147483647) {
+          final b = ByteData(8)..setInt64(0, arg, Endian.big);
+          builder.add(b.buffer.asUint8List());
+        } else {
+          final b = ByteData(4)..setInt32(0, arg, Endian.big);
+          builder.add(b.buffer.asUint8List());
+        }
       } else if (arg is double) {
-        final b = ByteData(4)..setFloat32(0, arg, Endian.big);
+        final b = ByteData(8)..setFloat64(0, arg, Endian.big);
         builder.add(b.buffer.asUint8List());
       } else if (arg is String) {
         builder.add(_stringBytes(arg));
+      } else {
+        throw ArgumentError(
+          'Unsupported OSC argument type: ${arg.runtimeType}',
+        );
       }
     }
 

@@ -35,8 +35,11 @@ void main() {
         lighting: null,
       );
 
-      expect(state.electronicsForSlot(event, 12)?.sample, partAssignment.sample);
-      expect(state.electronicsForSlot(event, 16)?.sample, familyAssignment.sample);
+      expect(state.electronicsForSlot(event, 8)?.sample, partAssignment.sample);
+      expect(
+        state.electronicsForSlot(event, 1)?.sample,
+        familyAssignment.sample,
+      );
     });
   });
 }

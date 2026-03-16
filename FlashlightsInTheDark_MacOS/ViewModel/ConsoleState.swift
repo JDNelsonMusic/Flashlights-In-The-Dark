@@ -149,6 +149,13 @@ public struct TriggerValidationResult: Identifiable {
     }
 }
 
+public struct SlotSyncCalibration {
+    public let slot: Int
+    public let offsetMs: Double
+    public let rttMs: Double
+    public let updatedAt: Date
+}
+
 // Shared slot mapping data model for console
 private struct ConsoleSlotInfo: Codable {
     let ip: String
@@ -237,21 +244,18 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     /// Default slot-group mapping for the live chorus layout.
     private let defaultGroups: [Int: [Int]] = [
-        1: [27, 41, 42],
-        2: [1, 14, 15],
-        3: [16, 29, 44],
-        4: [3, 4, 18],
-        5: [7, 19, 34],
-        6: [9, 20, 21],
-        7: [23, 38, 51],
-        8: [12, 24, 25],
-        9: [40, 53, 54]
+        1: [31, 32, 33, 34],
+        2: [25, 26, 27, 28],
+        3: [1, 2, 3, 4],
+        4: [19, 20, 21, 22],
+        5: [13, 14, 15, 16],
+        6: [17, 18, 23, 24],
+        7: [5, 6, 11, 12],
+        8: [7, 8, 9, 10],
+        9: [29, 30, 35, 36]
     ]
 
-    private let performanceSlots: [Int] = [
-        1, 3, 4, 7, 9, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25,
-        27, 29, 34, 38, 40, 41, 42, 44, 51, 53, 54
-    ]
+    private let performanceSlots: [Int] = Array(1...36)
 
     private lazy var canonicalSlots: Set<Int> = {
         Set(performanceSlots)
@@ -312,6 +316,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private func rebuildLastTriggerCueSnapshot() {
         guard let context = lastTriggerCueContext else {
             lastTriggerCueSnapshot = nil
+            medianCueAckLatencyMs = 0
             return
         }
 
@@ -338,16 +343,60 @@ public final class ConsoleState: ObservableObject, Sendable {
             sentAt: context.sentAt,
             slotStatuses: slotStatuses
         )
+        refreshCueLatencyMetrics(from: lastTriggerCueSnapshot)
+    }
+
+    private func refreshCueLatencyMetrics(from snapshot: TriggerCueSnapshot?) {
+        let latencies = (snapshot?.slotStatuses ?? [])
+            .compactMap(\.latencyMs)
+            .sorted()
+        guard !latencies.isEmpty else {
+            medianCueAckLatencyMs = 0
+            return
+        }
+        let middle = latencies.count / 2
+        if latencies.count.isMultiple(of: 2) {
+            medianCueAckLatencyMs = Int(((Double(latencies[middle - 1]) + Double(latencies[middle])) / 2.0).rounded())
+        } else {
+            medianCueAckLatencyMs = latencies[middle]
+        }
+    }
+
+    private func refreshSyncMetrics() {
+        let freshCutoff = Date().addingTimeInterval(-20)
+        slotSyncCalibrations = slotSyncCalibrations.filter { _, sample in
+            sample.updatedAt >= freshCutoff
+        }
+        let samples = slotSyncCalibrations.values.map(\.rttMs)
+        syncCalibratedDeviceCount = samples.count
+        guard !samples.isEmpty else {
+            averageSyncRttMs = 0
+            maxSyncRttMs = 0
+            return
+        }
+        averageSyncRttMs = samples.reduce(0, +) / Double(samples.count)
+        maxSyncRttMs = samples.max() ?? 0
+    }
+
+    private static func normalizedDevices(from snapshot: [ChoirDevice]?) -> [ChoirDevice] {
+        let existingBySlot = Dictionary(uniqueKeysWithValues: (snapshot ?? []).map { ($0.listeningSlot, $0) })
+        return (1...ConcertProtocol.expectedDeviceCount).map { slot in
+            let existing = existingBySlot[slot]
+            return ChoirDevice(
+                id: slot - 1,
+                udid: existing?.udid ?? "",
+                name: existing?.name ?? "",
+                ip: existing?.ip ?? "",
+                listeningSlot: slot,
+                midiChannels: ChoirDevice.defaultChannelMap[slot] ?? existing?.midiChannels ?? [10],
+                isPlaceholder: false
+            )
+        }
     }
 
     // MARK: – Init
     public init() {
-        // If a session file exists in UserDefaults, load it; else use defaults.
-        if let saved = Self.restoreLastSession() {
-            self.devices = saved
-        } else {
-            self.devices = ChoirDevice.demo // demo already contains defaultChannelMap
-        }
+        self.devices = Self.normalizedDevices(from: Self.restoreLastSession() ?? ChoirDevice.demo)
 
         // Override MIDI channel assignments from external JSON if present
         if let mapURL = Bundle.main.url(forResource: "channel_map", withExtension: "json"),
@@ -399,6 +448,12 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public var lastLog: String = "🎛  Ready – tap a tile"
     @Published public var isKeyCaptureEnabled: Bool = true
     @Published public var isTransportShortcutSuspended: Bool = false
+    @Published public var showModeEnabled: Bool = true {
+        didSet {
+            guard showModeEnabled != oldValue else { return }
+            startMetricsLoop()
+        }
+    }
     @Published public private(set) var showSessionId: String = UUID().uuidString
     @Published public private(set) var protocolVersion: Int = Int(ConcertProtocol.version)
     @Published public var expectedDeviceCount: Int = ConcertProtocol.expectedDeviceCount
@@ -417,6 +472,11 @@ public final class ConsoleState: ObservableObject, Sendable {
     @Published public private(set) var packetRatePerSecond: Double = 0
     @Published public private(set) var totalSendFailures: Int = 0
     @Published public private(set) var interfaceHealthSummary: [NetworkDiagnosticsSnapshot.InterfaceSummary] = []
+    @Published public private(set) var averageSyncRttMs: Double = 0
+    @Published public private(set) var maxSyncRttMs: Double = 0
+    @Published public private(set) var syncCalibratedDeviceCount: Int = 0
+    @Published public private(set) var medianCueAckLatencyMs: Int = 0
+    @Published public private(set) var lastTriggerDispatchDurationMs: Int = 0
 
     /// Last time a /hello was heard from each slot.
     private var lastHello: [Int: Date] = [:]
@@ -442,6 +502,7 @@ public final class ConsoleState: ObservableObject, Sendable {
     private var conductorHelloStartedAt: Date?
     private var syncTimer: Timer?
     private var metricsTimer: Timer?
+    private var slotSyncCalibrations: [Int: SlotSyncCalibration] = [:]
 
     private var sessionURL: URL?
     /// Monotonic per-slot counter so flashlight retries abandon stale intents.
@@ -808,6 +869,7 @@ public final class ConsoleState: ObservableObject, Sendable {
                 let slot = Int32(slotNumber)
                 let gain: Float32 = 1.0
                 let startAtMs = Date().timeIntervalSince1970 * 1000.0
+                let fileIndex = ((slotNumber - 1) % 32) + 1
 
                 // --- Collect main-actor data once, then use it ---
                 let toneSets: [String] = await MainActor.run {
@@ -817,7 +879,7 @@ public final class ConsoleState: ObservableObject, Sendable {
 
                 for set in toneSets {
                     let prefix = set.lowercased()
-                    let file = "\(prefix)\(slotNumber).mp3"
+                    let file = "\(prefix)\(fileIndex).mp3"
 
                     let message = AudioPlay(index: slot,
                                              file: file,
@@ -923,23 +985,11 @@ public final class ConsoleState: ObservableObject, Sendable {
 
     private func updateDevices(from dict: [String: ConsoleSlotInfo]) {
         let canonical = canonicalSlots
-        let maxSlot = max(canonical.max() ?? devices.count, devices.count)
-
-        if maxSlot > devices.count {
-            for slot in (devices.count + 1)...maxSlot {
-                let isKnownReal = canonical.contains(slot)
-                let dev = ChoirDevice(
-                    id: slot - 1,
-                    udid: "",
-                    name: "",
-                    midiChannels: ChoirDevice.defaultChannelMap[slot] ?? [10],
-                    isPlaceholder: !isKnownReal
-                )
-                devices.append(dev)
-                statuses[slot - 1] = .clean
-            }
-        }
-
+        let previousStatuses = statuses
+        devices = Self.normalizedDevices(from: devices)
+        statuses = Dictionary(uniqueKeysWithValues: devices.map { device in
+            (device.id, previousStatuses[device.id] ?? .clean)
+        })
         let snapshot = devices
 
         for idx in devices.indices {
@@ -948,18 +998,8 @@ public final class ConsoleState: ObservableObject, Sendable {
             let previous = snapshot[idx]
             let mapping = dict[String(slot)]
 
-            if !canonical.contains(slot) {
-                if mapping != nil {
-                    print("[ConsoleState] Ignoring mapping entry for placeholder slot #\(slot)")
-                }
-                device.isPlaceholder = true
-                device.ip = ""
-                device.udid = ""
-                device.name = previous.name
-                device.midiChannels = previous.midiChannels
-                device.listeningSlot = previous.listeningSlot
-                devices[idx] = device
-                continue
+            if !canonical.contains(slot), mapping != nil {
+                print("[ConsoleState] Ignoring mapping entry for non-performance slot #\(slot)")
             }
 
             device.isPlaceholder = false
@@ -1456,32 +1496,35 @@ public final class ConsoleState: ObservableObject, Sendable {
     // MARK: – Dynamic device management  📱
     /// Add a new device at runtime. Assigns next available zero-based id and initializes status.
     public func addDevice(name: String, ip: String, udid: String) {
-        let newId = devices.count
-        let device = ChoirDevice(id: newId,
-                                 udid: udid,
-                                 name: name,
-                                 ip: ip,
-                                 listeningSlot: newId + 1,
-                                 midiChannels: [1])
-        devices.append(device)
-        statuses[newId] = .clean
+        guard let index = devices.firstIndex(where: { $0.udid.isEmpty && $0.ip.isEmpty }) else {
+            lastLog = "⚠️ All 36 seats are already reserved"
+            return
+        }
+        devices[index].name = name
+        devices[index].ip = ip
+        devices[index].udid = udid
+        devices[index].isPlaceholder = false
+        statuses[devices[index].id] = .clean
+        if let seat = StageConsoleLayout.seat(for: devices[index].listeningSlot) {
+            lastLog = "➕ Registered \(seat.displayLabel)"
+        } else {
+            lastLog = "➕ Registered slot \(devices[index].listeningSlot)"
+        }
     }
     
     /// Remove a device by its id, reindexes remaining devices.
     public func removeDevice(id: Int) {
         guard let index = devices.firstIndex(where: { $0.id == id }) else { return }
-        devices.remove(at: index)
-        statuses.removeValue(forKey: id)
-        // Reassign ids and statuses for subsequent devices
-        for idx in index..<devices.count {
-            devices[idx].listeningSlot = idx + 1
-            let oldId = devices[idx].id
-            devices[idx].id = idx
-            if let status = statuses[oldId] {
-                statuses[idx] = status
-                statuses.removeValue(forKey: oldId)
-            }
-        }
+        let slot = devices[index].listeningSlot
+        devices[index].name = ""
+        devices[index].ip = ""
+        devices[index].udid = ""
+        devices[index].torchOn = false
+        devices[index].audioPlaying = false
+        devices[index].micActive = false
+        devices[index].midiChannels = ChoirDevice.defaultChannelMap[slot] ?? [10]
+        devices[index].isPlaceholder = false
+        statuses[id] = .clean
     }
 
     /// Toggle listening for a MIDI channel on a device
@@ -1633,6 +1676,10 @@ extension ConsoleState {
         showSessionId = UUID().uuidString
         isArmed = false
         preflightWarning = nil
+        slotSyncCalibrations.removeAll()
+        refreshSyncMetrics()
+        lastTriggerDispatchDurationMs = 0
+        medianCueAckLatencyMs = 0
         lastLog = "🛰  Starting conductor session \(showSessionId.prefix(8))"
         do {
             let broadcaster = try await broadcasterTask.value
@@ -1651,6 +1698,11 @@ extension ConsoleState {
             await broadcaster.registerTapHandler { [weak self] in
                 Task { @MainActor in
                     self?.tapReceived()
+                }
+            }
+            await broadcaster.registerSyncReplyHandler { [weak self] reply, ip in
+                Task { @MainActor in
+                    self?.handleSyncReply(reply, ip: ip)
                 }
             }
             await broadcaster.configureConcert(
@@ -1829,11 +1881,12 @@ extension ConsoleState {
 
     private func sendSyncTick(referenceMs: Double? = nil) {
         let timestampMs = Int64((referenceMs ?? (Date().timeIntervalSince1970 * 1000.0)).rounded())
+        let requestId = UUID().uuidString
         Task.detached { [weak self] in
             guard let self else { return }
             do {
                 let broadcaster = try await self.broadcasterTask.value
-                try await broadcaster.broadcastSync(timestampMs: timestampMs)
+                try await broadcaster.broadcastSync(requestId: requestId, timestampMs: timestampMs)
             } catch {
                 await self.diagnostics.record(
                     .sendFailed,
@@ -1845,12 +1898,53 @@ extension ConsoleState {
 
     private func startMetricsLoop() {
         metricsTimer?.invalidate()
-        metricsTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        let interval = showModeEnabled ? 2.0 : 1.0
+        metricsTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.refreshMetricsSnapshot()
             }
         }
         refreshMetricsSnapshot()
+    }
+
+    private func handleSyncReply(_ reply: ClientSyncReply, ip: String) {
+        let conductorReceivedAtMs = Date().timeIntervalSince1970 * 1000.0
+        let t1 = Double(reply.conductorSentAtMs)
+        let t2 = Double(reply.clientReceivedAtMs)
+        let t3 = Double(reply.clientSentAtMs)
+        let t4 = conductorReceivedAtMs
+
+        let rttMs = max(0, (t4 - t1) - (t3 - t2))
+        let offsetMs = ((t2 - t1) + (t3 - t4)) / 2.0
+
+        slotSyncCalibrations[reply.slot] = SlotSyncCalibration(
+            slot: reply.slot,
+            offsetMs: offsetMs,
+            rttMs: rttMs,
+            updatedAt: Date()
+        )
+        refreshSyncMetrics()
+
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let broadcaster = try await self.broadcasterTask.value
+                try await broadcaster.sendSyncCalibration(
+                    toSlot: reply.slot,
+                    requestId: reply.requestId,
+                    offsetMs: Int64(offsetMs.rounded()),
+                    rttMs: Int64(rttMs.rounded()),
+                    conductorNowMs: Int64(conductorReceivedAtMs.rounded())
+                )
+            } catch {
+                await self.diagnostics.record(
+                    .sendFailed,
+                    slot: reply.slot,
+                    ipAddress: ip,
+                    message: "Sync calibration send failed: \(error.localizedDescription)"
+                )
+            }
+        }
     }
 
     private func refreshMetricsSnapshot() {
@@ -2516,6 +2610,7 @@ extension ConsoleState {
                 }
             }
             await MainActor.run {
+                self.lastTriggerDispatchDurationMs = Int((Date().timeIntervalSince(dispatchedAt) * 1000.0).rounded())
                 let snapshot = self.lastTriggerCueSnapshot
                 if sentSlots.isEmpty {
                     self.lastLog = "⚠️ No trigger cues sent for Trigger #\(event.id) (\(failedSlots.count) slots unavailable)"

@@ -7,7 +7,7 @@ struct RoutingView: View {
 
     @State private var showAddDevice: Bool = false
     @State private var filterText: String = ""
-    @State private var selectedColor: PrimerColor?
+    @State private var selectedStaff: LightStaff?
     @State private var showPlaceholders: Bool = false
 
     private let columns = [
@@ -29,7 +29,7 @@ struct RoutingView: View {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(filteredDevices) { device in
                             let status = state.statuses[device.id] ?? .clean
-                            let color = state.colorForSlot(device.listeningSlot)
+                            let seat = StageConsoleLayout.seat(for: device.listeningSlot)
                             let lastHello = state.lastHelloDate(forSlot: device.listeningSlot)
                             let lastAck = state.lastAckDate(forSlot: device.listeningSlot)
                             let slotBinding = Binding<Int>(
@@ -43,7 +43,7 @@ struct RoutingView: View {
                             DeviceCard(
                                 device: device,
                                 status: status,
-                                color: color,
+                                seat: seat,
                                 lastHello: lastHello,
                                 lastAck: lastAck,
                                 relativeDescription: relativeDescription,
@@ -98,10 +98,10 @@ struct RoutingView: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(minWidth: 260, maxWidth: 320)
 
-                Picker("Colour", selection: $selectedColor) {
-                    Text("All Colours").tag(nil as PrimerColor?)
-                    ForEach(PrimerColor.allCases) { color in
-                        Text(color.displayName).tag(color as PrimerColor?)
+                Picker("Part", selection: $selectedStaff) {
+                    Text("All Parts").tag(nil as LightStaff?)
+                    ForEach(LightStaff.stageOrder) { staff in
+                        Text(staff.label).tag(staff as LightStaff?)
                     }
                 }
                 .pickerStyle(.menu)
@@ -120,7 +120,7 @@ struct RoutingView: View {
                 .buttonStyle(.bordered)
             }
 
-            if !filterText.isEmpty || selectedColor != nil {
+            if !filterText.isEmpty || selectedStaff != nil {
                 Text("Showing \(filteredDevices.count) of \(state.devices.count) devices")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -146,7 +146,8 @@ struct RoutingView: View {
         let search = filterText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         return state.devices.filter { device in
             guard !device.isPlaceholder else { return false }
-            if let selectedColor, state.colorForSlot(device.listeningSlot) != selectedColor {
+            if let selectedStaff,
+               StageConsoleLayout.seat(for: device.listeningSlot)?.staff != selectedStaff {
                 return false
             }
             guard !search.isEmpty else { return true }
@@ -184,26 +185,22 @@ private struct DeviceCard: View {
 
     let device: ChoirDevice
     let status: DeviceStatus
-    let color: PrimerColor?
+    let seat: LightStaffSeat?
     let lastHello: Date?
     let lastAck: Date?
     let relativeDescription: (Date?) -> String
     let slotBinding: Binding<Int>
     let onPing: () -> Void
 
-    private var stageSeat: LightStaffSeat? {
-        StageConsoleLayout.seat(for: device.listeningSlot)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
-                    if let stageSeat {
-                        Text(stageSeat.displayLabel)
+                    if let seat {
+                        Text(seat.displayLabel)
                             .font(.title3)
                             .bold()
-                        Text("Legacy Slot #\(device.listeningSlot)")
+                        Text("System slot #\(device.listeningSlot)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -223,12 +220,12 @@ private struct DeviceCard: View {
                 StatusChip(status: status)
             }
 
-            if let color {
-                Label(color.displayName, systemImage: "tag")
+            if let seat {
+                Label(seat.staff.label, systemImage: "music.note")
                     .font(.caption)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
-                    .background(colorTint(for: color).opacity(0.18))
+                    .background(seat.staff.accentColor.opacity(0.18))
                     .clipShape(Capsule())
             }
 
@@ -258,7 +255,7 @@ private struct DeviceCard: View {
 
             Divider()
 
-            Picker("Listening Slot", selection: slotBinding) {
+            Picker("Assigned Seat", selection: slotBinding) {
                 ForEach(StageConsoleLayout.routeableSeats) { seat in
                     if let legacySlot = seat.legacySlot {
                         Text(seat.routingLabel).tag(legacySlot)
@@ -312,21 +309,6 @@ private struct DeviceCard: View {
         default: return Color.white.opacity(0.1)
         }
     }
-
-    private func colorTint(for color: PrimerColor) -> Color {
-        switch color {
-        case .blue: return .royalBlue
-        case .red: return .brightRed
-        case .green: return .slotGreen
-        case .purple: return .slotPurple
-        case .yellow: return .slotYellow
-        case .pink: return .lightRose
-        case .orange: return .slotOrange
-        case .magenta: return .hotMagenta
-        case .cyan: return .skyBlue
-        }
-    }
-
 }
 
 private struct PlaceholderCard: View {

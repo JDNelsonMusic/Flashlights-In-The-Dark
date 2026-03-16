@@ -20,7 +20,7 @@ public struct LightStaffSeat: Identifiable, Hashable {
 
     public var routingLabel: String {
         if let legacySlot {
-            return "\(staff.label) · Seat \(seatNumber) · Legacy \(legacySlot)"
+            return "\(staff.label) · Seat \(seatNumber) · Slot \(legacySlot)"
         }
         return "\(staff.label) · Seat \(seatNumber)"
     }
@@ -57,17 +57,17 @@ public extension LightStaff {
     var legacySlots: [Int] {
         switch self {
         case .sopranoL1:
-            return [16, 29, 44]
+            return Array(1...6)
         case .sopranoL2:
-            return [12, 24, 25, 23, 38, 51]
+            return Array(7...12)
         case .tenorL:
-            return [7, 19, 34]
+            return Array(13...18)
         case .bassL:
-            return [9, 20, 21, 3, 4, 18]
+            return Array(19...24)
         case .altoL2:
-            return [1, 14, 15, 40, 53, 54]
+            return Array(25...30)
         case .altoL1:
-            return [27, 41, 42]
+            return Array(31...36)
         }
     }
 
@@ -82,6 +82,6 @@ public extension LightStaff {
     }
 
     var routedSeatCount: Int {
-        legacySlots.count
+        StageConsoleLayout.seatsPerStaff
     }
 }

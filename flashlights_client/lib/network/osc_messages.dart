@@ -2,7 +2,7 @@
 import 'osc_packet.dart';
 
 const int kConcertProtocolVersion = 2;
-const int kExpectedDeviceCount = 28;
+const int kExpectedDeviceCount = 36;
 
 enum OscAddress {
   flashOn('/flash/on'),

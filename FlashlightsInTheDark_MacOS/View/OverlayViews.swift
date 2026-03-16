@@ -13,7 +13,7 @@ struct FullScreenFlashView: View {
                     .opacity(strobeOn ? 0.8 : 0.0)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                    .animation(.easeOut(duration: 0.3), value: strobeActive)
+                    .animation(state.showModeEnabled ? nil : .easeOut(duration: 0.3), value: strobeActive)
                     .allowsHitTesting(false)
             }
         }

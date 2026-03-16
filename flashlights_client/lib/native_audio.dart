@@ -62,10 +62,11 @@ class NativeAudio {
             primerManifest,
           );
           final electronicsManifest = await _primeElectronicsAssets();
-          final electronicsValue = await _channel.invokeMapMethod<String, dynamic>(
-            'initializeElectronicsLibrary',
-            electronicsManifest,
-          );
+          final electronicsValue = await _channel
+              .invokeMapMethod<String, dynamic>(
+                'initializeElectronicsLibrary',
+                electronicsManifest,
+              );
 
           if (primerValue != null || electronicsValue != null) {
             final snapshot = <String, dynamic>{
@@ -149,7 +150,9 @@ class NativeAudio {
         decoded.keys
             .where(
               (key) =>
-                  key.startsWith('available-sounds/electronics-trigger-clips/') &&
+                  key.startsWith(
+                    'available-sounds/electronics-trigger-clips/',
+                  ) &&
                   key.toLowerCase().endsWith('.mp3'),
             )
             .toList()
@@ -193,15 +196,17 @@ class NativeAudio {
   }
 
   /// Plays a bundled event-electronics clip directly from the Flutter asset tree.
-  static Future<void> playElectronicsClip(
+  static Future<Map<String, dynamic>?> playElectronicsClip(
     String assetKey,
-    double volume,
-  ) async {
+    double volume, {
+    Duration startDelay = Duration.zero,
+    double? requestedStartAtMs,
+  }) async {
     await ensureInitialized();
     final trimmed = assetKey.trim();
     if (trimmed.isEmpty) {
       debugPrint('[NativeAudio] Ignoring empty electronics clip request');
-      return;
+      return null;
     }
 
     final manifest = await _loadAssetManifest();
@@ -212,8 +217,16 @@ class NativeAudio {
     final payload = <String, dynamic>{
       'assetKey': trimmed,
       'volume': volume.clamp(0.0, 1.0),
+      'startDelayMs': startDelay.inMilliseconds,
+      if (requestedStartAtMs != null) 'requestedStartAtMs': requestedStartAtMs,
     };
-    await _channel.invokeMethod('playEventClip', payload);
+    final response = await _channel.invokeMapMethod<String, dynamic>(
+      'playEventClip',
+      payload,
+    );
+    return response == null
+        ? null
+        : Map<String, dynamic>.unmodifiable(response);
   }
 
   /// Stops any native playback in progress on the platform side.

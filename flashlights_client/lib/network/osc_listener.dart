@@ -27,7 +27,7 @@ const Duration _conductorTimeout = Duration(seconds: 8);
 const Duration _watchdogTick = Duration(seconds: 1);
 const int _legacySoundEventCount = 32;
 const bool kPrimerPlaybackEnabled = false;
-const Duration _lightSequenceTick = Duration(milliseconds: 40);
+const Duration _lightSequenceTick = Duration(milliseconds: 16);
 
 enum _EventTriggerComponentMode { all, audioOnly, lightingOnly }
 
@@ -56,10 +56,7 @@ Duration playbackDelayForStartAtMs(double? startAtMs, {DateTime? now}) {
   final reference = now ?? DateTime.now();
   final alignedNowMs =
       reference.millisecondsSinceEpoch + client.clockOffsetMs.value;
-  final delayMs =
-      (startAtMs - alignedNowMs)
-          .clamp(0, double.infinity)
-          .toInt();
+  final delayMs = (startAtMs - alignedNowMs).clamp(0, double.infinity).toInt();
   return Duration(milliseconds: delayMs);
 }
 
@@ -361,6 +358,13 @@ class OscListener {
   String? _activeLightingSummary;
   String? _activeLightingPart;
   int? _activeLightingEventId;
+  double? _lastCueReceivedAtMs;
+  double? _lastRequestedCueStartAtMs;
+  int? _lastScheduledAudioDelayMs;
+  double? _lastSyncRttMs;
+  String? _lastSyncMode;
+  double? _lastSyncCalibratedAtMs;
+  Map<String, Object?>? _lastNativeAudioSchedule;
 
   final List<_NetworkEvent> _eventLog = <_NetworkEvent>[];
   static const int _maxLogEntries = 600;
@@ -443,10 +447,114 @@ class OscListener {
             : current + ((measuredOffsetMs - current) * 0.2);
 
     client.clockOffsetMs.value = nextOffsetMs;
+    _lastSyncMode = 'broadcast';
+    _lastSyncCalibratedAtMs = localNowMs;
     _record('sync', 'Updated clock offset', <String, Object?>{
       'remoteMs': remoteMs.round(),
       'offsetMs': nextOffsetMs.round(),
       'measuredOffsetMs': measuredOffsetMs.round(),
+    });
+  }
+
+  void _applyClockCalibration({
+    required double offsetMs,
+    required double rttMs,
+    required String mode,
+    String? requestId,
+  }) {
+    final current = client.clockOffsetMs.value;
+    final nextOffsetMs =
+        current == 0
+            ? offsetMs
+            : (offsetMs - current).abs() > 250
+            ? offsetMs
+            : current + ((offsetMs - current) * 0.55);
+    client.clockOffsetMs.value = nextOffsetMs;
+    _lastSyncRttMs = rttMs;
+    _lastSyncMode = mode;
+    _lastSyncCalibratedAtMs = DateTime.now().millisecondsSinceEpoch.toDouble();
+    _record('sync', 'Applied sync calibration', <String, Object?>{
+      if (requestId != null) 'requestId': requestId,
+      'offsetMs': nextOffsetMs.round(),
+      'rttMs': rttMs.round(),
+      'mode': mode,
+    });
+  }
+
+  bool _handleStructuredSync(OSCMessage message) {
+    final args = message.arguments;
+    if (args.length < 3 || args.first is! String) {
+      return false;
+    }
+    final mode = (args.first as String).trim().toLowerCase();
+    switch (mode) {
+      case 'request':
+        final requestId = args[1];
+        final conductorSentAt = args[2];
+        if (requestId is! String || conductorSentAt is! int) {
+          return false;
+        }
+        final receivedAtMs = DateTime.now().millisecondsSinceEpoch;
+        _sendSyncReply(
+          requestId: requestId,
+          conductorSentAtMs: conductorSentAt,
+          clientReceivedAtMs: receivedAtMs,
+        );
+        return true;
+      case 'calibration':
+        if (args.length < 5) {
+          return false;
+        }
+        final requestId = args[1];
+        final offset = args[2];
+        final rtt = args[3];
+        if (requestId is! String || offset is! int || rtt is! int) {
+          return false;
+        }
+        _applyClockCalibration(
+          offsetMs: offset.toDouble(),
+          rttMs: rtt.toDouble(),
+          mode: 'rtt',
+          requestId: requestId,
+        );
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void _sendSyncReply({
+    required String requestId,
+    required int conductorSentAtMs,
+    required int clientReceivedAtMs,
+  }) {
+    final conductor = _trustedConductorAddress;
+    final conductorPort = _trustedConductorPort;
+    if (conductor == null || conductorPort == null) {
+      return;
+    }
+    final clientSentAtMs = DateTime.now().millisecondsSinceEpoch;
+    final msg = OSCMessage(
+      '/sync',
+      arguments: <Object>[
+        'reply',
+        client.myIndex.value,
+        requestId,
+        conductorSentAtMs,
+        clientReceivedAtMs,
+        clientSentAtMs,
+        client.deviceId.value,
+      ],
+    );
+    _sendBestEffort(
+      msg,
+      destination: conductor,
+      port: conductorPort,
+      category: 'sync',
+    );
+    _record('sync', 'Sent sync reply', <String, Object?>{
+      'requestId': requestId,
+      'slot': client.myIndex.value,
     });
   }
 
@@ -944,6 +1052,9 @@ class OscListener {
     String? primerFile,
     String? electronicsAssetKey,
     double? electronicsDurationMs,
+    Duration scheduledDelay = Duration.zero,
+    double? requestedStartAtMs,
+    double? cueReceivedAtMs,
     bool sendAck = false,
     String? dedupeKey,
     String? cueId,
@@ -970,12 +1081,27 @@ class OscListener {
 
     try {
       final playbackToken = ++_playbackToken;
+      _lastCueReceivedAtMs = cueReceivedAtMs;
+      _lastRequestedCueStartAtMs = requestedStartAtMs;
+      _lastScheduledAudioDelayMs = scheduledDelay.inMilliseconds;
 
       if (kPrimerPlaybackEnabled && primerFile != null) {
         await NativeAudio.playPrimerTone(primerFile, 1.0);
       }
       if (electronicsAssetKey != null) {
-        await NativeAudio.playElectronicsClip(electronicsAssetKey, 1.0);
+        _lastNativeAudioSchedule = await NativeAudio.playElectronicsClip(
+          electronicsAssetKey,
+          1.0,
+          startDelay: scheduledDelay,
+          requestedStartAtMs: requestedStartAtMs,
+        );
+        _record('audio', 'Scheduled electronics clip', <String, Object?>{
+          'asset': electronicsAssetKey,
+          'delayMs': scheduledDelay.inMilliseconds,
+          if (requestedStartAtMs != null)
+            'requestedStartAtMs': requestedStartAtMs.round(),
+          ...?_lastNativeAudioSchedule,
+        });
       }
 
       if (dedupeKey != null) {
@@ -1212,7 +1338,9 @@ class OscListener {
 
     if (message.address == '/sync') {
       _markConductorHeartbeat();
-      _updateClockOffsetFromSync(message);
+      if (!_handleStructuredSync(message)) {
+        _updateClockOffsetFromSync(message);
+      }
       return;
     }
 
@@ -1332,6 +1460,7 @@ class OscListener {
 
     final eventId = envelope.payload[0] as int;
     final componentMode = _componentModeFromPayload(envelope.payload);
+    final cueReceivedAtMs = DateTime.now().millisecondsSinceEpoch.toDouble();
     double? startAtMs;
     if (envelope.payload.length >= 2 && envelope.payload[1] is num) {
       startAtMs = (envelope.payload[1] as num).toDouble();
@@ -1390,26 +1519,29 @@ class OscListener {
 
     final delay = playbackDelayForStartAtMs(startAtMs);
     final dedupeKey = 'event:$eventId:slot=$slot';
-
-    unawaited(
-      Future<void>.delayed(delay, () async {
-        if (lightingAssignment != null) {
+    if (lightingAssignment != null) {
+      unawaited(
+        Future<void>.delayed(delay, () async {
           _startLightSequence(lightingAssignment, eventId: eventId, slot: slot);
-        }
-        if (!wantsAudio || (primerAssignment == null && electronicsAssignment == null)) {
-          _sendAck(cueId: envelope.cueId, seq: envelope.seq);
-          return;
-        }
-        await _playEventMedia(
-          primerFile: primerAssignment?.sample,
-          electronicsAssetKey: electronicsAssignment?.sample,
-          electronicsDurationMs: electronicsAssignment?.durationMs,
-          sendAck: true,
-          dedupeKey: dedupeKey,
-          cueId: envelope.cueId,
-          seq: envelope.seq,
-        );
-      }),
+        }),
+      );
+    }
+    if (!wantsAudio ||
+        (primerAssignment == null && electronicsAssignment == null)) {
+      _sendAck(cueId: envelope.cueId, seq: envelope.seq);
+      return;
+    }
+    await _playEventMedia(
+      primerFile: primerAssignment?.sample,
+      electronicsAssetKey: electronicsAssignment?.sample,
+      electronicsDurationMs: electronicsAssignment?.durationMs,
+      scheduledDelay: delay,
+      requestedStartAtMs: startAtMs,
+      cueReceivedAtMs: cueReceivedAtMs,
+      sendAck: true,
+      dedupeKey: dedupeKey,
+      cueId: envelope.cueId,
+      seq: envelope.seq,
     );
   }
 
@@ -1438,6 +1570,7 @@ class OscListener {
     }
 
     final delay = playbackDelayForStartAtMs(startAtMs);
+    final cueReceivedAtMs = DateTime.now().millisecondsSinceEpoch.toDouble();
     final primerFile = resolvePrimerAudioPlayFile(file);
     final bundledAssetKey =
         primerFile == null ? resolveBundledAudioPlayAssetKey(file) : null;
@@ -1460,9 +1593,9 @@ class OscListener {
       return;
     }
 
-    unawaited(
-      Future<void>.delayed(delay, () async {
-        if (primerFile != null) {
+    if (primerFile != null) {
+      unawaited(
+        Future<void>.delayed(delay, () async {
           await _playPrimer(
             primerFile,
             gain.toDouble(),
@@ -1470,16 +1603,19 @@ class OscListener {
             cueId: envelope.cueId,
             seq: envelope.seq,
           );
-          return;
-        }
+        }),
+      );
+      return;
+    }
 
-        await _playEventMedia(
-          electronicsAssetKey: bundledAssetKey,
-          sendAck: true,
-          cueId: envelope.cueId,
-          seq: envelope.seq,
-        );
-      }),
+    await _playEventMedia(
+      electronicsAssetKey: bundledAssetKey,
+      scheduledDelay: delay,
+      requestedStartAtMs: startAtMs,
+      cueReceivedAtMs: cueReceivedAtMs,
+      sendAck: true,
+      cueId: envelope.cueId,
+      seq: envelope.seq,
     );
   }
 
@@ -1730,6 +1866,13 @@ class OscListener {
       'activeLightingEventId': _activeLightingEventId,
       'activeLightingPart': _activeLightingPart,
       'activeLightingSummary': _activeLightingSummary,
+      'lastCueReceivedAtMs': _lastCueReceivedAtMs,
+      'lastRequestedCueStartAtMs': _lastRequestedCueStartAtMs,
+      'lastScheduledAudioDelayMs': _lastScheduledAudioDelayMs,
+      'lastSyncRttMs': _lastSyncRttMs,
+      'lastSyncMode': _lastSyncMode,
+      'lastSyncCalibratedAtMs': _lastSyncCalibratedAtMs,
+      'lastNativeAudioSchedule': _lastNativeAudioSchedule,
       'helloIntervalSeconds': _currentHelloInterval.inSeconds,
       'events': _eventLog.map((e) => e.toJson()).toList(growable: false),
     };

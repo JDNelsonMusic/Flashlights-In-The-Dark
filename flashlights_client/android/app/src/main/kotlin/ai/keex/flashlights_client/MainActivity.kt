@@ -32,6 +32,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -134,8 +137,16 @@ class MainActivity : FlutterActivity() {
                         return@setMethodCallHandler
                     }
                     val volume = (call.argument<Number>("volume") ?: 1.0).toFloat()
-                    electronicsAudio.play(assetKey, volume)
-                    result.success(null)
+                    val startDelayMs = (call.argument<Number>("startDelayMs") ?: 0).toLong()
+                    val requestedStartAtMs = call.argument<Number>("requestedStartAtMs")?.toLong()
+                    result.success(
+                        electronicsAudio.play(
+                            assetKey,
+                            volume,
+                            startDelayMs,
+                            requestedStartAtMs
+                        )
+                    )
                 }
                 "stopPrimerTone" -> {
                     primerAudio.stopAll()
@@ -144,7 +155,7 @@ class MainActivity : FlutterActivity() {
                 }
                 "diagnostics" -> {
                     val payload = HashMap(primerAudio.diagnostics())
-                    payload["electronicsPlayers"] = electronicsAudio.activePlayerCount()
+                    payload.putAll(electronicsAudio.diagnostics())
                     result.success(payload)
                 }
                 else -> result.notImplemented()
@@ -615,14 +626,24 @@ private class ElectronicsClipManager(context: Context) {
         }
     }
     private val executor: ExecutorService = Executors.newCachedThreadPool()
+    private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val lock = Any()
     private val activePlayers: MutableMap<Int, MediaPlayer> = mutableMapOf()
     private val assetFiles: MutableMap<String, File> = mutableMapOf()
+    private val pendingStartTasks: MutableMap<Int, ScheduledFuture<*>> = mutableMapOf()
     private var nextPlayerId: Int = 1
     private var initialised = false
     private var initialising = false
     private var requestedAssets = 0
     private val pendingCallbacks = mutableListOf<(Result<Map<String, Any?>>) -> Unit>()
+    private var lastRequestedAssetKey: String? = null
+    private var lastResolvedAssetPath: String? = null
+    private var lastPlaybackError: String? = null
+    private var lastRequestedStartAtMs: Long = 0L
+    private var lastRequestedDelayMs: Long = 0L
+    private var lastPlaybackScheduledAtMs: Long = 0L
+    private var lastPlaybackStartedAtMs: Long = 0L
+    private var lastStartDriftMs: Long = 0L
 
     fun initialize(assetKeys: List<String>, callback: (Result<Map<String, Any?>>) -> Unit) {
         val startInitialisation: Boolean
@@ -661,13 +682,30 @@ private class ElectronicsClipManager(context: Context) {
         }
     }
 
-    fun play(assetKey: String, volume: Float) {
+    fun play(
+        assetKey: String,
+        volume: Float,
+        startDelayMs: Long = 0L,
+        requestedStartAtMs: Long? = null
+    ): Map<String, Any?> {
         val trimmed = assetKey.trim()
         if (trimmed.isEmpty()) {
-            return
+            return hashMapOf(
+                "mode" to "ignored",
+                "error" to "Empty asset key"
+            )
+        }
+        val clamped = volume.coerceIn(0f, 1f)
+        val scheduledDelayMs = startDelayMs.coerceAtLeast(0L)
+        val scheduledStartWallMs = System.currentTimeMillis() + scheduledDelayMs
+        synchronized(lock) {
+            lastRequestedAssetKey = trimmed
+            lastRequestedStartAtMs = requestedStartAtMs ?: 0L
+            lastRequestedDelayMs = scheduledDelayMs
+            lastPlaybackScheduledAtMs = scheduledStartWallMs
+            lastPlaybackError = null
         }
         executor.execute {
-            val clamped = volume.coerceIn(0f, 1f)
             val player = MediaPlayer()
             val playerId = synchronized(lock) {
                 val id = nextPlayerId++
@@ -685,6 +723,9 @@ private class ElectronicsClipManager(context: Context) {
 
                 val cachedFile = synchronized(lock) { assetFiles[trimmed] }
                 if (cachedFile != null) {
+                    synchronized(lock) {
+                        lastResolvedAssetPath = cachedFile.absolutePath
+                    }
                     player.setDataSource(cachedFile.absolutePath)
                 } else {
                     val lookupKey = flutterLoader.getLookupKeyForAsset(trimmed)
@@ -696,6 +737,7 @@ private class ElectronicsClipManager(context: Context) {
                         val cached = materialiseAsset(lookupKey, trimmed)
                         synchronized(lock) {
                             assetFiles[trimmed] = cached
+                            lastResolvedAssetPath = cached.absolutePath
                         }
                         player.setDataSource(cached.absolutePath)
                     }
@@ -714,17 +756,49 @@ private class ElectronicsClipManager(context: Context) {
                     true
                 }
                 player.prepare()
-                player.start()
+                val remainingDelayMs =
+                    (scheduledStartWallMs - System.currentTimeMillis()).coerceAtLeast(0L)
+                val startTask = scheduler.schedule({
+                    val stillActive = synchronized(lock) { activePlayers.containsKey(playerId) }
+                    if (stillActive) {
+                        try {
+                            player.start()
+                            synchronized(lock) {
+                                lastPlaybackStartedAtMs = System.currentTimeMillis()
+                                lastStartDriftMs = lastPlaybackStartedAtMs - scheduledStartWallMs
+                                pendingStartTasks.remove(playerId)
+                            }
+                        } catch (e: Exception) {
+                            synchronized(lock) {
+                                lastPlaybackError = e.message ?: "MediaPlayer failed to start"
+                                pendingStartTasks.remove(playerId)
+                            }
+                            Log.e(TAG, "Failed to start scheduled electronics clip $trimmed", e)
+                            removePlayer(playerId, player)
+                        }
+                    }
+                }, remainingDelayMs, TimeUnit.MILLISECONDS)
+                synchronized(lock) {
+                    pendingStartTasks[playerId] = startTask
+                }
             } catch (e: Exception) {
+                synchronized(lock) {
+                    lastPlaybackError = e.message ?: "Playback failed"
+                }
                 Log.e(TAG, "Failed to play electronics clip $trimmed", e)
                 removePlayer(playerId, player)
             }
+        }
+        return synchronized(lock) {
+            schedulePayloadLocked(if (scheduledDelayMs > 4L) "scheduled" else "immediate")
         }
     }
 
     fun stopAll() {
         val players = synchronized(lock) {
             val copy = activePlayers.values.toList()
+            pendingStartTasks.values.forEach { it.cancel(false) }
+            pendingStartTasks.clear()
             activePlayers.clear()
             copy
         }
@@ -743,6 +817,8 @@ private class ElectronicsClipManager(context: Context) {
 
     fun activePlayerCount(): Int = synchronized(lock) { activePlayers.size }
 
+    fun diagnostics(): Map<String, Any?> = synchronized(lock) { diagnosticsLocked() }
+
     fun release() {
         stopAll()
         synchronized(lock) {
@@ -753,6 +829,7 @@ private class ElectronicsClipManager(context: Context) {
             requestedAssets = 0
         }
         executor.shutdownNow()
+        scheduler.shutdownNow()
     }
 
     private fun performInitialization(assetKeys: List<String>): Map<String, Any?> {
@@ -793,13 +870,22 @@ private class ElectronicsClipManager(context: Context) {
             "electronicsInitialised" to initialised,
             "electronicsAssets" to assetFiles.size,
             "electronicsRequested" to requestedAssets,
-            "electronicsPlayers" to activePlayers.size
+            "electronicsPlayers" to activePlayers.size,
+            "lastElectronicsAssetKey" to lastRequestedAssetKey,
+            "lastElectronicsResolvedPath" to lastResolvedAssetPath,
+            "lastElectronicsError" to lastPlaybackError,
+            "lastElectronicsRequestedStartAtMs" to lastRequestedStartAtMs,
+            "lastElectronicsRequestedDelayMs" to lastRequestedDelayMs,
+            "lastElectronicsPlaybackScheduledAtMs" to lastPlaybackScheduledAtMs,
+            "lastElectronicsPlaybackStartedAtMs" to lastPlaybackStartedAtMs,
+            "lastElectronicsStartDriftMs" to lastStartDriftMs
         )
     }
 
     private fun removePlayer(playerId: Int, player: MediaPlayer) {
         synchronized(lock) {
             activePlayers.remove(playerId)
+            pendingStartTasks.remove(playerId)?.cancel(false)
         }
         try {
             if (player.isPlaying) {
@@ -810,6 +896,18 @@ private class ElectronicsClipManager(context: Context) {
             player.reset()
             player.release()
         }
+    }
+
+    private fun schedulePayloadLocked(mode: String): Map<String, Any?> {
+        return hashMapOf(
+            "mode" to mode,
+            "assetKey" to lastRequestedAssetKey,
+            "scheduledDelayMs" to lastRequestedDelayMs,
+            "requestedStartAtMs" to lastRequestedStartAtMs,
+            "scheduledStartAtMs" to lastPlaybackScheduledAtMs,
+            "lastKnownStartDriftMs" to lastStartDriftMs,
+            "error" to lastPlaybackError
+        )
     }
 
     private fun materialiseAsset(lookupKey: String, assetKey: String): File {

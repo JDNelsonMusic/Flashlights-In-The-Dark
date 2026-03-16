@@ -135,7 +135,10 @@ struct EventTriggerStrip: View {
                         )
                     }
                 }
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: state.currentEventIndex)
+                .animation(
+                    state.showModeEnabled ? nil : .spring(response: 0.35, dampingFraction: 0.8),
+                    value: state.currentEventIndex
+                )
             } else {
                 Text(state.eventLoadError ?? "No trigger-point bundle loaded")
                     .font(.headline)
@@ -199,8 +202,12 @@ struct EventTriggerStrip: View {
         guard !trimmed.isEmpty else { return }
         let previousIndex = state.currentEventIndex
         if let targetIndex = resolveEventIndex(from: trimmed) {
-            withAnimation {
+            if state.showModeEnabled {
                 state.currentEventIndex = targetIndex
+            } else {
+                withAnimation {
+                    state.currentEventIndex = targetIndex
+                }
             }
             if state.eventRecipes.indices.contains(targetIndex) {
                 let event = state.eventRecipes[targetIndex]

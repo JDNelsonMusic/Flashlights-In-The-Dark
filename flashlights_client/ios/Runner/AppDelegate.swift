@@ -152,8 +152,15 @@ import AVFoundation
           return
         }
         let volume = (args["volume"] as? Double) ?? 1.0
-        self.electronicsAudio.play(assetKey: assetKey, gain: volume)
-        result(nil)
+        let startDelayMs = (args["startDelayMs"] as? Double) ?? 0
+        let requestedStartAtMs = args["requestedStartAtMs"] as? Double
+        let payload = self.electronicsAudio.play(
+          assetKey: assetKey,
+          gain: volume,
+          startDelayMs: startDelayMs,
+          requestedStartAtMs: requestedStartAtMs
+        )
+        result(payload)
       case "stopPrimerTone":
         self.primerAudio.stopAll()
         self.electronicsAudio.stopAll()
@@ -744,8 +751,13 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
   private var lastRequestedAssetKey: String?
   private var lastResolvedAssetPath: String?
   private var lastPlaybackError: String?
+  private var lastRequestedStartAtMs: Double = 0
+  private var lastRequestedDelayMs: Double = 0
+  private var lastPlaybackScheduledAtMs: Double = 0
   private var lastPlaybackStartedAtMs: Double = 0
+  private var lastStartDriftMs: Double = 0
   private var currentStatus: String = "not_initialized"
+  private var startMarkerWorkItems: [ObjectIdentifier: DispatchWorkItem] = [:]
 
   func attachFlutterController(_ controller: FlutterViewController) {
     flutterController = controller
@@ -779,7 +791,11 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
         self.lastRequestedAssetKey = nil
         self.lastResolvedAssetPath = nil
         self.lastPlaybackError = nil
+        self.lastRequestedStartAtMs = 0
+        self.lastRequestedDelayMs = 0
+        self.lastPlaybackScheduledAtMs = 0
         self.lastPlaybackStartedAtMs = 0
+        self.lastStartDriftMs = 0
         self.currentStatus = "initializing"
 
         var loaded = 0
@@ -848,18 +864,34 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     }
   }
 
-  func play(assetKey: String, gain: Double) {
+  func play(
+    assetKey: String,
+    gain: Double,
+    startDelayMs: Double = 0,
+    requestedStartAtMs: Double? = nil
+  ) -> [String: Any] {
     let trimmed = assetKey.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty else { return }
+    guard !trimmed.isEmpty else {
+      return [
+        "mode": "ignored",
+        "error": "Empty asset key"
+      ]
+    }
     let capped = max(0.0, min(gain, 1.0))
+    var payload: [String: Any] = [:]
 
-    queue.async {
+    queue.sync {
       self.lastRequestedAssetKey = trimmed
+      self.lastRequestedStartAtMs = requestedStartAtMs ?? 0
+      self.lastRequestedDelayMs = max(0, startDelayMs)
+      self.lastPlaybackScheduledAtMs = Date().timeIntervalSince1970 * 1000.0 + self.lastRequestedDelayMs
+
       let url = self.assetURLs[trimmed] ?? self.locateAssetURL(assetKey: trimmed)
       guard let url else {
         self.lastResolvedAssetPath = nil
         self.lastPlaybackError = "Asset not found"
         NSLog("[ElectronicsClipEngine] Asset not found for \(trimmed)")
+        payload = self.schedulePayloadLocked(mode: "failed")
         return
       }
       self.assetURLs[trimmed] = url
@@ -871,22 +903,63 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
         let player = try self.dequeuePlayer(for: trimmed)
         self.lastResolvedAssetPath = url.path
         player.volume = Float(capped)
+        player.currentTime = 0
+        player.prepareToPlay()
+
         let identifier = ObjectIdentifier(player)
         self.activePlayers[identifier] = player
         self.playerAssets[identifier] = trimmed
         self.currentAssetKey = trimmed
         self.lastPlaybackError = nil
-        self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
 
-        DispatchQueue.main.async {
-          player.currentTime = 0
-          player.play()
+        if let workItem = self.startMarkerWorkItems[identifier] {
+          workItem.cancel()
         }
+        let scheduledWallClockMs = self.lastPlaybackScheduledAtMs
+        let marker = DispatchWorkItem { [weak self] in
+          guard let self else { return }
+          self.queue.async {
+            self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
+            self.lastStartDriftMs = self.lastPlaybackStartedAtMs - scheduledWallClockMs
+            self.startMarkerWorkItems.removeValue(forKey: identifier)
+          }
+        }
+        self.startMarkerWorkItems[identifier] = marker
+
+        let delaySec = self.lastRequestedDelayMs / 1000.0
+        let started: Bool
+        if delaySec > 0.004 {
+          let targetTime = player.deviceCurrentTime + delaySec
+          started = player.play(atTime: targetTime)
+          if started {
+            self.queue.asyncAfter(deadline: .now() + delaySec, execute: marker)
+          }
+        } else {
+          started = player.play()
+          if started {
+            marker.cancel()
+            self.startMarkerWorkItems.removeValue(forKey: identifier)
+            self.lastPlaybackStartedAtMs = Date().timeIntervalSince1970 * 1000.0
+            self.lastStartDriftMs = self.lastPlaybackStartedAtMs - scheduledWallClockMs
+          }
+        }
+
+        if !started {
+          throw NSError(
+            domain: "ai.keex.flashlights",
+            code: -11,
+            userInfo: [NSLocalizedDescriptionKey: "AVAudioPlayer failed to start playback"]
+          )
+        }
+        payload = self.schedulePayloadLocked(mode: delaySec > 0.004 ? "scheduled" : "immediate")
       } catch {
         self.lastPlaybackError = error.localizedDescription
         NSLog("[ElectronicsClipEngine] Playback failed for \(trimmed): \(error)")
+        payload = self.schedulePayloadLocked(mode: "failed")
       }
     }
+
+    return payload
   }
 
   func stopAll() {
@@ -900,6 +973,8 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     queue.async {
       let identifier = ObjectIdentifier(player)
       self.activePlayers.removeValue(forKey: identifier)
+      self.startMarkerWorkItems[identifier]?.cancel()
+      self.startMarkerWorkItems.removeValue(forKey: identifier)
       if let assetKey = self.playerAssets[identifier] {
         player.currentTime = 0
         player.prepareToPlay()
@@ -915,6 +990,8 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     queue.async {
       let identifier = ObjectIdentifier(player)
       self.activePlayers.removeValue(forKey: identifier)
+      self.startMarkerWorkItems[identifier]?.cancel()
+      self.startMarkerWorkItems.removeValue(forKey: identifier)
       self.lastPlaybackError = error?.localizedDescription ?? "Decode error"
       NSLog("[ElectronicsClipEngine] Decode error: \(String(describing: error))")
       if self.activePlayers.isEmpty {
@@ -935,6 +1012,8 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
     let entries = Array(activePlayers)
     activePlayers.removeAll(keepingCapacity: true)
     for (identifier, player) in entries {
+      startMarkerWorkItems[identifier]?.cancel()
+      startMarkerWorkItems.removeValue(forKey: identifier)
       player.stop()
       player.currentTime = 0
       player.prepareToPlay()
@@ -958,7 +1037,23 @@ private final class ElectronicsClipEngine: NSObject, AVAudioPlayerDelegate {
       "lastElectronicsAssetKey": lastRequestedAssetKey ?? NSNull(),
       "lastElectronicsResolvedPath": lastResolvedAssetPath ?? NSNull(),
       "lastElectronicsError": lastPlaybackError ?? NSNull(),
-      "lastElectronicsPlaybackStartedAtMs": lastPlaybackStartedAtMs
+      "lastElectronicsRequestedStartAtMs": lastRequestedStartAtMs,
+      "lastElectronicsRequestedDelayMs": lastRequestedDelayMs,
+      "lastElectronicsPlaybackScheduledAtMs": lastPlaybackScheduledAtMs,
+      "lastElectronicsPlaybackStartedAtMs": lastPlaybackStartedAtMs,
+      "lastElectronicsStartDriftMs": lastStartDriftMs
+    ]
+  }
+
+  private func schedulePayloadLocked(mode: String) -> [String: Any] {
+    [
+      "mode": mode,
+      "assetKey": lastRequestedAssetKey ?? NSNull(),
+      "scheduledDelayMs": lastRequestedDelayMs,
+      "requestedStartAtMs": lastRequestedStartAtMs,
+      "scheduledStartAtMs": lastPlaybackScheduledAtMs,
+      "lastKnownStartDriftMs": lastStartDriftMs,
+      "error": lastPlaybackError ?? NSNull()
     ]
   }
 

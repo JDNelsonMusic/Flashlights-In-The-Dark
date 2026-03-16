@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-03-16T06:59:42+00:00",
+  "generated_utc": "2026-03-16T13:23:37+00:00",
   "sources": {
     "recipe_json": "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
     "musicxml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml"
@@ -1039,23 +1039,23 @@
   "event_recipe_hashes": {
     "recipe_bundle": {
       "path": "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
-      "sha256": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72"
+      "sha256": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a"
     },
     "macos": {
       "path": "FlashlightsInTheDark_MacOS/Resources/event_recipes.json",
-      "sha256": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72"
+      "sha256": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a"
     },
     "flutter": {
       "path": "flashlights_client/assets/event_recipes.json",
-      "sha256": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72"
+      "sha256": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a"
     }
   },
   "event_recipe_copy_check": {
     "all_equal": true,
     "hashes": {
-      "recipe_bundle": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72",
-      "macos": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72",
-      "flutter": "4bcae399e033373adfef9bcebeca96c0792cb697753f285e3217e1cc3f0bbd72"
+      "recipe_bundle": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a",
+      "macos": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a",
+      "flutter": "c97e7d4dc7d533260265944d48def2354cf8f2d9cc5874ca521d519a24891c2a"
     }
   },
   "primer_asset_check": {
@@ -1103,7 +1103,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-01-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -1114,7 +1117,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-01-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -1125,7 +1131,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-01-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 2000.0,
           "sourceEndMs": 13088.471,
           "durationMs": 11088.471,
@@ -1159,7 +1168,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-02-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -1170,7 +1182,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-02-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -1181,7 +1196,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-02-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 11912.0,
           "sourceEndMs": 68970.824,
           "durationMs": 57058.824,
@@ -1213,7 +1231,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-03-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -1224,7 +1245,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-03-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -1235,7 +1259,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-03-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 67794.353,
           "sourceEndMs": 89461.02,
           "durationMs": 21666.667,
@@ -1267,7 +1294,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-04-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -1278,7 +1308,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-04-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -1289,7 +1322,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-04-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 87794.353,
           "sourceEndMs": 96127.687,
           "durationMs": 8333.334,
@@ -1322,7 +1358,7 @@
         "soprano_l1": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l1/electronics-trigger-05-soprano-l1-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1334,6 +1370,8 @@
           "baseChannelExpression": "c0=c0",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1343,7 +1381,7 @@
         "soprano_l2": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/soprano-l2/electronics-trigger-05-soprano-l2-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1355,6 +1393,8 @@
           "baseChannelExpression": "c0=c0",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_2.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1364,7 +1404,7 @@
         "tenor_l": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/tenor-l/electronics-trigger-05-tenor-l-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1376,6 +1416,8 @@
           "baseChannelExpression": "c0=0.5*c0+0.5*c1",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_3.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1385,7 +1427,7 @@
         "bass_l": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/bass-l/electronics-trigger-05-bass-l-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1397,6 +1439,8 @@
           "baseChannelExpression": "c0=0.5*c0+0.5*c1",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_4.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1406,7 +1450,7 @@
         "alto_l2": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l2/electronics-trigger-05-alto-l2-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1418,6 +1462,8 @@
           "baseChannelExpression": "c0=c1",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_5.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1427,7 +1473,7 @@
         "alto_l1": {
           "sample": "available-sounds/electronics-trigger-clips/part-specific/alto-l1/electronics-trigger-05-alto-l1-tour-cut-composite.mp3",
           "channelMode": "part_track",
-          "sourceFile": "composite:full_electronics+musique_concrete+mm100_103",
+          "sourceFile": "composite:full_electronics+family_primer_stem+musique_concrete+mm100_103",
           "sourceStartMs": 0.0,
           "sourceEndMs": 21666.658,
           "durationMs": 21666.658,
@@ -1439,6 +1485,8 @@
           "baseChannelExpression": "c0=c1",
           "baseStartMs": 94461.02,
           "baseEndMs": 104461.016,
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "concreteSourceFile": "audio/protools-exports/musique-concrete/MusiqueConcrete_Track1_6.mp3",
           "concreteStartBeat": 5.0,
           "concreteEndBeat": 24.0,
@@ -1468,7 +1516,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-11-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 298627.686,
           "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
@@ -1479,7 +1530,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-11-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 298627.686,
           "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
@@ -1490,7 +1544,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-11-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 298627.686,
           "sourceEndMs": 335294.353,
           "durationMs": 36666.667,
@@ -1525,7 +1582,10 @@
         "soprano": {
           "sample": "available-sounds/electronics-trigger-clips/soprano/electronics-trigger-12-soprano.mp3",
           "channelMode": "left",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Sops_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 333627.686,
           "sourceEndMs": 440147.292,
           "durationMs": 106519.606,
@@ -1536,7 +1596,10 @@
         "alto": {
           "sample": "available-sounds/electronics-trigger-clips/alto/electronics-trigger-12-alto.mp3",
           "channelMode": "right",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_Altos_Primertones_2.mp3",
+          "primerStemDurationMs": 427391.396,
           "sourceStartMs": 333627.686,
           "sourceEndMs": 440147.292,
           "durationMs": 106519.606,
@@ -1547,7 +1610,10 @@
         "tenor_bass": {
           "sample": "available-sounds/electronics-trigger-clips/tenor-bass/electronics-trigger-12-tenor-bass.mp3",
           "channelMode": "mono_sum",
-          "sourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "sourceFile": "composite:full_electronics+family_primer_stem",
+          "electronicsSourceFile": "audio/protools-exports/electronics/2026_0314_FlashlightsInTheDark_Electronics-StereoSum_7.mp3",
+          "primerStemSourceFile": "audio/protools-exports/primer-stems/2026_0316_TenBass_Primertones_2.mp3",
+          "primerStemDurationMs": 401749.333,
           "sourceStartMs": 333627.686,
           "sourceEndMs": 440147.292,
           "durationMs": 106519.606,
