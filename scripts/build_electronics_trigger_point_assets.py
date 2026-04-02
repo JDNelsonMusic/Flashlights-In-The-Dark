@@ -66,6 +66,7 @@ FIRST_TRIGGER_START_MS = 2000.0
 TP5_TOTAL_BEATS = 26.0
 TP5_BASE_BEATS = 12.0
 TP5_BASE_FADE_OUT_BEATS = 4.0
+TP5_PRIMER_OPENING_BEATS = 8.0
 TP5_CONCRETE_START_BEAT = 5.0
 TP5_CONCRETE_END_BEAT = 24.0
 TP5_CONCRETE_FADE_IN_BEATS = 4.0
@@ -73,6 +74,9 @@ TP5_CONCRETE_FADE_OUT_BEATS = 4.0
 TP5_REENTRY_START_BEAT = 9.0
 TP5_REENTRY_FADE_IN_BEATS = 14.0
 TP5_REENTRY_FADE_OUT_BEATS = 2.0
+TP5_PRIMER_REENTRY_END_BEAT = 24.0
+TP5_PRIMER_REENTRY_FADE_IN_BEATS = 14.0
+TP5_PRIMER_EDGE_FADE_MS = 20.0
 TP5_REENTRY_SOURCE_START_MEASURE = "100"
 TP5_REENTRY_SOURCE_END_MEASURE = "104"
 
@@ -541,6 +545,7 @@ def render_tp5_tour_cut_part_variant(
     base_duration_ms = round(beat_duration_ms * TP5_BASE_BEATS, 3)
     base_fade_out_ms = round(beat_duration_ms * TP5_BASE_FADE_OUT_BEATS, 3)
     base_fade_out_start_ms = round(base_duration_ms - base_fade_out_ms, 3)
+    primer_opening_duration_ms = round(beat_duration_ms * TP5_PRIMER_OPENING_BEATS, 3)
 
     concrete_delay_ms = round(beat_duration_ms * (TP5_CONCRETE_START_BEAT - 1.0), 3)
     concrete_duration_ms = round(
@@ -557,6 +562,15 @@ def render_tp5_tour_cut_part_variant(
     reentry_fade_in_ms = round(beat_duration_ms * TP5_REENTRY_FADE_IN_BEATS, 3)
     reentry_fade_out_ms = round(beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS, 3)
     reentry_fade_out_start_ms = round(reentry_duration_ms - reentry_fade_out_ms, 3)
+    primer_reentry_duration_ms = round(
+        beat_duration_ms * (TP5_PRIMER_REENTRY_END_BEAT - TP5_REENTRY_START_BEAT + 1.0),
+        3,
+    )
+    primer_reentry_delay_ms = reentry_delay_ms
+    primer_reentry_fade_in_ms = round(
+        beat_duration_ms * TP5_PRIMER_REENTRY_FADE_IN_BEATS,
+        3,
+    )
 
     filter_parts = [
         f"[0:a]atrim=start={base_start_ms / 1000.0:.6f}:end={(base_start_ms + base_duration_ms) / 1000.0:.6f},"
@@ -586,24 +600,46 @@ def render_tp5_tour_cut_part_variant(
         and primer_source_duration_ms is not None
         and base_start_ms < primer_source_duration_ms
     ):
-        primer_end_ms = min(base_start_ms + total_duration_ms, primer_source_duration_ms)
-        primer_duration_ms = round(primer_end_ms - base_start_ms, 3)
-        if primer_duration_ms > 0:
-            primer_fade_out_ms = round(beat_duration_ms * TP5_REENTRY_FADE_OUT_BEATS, 3)
-            primer_fade_out_start_ms = round(total_duration_ms - primer_fade_out_ms, 3)
+        primer_opening_end_ms = min(
+            base_start_ms + primer_opening_duration_ms,
+            primer_source_duration_ms,
+        )
+        primer_opening_duration_trimmed_ms = round(primer_opening_end_ms - base_start_ms, 3)
+        if primer_opening_duration_trimmed_ms > 0:
             filter_parts.append(
-                f"[2:a]atrim=start={base_start_ms / 1000.0:.6f}:end={primer_end_ms / 1000.0:.6f},"
+                f"[2:a]atrim=start={base_start_ms / 1000.0:.6f}:end={primer_opening_end_ms / 1000.0:.6f},"
                 "asetpts=PTS-STARTPTS,"
                 "pan=mono|c0=0.5*c0+0.5*c1,"
                 f"volume={PRIMER_STEM_GAIN_DB:.1f}dB,"
-                f"apad=whole_dur={total_duration_ms / 1000.0:.6f},"
-                f"atrim=duration={total_duration_ms / 1000.0:.6f},"
                 f"afade=t=in:st=0:d={FADE_IN_MS / 1000.0:.6f},"
-                f"afade=t=out:st={primer_fade_out_start_ms / 1000.0:.6f}:d={primer_fade_out_ms / 1000.0:.6f}[primer]"
+                f"afade=t=out:st={max(primer_opening_duration_trimmed_ms - TP5_PRIMER_EDGE_FADE_MS, 0.0) / 1000.0:.6f}:d={min(TP5_PRIMER_EDGE_FADE_MS, primer_opening_duration_trimmed_ms) / 1000.0:.6f}[primer_opening]"
             )
-            input_args += ["-i", str(primer_source_path)]
-            mix_inputs += "[primer]"
+            mix_inputs += "[primer_opening]"
             mix_count += 1
+
+        primer_reentry_end_ms = min(
+            reentry_start_ms + primer_reentry_duration_ms,
+            primer_source_duration_ms,
+        )
+        primer_reentry_duration_trimmed_ms = round(
+            primer_reentry_end_ms - reentry_start_ms,
+            3,
+        )
+        if primer_reentry_duration_trimmed_ms > 0:
+            filter_parts.append(
+                f"[2:a]atrim=start={reentry_start_ms / 1000.0:.6f}:end={primer_reentry_end_ms / 1000.0:.6f},"
+                "asetpts=PTS-STARTPTS,"
+                "pan=mono|c0=0.5*c0+0.5*c1,"
+                f"volume={PRIMER_STEM_GAIN_DB:.1f}dB,"
+                f"afade=t=in:st=0:d={min(primer_reentry_fade_in_ms, primer_reentry_duration_trimmed_ms) / 1000.0:.6f},"
+                f"afade=t=out:st={max(primer_reentry_duration_trimmed_ms - TP5_PRIMER_EDGE_FADE_MS, 0.0) / 1000.0:.6f}:d={min(TP5_PRIMER_EDGE_FADE_MS, primer_reentry_duration_trimmed_ms) / 1000.0:.6f},"
+                f"adelay={int(round(primer_reentry_delay_ms))}:all=1[primer_reentry]"
+            )
+            mix_inputs += "[primer_reentry]"
+            mix_count += 1
+
+        if mix_count > 3:
+            input_args += ["-i", str(primer_source_path)]
 
     filter_graph = (
         ";".join(filter_parts)
@@ -697,7 +733,8 @@ def build_trigger_plans(
             "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
             "Trigger Point 2 remains anchored to 00:11.912. A family-specific primer stem is baked into each trigger clip "
             "using the same source timings as the electronics track. Trigger 5 is a custom 26-beat composite: "
-            "the opening electronics speak for 12 beats, the matching family primer stem spans the full TP5 window, "
+            "the opening electronics speak for 12 beats, the matching family primer stem plays mm36-37 for beats 1-8 "
+            "then mm100-103 for beats 9-24 with a long crescendo, "
             "six musique-concrete strands bloom from beats 5-24, "
             "and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1."
         )
@@ -744,8 +781,9 @@ def build_trigger_plans(
                     "timingRule": "tp5_custom_26_beat_tour_cut_composite",
                     "designNote": (
                         f"{part_variant.label} receives a dedicated TP5 composite: "
-                        "12 beats of M36 electronics, a unique musique-concrete strand from beats 5-24, "
-                        "and the mm100-103 preview from beats 9-26."
+                        "12 beats of M36 electronics, the family primer stem from mm36-37 across beats 1-8, "
+                        "the family primer stem from mm100-103 across beats 9-24 with a crescendo, "
+                        "a unique musique-concrete strand from beats 5-24, and the mm100-103 preview from beats 9-26."
                     ),
                     "renderMode": "tp5_part_mix",
                     "baseChannelExpression": choir_variant.pan_expression,
@@ -753,6 +791,22 @@ def build_trigger_plans(
                     "baseEndMs": base_end_ms,
                     "primerStemSourceFile": primer_stem_exports[choir_variant.key]["mp3SourceFile"],
                     "primerStemDurationMs": primer_stem_exports[choir_variant.key]["durationMs"],
+                    "primerOpeningSourceStartMs": base_start_ms,
+                    "primerOpeningSourceEndMs": round(
+                        base_start_ms + beat_duration_ms * TP5_PRIMER_OPENING_BEATS,
+                        3,
+                    ),
+                    "primerOpeningBeatCount": TP5_PRIMER_OPENING_BEATS,
+                    "primerReentrySourceStartMs": reentry_start_ms,
+                    "primerReentrySourceEndMs": round(
+                        reentry_start_ms
+                        + beat_duration_ms
+                        * (TP5_PRIMER_REENTRY_END_BEAT - TP5_REENTRY_START_BEAT + 1.0),
+                        3,
+                    ),
+                    "primerReentryStartBeat": TP5_REENTRY_START_BEAT,
+                    "primerReentryEndBeat": TP5_PRIMER_REENTRY_END_BEAT,
+                    "primerReentryFadeInBeats": TP5_PRIMER_REENTRY_FADE_IN_BEATS,
                     "concreteSourceFile": str(concrete_source.relative_to(ROOT)),
                     "concreteStartBeat": TP5_CONCRETE_START_BEAT,
                     "concreteEndBeat": TP5_CONCRETE_END_BEAT,
@@ -922,7 +976,7 @@ def build_manifest(
             plan["id"] for plan in plans if plan.get("partVariants")
         ],
         "tailRule": "Standard clips end 2 beats after the next surviving trigger point. Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats.",
-        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, a family-specific primer stem, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
+        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, a family-specific primer stem from mm36-37 on beats 1-8, the family primer stem from mm100-103 on beats 9-24 with a long crescendo, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
         "events": plans,
     }
 
@@ -1016,7 +1070,8 @@ def write_recipe_copies(
             "Trigger Point 2 remains locked to 00:11.912 in the tour-cut electronics master. "
             "A family-specific primer stem is now baked into every trigger asset using the same source timings as the electronics track. "
             "Trigger Point 5 is now a custom 26-beat tour-cut composite: its own electronics sound for 12 beats, "
-            "the matching family primer stem spans the full TP5 window, six musique-concrete strands enter on beats 5-24, "
+            "the matching family primer stem plays mm36-37 for beats 1-8 then mm100-103 for beats 9-24 with a long crescendo, "
+            "six musique-concrete strands enter on beats 5-24, "
             "and a mm100-103 layer crescendos across beats 9-26. "
             "Trigger Point 11 stays at M104 beat 1 and overlaps TP5 by 2 beats. Trigger Point 1 starts at 00:02.000 in the file."
         ),
