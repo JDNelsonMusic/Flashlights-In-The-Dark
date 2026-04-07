@@ -4,6 +4,11 @@
 
 This is the active Flashlights repo. Prefer this checkout over the snapshot and recovery clones under `JDN_KEEx-AI_WorkspaceRecords/`.
 
+## GitHub
+
+- Target org repo: `KEEx-AI-INC/Flashlights-In-The-Dark`.
+- Migration note: local `origin` remotes and older docs may still reference a legacy namespace until the GitHub transfer and automation updates are finished.
+
 ## What Lives Here
 
 - `FlashlightsInTheDark_MacOS/`: SwiftUI conductor console, OSC routing, MIDI integration, device management, and event triggering.
@@ -37,4 +42,3 @@ This is the active Flashlights repo. Prefer this checkout over the snapshot and 
 - Prefer generator scripts over manual edits for derived score/event assets.
 - Normal deployment now flows through TestFlight and the Play Store; only use older onboarding scripts when the task explicitly requires maintenance on the legacy path.
 - Do not commit real performer identifiers, device identifiers, secrets, or one-off rehearsal artifacts.
-

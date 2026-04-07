@@ -4,6 +4,11 @@
 
 A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-based control system
 
+## GitHub Organization
+
+- Target org repo: `KEEx-AI-INC/Flashlights-In-The-Dark`
+- Migration note: local clones, remotes, or older docs may still reference a legacy namespace until the GitHub transfer and automation updates are completed.
+
 ## Concert Hardening (2026)
 
 - Reliability runbook: [docs/project-management/CONCERT_READINESS.md](docs/project-management/CONCERT_READINESS.md)
