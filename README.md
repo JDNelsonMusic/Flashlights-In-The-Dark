@@ -234,9 +234,10 @@ flashlights-in-the-dark/
 ├── FlashlightsInTheDark_MacOS/          # Swift macOS conductor console
 ├── FlashlightsInTheDark.xcodeproj/      # Xcode project for the console
 ├── flashlights_client/                  # Flutter singer client
+├── FlashlightsInTheDark_Icons/          # restored f01757a source app-icon exports
 ├── Flashlights-ITD_EventRecipes_4_2026_0309/  # current score + event recipe outputs
 ├── Flashlights-ITD_EventRecipes_3_2025_0921/  # legacy score + recipe outputs
-├── FlashlightsInTheDark_Protools-Session/     # composer DAW workspace
+├── FlashlightsInTheDark_Protools-Session/     # local composer DAW workspace; ignored unless moved to LFS
 ├── audio/                               # exported audio and rendered references
 ├── docs/
 │   ├── project-management/              # active planning, readiness, and state docs
