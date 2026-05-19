@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 ###############################################################################
@@ -13,10 +13,13 @@ set -euo pipefail
 export FASTLANE_DISABLE_COLORS=1      # coloured2 recursion bug on Ruby 3.4
 
 # ——— Paths ———
-ARCHIVE="FlashlightsInTheDark.xcarchive"        # only used if you re-export
-IPA="/Users/JDNelson/AI_Dev/Flashlights-ITD_Client_2025-05-19 13-37-19/flashlights_client.ipa"
-APK="flashlights_client/build/app/outputs/flutter-apk/app-release.apk"
-MAP="FlashlightsInTheDark/flash_ip+udid_map.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ARCHIVE="${FLASHLIGHTS_ARCHIVE_PATH:-${REPO_ROOT}/FlashlightsInTheDark.xcarchive}" # only used if you re-export
+IPA="${FLASHLIGHTS_IPA_PATH:-${REPO_ROOT}/FlashlightsInTheDark.ipa}"
+APK="${REPO_ROOT}/flashlights_client/build/app/outputs/flutter-apk/app-release.apk"
+MAP="${FLASHLIGHTS_MAP_PATH:-${REPO_ROOT}/FlashlightsInTheDark_MacOS/flash_ip+udid_map.json}"
+export FLASHLIGHTS_MAP_PATH="${MAP}"
 
 ###############################################################################
 #                               iOS section                                   #
@@ -55,7 +58,7 @@ mapfile -t ANDROID_SERIALS < <(adb devices | awk 'NR>1 && $2=="device"{print $1}
 
 if (( ${#ANDROID_SERIALS[@]} )); then
   echo "⚙️   Building Flutter APK (release)…"
-  (cd flashlights_client && flutter build apk --release -q)
+  (cd "${REPO_ROOT}/flashlights_client" && flutter build apk --release -q)
 
   for S in "${ANDROID_SERIALS[@]}"; do
     echo "🤖  Installing on $S…"
@@ -68,8 +71,9 @@ fi
 ###############################################################################
 echo "🗺   Updating IP ⇄ UDID map…"
 python3 - <<'PY'
+import os
 import json, subprocess, re, pathlib, ipaddress
-MAP = pathlib.Path("FlashlightsInTheDark/flash_ip+udid_map.json")
+MAP = pathlib.Path(os.environ["FLASHLIGHTS_MAP_PATH"])
 data = json.load(MAP.open()) if MAP.exists() else {}
 
 arp = subprocess.check_output(["arp", "-a"]).decode()

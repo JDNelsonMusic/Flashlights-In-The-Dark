@@ -82,7 +82,10 @@ def main():
         ip = input("Enter device IP address: ").strip()
 
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-    map_path = os.path.join(project_root, "FlashlightsInTheDark", "flash_ip+udid_map.json")
+    map_path = os.environ.get(
+        "FLASHLIGHTS_MAP_PATH",
+        os.path.join(project_root, "FlashlightsInTheDark_MacOS", "flash_ip+udid_map.json"),
+    )
     with open(map_path, "r+", encoding="utf-8") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         data = json.load(f)
