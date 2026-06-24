@@ -11,31 +11,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 PROFILE_MANIFEST = {
-    "activeProfileId": "tour_cut",
+    "activeProfileId": "full_version",
     "profiles": [
         {
             "id": "tour_cut",
             "label": "Tour Cut",
             "shortLabel": "Tour",
-            "runtimeReady": True,
+            "runtimeReady": False,
             "triggerCount": 7,
             "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml",
             "triggerPositionSource": "docs/score-study/tour_cut_trigger_points.csv",
             "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
             "lightShowManifest": "docs/score-study/tour_cut_light_show.json",
-            "notes": "Current performance runtime bundle with tour-cut score, 7 trigger points, and a custom TP5 composite that carries the bridge, musique concrete, and mm100-103 reentry preview before TP11.",
+            "notes": "Archived tour-cut runtime profile retained for reference; not the planned December 2026 performance state.",
         },
         {
             "id": "full_version",
             "label": "Full Version",
             "shortLabel": "Full",
-            "runtimeReady": False,
+            "runtimeReady": True,
             "triggerCount": 12,
             "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
             "triggerPositionSource": "docs/score-study/full_version_trigger_points.csv",
             "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
             "lightShowManifest": "docs/score-study/twelve_trigger_light_show.json",
-            "notes": "Profile is registered and documented, but the shipped runtime currently remains tour-cut only until a dedicated full-version bundle is regenerated.",
+            "notes": "Planned December 2026 runtime profile with twelve macro trigger points and restored middle-section light choreography.",
         },
     ],
 }
@@ -80,15 +80,23 @@ def sync_profile_manifest(active_profile: str) -> None:
 
 def annotate_active_recipe_bundles(active_profile: str) -> None:
     metadata = ACTIVE_PROFILE_METADATA[active_profile]
+    canonical_payload = None
     for path in ACTIVE_RECIPE_PATHS:
         payload = json.loads(path.read_text(encoding="utf-8"))
         payload.update(metadata)
-        write_json(path, payload)
+        if canonical_payload is None:
+            canonical_payload = payload
+
+    if canonical_payload is None:
+        return
+
+    for path in ACTIVE_RECIPE_PATHS:
+        write_json(path, canonical_payload)
 
 
-def run_script(script_name: str) -> None:
+def run_script(script_name: str, *args: str) -> None:
     script_path = ROOT / "scripts" / script_name
-    subprocess.run(["python3", str(script_path)], cwd=ROOT, check=True)
+    subprocess.run(["python3", str(script_path), *args], cwd=ROOT, check=True)
 
 
 def main() -> int:
@@ -97,7 +105,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--active-profile",
-        default="tour_cut",
+        default="full_version",
         choices=["tour_cut", "full_version"],
         help="Profile to mark as active in the generated manifests.",
     )
@@ -108,19 +116,29 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if args.active_profile != "tour_cut" and not args.profiles_only:
-        raise SystemExit(
-            "The full-version runtime bundle is not yet regenerated in this pipeline. "
-            "Use --active-profile tour_cut or run with --profiles-only."
-        )
-
     sync_profile_manifest(args.active_profile)
 
     if not args.profiles_only:
-        run_script("build_tour_cut_score.py")
-        run_script("build_electronics_trigger_point_assets.py")
-        run_script("build_trigger_point_light_show.py")
-        run_script("build_protools_event_timeline.py")
+        if args.active_profile == "tour_cut":
+            run_script("build_tour_cut_score.py")
+        run_script(
+            "build_electronics_trigger_point_assets.py",
+            "--active-profile",
+            args.active_profile,
+        )
+        run_script(
+            "build_trigger_point_light_show.py",
+            "--active-profile",
+            args.active_profile,
+        )
+        profile = next(
+            item for item in PROFILE_MANIFEST["profiles"] if item["id"] == args.active_profile
+        )
+        run_script(
+            "build_protools_event_timeline.py",
+            "--score-xml",
+            profile["scoreMusicXml"],
+        )
 
     annotate_active_recipe_bundles(args.active_profile)
     return 0

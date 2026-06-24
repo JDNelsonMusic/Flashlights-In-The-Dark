@@ -1,17 +1,17 @@
 # Event Timeline And Integration Report
 
-Generated: `2026-03-16T13:40:20+00:00`
+Generated: `2026-06-23T06:01:15+00:00`
 Recipe source: `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
-Score source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
+Score source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
 
 ## Timeline Snapshot
 
-- Events: `7`
-- Clip rows: `24`
+- Events: `12`
+- Clip rows: `36`
 - Long events: `0`
 - First event: `0:00.000`
-- Last event: `2:19.902`
-- Score end: `3:54.069`
+- Last event: `5:24.069`
+- Score end: `6:58.235`
 
 ## Tempo Map
 
@@ -27,7 +27,7 @@ Score source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32
 
 ## Integration Checks
 
-- Event recipe copies identical: `True`
+- Event recipe copies identical: `False`
 - Primer asset counts: macOS `98`, Flutter `98`
 - Referenced samples missing in macOS assets: `0`
 - Referenced samples missing in Flutter assets: `0`

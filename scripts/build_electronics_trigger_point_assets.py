@@ -44,7 +44,9 @@ CUT_SCORE_XML = (
     / "Flashlights-ITD_EventRecipes_4_2026_0309"
     / "FlashlightsInTheDark_v32_TourCut.musicxml"
 )
-TRIGGER_POINT_SOURCE = ROOT / "docs" / "score-study" / "tour_cut_trigger_points.csv"
+TOUR_TRIGGER_POINT_SOURCE = ROOT / "docs" / "score-study" / "tour_cut_trigger_points.csv"
+FULL_TRIGGER_POINT_SOURCE = ROOT / "docs" / "score-study" / "full_version_trigger_points.csv"
+TRIGGER_POINT_SOURCE = TOUR_TRIGGER_POINT_SOURCE
 SYNC_REFERENCE_PATH = ROOT / "docs" / "protools-housekeeping" / "electronics_sync_reference.md"
 FLUTTER_ASSET_ROOT = (
     ROOT / "flashlights_client" / "available-sounds" / "electronics-trigger-clips"
@@ -60,6 +62,22 @@ RECIPE_COPY_PATHS = [
     ROOT / "FlashlightsInTheDark_MacOS" / "Resources" / "event_recipes.json",
     ROOT / "flashlights_client" / "assets" / "event_recipes.json",
 ]
+PROFILE_CONFIGS = {
+    "tour_cut": {
+        "label": "Tour Cut",
+        "score_xml": CUT_SCORE_XML,
+        "trigger_point_source": TOUR_TRIGGER_POINT_SOURCE,
+        "requires_cut_score": True,
+        "requires_musique_concrete": True,
+    },
+    "full_version": {
+        "label": "Full Version",
+        "score_xml": FULL_SCORE_XML,
+        "trigger_point_source": FULL_TRIGGER_POINT_SOURCE,
+        "requires_cut_score": False,
+        "requires_musique_concrete": False,
+    },
+}
 FADE_IN_MS = 20.0
 PRIMER_STEM_GAIN_DB = 6.0
 FIRST_TRIGGER_START_MS = 2000.0
@@ -700,7 +718,8 @@ def trigger_source_onset_ms(
 
 def build_trigger_plans(
     *,
-    cut_token_lookup: dict[str, dict[str, Any]],
+    profile_id: str,
+    performance_token_lookup: dict[str, dict[str, Any]],
     full_token_lookup: dict[str, dict[str, Any]],
     source_duration_ms: float,
     trigger_specs: list[TriggerPointSpec],
@@ -708,7 +727,7 @@ def build_trigger_plans(
 ) -> tuple[list[dict[str, Any]], float]:
     trigger_rows: list[dict[str, Any]] = []
     for trigger in trigger_specs:
-        onset_ms, tempo_bpm, ordinal = trigger_onset_ms(cut_token_lookup, trigger)
+        onset_ms, tempo_bpm, ordinal = trigger_onset_ms(performance_token_lookup, trigger)
         trigger_rows.append(
             {
                 "id": trigger.id,
@@ -727,22 +746,31 @@ def build_trigger_plans(
     offset_ms = round(11912.0 - float(trigger_two["onsetMs"]), 3)
 
     plans: list[dict[str, Any]] = []
+    is_tour_cut = profile_id == "tour_cut"
     for index, trigger in enumerate(trigger_rows):
         trigger_spec = trigger_specs[index]
-        timing_note = (
-            "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
-            "Trigger Point 2 remains anchored to 00:11.912. A family-specific primer stem is baked into each trigger clip "
-            "using the same source timings as the electronics track. Trigger 5 is a custom 26-beat composite: "
-            "the opening electronics speak for 12 beats, the matching family primer stem plays mm36-37 for beats 1-8 "
-            "then mm100-103 for beats 9-24 with a long crescendo, "
-            "six musique-concrete strands bloom from beats 5-24, "
-            "and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1."
-        )
+        if is_tour_cut:
+            timing_note = (
+                "Tour-cut trigger bundle preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
+                "Trigger Point 2 remains anchored to 00:11.912. A family-specific primer stem is baked into each trigger clip "
+                "using the same source timings as the electronics track. Trigger 5 is a custom 26-beat composite: "
+                "the opening electronics speak for 12 beats, the matching family primer stem plays mm36-37 for beats 1-8 "
+                "then mm100-103 for beats 9-24 with a long crescendo, "
+                "six musique-concrete strands bloom from beats 5-24, "
+                "and a mm100-103 preview enters on beats 9-26 before Trigger 11 takes over at M104 beat 1."
+            )
+        else:
+            timing_note = (
+                "Full-version trigger bundle for the December 2026 performance plan. "
+                "Trigger Point 2 remains anchored to 00:11.912 in the full electronics master. "
+                "Each trigger clip follows the next full-version trigger point plus a two-beat tail, "
+                "with family-specific primer stems mixed against the full electronics source."
+            )
 
         variant_payload: dict[str, dict[str, Any]] = {}
         part_variants: dict[str, dict[str, Any]] = {}
 
-        if trigger["id"] == 5:
+        if is_tour_cut and trigger["id"] == 5:
             beat_duration_ms = beat_ms(float(trigger["tempoBpm"]))
             total_duration_ms = round(beat_duration_ms * TP5_TOTAL_BEATS, 3)
             base_start_ms = trigger_source_onset_ms(
@@ -952,21 +980,27 @@ def render_assets(
 
 def build_manifest(
     *,
+    profile_id: str,
+    score_xml: Path,
+    trigger_point_source: Path,
     generated_at: str,
     source_duration_ms: float,
     offset_ms: float,
     plans: list[dict[str, Any]],
     primer_stem_exports: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
+    is_tour_cut = profile_id == "tour_cut"
     return {
         "generated": generated_at,
+        "profileId": profile_id,
+        "profileLabel": PROFILE_CONFIGS[profile_id]["label"],
         "sourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "fullSourceFile": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "primerStemExports": primer_stem_exports,
         "sourceDurationMs": source_duration_ms,
         "syncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
-        "triggerPointSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
-        "scoreMusicXml": str(CUT_SCORE_XML.relative_to(ROOT)),
+        "triggerPointSource": str(trigger_point_source.relative_to(ROOT)),
+        "scoreMusicXml": str(score_xml.relative_to(ROOT)),
         "flutterAssetRoot": str(FLUTTER_ASSET_ROOT.relative_to(ROOT)),
         "triggerPointCount": len(plans),
         "anchorOffsetMs": offset_ms,
@@ -975,8 +1009,17 @@ def build_manifest(
         "specialPartSpecificTriggerIds": [
             plan["id"] for plan in plans if plan.get("partVariants")
         ],
-        "tailRule": "Standard clips end 2 beats after the next surviving trigger point. Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats.",
-        "cutDefinition": "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, a family-specific primer stem from mm36-37 on beats 1-8, the family primer stem from mm100-103 on beats 9-24 with a long crescendo, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1.",
+        "tailRule": (
+            "Standard clips end 2 beats after the next surviving trigger point. "
+            "Trigger 5 is a custom 26-beat composite and overlaps Trigger 11 by 2 beats."
+            if is_tour_cut
+            else "Standard clips end 2 beats after the next full-version trigger point; the final trigger runs to the end of the full electronics master."
+        ),
+        "profileDefinition": (
+            "Keep full trigger identities 1, 2, 3, 4, 5, 11, 12. Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4 in the cut score. Trigger 5 becomes a custom bridge composite carrying 12 beats of its own source, a family-specific primer stem from mm36-37 on beats 1-8, the family primer stem from mm100-103 on beats 9-24 with a long crescendo, six musique-concrete entries from beats 5-24, and a mm100-103 preview from beats 9-26 before Trigger 11 reenters at M104 beat 1."
+            if is_tour_cut
+            else "Restore the full-length December 2026 trigger plan with twelve macro trigger points at measures 1, 2, 25, 33, 36, 46, 63, 78, 89, 98, 104, and 115."
+        ),
         "events": plans,
     }
 
@@ -1058,12 +1101,16 @@ def write_manifest(manifest: dict[str, Any]) -> None:
 
 def write_recipe_copies(
     *,
+    profile_id: str,
+    score_xml: Path,
+    trigger_point_source: Path,
     generated_at: str,
     plans: list[dict[str, Any]],
 ) -> None:
+    is_tour_cut = profile_id == "tour_cut"
     bundle = {
-        "source": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
-        "triggerPositionSource": str(TRIGGER_POINT_SOURCE.relative_to(ROOT)),
+        "source": str(trigger_point_source.relative_to(ROOT)),
+        "triggerPositionSource": str(trigger_point_source.relative_to(ROOT)),
         "triggerTimingNote": (
             "Tour-cut trigger bundle preserving full-version trigger identities 1, 2, 3, 4, 5, 11, 12. "
             "Measures 38-41 are relabeled as 38 / 38.2 / 38.3 / 38.4. "
@@ -1074,10 +1121,12 @@ def write_recipe_copies(
             "six musique-concrete strands enter on beats 5-24, "
             "and a mm100-103 layer crescendos across beats 9-26. "
             "Trigger Point 11 stays at M104 beat 1 and overlaps TP5 by 2 beats. Trigger Point 1 starts at 00:02.000 in the file."
+            if is_tour_cut
+            else "Full-version trigger bundle for the December 2026 performance plan. It restores the middle trigger points at M46, M63, M78, M89, and M98, removes the tour-cut TP5 composite bridge, and keeps Trigger Point 2 locked to 00:11.912 in the full electronics master."
         ),
         "eventCount": len(plans),
         "generated": generated_at,
-        "scoreMusicXml": str(CUT_SCORE_XML.relative_to(ROOT)),
+        "scoreMusicXml": str(score_xml.relative_to(ROOT)),
         "electronicsSource": str(FULL_SOURCE_MP3.relative_to(ROOT)),
         "electronicsSyncReference": str(SYNC_REFERENCE_PATH.relative_to(ROOT)),
         "electronicsManifest": str(MANIFEST_JSON_PATH.relative_to(ROOT)),
@@ -1106,9 +1155,15 @@ def write_recipe_copies(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render the tour-cut choir-part-specific electronics trigger assets "
+            "Render choir-part-specific electronics trigger assets "
             "and replace the runtime recipe bundles."
         )
+    )
+    parser.add_argument(
+        "--active-profile",
+        default="tour_cut",
+        choices=sorted(PROFILE_CONFIGS),
+        help="Show profile whose trigger map should be rendered into the active runtime bundle.",
     )
     parser.add_argument(
         "--skip-render",
@@ -1125,24 +1180,33 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    profile = PROFILE_CONFIGS[args.active_profile]
+    score_xml = profile["score_xml"]
+    trigger_point_source = profile["trigger_point_source"]
 
-    for path in (
+    required_paths = [
         FULL_SOURCE_MP3,
         FULL_SCORE_XML,
-        CUT_SCORE_XML,
-        TRIGGER_POINT_SOURCE,
-        MUSIQUE_CONCRETE_SOURCE_ROOT,
-    ):
+        score_xml,
+        trigger_point_source,
+    ]
+    if profile["requires_cut_score"]:
+        required_paths.append(CUT_SCORE_XML)
+    if profile["requires_musique_concrete"]:
+        required_paths.append(MUSIQUE_CONCRETE_SOURCE_ROOT)
+
+    for path in required_paths:
         if not path.exists():
             raise FileNotFoundError(path)
 
     primer_stem_exports = ensure_primer_stem_exports()
     _, full_token_lookup, _ = build_measure_token_map(FULL_SCORE_XML)
-    _, cut_token_lookup, _ = build_measure_token_map(CUT_SCORE_XML)
-    trigger_specs = load_trigger_specs(TRIGGER_POINT_SOURCE)
+    _, performance_token_lookup, _ = build_measure_token_map(score_xml)
+    trigger_specs = load_trigger_specs(trigger_point_source)
     source_duration_ms = ffprobe_duration_ms(FULL_SOURCE_MP3)
     plans, offset_ms = build_trigger_plans(
-        cut_token_lookup=cut_token_lookup,
+        profile_id=args.active_profile,
+        performance_token_lookup=performance_token_lookup,
         full_token_lookup=full_token_lookup,
         source_duration_ms=source_duration_ms,
         trigger_specs=trigger_specs,
@@ -1155,6 +1219,9 @@ def main() -> None:
         render_assets(plans=plans)
 
     manifest = build_manifest(
+        profile_id=args.active_profile,
+        score_xml=score_xml,
+        trigger_point_source=trigger_point_source,
         generated_at=generated_at,
         source_duration_ms=source_duration_ms,
         offset_ms=offset_ms,
@@ -1162,11 +1229,18 @@ def main() -> None:
         primer_stem_exports=primer_stem_exports,
     )
     write_manifest(manifest)
-    write_recipe_copies(generated_at=generated_at, plans=plans)
+    write_recipe_copies(
+        profile_id=args.active_profile,
+        score_xml=score_xml,
+        trigger_point_source=trigger_point_source,
+        generated_at=generated_at,
+        plans=plans,
+    )
 
     choir_asset_count = sum(len(plan.get("variants", {})) for plan in plans)
     part_specific_asset_count = sum(len(plan.get("partVariants", {})) for plan in plans)
-    print(f"Rendered {choir_asset_count + part_specific_asset_count} assets")
+    verb = "Planned" if args.skip_render else "Rendered"
+    print(f"{verb} {choir_asset_count + part_specific_asset_count} assets")
     print(f"Primary source: {FULL_SOURCE_MP3.relative_to(ROOT)}")
     print(f"Manifest: {MANIFEST_JSON_PATH.relative_to(ROOT)}")
     print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")

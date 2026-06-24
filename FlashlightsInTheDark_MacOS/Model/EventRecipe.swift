@@ -124,6 +124,20 @@ public struct EventLightPartPlan: Decodable {
 public struct EventLightKeyframe: Decodable {
     public let atMs: Double
     public let level: Double
+    public let interpolation: String
+
+    enum CodingKeys: String, CodingKey {
+        case atMs
+        case level
+        case interpolation
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        atMs = try container.decode(Double.self, forKey: .atMs)
+        level = try container.decode(Double.self, forKey: .level)
+        interpolation = try container.decodeIfPresent(String.self, forKey: .interpolation) ?? "linear"
+    }
 }
 
 public enum LightStaff: String, CaseIterable, Codable, Identifiable {

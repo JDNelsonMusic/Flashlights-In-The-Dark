@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last refreshed: March 13, 2026
+Last refreshed: June 23, 2026
 
 This file is the workspace source-of-truth map for the current repository state. It is meant to answer two questions quickly:
 
@@ -10,7 +10,9 @@ This file is the workspace source-of-truth map for the current repository state.
 ## Current Canonical State
 
 - Musical structure and cue timing source:
-  `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
+  `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+- Active show profile:
+  `full_version` in `docs/show-profiles/show_profiles.json`
 - Canonical cue bundle:
   `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
 - Runtime cue bundle copies:
@@ -21,30 +23,31 @@ This file is the workspace source-of-truth map for the current repository state.
 - Primer asset sets currently in sync:
   `FlashlightsInTheDark_MacOS/Audio/primerTones/`
   `flashlights_client/available-sounds/primerTones/`
-- Current director/composer rehearsal-cut note:
+- Historical director/composer rehearsal-cut note:
   `docs/2026-03-13-rehearsal-cut-plan.md`
 - Housekeeping and timing reports:
   `docs/protools-housekeeping/`
 
 Verified current facts from the generated reports:
 
-- The runtime trigger bundle currently contains `11` events.
+- The active runtime trigger bundle currently contains `12` full-version macro trigger events.
 - The recipe copies in the recipe folder, macOS app, and Flutter app are byte-identical.
 - The primer MP3s in the macOS app and Flutter app are byte-identical with `98` matched files.
-- The tour-cut electronics source keeps original measures `1-41`, then jumps to original measure `104`.
-- The Flutter score-practice asset now points at the tour-cut MusicXML.
-- Encoded tempo changes still occur at measure `1` (`102 BPM`) and measure `30` (`72 BPM`) in the surviving material.
+- The bundled full-version trigger electronics currently has `36` rendered clips: `12` triggers x `3` choir-family variants.
+- Restored middle trigger points are `6` at `M46 beat3`, `7` at `M63 beat3`, `8` at `M78 beat1`, `9` at `M89 beat1`, and `10` at `M98 beat1`.
+- Encoded tempo changes occur at measure `1` (`102 BPM`) and measure `30` (`72 BPM`).
+- Current timeline report: first trigger `0:00.000`, last trigger `5:24.069`, encoded score end `6:58.235`.
 
 ## Workspace Map
 
 | Path | Role | Status |
 | --- | --- | --- |
-| `README.md` | project overview and contributor-facing setup | active, but duration language still describes the longer version |
+| `README.md` | project overview and contributor-facing setup | active |
 | `docs/project-management/` | active planning, readiness, review, and state docs | active coordination layer |
 | `FlashlightsInTheDark_MacOS/` | macOS conductor console | core runtime target |
 | `flashlights_client/` | Flutter singer client | core runtime target |
 | `FlashlightsInTheDark_Protools-Session/` | Pro Tools sessions, backups, raw and rendered audio | core composer/audio workspace |
-| `Flashlights-ITD_EventRecipes_4_2026_0309/` | current score + recipe generation output set | current canonical score/recipe folder |
+| `Flashlights-ITD_EventRecipes_4_2026_0309/` | current score + recipe generation output set | current canonical full-version score/recipe folder |
 | `Flashlights-ITD_EventRecipes_3_2025_0921/` | older recipe + score generation | legacy reference, not current source-of-truth |
 | `scripts/` | operational and generation scripts | active |
 | `docs/protools-housekeeping/` | generated audit + timeline outputs for the Pro Tools work | active orientation layer |
@@ -82,20 +85,22 @@ The `measure` and `position` attached to each event should now be read as the of
 
 | Domain | Canonical source | Downstream copies / consumers | Notes |
 | --- | --- | --- | --- |
-| Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml`, `scripts/build_tour_cut_score.py` | Flutter practice view uses its own asset copy, not the source folder directly |
-| Official trigger positions | `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv` | `scripts/generate_event_recipes_v4.py`, recipe spreadsheet rows, runtime JSON `measure` / `position` fields | Source images documented in `docs/official_trigger_positions.md`; these trigger points intentionally lead the sung events |
-| Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | The copies are currently identical and carry tour-cut `measureToken` / `scoreMeasureOrdinal` metadata |
-| Recipe generation logic | `scripts/generate_event_recipes_v4.py` | writes JSON copies and CSV/XLSX outputs | This script currently points at the v4 score folder |
+| Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`, `docs/protools-housekeeping/event_timeline.*` | Full-version profile source for December 2026 planning |
+| Macro trigger positions | `docs/score-study/full_version_trigger_points.csv` | `scripts/build_electronics_trigger_point_assets.py`, runtime JSON `measure` / `position` fields | Twelve conductor trigger points for the full-length show |
+| 192-event trigger positions | `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv` | `scripts/generate_event_recipes_v4.py`, recipe spreadsheet rows | Light-chorus reference table; not the active macro trigger runtime bundle |
+| Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | Copies are byte-identical and carry full-version trigger metadata |
+| Active profile manifest | `docs/show-profiles/show_profiles.json` | `FlashlightsInTheDark_MacOS/Resources/show_profiles.json`, `flashlights_client/assets/show_profiles.json` | `full_version` is active and runtime-ready; `tour_cut` is archived/reference |
+| Electronics trigger asset generation | `scripts/build_electronics_trigger_point_assets.py --active-profile full_version` | `docs/protools-housekeeping/electronics_trigger_assets.json`, `flashlights_client/available-sounds/electronics-trigger-clips/` | Renders 12 x 3 full-version trigger clips from the full electronics master plus primer stems |
+| Light-show generation/injection | `scripts/build_trigger_point_light_show.py --active-profile full_version` | `docs/score-study/twelve_trigger_light_show.json`, runtime event `lighting` fields | Restores middle-section lighting between M36 and M104 |
 | macOS cue UI | `FlashlightsInTheDark_MacOS/View/EventTriggerStrip.swift` | consumes decoded event recipes | Event count is dynamic |
 | Flutter cue/practice model | `flashlights_client/lib/model/event_recipe.dart` | consumes decoded event recipes | Event count is dynamic |
-| Flutter score practice asset path | `flashlights_client/lib/utils/music_xml_utils.dart` | loads hardcoded tour-cut MusicXML asset | If the score filename changes, this file must change too |
-| Flutter asset registration | `flashlights_client/pubspec.yaml` | bundles `event_recipes.json`, MusicXML, and primer MP3s | Must stay aligned with renamed or added assets |
+| Flutter asset registration | `flashlights_client/pubspec.yaml` | bundles runtime JSON and electronics trigger folders | Must stay aligned with renamed or added assets |
 | Pro Tools working session | `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx` | composer DAW workflow | Recommendation only; confirm in Pro Tools |
 | Pro Tools audit / cue timing reports | `docs/protools-housekeeping/` | composer orientation and cleanup passes | Generated, safe to regenerate |
 
-## What Will Break If You Make A Major Middle Cut
+## If You Reshape The Full Version Again
 
-If you remove a large middle span, the likely blast radius is:
+If you add, remove, or relocate a large span after this full-version restoration, the likely blast radius is:
 
 1. `MusicXML score source`
    You will change measure structure, surviving notes, and possibly measure numbering after the cut.
@@ -105,7 +110,7 @@ If you remove a large middle span, the likely blast radius is:
    Both the macOS and Flutter apps must receive the updated bundle.
 4. `Flutter score-practice asset`
    If the new score lives under a new filename or version, update both the asset file and the hardcoded path in `music_xml_utils.dart`.
-5. `Pro Tools session and rendered audio`
+5. `Electronics trigger clips and Pro Tools session`
    The session arrangement, stems, transitions, and possibly primer/support sounds will need parallel edits.
 6. `documentation and public text`
    The repo currently still says "nine-minute" or "~9 minutes" in multiple places.
@@ -118,12 +123,12 @@ What likely does **not** require deep code surgery:
 
 Those layers appear to consume the event bundle dynamically. The "192 events" references that still exist are currently comments and metadata, not core logic constraints.
 
-## Major-Cut Working Order
+## Full-Version Reshape Working Order
 
 Do this in order:
 
-1. Decide the cut span in score terms first.
-   Record it as start/end measures and start/end event IDs.
+1. Decide the change in score terms first.
+   Record it as start/end measures and nearest macro trigger IDs.
 2. Change the score source.
    Do not start by hand-editing copied JSON bundles.
 3. Regenerate the recipe bundle and timing reports.
@@ -137,18 +142,13 @@ Do this in order:
 
 ## Recommended 24-Hour Triage
 
-If the goal is "get the piece substantially pulled together in the next day", the best sequence is:
+If the goal is "get the full piece substantially pulled together in the next day", the best sequence is:
 
-1. Lock the cut plan.
-   Pick the exact measures or event range to remove.
-2. Regenerate the control layer.
-   Make sure the event bundle reflects the new structure before touching too much audio.
-3. Rebuild the middle transition in Pro Tools.
-   This is the highest-musical-risk step and should not be delayed.
-4. Push the new data into both apps.
-   Avoid diverging score/recipe/runtime copies.
-5. Run a minimal end-to-end test.
-   Can the Mac app browse the new events? Can the Flutter client still practice/highlight? Do the primer assets still align?
+1. Review the restored 12-trigger arc in `docs/score-study/twelve_trigger_light_show.json`.
+2. Audition the newly rendered `electronics-trigger-clips` on representative phones.
+3. Validate the middle-section lighting at triggers `5-10` in a dark room with several devices.
+4. Reconcile Pro Tools against `docs/protools-housekeeping/event_timeline_events.csv`.
+5. Run a minimal end-to-end test: Mac event strip, phone audio, phone lighting, and ACK/resend behavior.
 
 ## Fast Recovery Checklist
 
@@ -160,9 +160,9 @@ If coming back cold after months away, open these first:
 4. `docs/protools-housekeeping/session_audit.md`
 5. `docs/protools-housekeeping/event_timeline.md`
 6. `scripts/generate_event_recipes_v4.py`
-7. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
+7. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
 8. `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
-9. `flashlights_client/lib/utils/music_xml_utils.dart`
+9. `docs/score-study/twelve_trigger_light_show.json`
 10. `flashlights_client/pubspec.yaml`
 11. `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx`
 
@@ -172,7 +172,8 @@ From the repo root:
 
 ```bash
 python3 scripts/audit_protools_session.py
-python3 scripts/build_protools_event_timeline.py
+python3 scripts/build_show_runtime.py --active-profile full_version
+python3 scripts/build_protools_event_timeline.py --score-xml Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml
 ```
 
 ## Do Not Burn Time On These First

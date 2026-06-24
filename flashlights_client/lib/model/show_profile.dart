@@ -37,8 +37,7 @@ class ShowProfile {
       scoreMusicXml: (json['scoreMusicXml'] as String?)?.trim() ?? '',
       triggerPositionSource:
           (json['triggerPositionSource'] as String?)?.trim() ?? '',
-      electronicsManifest:
-          (json['electronicsManifest'] as String?)?.trim(),
+      electronicsManifest: (json['electronicsManifest'] as String?)?.trim(),
       lightShowManifest: (json['lightShowManifest'] as String?)?.trim(),
       notes: (json['notes'] as String?)?.trim(),
     );

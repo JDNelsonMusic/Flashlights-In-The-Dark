@@ -1,6 +1,6 @@
 # Flashlights In The Dark
 
-## Last updated March 2nd 2026
+## Last updated June 23rd 2026
 
 A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-based control system
 
@@ -14,6 +14,8 @@ A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-b
 - Reliability runbook: [docs/project-management/CONCERT_READINESS.md](docs/project-management/CONCERT_READINESS.md)
 - Composer/tech state map: [docs/project-management/PROJECT_STATE.md](docs/project-management/PROJECT_STATE.md)
 - Fast reorientation map: [docs/project-management/composermap.md](docs/project-management/composermap.md)
+- Active runtime profile: `full_version` for the planned December 2026 full-piece performance.
+- Active light-show manifest: `docs/score-study/twelve_trigger_light_show.json`.
 - One-command verification: `scripts/verify.sh`
 - Soak simulator: `scripts/soak_sim.sh` and `tools/concert_sim.py`
 - Legacy onboarding scripts in `scripts/` are deprecated for normal deployment; use TestFlight (iOS) and Play Store (Android).

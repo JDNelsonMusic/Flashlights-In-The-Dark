@@ -1,27 +1,41 @@
 # composermap
 
-Last refreshed: March 13, 2026
+Last refreshed: June 23, 2026
 
 This file is meant to help you reorient fast as the composer/technical owner of the piece after time away.
 
 It is not a contributor guide. It is a "where am I, what is alive, and what do I touch first if I need to reshape the piece tonight?" map.
+
+## June 2026 Update
+
+The March tour cut is now historical/reference material. The active December 2026 plan is the restored `full_version` runtime profile:
+
+- active profile manifest: `docs/show-profiles/show_profiles.json`
+- active score source: `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
+- active trigger map: `docs/score-study/full_version_trigger_points.csv`
+- active light-show manifest: `docs/score-study/twelve_trigger_light_show.json`
+- active runtime bundle: `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json`
+
+The restored full-version macro trigger points are `1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12`; the previously cut middle is covered by triggers `6-10`.
 
 ## If You Only Have 10 Minutes
 
 Read these in order:
 
 1. `docs/project-management/PROJECT_STATE.md`
-2. `docs/2026-03-13-rehearsal-cut-plan.md`
+2. `docs/score-study/twelve_trigger_light_show.json`
 3. `docs/protools-housekeeping/event_timeline.md`
 4. `docs/protools-housekeeping/session_audit.md`
-5. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
+5. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml`
 6. `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx`
 
 Then answer one question before doing anything else:
 
-`What exact version of the 38 -> bridge -> 104 handoff am I implementing?`
+`What exact December 2026 full-version arc am I validating or revising?`
 
-## Current Agreed Rehearsal Cut
+## Historical Agreed Rehearsal Cut
+
+The rest of this section records the March 2026 tour-cut thinking. Keep it for archaeology, but do not treat it as the current performance plan.
 
 As of March 13, 2026, the currently agreed immediate cut to communicate to the choir is captured in:
 

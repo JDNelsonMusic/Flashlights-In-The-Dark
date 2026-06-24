@@ -37,12 +37,6 @@ flutter:
     - available-sounds/electronics-trigger-clips/soprano/
     - available-sounds/electronics-trigger-clips/alto/
     - available-sounds/electronics-trigger-clips/tenor-bass/
-    - available-sounds/electronics-trigger-clips/part-specific/alto-l1/
-    - available-sounds/electronics-trigger-clips/part-specific/alto-l2/
-    - available-sounds/electronics-trigger-clips/part-specific/bass-l/
-    - available-sounds/electronics-trigger-clips/part-specific/soprano-l1/
-    - available-sounds/electronics-trigger-clips/part-specific/soprano-l2/
-    - available-sounds/electronics-trigger-clips/part-specific/tenor-l/
 
 dependency_overrides:
   win32: ^5.14.0

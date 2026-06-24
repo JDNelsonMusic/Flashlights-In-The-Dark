@@ -6,17 +6,36 @@ from __future__ import annotations
 import json
 import re
 import xml.etree.ElementTree as ET
+import argparse
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from score_reactive_light_show import (
+    build_score_light_analysis,
+    build_score_reactive_manifest,
+    load_json,
+    write_json,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TRIGGER_MANIFEST_PATH = REPO_ROOT / "docs/protools-housekeeping/electronics_trigger_assets.json"
-MUSICXML_PATH = REPO_ROOT / "flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml"
-LIGHT_SHOW_MANIFEST_PATH = REPO_ROOT / "docs/score-study/tour_cut_light_show.json"
+TOUR_MUSICXML_PATH = REPO_ROOT / "flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml"
+FULL_MUSICXML_PATH = REPO_ROOT / "flashlights_client/assets/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml"
+MUSICXML_PATH = TOUR_MUSICXML_PATH
+TOUR_LIGHT_SHOW_MANIFEST_PATH = REPO_ROOT / "docs/score-study/tour_cut_light_show.json"
+FULL_LIGHT_SHOW_MANIFEST_PATH = REPO_ROOT / "docs/score-study/twelve_trigger_light_show.json"
+FULL_SCORE_REACTIVE_LIGHT_SHOW_MANIFEST_PATH = (
+    REPO_ROOT / "docs/score-study/twelve_trigger_light_show_score_reactive_v1.json"
+)
+FULL_SCORE_LIGHT_ANALYSIS_PATH = REPO_ROOT / "docs/score-study/score_light_analysis_full_version.json"
+FULL_SCORE_REACTIVE_GRAMMAR_PATH = (
+    REPO_ROOT / "docs/score-study/score_reactive_light_grammar_full_version.json"
+)
+LIGHT_SHOW_MANIFEST_PATH = TOUR_LIGHT_SHOW_MANIFEST_PATH
 
 RECIPE_COPY_PATHS = [
     REPO_ROOT / "Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json",
@@ -58,6 +77,42 @@ FINAL_BASE_LEVELS = {
     "bass_l": 0.34,
     "alto_l2": 0.22,
     "alto_l1": 0.20,
+}
+
+PROFILE_CONFIGS = {
+    "tour_cut": {
+        "source_musicxml": TOUR_MUSICXML_PATH,
+        "manifest_path": TOUR_LIGHT_SHOW_MANIFEST_PATH,
+        "inject_runtime": True,
+        "design_note": (
+            "Tour-cut six-staff torch choreography preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
+            "Trigger Point 5 carries its extended bridge light show: an eight-beat global ramp, the piece's "
+            "most complex lighting field across beats 9-24, and a hard blackout on beat 25. Trigger Point 11 begins "
+            "with the piece's only fully unified slow glow before the staves separate again; Trigger Point 12 is "
+            "strictly locked to light-chorus note onsets."
+        ),
+    },
+    "full_version": {
+        "source_musicxml": FULL_MUSICXML_PATH,
+        "manifest_path": FULL_LIGHT_SHOW_MANIFEST_PATH,
+        "inject_runtime": True,
+        "design_note": (
+            "Full-version twelve-trigger six-staff torch choreography for the December 2026 performance plan. "
+            "The restored middle section fills the former tour-cut gap with a moderate center-out breath at M36, "
+            "suspended rocking at M46, a right-to-left exhale at M63, search-beam alternations at M78, "
+            "hushed isolated pools at M89, and a max-brightness density crescendo at M98 before the unified M104 glow."
+        ),
+    },
+    "full_version_score_reactive": {
+        "source_musicxml": FULL_MUSICXML_PATH,
+        "manifest_path": FULL_SCORE_REACTIVE_LIGHT_SHOW_MANIFEST_PATH,
+        "inject_runtime": False,
+        "design_note": (
+            "Review-only score-reactive full-version draft. Triggers 1-11 are generated from MusicXML-derived "
+            "note, duration, dynamic, text, register, density, and phrase data. Trigger 12 preserves the accepted "
+            "note-synchronous finale."
+        ),
+    },
 }
 
 
@@ -501,7 +556,7 @@ def _build_event_plans() -> dict[int, EventPlan]:
     }
 
 
-def _build_lighting_manifest() -> dict[str, Any]:
+def _build_tour_cut_lighting_manifest() -> dict[str, Any]:
     trigger_manifest = json.loads(TRIGGER_MANIFEST_PATH.read_text())
     events = trigger_manifest["events"]
     source_duration_ms = float(trigger_manifest["sourceDurationMs"])
@@ -561,22 +616,73 @@ def _build_lighting_manifest() -> dict[str, Any]:
     }
 
 
-def _inject_lighting_into_recipes(light_manifest: dict[str, Any]) -> None:
+def _build_full_version_lighting_manifest() -> dict[str, Any]:
+    light_manifest = json.loads(FULL_LIGHT_SHOW_MANIFEST_PATH.read_text())
+    trigger_manifest = json.loads(TRIGGER_MANIFEST_PATH.read_text())
+    manifest_ids = [int(event["id"]) for event in light_manifest.get("events", [])]
+    trigger_ids = [int(event["id"]) for event in trigger_manifest.get("events", [])]
+    if manifest_ids != trigger_ids:
+        raise ValueError(
+            "Full-version light-show manifest IDs do not match active trigger manifest: "
+            f"{manifest_ids} != {trigger_ids}"
+        )
+
+    light_manifest["generated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    light_manifest["sourceMusicXml"] = str(FULL_MUSICXML_PATH.relative_to(REPO_ROOT))
+    light_manifest["sourceTriggerManifest"] = str(TRIGGER_MANIFEST_PATH.relative_to(REPO_ROOT))
+    return light_manifest
+
+
+def _build_full_version_score_reactive_lighting_manifest() -> dict[str, Any]:
+    analysis = build_score_light_analysis(
+        score_path=FULL_MUSICXML_PATH,
+        trigger_manifest_path=TRIGGER_MANIFEST_PATH,
+        baseline_light_show_path=FULL_LIGHT_SHOW_MANIFEST_PATH,
+    )
+    analysis_payload = deepcopy(analysis)
+    analysis_payload["sourceMusicXml"] = str(FULL_MUSICXML_PATH.relative_to(REPO_ROOT))
+    analysis_payload["sourceTriggerManifest"] = str(TRIGGER_MANIFEST_PATH.relative_to(REPO_ROOT))
+    analysis_payload["baselineLightShow"] = str(FULL_LIGHT_SHOW_MANIFEST_PATH.relative_to(REPO_ROOT))
+    write_json(FULL_SCORE_LIGHT_ANALYSIS_PATH, analysis_payload)
+
+    baseline = load_json(FULL_LIGHT_SHOW_MANIFEST_PATH)
+    grammar = load_json(FULL_SCORE_REACTIVE_GRAMMAR_PATH)
+    manifest = build_score_reactive_manifest(
+        baseline_light_show=baseline,
+        analysis=analysis_payload,
+        grammar=grammar,
+        analysis_path=FULL_SCORE_LIGHT_ANALYSIS_PATH.relative_to(REPO_ROOT),
+        grammar_path=FULL_SCORE_REACTIVE_GRAMMAR_PATH.relative_to(REPO_ROOT),
+    )
+    manifest["generated"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    manifest["sourceMusicXml"] = str(FULL_MUSICXML_PATH.relative_to(REPO_ROOT))
+    manifest["sourceTriggerManifest"] = str(TRIGGER_MANIFEST_PATH.relative_to(REPO_ROOT))
+    return manifest
+
+
+def _build_lighting_manifest(active_profile: str) -> dict[str, Any]:
+    if active_profile == "full_version_score_reactive":
+        return _build_full_version_score_reactive_lighting_manifest()
+    if active_profile == "full_version":
+        return _build_full_version_lighting_manifest()
+    return _build_tour_cut_lighting_manifest()
+
+
+def _inject_lighting_into_recipes(
+    light_manifest: dict[str, Any],
+    *,
+    manifest_path: Path,
+    design_note: str,
+) -> None:
     events_by_id = {event["id"]: event for event in light_manifest["events"]}
     generated = light_manifest["generated"]
 
     for path in RECIPE_COPY_PATHS:
         bundle = json.loads(path.read_text())
         bundle["lightingSourceMusicXml"] = light_manifest["sourceMusicXml"]
-        bundle["lightingManifest"] = str(LIGHT_SHOW_MANIFEST_PATH.relative_to(REPO_ROOT))
+        bundle["lightingManifest"] = str(manifest_path.relative_to(REPO_ROOT))
         bundle["lightingGenerated"] = generated
-        bundle["lightingDesignNote"] = (
-            "Tour-cut six-staff torch choreography preserving full trigger identities 1, 2, 3, 4, 5, 11, 12. "
-            "Trigger Point 5 now carries its own extended bridge light show: an eight-beat global ramp, the piece's "
-            "most complex lighting field across beats 9-24, and a hard blackout on beat 25. Trigger Point 11 begins "
-            "with the piece's only fully unified slow glow before the staves separate again; Trigger Point 12 is "
-            "strictly locked to light-chorus note onsets."
-        )
+        bundle["lightingDesignNote"] = design_note
 
         for event in bundle.get("events", []):
             event_id = int(event["id"])
@@ -593,13 +699,43 @@ def _inject_lighting_into_recipes(light_manifest: dict[str, Any]) -> None:
 
 
 def main() -> None:
-    light_manifest = _build_lighting_manifest()
-    LIGHT_SHOW_MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    LIGHT_SHOW_MANIFEST_PATH.write_text(json.dumps(light_manifest, indent=2) + "\n")
-    _inject_lighting_into_recipes(light_manifest)
+    parser = argparse.ArgumentParser(
+        description="Build or inject trigger-point flashlight choreography into active recipe bundles."
+    )
+    parser.add_argument(
+        "--active-profile",
+        default="tour_cut",
+        choices=sorted(PROFILE_CONFIGS),
+        help="Show profile whose light-show manifest should be injected into the active runtime bundle.",
+    )
+    parser.add_argument(
+        "--inject-runtime",
+        action="store_true",
+        help=(
+            "Inject the generated lighting into runtime event_recipes.json copies. "
+            "The review-only score-reactive profile skips this unless this flag is set."
+        ),
+    )
+    args = parser.parse_args()
+    profile = PROFILE_CONFIGS[args.active_profile]
+    manifest_path = profile["manifest_path"]
 
-    print(f"Light-show manifest: {LIGHT_SHOW_MANIFEST_PATH.relative_to(REPO_ROOT)}")
-    print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")
+    light_manifest = _build_lighting_manifest(args.active_profile)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(light_manifest, indent=2) + "\n")
+    should_inject_runtime = bool(profile.get("inject_runtime", True)) or args.inject_runtime
+    if should_inject_runtime:
+        _inject_lighting_into_recipes(
+            light_manifest,
+            manifest_path=manifest_path,
+            design_note=profile["design_note"],
+        )
+
+    print(f"Light-show manifest: {manifest_path.relative_to(REPO_ROOT)}")
+    if should_inject_runtime:
+        print(f"Recipe copies updated: {len(RECIPE_COPY_PATHS)}")
+    else:
+        print("Recipe copies updated: 0 (review manifest only)")
 
 
 if __name__ == "__main__":
