@@ -24,9 +24,12 @@ public struct EventRecipe: Identifiable, Decodable {
     public let timingNote: String?
     public let primerAssignments: [PrimerColor: PrimerAssignment]
     public let lighting: EventLighting?
+    public let visualSectionIds: [Int]
+    public let visualSectionWindows: [VisualSectionWindow]
 
     enum CodingKeys: String, CodingKey {
         case id, measure, measureToken, scoreMeasureOrdinal, position, scoreLabel, timingNote, primer, lighting
+        case visualSectionIds, visualSectionWindows
     }
 
     public init(
@@ -38,7 +41,9 @@ public struct EventRecipe: Identifiable, Decodable {
         scoreLabel: String?,
         timingNote: String?,
         primerAssignments: [PrimerColor: PrimerAssignment],
-        lighting: EventLighting? = nil
+        lighting: EventLighting? = nil,
+        visualSectionIds: [Int] = [],
+        visualSectionWindows: [VisualSectionWindow] = []
     ) {
         self.id = id
         self.measure = measure
@@ -49,6 +54,8 @@ public struct EventRecipe: Identifiable, Decodable {
         self.timingNote = timingNote
         self.primerAssignments = primerAssignments
         self.lighting = lighting
+        self.visualSectionIds = visualSectionIds
+        self.visualSectionWindows = visualSectionWindows
     }
 
     public init(from decoder: Decoder) throws {
@@ -72,7 +79,18 @@ public struct EventRecipe: Identifiable, Decodable {
             primerAssignments = [:]
         }
         lighting = try container.decodeIfPresent(EventLighting.self, forKey: .lighting)
+        visualSectionIds = try container.decodeIfPresent([Int].self, forKey: .visualSectionIds) ?? []
+        visualSectionWindows = try container.decodeIfPresent([VisualSectionWindow].self, forKey: .visualSectionWindows) ?? []
     }
+}
+
+public struct VisualSectionWindow: Decodable {
+    public let sectionId: Int
+    public let key: String
+    public let label: String
+    public let startAtMs: Double
+    public let endAtMs: Double
+    public let durationMs: Double
 }
 
 // MARK: - Lighting ------------------------------------------------------------

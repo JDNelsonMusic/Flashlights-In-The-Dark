@@ -34,7 +34,7 @@ PROFILE_MANIFEST = {
             "scoreMusicXml": "Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml",
             "triggerPositionSource": "docs/score-study/full_version_trigger_points.csv",
             "electronicsManifest": "docs/protools-housekeeping/electronics_trigger_assets.json",
-            "lightShowManifest": "docs/score-study/twelve_trigger_light_show.json",
+            "lightShowManifest": "docs/score-study/Flashlights_Lightshow_Prototype_Schema.json",
             "notes": "Profile is registered and documented, but the shipped runtime currently remains tour-cut only until a dedicated full-version bundle is regenerated.",
         },
     ],
@@ -61,7 +61,7 @@ ACTIVE_PROFILE_METADATA = {
     "full_version": {
         "profileId": "full_version",
         "profileLabel": "Full Version",
-        "lightShowManifest": "docs/score-study/twelve_trigger_light_show.json",
+        "lightShowManifest": "docs/score-study/Flashlights_Lightshow_Prototype_Schema.json",
     },
 }
 

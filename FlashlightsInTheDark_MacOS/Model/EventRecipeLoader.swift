@@ -52,7 +52,9 @@ struct EventRecipeLoader {
             scoreLabel: event.scoreLabel,
             timingNote: event.timingNote,
             primerAssignments: cleaned,
-            lighting: event.lighting
+            lighting: event.lighting,
+            visualSectionIds: event.visualSectionIds,
+            visualSectionWindows: event.visualSectionWindows
         )
     }
 

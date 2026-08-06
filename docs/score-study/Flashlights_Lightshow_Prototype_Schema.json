@@ -222,7 +222,20 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        1
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 1,
+          "key": "first_emergence",
+          "label": "First emergence",
+          "startAtMs": 0.0,
+          "endAtMs": 2352.941,
+          "durationMs": 2352.941
+        }
+      ]
     },
     {
       "id": 2,
@@ -825,7 +838,38 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        2,
+        3,
+        4
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 2,
+          "key": "forte_shimmer",
+          "label": "Forte shimmer",
+          "startAtMs": 0.0,
+          "endAtMs": 18823.53,
+          "durationMs": 18823.53
+        },
+        {
+          "sectionId": 3,
+          "key": "niente_rupture",
+          "label": "Niente rupture",
+          "startAtMs": 18823.53,
+          "endAtMs": 40000.0,
+          "durationMs": 21176.47
+        },
+        {
+          "sectionId": 4,
+          "key": "clock_withdrawal",
+          "label": "Clock withdrawal",
+          "startAtMs": 40000.0,
+          "endAtMs": 55882.353,
+          "durationMs": 15882.353
+        }
+      ]
     },
     {
       "id": 3,
@@ -1032,7 +1076,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        4,
+        5
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 4,
+          "key": "clock_withdrawal",
+          "label": "Clock withdrawal",
+          "startAtMs": 0.0,
+          "endAtMs": 10000.0,
+          "durationMs": 10000.0
+        },
+        {
+          "sectionId": 5,
+          "key": "andante_reset",
+          "label": "Andante reset",
+          "startAtMs": 10000.0,
+          "endAtMs": 20000.0,
+          "durationMs": 10000.0
+        }
+      ]
     },
     {
       "id": 4,
@@ -1223,7 +1289,20 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        5
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 5,
+          "key": "andante_reset",
+          "label": "Andante reset",
+          "startAtMs": 0.0,
+          "endAtMs": 6666.667,
+          "durationMs": 6666.667
+        }
+      ]
     },
     {
       "id": 5,
@@ -1438,7 +1517,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        6,
+        7
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 6,
+          "key": "breathing_arc",
+          "label": "Breathing arc",
+          "startAtMs": 0.0,
+          "endAtMs": 33333.333,
+          "durationMs": 33333.333
+        },
+        {
+          "sectionId": 7,
+          "key": "irregular_pendulum",
+          "label": "Irregular pendulum",
+          "startAtMs": 33333.333,
+          "endAtMs": 35000.0,
+          "durationMs": 1666.667
+        }
+      ]
     },
     {
       "id": 6,
@@ -1701,7 +1802,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        7,
+        8
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 7,
+          "key": "irregular_pendulum",
+          "label": "Irregular pendulum",
+          "startAtMs": 0.0,
+          "endAtMs": 25833.333,
+          "durationMs": 25833.333
+        },
+        {
+          "sectionId": 8,
+          "key": "forte_expansion",
+          "label": "Forte expansion",
+          "startAtMs": 25833.333,
+          "endAtMs": 44166.667,
+          "durationMs": 18333.334
+        }
+      ]
     },
     {
       "id": 7,
@@ -1908,7 +2031,38 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        8,
+        9,
+        10
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 8,
+          "key": "forte_expansion",
+          "label": "Forte expansion",
+          "startAtMs": 0.0,
+          "endAtMs": 3333.333,
+          "durationMs": 3333.333
+        },
+        {
+          "sectionId": 9,
+          "key": "piano_rebuild",
+          "label": "Piano rebuild",
+          "startAtMs": 3333.333,
+          "endAtMs": 21666.666,
+          "durationMs": 18333.333
+        },
+        {
+          "sectionId": 10,
+          "key": "metered_forte_return",
+          "label": "Metered forte return",
+          "startAtMs": 21666.666,
+          "endAtMs": 39166.666,
+          "durationMs": 17500.0
+        }
+      ]
     },
     {
       "id": 8,
@@ -2155,7 +2309,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        10,
+        11
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 10,
+          "key": "metered_forte_return",
+          "label": "Metered forte return",
+          "startAtMs": 0.0,
+          "endAtMs": 9166.667,
+          "durationMs": 9166.667
+        },
+        {
+          "sectionId": 11,
+          "key": "musique_concrete",
+          "label": "Musique concrete",
+          "startAtMs": 9166.667,
+          "endAtMs": 35833.333,
+          "durationMs": 26666.666
+        }
+      ]
     },
     {
       "id": 9,
@@ -2354,7 +2530,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        11,
+        12
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 11,
+          "key": "musique_concrete",
+          "label": "Musique concrete",
+          "startAtMs": 0.0,
+          "endAtMs": 0.0,
+          "durationMs": 0.0
+        },
+        {
+          "sectionId": 12,
+          "key": "isolated_lanterns",
+          "label": "Isolated lanterns",
+          "startAtMs": 0.0,
+          "endAtMs": 30000.0,
+          "durationMs": 30000.0
+        }
+      ]
     },
     {
       "id": 10,
@@ -2936,7 +3134,20 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        13
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 13,
+          "key": "density_crescendo",
+          "label": "Density crescendo",
+          "startAtMs": 0.0,
+          "endAtMs": 20000.0,
+          "durationMs": 20000.0
+        }
+      ]
     },
     {
       "id": 11,
@@ -3199,7 +3410,29 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        14,
+        15
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 14,
+          "key": "unified_glow",
+          "label": "Unified glow",
+          "startAtMs": 0.0,
+          "endAtMs": 25000.0,
+          "durationMs": 25000.0
+        },
+        {
+          "sectionId": 15,
+          "key": "subito_contraction",
+          "label": "Subito contraction",
+          "startAtMs": 25000.0,
+          "endAtMs": 35000.0,
+          "durationMs": 10000.0
+        }
+      ]
     },
     {
       "id": 12,
@@ -6205,7 +6438,320 @@
             }
           ]
         }
-      }
+      },
+      "visualSectionIds": [
+        16,
+        17,
+        18
+      ],
+      "visualSectionWindows": [
+        {
+          "sectionId": 16,
+          "key": "aleatoric_field_one",
+          "label": "Aleatoric field I",
+          "startAtMs": 0.0,
+          "endAtMs": 40000.0,
+          "durationMs": 40000.0
+        },
+        {
+          "sectionId": 17,
+          "key": "aleatoric_field_two",
+          "label": "Aleatoric field II",
+          "startAtMs": 40000.0,
+          "endAtMs": 65000.0,
+          "durationMs": 25000.0
+        },
+        {
+          "sectionId": 18,
+          "key": "polytonal_chandelier",
+          "label": "Polytonal chandelier",
+          "startAtMs": 65000.0,
+          "endAtMs": 116078.665,
+          "durationMs": 51078.665
+        }
+      ]
+    }
+  ],
+  "operatorTriggerCount": 12,
+  "visualSectionCount": 18,
+  "visualSectionModelVersion": 1,
+  "visualSectionTimingBasis": "v26 MusicXML measure starts; the final section extends through the source audio duration",
+  "visualSections": [
+    {
+      "id": 1,
+      "key": "first_emergence",
+      "label": "First emergence",
+      "startMeasure": 1,
+      "endMeasure": 1,
+      "scoreRange": "M1-M1",
+      "summary": "Darkness releases the first left-to-right glint.",
+      "startAtMs": 0.0,
+      "endAtMs": 2352.941,
+      "durationMs": 2352.941,
+      "entryTriggerId": 1,
+      "operatorTriggerIds": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "key": "forte_shimmer",
+      "label": "Forte shimmer",
+      "startMeasure": 2,
+      "endMeasure": 9,
+      "scoreRange": "M2-M9",
+      "summary": "A bright shimmer accumulates toward the first ff crest.",
+      "startAtMs": 2352.941,
+      "endAtMs": 21176.471,
+      "durationMs": 18823.53,
+      "entryTriggerId": 2,
+      "operatorTriggerIds": [
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "key": "niente_rupture",
+      "label": "Niente rupture",
+      "startMeasure": 10,
+      "endMeasure": 18,
+      "scoreRange": "M10-M18",
+      "summary": "Niente, reattack, and robot/rocket textures fracture the opening field.",
+      "startAtMs": 21176.471,
+      "endAtMs": 42352.941,
+      "durationMs": 21176.47,
+      "entryTriggerId": 2,
+      "operatorTriggerIds": []
+    },
+    {
+      "id": 4,
+      "key": "clock_withdrawal",
+      "label": "Clock withdrawal",
+      "startMeasure": 19,
+      "endMeasure": 29,
+      "scoreRange": "M19-M29",
+      "summary": "The ensemble withdraws to mp and exposes the clock-ticking transition.",
+      "startAtMs": 42352.941,
+      "endAtMs": 68235.294,
+      "durationMs": 25882.353,
+      "entryTriggerId": 2,
+      "operatorTriggerIds": [
+        3
+      ]
+    },
+    {
+      "id": 5,
+      "key": "andante_reset",
+      "label": "Andante reset",
+      "startMeasure": 30,
+      "endMeasure": 35,
+      "scoreRange": "M30-M35",
+      "summary": "The new 72 BPM tempo opens a slower visual breathing space.",
+      "startAtMs": 68235.294,
+      "endAtMs": 84901.961,
+      "durationMs": 16666.667,
+      "entryTriggerId": 3,
+      "operatorTriggerIds": [
+        4
+      ]
+    },
+    {
+      "id": 6,
+      "key": "breathing_arc",
+      "label": "Breathing arc",
+      "startMeasure": 36,
+      "endMeasure": 45,
+      "scoreRange": "M36-M45",
+      "summary": "A moderate center-out breath expands across the six groups.",
+      "startAtMs": 84901.961,
+      "endAtMs": 118235.294,
+      "durationMs": 33333.333,
+      "entryTriggerId": 5,
+      "operatorTriggerIds": [
+        5
+      ]
+    },
+    {
+      "id": 7,
+      "key": "irregular_pendulum",
+      "label": "Irregular pendulum",
+      "startMeasure": 46,
+      "endMeasure": 56,
+      "scoreRange": "M46-M56",
+      "summary": "Changing meters suspend a pendulum between center and edges.",
+      "startAtMs": 118235.294,
+      "endAtMs": 145735.294,
+      "durationMs": 27500.0,
+      "entryTriggerId": 5,
+      "operatorTriggerIds": [
+        6
+      ]
+    },
+    {
+      "id": 8,
+      "key": "forte_expansion",
+      "label": "Forte expansion",
+      "startMeasure": 57,
+      "endMeasure": 64,
+      "scoreRange": "M57-M64",
+      "summary": "A renewed forte gesture expands and begins to release.",
+      "startAtMs": 145735.294,
+      "endAtMs": 167401.961,
+      "durationMs": 21666.667,
+      "entryTriggerId": 6,
+      "operatorTriggerIds": [
+        7
+      ]
+    },
+    {
+      "id": 9,
+      "key": "piano_rebuild",
+      "label": "Piano rebuild",
+      "startMeasure": 65,
+      "endMeasure": 70,
+      "scoreRange": "M65-M70",
+      "summary": "The texture thins to piano and gradually gathers weight again.",
+      "startAtMs": 167401.961,
+      "endAtMs": 185735.294,
+      "durationMs": 18333.333,
+      "entryTriggerId": 7,
+      "operatorTriggerIds": []
+    },
+    {
+      "id": 10,
+      "key": "metered_forte_return",
+      "label": "Metered forte return",
+      "startMeasure": 71,
+      "endMeasure": 80,
+      "scoreRange": "M71-M80",
+      "summary": "Forte energy returns through a sequence of changing meters.",
+      "startAtMs": 185735.294,
+      "endAtMs": 212401.961,
+      "durationMs": 26666.667,
+      "entryTriggerId": 7,
+      "operatorTriggerIds": [
+        8
+      ]
+    },
+    {
+      "id": 11,
+      "key": "musique_concrete",
+      "label": "Musique concrete",
+      "startMeasure": 81,
+      "endMeasure": 88,
+      "scoreRange": "M81-M88",
+      "summary": "The musique-concrete region becomes its own visual environment.",
+      "startAtMs": 212401.961,
+      "endAtMs": 239068.627,
+      "durationMs": 26666.666,
+      "entryTriggerId": 8,
+      "operatorTriggerIds": []
+    },
+    {
+      "id": 12,
+      "key": "isolated_lanterns",
+      "label": "Isolated lanterns",
+      "startMeasure": 89,
+      "endMeasure": 97,
+      "scoreRange": "M89-M97",
+      "summary": "Quiet asymmetric lanterns occupy separate pockets of the stage.",
+      "startAtMs": 239068.627,
+      "endAtMs": 269068.627,
+      "durationMs": 30000.0,
+      "entryTriggerId": 9,
+      "operatorTriggerIds": [
+        9
+      ]
+    },
+    {
+      "id": 13,
+      "key": "density_crescendo",
+      "label": "Density crescendo",
+      "startMeasure": 98,
+      "endMeasure": 103,
+      "scoreRange": "M98-M103",
+      "summary": "Binary glitter grows from p to ff through increasing density.",
+      "startAtMs": 269068.627,
+      "endAtMs": 289068.627,
+      "durationMs": 20000.0,
+      "entryTriggerId": 10,
+      "operatorTriggerIds": [
+        10
+      ]
+    },
+    {
+      "id": 14,
+      "key": "unified_glow",
+      "label": "Unified glow",
+      "startMeasure": 104,
+      "endMeasure": 111,
+      "scoreRange": "M104-M111",
+      "summary": "All six groups share the piece's only fully unified slow glow.",
+      "startAtMs": 289068.627,
+      "endAtMs": 314068.627,
+      "durationMs": 25000.0,
+      "entryTriggerId": 11,
+      "operatorTriggerIds": [
+        11
+      ]
+    },
+    {
+      "id": 15,
+      "key": "subito_contraction",
+      "label": "Subito contraction",
+      "startMeasure": 112,
+      "endMeasure": 114,
+      "scoreRange": "M112-M114",
+      "summary": "A subito mp contraction clears space for the final aleatoric field.",
+      "startAtMs": 314068.627,
+      "endAtMs": 324068.627,
+      "durationMs": 10000.0,
+      "entryTriggerId": 11,
+      "operatorTriggerIds": []
+    },
+    {
+      "id": 16,
+      "key": "aleatoric_field_one",
+      "label": "Aleatoric field I",
+      "startMeasure": 115,
+      "endMeasure": 129,
+      "scoreRange": "M115-M129",
+      "summary": "The first note-synchronous aleatoric field follows individual entrances.",
+      "startAtMs": 324068.627,
+      "endAtMs": 364068.627,
+      "durationMs": 40000.0,
+      "entryTriggerId": 12,
+      "operatorTriggerIds": [
+        12
+      ]
+    },
+    {
+      "id": 17,
+      "key": "aleatoric_field_two",
+      "label": "Aleatoric field II",
+      "startMeasure": 130,
+      "endMeasure": 139,
+      "scoreRange": "M130-M139",
+      "summary": "Rearticulation produces a second, more dispersed onset field.",
+      "startAtMs": 364068.627,
+      "endAtMs": 389068.627,
+      "durationMs": 25000.0,
+      "entryTriggerId": 12,
+      "operatorTriggerIds": []
+    },
+    {
+      "id": 18,
+      "key": "polytonal_chandelier",
+      "label": "Polytonal chandelier",
+      "startMeasure": 140,
+      "endMeasure": 151,
+      "scoreRange": "M140-M151",
+      "summary": "The polytonal chandelier dissolves into the final ppp release.",
+      "startAtMs": 389068.627,
+      "endAtMs": 440147.292,
+      "durationMs": 51078.665,
+      "entryTriggerId": 12,
+      "operatorTriggerIds": []
     }
   ]
 }

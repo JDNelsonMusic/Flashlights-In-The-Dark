@@ -214,6 +214,24 @@ class EventLighting {
   final Map<String, LightingAssignment> parts;
 }
 
+class VisualSectionWindow {
+  const VisualSectionWindow({
+    required this.sectionId,
+    required this.key,
+    required this.label,
+    required this.startAtMs,
+    required this.endAtMs,
+    required this.durationMs,
+  });
+
+  final int sectionId;
+  final String key;
+  final String label;
+  final double startAtMs;
+  final double endAtMs;
+  final double durationMs;
+}
+
 String? _canonicalPrimerSample(String? raw) {
   if (raw == null) {
     return null;
@@ -274,6 +292,8 @@ class EventRecipe {
     required this.electronicsAssignments,
     required this.electronicsByPart,
     required this.lighting,
+    this.visualSectionIds = const <int>[],
+    this.visualSectionWindows = const <VisualSectionWindow>[],
   });
 
   final int id;
@@ -290,6 +310,8 @@ class EventRecipe {
   final Map<ChoirFamily, ElectronicsAssignment> electronicsAssignments;
   final Map<String, ElectronicsAssignment> electronicsByPart;
   final EventLighting? lighting;
+  final List<int> visualSectionIds;
+  final List<VisualSectionWindow> visualSectionWindows;
 
   String get displayMeasureText {
     final token = measureToken?.trim();
@@ -453,6 +475,43 @@ class EventRecipe {
       }
     }
 
+    final visualSectionIds = (json['visualSectionIds'] as List<dynamic>? ??
+            const <dynamic>[])
+        .whereType<num>()
+        .map((value) => value.toInt())
+        .toList(growable: false);
+    final visualSectionWindows =
+        (json['visualSectionWindows'] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<Map<String, dynamic>>()
+            .map((entry) {
+              final sectionId = (entry['sectionId'] as num?)?.toInt();
+              final key = (entry['key'] as String?)?.trim();
+              final label = (entry['label'] as String?)?.trim();
+              final startAtMs = (entry['startAtMs'] as num?)?.toDouble();
+              final endAtMs = (entry['endAtMs'] as num?)?.toDouble();
+              final durationMs = (entry['durationMs'] as num?)?.toDouble();
+              if (sectionId == null ||
+                  key == null ||
+                  key.isEmpty ||
+                  label == null ||
+                  label.isEmpty ||
+                  startAtMs == null ||
+                  endAtMs == null ||
+                  durationMs == null) {
+                return null;
+              }
+              return VisualSectionWindow(
+                sectionId: sectionId,
+                key: key,
+                label: label,
+                startAtMs: startAtMs,
+                endAtMs: endAtMs,
+                durationMs: durationMs,
+              );
+            })
+            .whereType<VisualSectionWindow>()
+            .toList(growable: false);
+
     return EventRecipe(
       id: json['id'] as int,
       measure: json['measure'] as int?,
@@ -464,6 +523,8 @@ class EventRecipe {
       electronicsAssignments: electronics,
       electronicsByPart: electronicsByPart,
       lighting: lighting,
+      visualSectionIds: visualSectionIds,
+      visualSectionWindows: visualSectionWindows,
     );
   }
 }
