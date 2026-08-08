@@ -1,0 +1,1216 @@
+{
+  "metadata": {
+    "divisionsPerQuarter": 24,
+    "totalDurationSeconds": 418.235294
+  },
+  "measures": [
+    {
+      "number": 1,
+      "startSeconds": 0.0,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 2,
+      "startSeconds": 2.352941,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 3,
+      "startSeconds": 4.705882,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 4,
+      "startSeconds": 7.058824,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 5,
+      "startSeconds": 9.411765,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 6,
+      "startSeconds": 11.764706,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 7,
+      "startSeconds": 14.117647,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 8,
+      "startSeconds": 16.470588,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 9,
+      "startSeconds": 18.823529,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 10,
+      "startSeconds": 21.176471,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 11,
+      "startSeconds": 23.529412,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 12,
+      "startSeconds": 25.882353,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 13,
+      "startSeconds": 28.235294,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 14,
+      "startSeconds": 30.588235,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 15,
+      "startSeconds": 32.941176,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 16,
+      "startSeconds": 35.294118,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 17,
+      "startSeconds": 37.647059,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 18,
+      "startSeconds": 40.0,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 19,
+      "startSeconds": 42.352941,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 20,
+      "startSeconds": 44.705882,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 21,
+      "startSeconds": 47.058824,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 22,
+      "startSeconds": 49.411765,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 23,
+      "startSeconds": 51.764706,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 24,
+      "startSeconds": 54.117647,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 25,
+      "startSeconds": 56.470588,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 26,
+      "startSeconds": 58.823529,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 27,
+      "startSeconds": 61.176471,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 28,
+      "startSeconds": 63.529412,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 29,
+      "startSeconds": 65.882353,
+      "durationSeconds": 2.352941,
+      "tempoBpm": 102.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 30,
+      "startSeconds": 68.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 31,
+      "startSeconds": 71.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 32,
+      "startSeconds": 74.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 33,
+      "startSeconds": 77.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 34,
+      "startSeconds": 79.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 35,
+      "startSeconds": 82.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 36,
+      "startSeconds": 84.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 37,
+      "startSeconds": 88.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 38,
+      "startSeconds": 91.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 39,
+      "startSeconds": 94.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 40,
+      "startSeconds": 98.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 41,
+      "startSeconds": 101.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 42,
+      "startSeconds": 104.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 43,
+      "startSeconds": 108.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 44,
+      "startSeconds": 111.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 45,
+      "startSeconds": 114.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 46,
+      "startSeconds": 118.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 47,
+      "startSeconds": 120.735294,
+      "durationSeconds": 1.666667,
+      "tempoBpm": 72.0,
+      "beats": 2,
+      "beatType": 4
+    },
+    {
+      "number": 48,
+      "startSeconds": 122.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 49,
+      "startSeconds": 124.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 50,
+      "startSeconds": 127.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 51,
+      "startSeconds": 129.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 52,
+      "startSeconds": 133.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 53,
+      "startSeconds": 135.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 54,
+      "startSeconds": 138.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 55,
+      "startSeconds": 140.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 56,
+      "startSeconds": 143.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 57,
+      "startSeconds": 145.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 58,
+      "startSeconds": 148.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 59,
+      "startSeconds": 150.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 60,
+      "startSeconds": 153.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 61,
+      "startSeconds": 156.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 62,
+      "startSeconds": 159.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 63,
+      "startSeconds": 162.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 64,
+      "startSeconds": 164.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 65,
+      "startSeconds": 167.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 66,
+      "startSeconds": 169.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 67,
+      "startSeconds": 173.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 68,
+      "startSeconds": 176.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 69,
+      "startSeconds": 179.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 70,
+      "startSeconds": 183.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 71,
+      "startSeconds": 185.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 72,
+      "startSeconds": 188.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 73,
+      "startSeconds": 190.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 74,
+      "startSeconds": 193.235294,
+      "durationSeconds": 1.666667,
+      "tempoBpm": 72.0,
+      "beats": 2,
+      "beatType": 4
+    },
+    {
+      "number": 75,
+      "startSeconds": 194.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 76,
+      "startSeconds": 197.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 77,
+      "startSeconds": 199.901961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 78,
+      "startSeconds": 203.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 79,
+      "startSeconds": 206.568627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 80,
+      "startSeconds": 209.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 81,
+      "startSeconds": 212.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 82,
+      "startSeconds": 215.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 83,
+      "startSeconds": 219.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 84,
+      "startSeconds": 222.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 85,
+      "startSeconds": 225.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 86,
+      "startSeconds": 229.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 87,
+      "startSeconds": 232.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 88,
+      "startSeconds": 235.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 89,
+      "startSeconds": 239.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 90,
+      "startSeconds": 242.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 91,
+      "startSeconds": 245.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 92,
+      "startSeconds": 249.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 93,
+      "startSeconds": 252.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 94,
+      "startSeconds": 255.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 95,
+      "startSeconds": 259.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 96,
+      "startSeconds": 262.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 97,
+      "startSeconds": 265.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 98,
+      "startSeconds": 269.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 99,
+      "startSeconds": 272.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 100,
+      "startSeconds": 275.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 101,
+      "startSeconds": 279.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 102,
+      "startSeconds": 282.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 103,
+      "startSeconds": 285.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 104,
+      "startSeconds": 289.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 105,
+      "startSeconds": 292.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 106,
+      "startSeconds": 295.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 107,
+      "startSeconds": 299.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 108,
+      "startSeconds": 302.401961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 109,
+      "startSeconds": 304.901961,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 110,
+      "startSeconds": 307.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 111,
+      "startSeconds": 310.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 112,
+      "startSeconds": 314.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 113,
+      "startSeconds": 317.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 114,
+      "startSeconds": 320.735294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 115,
+      "startSeconds": 324.068627,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 116,
+      "startSeconds": 327.401961,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 117,
+      "startSeconds": 330.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 118,
+      "startSeconds": 333.235294,
+      "durationSeconds": 3.333333,
+      "tempoBpm": 72.0,
+      "beats": 4,
+      "beatType": 4
+    },
+    {
+      "number": 119,
+      "startSeconds": 336.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 120,
+      "startSeconds": 339.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 121,
+      "startSeconds": 341.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 122,
+      "startSeconds": 344.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 123,
+      "startSeconds": 346.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 124,
+      "startSeconds": 349.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 125,
+      "startSeconds": 351.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 126,
+      "startSeconds": 354.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 127,
+      "startSeconds": 356.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 128,
+      "startSeconds": 359.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 129,
+      "startSeconds": 361.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 130,
+      "startSeconds": 364.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 131,
+      "startSeconds": 366.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 132,
+      "startSeconds": 369.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 133,
+      "startSeconds": 371.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 134,
+      "startSeconds": 374.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 135,
+      "startSeconds": 376.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 136,
+      "startSeconds": 379.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 137,
+      "startSeconds": 381.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 138,
+      "startSeconds": 384.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 139,
+      "startSeconds": 386.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 140,
+      "startSeconds": 389.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 141,
+      "startSeconds": 391.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 142,
+      "startSeconds": 394.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 143,
+      "startSeconds": 396.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 144,
+      "startSeconds": 399.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 145,
+      "startSeconds": 401.568627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 146,
+      "startSeconds": 404.068627,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 147,
+      "startSeconds": 406.568627,
+      "durationSeconds": 1.666667,
+      "tempoBpm": 72.0,
+      "beats": 2,
+      "beatType": 4
+    },
+    {
+      "number": 148,
+      "startSeconds": 408.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 149,
+      "startSeconds": 410.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 150,
+      "startSeconds": 413.235294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    },
+    {
+      "number": 151,
+      "startSeconds": 415.735294,
+      "durationSeconds": 2.5,
+      "tempoBpm": 72.0,
+      "beats": 3,
+      "beatType": 4
+    }
+  ]
+}
