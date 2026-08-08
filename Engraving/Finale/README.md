@@ -5,3 +5,5 @@
 On 2026-08-08, the personal Finale inventory scanned 55 `.musx` files. Metadata and filename review identified 39 Flashlights/FITD files: 24 source files and 15 backups. Each was copied into this directory, byte-compared with its original, and only then removed from its prior personal location. No unrelated Finale files were moved.
 
 Treat these Finale files as authored sources. Create MusicXML/PDF delivery artifacts in `../Scores/`; do not edit the software runtime copies directly.
+
+`Source/FlashlightsInTheDark_v26_NewerScoreWithFewerParts.musicxml` is a verified copy of the canonical MusicXML source currently named by the score-reactive light-show recipe. It is retained here for engraving-side reference; `../Scores/` remains the canonical runtime source.
