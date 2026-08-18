@@ -2,49 +2,44 @@
 
 ## Status
 
-This is the active Flashlights repo. Prefer this checkout over the snapshot and recovery clones under `JDN_KEEx-AI_WorkspaceRecords/`.
+This is the active Flashlights repo. Prefer this checkout over snapshot and recovery clones under `JDN_KEEx-AI_WorkspaceRecords/`.
 
-## GitHub
+## Root domains
 
-- Target org repo: `KEEx-AI-INC/Flashlights-In-The-Dark`.
-- Migration note: local `origin` remotes and older docs may still reference a legacy namespace until the GitHub transfer and automation updates are finished.
+- `Engraving/`: authoritative notation, score study, and score references.
+- `Show-Control/`: versioned generated recipes, trigger maps, and runtime profiles.
+- `Software/`: the macOS conductor console and Flutter singer client.
+- `Web-Surfaces/`: the canonical public Communiti Flashlights web surface and component package.
+- `DAW-Production/`: Pro Tools session, tracked exports, and timing/audit outputs.
+- `Visual-Production/`: visual references and future committed demos.
+- `Operations/`: build, validation, rehearsal, deployment, and support tooling.
+- `Documentation/`: concert readiness, technical references, and performance playbooks.
 
-## What Lives Here
+## Start here
 
-- `FlashlightsInTheDark_MacOS/`: SwiftUI conductor console, OSC routing, MIDI integration, device management, and event triggering.
-- `flashlights_client/`: Flutter phone client for iOS and Android.
-- `scripts/`: verification, soak testing, onboarding/maintenance, and event/score asset builders.
-- `tools/`: concert simulation and support utilities.
-- `Flashlights-ITD_EventRecipes_*`: generated cue/timeline assets for current score revisions.
-- `docs/project-management/`: concert readiness notes and state maps.
-
-## Start Here
-
-1. Read `README.md`.
+1. Read `README.md` and select the relevant domain.
 2. For text, score-engraving, rehearsal-copy, or public-reading work, read
-   `docs/project-management/FALL_2026_WORKING_TEXT.md` before changing a
-   libretto source or score asset.
-3. For live-show or reliability work, read `docs/project-management/CONCERT_READINESS.md`.
-4. For cue/timeline changes, inspect the latest `Flashlights-ITD_EventRecipes_*` directory and the corresponding generator scripts in `scripts/`.
-5. For phone behavior, work in `flashlights_client/` and keep OSC compatibility with the Mac console.
+   `Documentation/Project-Management/FALL_2026_WORKING_TEXT.md` first.
+3. For live-show or reliability work, read `Documentation/Project-Management/CONCERT_READINESS.md`.
+4. For score/cue work, change the canonical source in `Engraving/` or `Show-Control/`, then regenerate runtime copies through `Operations/Scripts/`.
+5. For phone behavior, work in `Software/Singer-Client/` and keep OSC compatibility with `Software/Conductor-MacOS/`.
+6. For the public resource hub, work in `Web-Surfaces/Communiti-Flashlights/`; do not duplicate its source in Simphoni-Mobile.
 
-## Useful Commands
+## Useful commands
 
-- `scripts/verify.sh`
-- `scripts/soak_sim.sh`
-- `xcodebuild -project FlashlightsInTheDark.xcodeproj -scheme FlashlightsInTheDark -destination 'platform=macOS' build`
-- `cd flashlights_client && flutter pub get`
-- `cd flashlights_client && flutter analyze`
-- `cd flashlights_client && flutter test`
-- `python3 tools/concert_sim.py`
+- `Operations/Scripts/verify.sh`
+- `Operations/Scripts/soak_sim.sh`
+- `xcodebuild -project Software/Conductor-MacOS/FlashlightsInTheDark.xcodeproj -scheme FlashlightsInTheDark -destination 'platform=macOS' build`
+- `cd Software/Singer-Client && flutter analyze && flutter test`
+- `python3 Operations/Tools/concert_sim.py`
 
 ## Guardrails
 
 - Preserve the offline, closed-network performance model and low-latency OSC behavior.
-- Treat device-slot maps, trigger positions, and event recipes as concert-critical data.
+- Treat device-slot maps, trigger positions, and show-control outputs as concert-critical data.
 - Treat the Fall 2026 working text as the editorial input to the next score
-  revision; do not confuse it with the currently generated MusicXML or
-  runtime-event assets.
-- Prefer generator scripts over manual edits for derived score/event assets.
-- Normal deployment now flows through TestFlight and the Play Store; only use older onboarding scripts when the task explicitly requires maintenance on the legacy path.
+  revision, not as an already-generated MusicXML or runtime-asset update.
+- Keep authored assets separate from generated/runtime copies; use generators instead of hand-editing derived recipes.
+- Do not publish the Web-Surfaces site until its asset-rights review is recorded.
 - Do not commit real performer identifiers, device identifiers, secrets, or one-off rehearsal artifacts.
+- `docs/demo/` is a temporary dirty-work boundary. Do not move, delete, or normalize it until its owner resolves the current changes.

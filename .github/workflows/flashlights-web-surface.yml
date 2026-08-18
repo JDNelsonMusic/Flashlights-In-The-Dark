@@ -1,0 +1,95 @@
+name: Flashlights web surface
+
+on:
+  pull_request:
+    paths:
+      - 'Web-Surfaces/Communiti-Flashlights/**'
+  push:
+    tags:
+      - 'flashlights-surface-v*'
+  workflow_dispatch:
+    inputs:
+      rights_review_reference:
+        description: 'Recorded approval for every public asset'
+        required: true
+        type: string
+      firebase_project_id:
+        description: 'Firebase project ID'
+        required: true
+        type: string
+      firebase_site_id:
+        description: 'Firebase Hosting site ID'
+        required: true
+        type: string
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Web-Surfaces/Communiti-Flashlights
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Web-Surfaces/Communiti-Flashlights/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  publish-package:
+    if: startsWith(github.ref, 'refs/tags/flashlights-surface-v')
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        working-directory: Web-Surfaces/Communiti-Flashlights
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          scope: '@keex-ai-inc'
+          cache: npm
+          cache-dependency-path: Web-Surfaces/Communiti-Flashlights/package-lock.json
+      - run: npm ci
+      - run: npm run build:package
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-public-site:
+    if: github.event_name == 'workflow_dispatch' && inputs.rights_review_reference != ''
+    needs: verify
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Web-Surfaces/Communiti-Flashlights
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Web-Surfaces/Communiti-Flashlights/package-lock.json
+      - run: npm ci
+      - run: npm run build:site
+      - run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+      - run: npm exec --yes firebase-tools target:apply hosting flashlights-public "$FIREBASE_SITE_ID" --project "$FIREBASE_PROJECT_ID"
+        env:
+          FIREBASE_PROJECT_ID: ${{ inputs.firebase_project_id }}
+          FIREBASE_SITE_ID: ${{ inputs.firebase_site_id }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+      - run: npm exec --yes firebase-tools deploy --only hosting:flashlights-public --project "$FIREBASE_PROJECT_ID" --non-interactive
+        env:
+          FIREBASE_PROJECT_ID: ${{ inputs.firebase_project_id }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json

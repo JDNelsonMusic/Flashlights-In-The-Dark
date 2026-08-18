@@ -1,0 +1,200 @@
+{
+  "version": 1,
+  "defaults": {
+    "mode": "phrase_contour",
+    "brightnessMin": 0.06,
+    "brightnessMax": 0.42,
+    "pulseMs": 130,
+    "afterglowMs": 360,
+    "densityLimitHz": 3.5,
+    "baseEnvelope": [
+      { "at": 0.0, "level": 0.0 },
+      { "at": 0.5, "level": 0.08 },
+      { "at": 1.0, "level": 0.0 }
+    ],
+    "tags": ["score_reactive"]
+  },
+  "events": {
+    "1": {
+      "summary": "The opening listens into the water-darkness; only actual score activity throws sparse glints across the stage.",
+      "mode": "listening_glint",
+      "brightnessMin": 0.03,
+      "brightnessMax": 0.2,
+      "pulseMs": 120,
+      "afterglowMs": 420,
+      "densityLimitHz": 1.2,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.7, "level": 0.025 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["opening", "water", "listening", "note_caused_glints"]
+    },
+    "2": {
+      "summary": "The early forte shimmer becomes score-density glitter: bright, clipped sparks thicken only where the notation thickens.",
+      "mode": "density_glitter",
+      "brightnessMin": 0.12,
+      "brightnessMax": 0.88,
+      "pulseMs": 95,
+      "afterglowMs": 170,
+      "densityLimitHz": 6.5,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.18, "level": 0.08 },
+        { "at": 0.55, "level": 0.12 },
+        { "at": 0.9, "level": 0.06 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["forte_shimmer", "density_glitter", "cross_stage"]
+    },
+    "3": {
+      "summary": "The glare retreats as a phrase-contour afterimage; attacks remain visible inside the soft right-to-left release.",
+      "mode": "phrase_contour",
+      "brightnessMin": 0.06,
+      "brightnessMax": 0.36,
+      "pulseMs": 140,
+      "afterglowMs": 680,
+      "densityLimitHz": 2.4,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.1 },
+        { "at": 0.25, "level": 0.13 },
+        { "at": 0.72, "level": 0.05 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["afterimage", "right_to_left", "phrase_contour"]
+    },
+    "4": {
+      "summary": "A compact center ignition is sharpened by the actual score attacks inside the gesture.",
+      "mode": "compressed_pulse",
+      "brightnessMin": 0.08,
+      "brightnessMax": 0.48,
+      "pulseMs": 120,
+      "afterglowMs": 300,
+      "densityLimitHz": 3.0,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.28, "level": 0.2 },
+        { "at": 0.55, "level": 0.08 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["center_out", "compressed_pulse", "note_caused"]
+    },
+    "5": {
+      "summary": "The restored middle opens as a measured breath: sustained notation becomes glow, entrances become audible-looking sparks.",
+      "mode": "breath",
+      "brightnessMin": 0.05,
+      "brightnessMax": 0.38,
+      "pulseMs": 150,
+      "afterglowMs": 900,
+      "densityLimitHz": 2.2,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.35, "level": 0.1 },
+        { "at": 0.72, "level": 0.16 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["restored_middle", "breath", "duration_glow"]
+    },
+    "6": {
+      "summary": "The suspended section rocks from real rhythmic weight: staff attacks tug the light between center and edge.",
+      "mode": "pendulum",
+      "brightnessMin": 0.05,
+      "brightnessMax": 0.42,
+      "pulseMs": 140,
+      "afterglowMs": 760,
+      "densityLimitHz": 2.8,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.04 },
+        { "at": 0.25, "level": 0.13 },
+        { "at": 0.5, "level": 0.06 },
+        { "at": 0.75, "level": 0.14 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["restored_middle", "pendulum", "suspension"]
+    },
+    "7": {
+      "summary": "The long exhale follows score contour and dynamic thinning, with fewer lights surviving each phrase breath.",
+      "mode": "exhale",
+      "brightnessMin": 0.04,
+      "brightnessMax": 0.34,
+      "pulseMs": 150,
+      "afterglowMs": 780,
+      "densityLimitHz": 2.0,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.16 },
+        { "at": 0.35, "level": 0.1 },
+        { "at": 0.7, "level": 0.045 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["restored_middle", "long_exhale", "diminuendo"]
+    },
+    "8": {
+      "summary": "Search-beams become score-following alternations: notes disclose which pocket of the stage should look awake.",
+      "mode": "search",
+      "brightnessMin": 0.05,
+      "brightnessMax": 0.44,
+      "pulseMs": 130,
+      "afterglowMs": 520,
+      "densityLimitHz": 3.0,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.02 },
+        { "at": 0.22, "level": 0.08 },
+        { "at": 0.48, "level": 0.03 },
+        { "at": 0.72, "level": 0.1 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["restored_middle", "search_beams", "outer_inner"]
+    },
+    "9": {
+      "summary": "Hushed isolated pools appear only where the score sustains enough presence to hold light.",
+      "mode": "isolated_pools",
+      "brightnessMin": 0.035,
+      "brightnessMax": 0.28,
+      "pulseMs": 180,
+      "afterglowMs": 1100,
+      "densityLimitHz": 1.5,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.35, "level": 0.04 },
+        { "at": 0.75, "level": 0.06 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["restored_middle", "hushed", "isolated_pools"]
+    },
+    "10": {
+      "summary": "The pre-M104 preparation becomes a real density crescendo, tightening as the notation accumulates.",
+      "mode": "density_crescendo",
+      "brightnessMin": 0.1,
+      "brightnessMax": 0.8,
+      "pulseMs": 95,
+      "afterglowMs": 180,
+      "densityLimitHz": 7.0,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.35, "level": 0.08 },
+        { "at": 0.72, "level": 0.16 },
+        { "at": 0.94, "level": 0.24 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["density_crescendo", "climax_preparation", "pre_reentry"]
+    },
+    "11": {
+      "summary": "The M104 entrance preserves the rare unified glow, then lets the split afterglow be articulated by real staff activity.",
+      "mode": "unified_then_split",
+      "brightnessMin": 0.08,
+      "brightnessMax": 0.58,
+      "pulseMs": 140,
+      "afterglowMs": 700,
+      "densityLimitHz": 2.6,
+      "baseEnvelope": [
+        { "at": 0.0, "level": 0.0 },
+        { "at": 0.14, "level": 0.36 },
+        { "at": 0.28, "level": 0.58 },
+        { "at": 0.45, "level": 0.18 },
+        { "at": 0.72, "level": 0.08 },
+        { "at": 1.0, "level": 0.0 }
+      ],
+      "tags": ["unified_glow", "afterglow_split", "score_reactive_release"]
+    }
+  }
+}

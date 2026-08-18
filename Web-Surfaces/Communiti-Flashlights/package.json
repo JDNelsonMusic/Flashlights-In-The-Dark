@@ -1,0 +1,50 @@
+{
+  "name": "@keex-ai-inc/flashlights-communiti-surface",
+  "version": "0.1.0",
+  "description": "Flashlights In The Dark public Communiti resource hub and reusable React surface.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:package && npm run build:site",
+    "build:package": "BUILD_TARGET=library vite build",
+    "build:site": "BUILD_TARGET=site vite build",
+    "preview": "vite preview --outDir dist-site",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KEEx-AI-INC/Flashlights-In-The-Dark.git",
+    "directory": "Web-Surfaces/Communiti-Flashlights"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20"
+  },
+  "dependencies": {
+    "pdfjs-dist": "3.11.174"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "vite": "^6.0.11",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

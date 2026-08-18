@@ -30,16 +30,16 @@ Carthage/Build/
 # -------------------------------
 #  Flutter / Dart
 # -------------------------------
-flashlights_client/.dart_tool/
-flashlights_client/.idea/
-flashlights_client/build/
-flashlights_client/ios/.symlinks/
-flashlights_client/ios/Pods/
-flashlights_client/ios/Flutter/Flutter.framework
-flashlights_client/ios/Runner.xcworkspace/
-flashlights_client/android/.gradle/
-flashlights_client/android/.idea/
-flashlights_client/pubspec.lock
+Software/Singer-Client/.dart_tool/
+Software/Singer-Client/.idea/
+Software/Singer-Client/build/
+Software/Singer-Client/ios/.symlinks/
+Software/Singer-Client/ios/Pods/
+Software/Singer-Client/ios/Flutter/Flutter.framework
+Software/Singer-Client/ios/Runner.xcworkspace/
+Software/Singer-Client/android/.gradle/
+Software/Singer-Client/android/.idea/
+Software/Singer-Client/pubspec.lock
 
 # Mobile bundles
 *.ipa
@@ -48,25 +48,24 @@ flashlights_client/pubspec.lock
 # -------------------------------
 #  Fastlane artefacts
 # -------------------------------
-fastlane/report*.json
-fastlane/build_logs/
+Operations/Fastlane/report*.json
+Operations/Fastlane/build_logs/
 
 # -------------------------------
 #  Pro Tools – large binary sessions
 # -------------------------------
-FlashlightsInTheDark_Protools-Session*/
-FlashlightsInTheDark_Protools-Session-OLD*/
+DAW-Production/ProTools-Session*/
 *.ptx
 *.wfm
 
 # Committed export refs: keep MP3s, ignore local WAV sources
-audio/protools-exports/**/*.wav
+DAW-Production/Exports/**/*.wav
 
 # -------------------------------
 #  Local score-study assets
 # -------------------------------
-FlashlightsScoreStudyInsights/
-FlashlightsScoreStudyInsights.zip
+Engraving/Score-Study/FlashlightsScoreStudyInsights/
+Engraving/Score-Study/FlashlightsScoreStudyInsights.zip
 
 # -------------------------------
 #  Common Dev tooling
@@ -89,5 +88,5 @@ __MACOSX/
 *.keystore
 
 key.properties
-flashlights_client/android/key.properties
+Software/Singer-Client/android/key.properties
 android/key.properties
