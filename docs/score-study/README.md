@@ -2,6 +2,13 @@
 
 This folder contains collected score-study submissions and supporting archive material.
 
+## Fall 2026 text reference
+
+The current working text for the Fall 2026 edition is documented in
+[`../project-management/FALL_2026_WORKING_TEXT.md`](../project-management/FALL_2026_WORKING_TEXT.md).
+This score-study archive does not supersede that editorial decision, and its
+historical score-study materials must not be mistaken for the new libretto.
+
 - `FlashlightsScoreStudyInsights/`: extracted reference images by contributor
 - `FlashlightsScoreStudyInsights.zip`: archived bundle of the same material
 

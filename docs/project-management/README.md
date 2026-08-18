@@ -7,3 +7,6 @@ This folder holds the active planning and orientation material for the Flashligh
 - `CONCERT_READINESS.md`: live reliability runbook
 - `ConsertSetupPlan.md`: setup planning notes
 - `REVIEW_NOTES.md`: review and working notes
+- `FALL_2026_WORKING_TEXT.md`: the current editorially designated text for
+  Fall 2026, its 88-cue browser capture, and the required handoff into score
+  engraving and runtime artifacts.

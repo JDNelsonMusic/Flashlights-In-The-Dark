@@ -1,6 +1,6 @@
 # composermap
 
-Last refreshed: March 13, 2026
+Last refreshed: August 18, 2026
 
 This file is meant to help you reorient fast as the composer/technical owner of the piece after time away.
 
@@ -11,11 +11,12 @@ It is not a contributor guide. It is a "where am I, what is alive, and what do I
 Read these in order:
 
 1. `docs/project-management/PROJECT_STATE.md`
-2. `docs/2026-03-13-rehearsal-cut-plan.md`
-3. `docs/protools-housekeeping/event_timeline.md`
-4. `docs/protools-housekeeping/session_audit.md`
-5. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
-6. `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx`
+2. `docs/project-management/FALL_2026_WORKING_TEXT.md`
+3. `docs/2026-03-13-rehearsal-cut-plan.md`
+4. `docs/protools-housekeeping/event_timeline.md`
+5. `docs/protools-housekeeping/session_audit.md`
+6. `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
+7. `FlashlightsInTheDark_Protools-Session/2025_0727_FlashlightsInTheDark22_MappingPrimerTones_3.r.ptx`
 
 Then answer one question before doing anything else:
 
@@ -84,6 +85,24 @@ There is also an optional musical idea attached to the bridge:
 Treat that as a live development idea, not yet as fixed structure.
 
 ## Composer-Facing Control Chain
+
+## Fall 2026 text handoff
+
+The Fall 2026 twin-poem draft is now the working text for the next edition.
+Use `docs/project-management/FALL_2026_WORKING_TEXT.md` as the editorial
+record. It is a precise 88-cue, Shadow/Light-aligned input to the next
+engraving pass; it is not already encoded in the tour-cut MusicXML or the
+runtime event bundle.
+
+The safe order for a text-only revision is:
+
+1. confirm the collaborators' approved 88-cue snapshot;
+2. engrave that text in the score while preserving the cue/timing contract;
+3. regenerate any score-derived artifacts that change; and
+4. update rehearsal/public copies from the same captured snapshot.
+
+Do not substitute a live Firestore draft or a browser presentation for the
+engraved score source.
 
 The current system is effectively this:
 

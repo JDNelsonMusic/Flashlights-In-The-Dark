@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Last refreshed: March 13, 2026
+Last refreshed: August 18, 2026
 
 This file is the workspace source-of-truth map for the current repository state. It is meant to answer two questions quickly:
 
@@ -8,6 +8,12 @@ This file is the workspace source-of-truth map for the current repository state.
 2. If I change the piece structure, what else do I have to touch?
 
 ## Current Canonical State
+
+- Editorial working text for the Fall 2026 edition:
+  `docs/project-management/FALL_2026_WORKING_TEXT.md`
+- Exact 88-cue captured text source and public reading display:
+  `Communiti/components/ToolsForArtists/flashlightsAssemblyTwinPoem.js` and
+  `https://simphoni.ai/flashlights/twin-poem`
 
 - Musical structure and cue timing source:
   `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml`
@@ -70,6 +76,8 @@ For the currently wired concert path, the project flows like this:
 The practical implication is:
 
 - structural changes should start in the score and recipe layer
+- editorial text changes should start from the documented Fall 2026 working
+  text and be intentionally engraved into the score before regeneration
 - not in the UI
 - not in random copied JSON files
 - not in Pro Tools first
@@ -82,6 +90,7 @@ The `measure` and `position` attached to each event should now be read as the of
 
 | Domain | Canonical source | Downstream copies / consumers | Notes |
 | --- | --- | --- | --- |
+| Fall 2026 editorial text | `docs/project-management/FALL_2026_WORKING_TEXT.md` and the 88-cue Communiti Assembly capture | Twin Poem reading page; future engraving/rehearsal copy | Current working text; it does not automatically replace MusicXML or generated runtime assets |
 | Score timing and measure structure | `Flashlights-ITD_EventRecipes_4_2026_0309/FlashlightsInTheDark_v32_TourCut.musicxml` | `flashlights_client/assets/FlashlightsInTheDark_v32_TourCut.musicxml`, `scripts/build_tour_cut_score.py` | Flutter practice view uses its own asset copy, not the source folder directly |
 | Official trigger positions | `Flashlights-ITD_EventRecipes_4_2026_0309/official_trigger_positions.csv` | `scripts/generate_event_recipes_v4.py`, recipe spreadsheet rows, runtime JSON `measure` / `position` fields | Source images documented in `docs/official_trigger_positions.md`; these trigger points intentionally lead the sung events |
 | Event recipe bundle | `Flashlights-ITD_EventRecipes_4_2026_0309/event_recipes.json` | `FlashlightsInTheDark_MacOS/Resources/event_recipes.json`, `flashlights_client/assets/event_recipes.json` | The copies are currently identical and carry tour-cut `measureToken` / `scoreMeasureOrdinal` metadata |

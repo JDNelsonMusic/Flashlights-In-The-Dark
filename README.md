@@ -1,6 +1,6 @@
 # Flashlights In The Dark
 
-## Last updated March 2nd 2026
+## Last updated August 18, 2026
 
 A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-based control system
 
@@ -17,6 +17,16 @@ A nine-minute electro-acoustic work for 54-voice choir, 28 smartphones & a Mac-b
 - One-command verification: `scripts/verify.sh`
 - Soak simulator: `scripts/soak_sim.sh` and `tools/concert_sim.py`
 - Legacy onboarding scripts in `scripts/` are deprecated for normal deployment; use TestFlight (iOS) and Play Store (Android).
+
+## Fall 2026 Working Text
+
+The twin-poem draft assembled on August 17, 2026 is the working text for this
+Fall edition. It is editorially authoritative for
+the next score-engraving pass, while the current MusicXML and event recipes
+remain the runtime/control sources until they are intentionally regenerated.
+
+Read [Fall 2026 Working Text](docs/project-management/FALL_2026_WORKING_TEXT.md)
+before making libretto, score, rehearsal-copy, or public-reading changes.
 
 
 # Table of Contents
@@ -239,7 +249,7 @@ flashlights-in-the-dark/
 ├── FlashlightsInTheDark_Protools-Session/     # composer DAW workspace
 ├── audio/                               # exported audio and rendered references
 ├── docs/
-│   ├── project-management/              # active planning, readiness, and state docs
+│   ├── project-management/              # active planning, readiness, state, and Fall 2026 text docs
 │   ├── protools-housekeeping/           # generated timing and audit reports
 │   ├── reference-images/                # trigger-score photos and visual references
 │   └── score-study/                     # collected score-study submissions

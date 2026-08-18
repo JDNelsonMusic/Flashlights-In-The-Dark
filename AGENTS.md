@@ -21,9 +21,12 @@ This is the active Flashlights repo. Prefer this checkout over the snapshot and 
 ## Start Here
 
 1. Read `README.md`.
-2. For live-show or reliability work, read `docs/project-management/CONCERT_READINESS.md`.
-3. For cue/timeline changes, inspect the latest `Flashlights-ITD_EventRecipes_*` directory and the corresponding generator scripts in `scripts/`.
-4. For phone behavior, work in `flashlights_client/` and keep OSC compatibility with the Mac console.
+2. For text, score-engraving, rehearsal-copy, or public-reading work, read
+   `docs/project-management/FALL_2026_WORKING_TEXT.md` before changing a
+   libretto source or score asset.
+3. For live-show or reliability work, read `docs/project-management/CONCERT_READINESS.md`.
+4. For cue/timeline changes, inspect the latest `Flashlights-ITD_EventRecipes_*` directory and the corresponding generator scripts in `scripts/`.
+5. For phone behavior, work in `flashlights_client/` and keep OSC compatibility with the Mac console.
 
 ## Useful Commands
 
@@ -39,6 +42,9 @@ This is the active Flashlights repo. Prefer this checkout over the snapshot and 
 
 - Preserve the offline, closed-network performance model and low-latency OSC behavior.
 - Treat device-slot maps, trigger positions, and event recipes as concert-critical data.
+- Treat the Fall 2026 working text as the editorial input to the next score
+  revision; do not confuse it with the currently generated MusicXML or
+  runtime-event assets.
 - Prefer generator scripts over manual edits for derived score/event assets.
 - Normal deployment now flows through TestFlight and the Play Store; only use older onboarding scripts when the task explicitly requires maintenance on the legacy path.
 - Do not commit real performer identifiers, device identifiers, secrets, or one-off rehearsal artifacts.
