@@ -236,6 +236,63 @@ const AUDIO_DATA_PENDING = new Map();
 
 const PROGRESS_FALLBACK_INTERVAL_MS = 180;
 
+const MIXER_SHORTCUT_INTERACTIVE_SELECTOR = [
+  'button',
+  'a',
+  'input',
+  'textarea',
+  'select',
+  'summary',
+  'area[href]',
+  'audio',
+  'video',
+  'iframe',
+  'object',
+  'embed',
+  '[contenteditable]',
+  '[tabindex]:not([tabindex="-1"])',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="switch"]',
+  '[role="slider"]',
+  '[role="spinbutton"]',
+  '[role="menuitem"]',
+  '[role="menuitemcheckbox"]',
+  '[role="menuitemradio"]',
+  '[role="tab"]',
+  '[role="option"]',
+  '[role="combobox"]',
+  '[role="textbox"]',
+  '[role="searchbox"]',
+  '[role="treeitem"]',
+  '[role="gridcell"]',
+  '[aria-controls]',
+  '[aria-expanded]',
+  '[aria-pressed]',
+  '[aria-checked]',
+].join(',');
+
+export const isMixerShortcutInteractiveTarget = (target) => {
+  const element = target?.closest ? target : target?.parentElement;
+  return Boolean(element?.closest?.(MIXER_SHORTCUT_INTERACTIVE_SELECTOR));
+};
+
+export const createMixerTransportKeyHandler = ({ isPlayingRef, startPlayback, stopPlayback }) =>
+  (event) => {
+    if (event.defaultPrevented) return;
+    if (event.code !== 'Space' && event.key !== ' ') return;
+    if (isMixerShortcutInteractiveTarget(event.target)) return;
+
+    event.preventDefault();
+    if (isPlayingRef.current) {
+      stopPlayback();
+    } else {
+      startPlayback();
+    }
+  };
+
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const MIN_SELECTION_SECONDS = 0.35;
@@ -1118,28 +1175,11 @@ export function FlashlightsMultiTrackMixer() {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
 
-    const handleTransportKey = (event) => {
-      if (event.defaultPrevented) return;
-      if (event.code !== 'Space' && event.key !== ' ') return;
-
-      const target = event.target;
-      if (
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.tagName === 'SELECT' ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      if (isPlayingRef.current) {
-        stopPlayback();
-      } else {
-        startPlayback();
-      }
-    };
+    const handleTransportKey = createMixerTransportKeyHandler({
+      isPlayingRef,
+      startPlayback,
+      stopPlayback,
+    });
 
     window.addEventListener('keydown', handleTransportKey);
     return () => {
@@ -1515,7 +1555,15 @@ export function FlashlightsMultiTrackMixer() {
     : 'flashlights-status-label';
 
   return (
-    <div className="flashlights-multitrack" aria-live="polite" ref={multitrackRef}>
+    <div className="flashlights-multitrack" ref={multitrackRef}>
+      <span
+        className="flashlights-mixer-live-status"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {loadError ? '' : `Mixer status: ${statusLabel}`}
+      </span>
       <div className="flashlights-multitrack-guidance" role="note">
         <p>
           Click anywhere in a waveform—or drag to highlight a span—to jump straight to the measure you
@@ -1688,7 +1736,7 @@ export function FlashlightsMultiTrackMixer() {
             )}
           </div>
           {selectionSummary && (
-            <div className="flashlights-selection-summary" role="status">
+            <div className="flashlights-selection-summary">
               {selectionSummary}
             </div>
           )}

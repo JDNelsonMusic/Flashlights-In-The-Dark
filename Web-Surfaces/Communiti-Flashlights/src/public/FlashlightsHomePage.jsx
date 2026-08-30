@@ -26,8 +26,7 @@ export function FlashlightsHomePage({
           <p className="flashlights-singer__eyebrow">Singer rehearsal home</p>
           <h1 id="flashlights-home-title">Flashlights in the Dark</h1>
           <p className="flashlights-singer__lede">
-            Find the materials you need to learn your part, warm up, and prepare for rehearsal.
-            Begin with the seven quick-practice tracks available today.
+            Start with a practice track, then find the score, videos, and advanced mixer here.
           </p>
           <a
             className="flashlights-singer__button flashlights-singer__button--primary"
@@ -46,7 +45,7 @@ export function FlashlightsHomePage({
             ) : (
               <ResourceStatus>Score PDF coming soon</ResourceStatus>
             )}
-            <p>{scoreIsReady
+            <p className="flashlights-singer__score-description">{scoreIsReady
               ? 'Download the approved 12-page reader-order score, or read the booklet printing notes.'
               : 'The approved reader-order score will appear here as soon as the final 12-page file is ready for public use.'}</p>
             {scoreIsReady ? (
@@ -59,7 +58,7 @@ export function FlashlightsHomePage({
               </a>
             ) : null}
             <a className="flashlights-singer__text-link" href={resourcePath(basePath, 'score')}>
-              Score details and printing notes
+              Score details
             </a>
           </div>
           <BookletMockup />

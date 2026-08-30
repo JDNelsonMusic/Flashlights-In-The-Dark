@@ -38,6 +38,11 @@
   text-decoration-thickness: 0.1em;
 }
 
+.flashlights-singer a.flashlights-singer__button--primary,
+.flashlights-singer button.flashlights-singer__button--primary {
+  color: var(--flashlights-ink);
+}
+
 .flashlights-singer a:focus-visible,
 .flashlights-singer button:focus-visible,
 .flashlights-singer [tabindex="-1"]:focus-visible {
@@ -126,6 +131,10 @@
   background: var(--flashlights-light);
 }
 
+.flashlights-singer__mobile-menu {
+  display: none;
+}
+
 .flashlights-singer__main {
   padding-block: clamp(2rem, 5vw, 5rem);
 }
@@ -169,7 +178,7 @@
 
 .flashlights-singer__eyebrow {
   color: var(--flashlights-light);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -177,7 +186,7 @@
 
 .flashlights-singer__lede {
   max-width: 64ch;
-  font-size: clamp(1.08rem, 2.2vw, 1.3rem);
+  font-size: clamp(1.125rem, 2.2vw, 1.3rem);
   line-height: 1.58;
 }
 
@@ -280,7 +289,7 @@
   background: #f8dda0;
   border: 1px solid #b58c28;
   border-radius: 999px;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 800;
 }
 
@@ -328,7 +337,7 @@
   justify-items: center;
   color: var(--flashlights-ink);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
@@ -345,9 +354,9 @@
 
 .flashlights-booklet__sheet--front small {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.68rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -355,14 +364,14 @@
   display: grid;
   gap: 0.1rem;
   color: var(--flashlights-muted);
-  font-size: 0.88rem;
+  font-size: 1.125rem;
   line-height: 1.4;
   text-align: center;
 }
 
 .flashlights-booklet figcaption strong {
   color: var(--flashlights-ink);
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .flashlights-singer__text-link {
@@ -508,7 +517,7 @@
 
 .flashlights-track__player p {
   color: var(--flashlights-muted);
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .flashlights-singer__new-window {
@@ -582,7 +591,7 @@
   gap: 1rem 2rem;
   color: #d5d8e1;
   border-top: 1px solid rgba(255, 248, 232, 0.25);
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .flashlights-singer__footer nav {
@@ -710,20 +719,118 @@
     width: min(100% - 1.25rem, 1280px);
   }
 
-  .flashlights-singer__nav-list {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .flashlights-singer__header-inner {
+    min-height: 60px;
+    padding-block: 0.35rem;
+    align-items: center;
+    flex-flow: row nowrap;
+    gap: 0.5rem;
   }
 
-  .flashlights-singer__nav-list a {
-    width: 100%;
+  .flashlights-singer__wordmark {
+    min-width: 0;
+    font-size: 1.125rem;
+    line-height: 1.15;
+  }
+
+  .flashlights-singer__wordmark-light {
+    display: none;
+  }
+
+  .flashlights-singer__desktop-nav {
+    display: none;
+  }
+
+  .flashlights-singer__mobile-menu {
+    position: relative;
+    z-index: 20;
+    margin-left: auto;
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  .flashlights-singer__mobile-menu summary {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0.55rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    padding-inline: 0.45rem;
+    color: var(--flashlights-ink);
+    background: var(--flashlights-light);
+    border: 2px solid var(--flashlights-light);
+    border-radius: 0.35rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    line-height: 1.2;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .flashlights-singer__mobile-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .flashlights-singer__mobile-menu summary:focus-visible {
+    outline: 3px solid var(--flashlights-focus);
+    outline-offset: 4px;
+    box-shadow: 0 0 0 7px #08101f;
+  }
+
+  .flashlights-singer__mobile-menu nav {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    width: min(18rem, calc(100vw - 1.25rem));
+    padding: 0.5rem;
+    color: #fffdf6;
+    background: var(--flashlights-night-soft);
+    border: 2px solid var(--flashlights-paper);
+    border-radius: 0.4rem;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.45);
+  }
+
+  .flashlights-singer__mobile-menu .flashlights-singer__nav-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flashlights-singer__mobile-menu .flashlights-singer__nav-list a {
+    width: 100%;
+    justify-content: flex-start;
+    padding-inline: 0.75rem;
+  }
+
+  .flashlights-singer__main {
+    padding-block: 0.7rem 2.5rem;
+  }
+
+  .flashlights-singer__hero {
+    align-items: start;
+    gap: 0.7rem;
+  }
+
+  .flashlights-singer__hero-copy {
+    gap: 0.5rem;
+  }
+
+  .flashlights-singer__hero-copy .flashlights-singer__eyebrow {
+    display: none;
+  }
+
+  .flashlights-singer__hero-copy .flashlights-singer__button {
+    margin-top: 0;
   }
 
   .flashlights-singer h1 {
-    font-size: clamp(2.45rem, 15vw, 4rem);
+    font-size: clamp(2.15rem, 12vw, 2.65rem);
+    line-height: 1.04;
+  }
+
+  .flashlights-singer__lede {
+    font-size: 1.125rem;
+    line-height: 1.35;
   }
 
   .flashlights-singer__score-feature,
@@ -732,12 +839,39 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .flashlights-booklet {
-    margin-top: 1rem;
+  .flashlights-singer__hero .flashlights-singer__score-feature {
+    padding: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
+    align-items: start;
+    gap: 0.5rem;
   }
 
-  .flashlights-booklet__sheets {
-    width: min(70%, 10rem);
+  .flashlights-singer__hero .flashlights-singer__score-feature > div {
+    gap: 0.35rem;
+  }
+
+  .flashlights-singer__hero .flashlights-singer__score-feature .flashlights-singer__eyebrow,
+  .flashlights-singer__hero .flashlights-singer__score-description {
+    display: none;
+  }
+
+  .flashlights-singer__hero .flashlights-singer__score-feature h2 {
+    font-size: 1.4rem;
+    line-height: 1.08;
+  }
+
+  .flashlights-booklet {
+    margin-top: 0;
+    gap: 0;
+  }
+
+  .flashlights-singer__hero .flashlights-booklet__sheets {
+    width: 4.25rem;
+  }
+
+  .flashlights-singer__hero .flashlights-booklet__sheet--front > *,
+  .flashlights-singer__hero .flashlights-booklet figcaption {
+    display: none;
   }
 
   .flashlights-singer__card-grid,
@@ -797,6 +931,7 @@
   .flashlights-singer__card,
   .flashlights-track,
   .flashlights-singer__button,
+  .flashlights-singer__mobile-menu summary,
   .flashlights-singer__status,
   .flashlights-singer__ready {
     border: 2px solid CanvasText;

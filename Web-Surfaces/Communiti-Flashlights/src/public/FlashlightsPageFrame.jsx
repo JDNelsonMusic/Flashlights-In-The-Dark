@@ -19,6 +19,25 @@ const NAV_ITEMS = [
   ['mixer', 'mixer', 'Mixer'],
 ];
 
+function ResourceNavigation({ basePath, currentPage, className, label }) {
+  return (
+    <nav className={className} aria-label={label}>
+      <ul className="flashlights-singer__nav-list">
+        {NAV_ITEMS.map(([key, suffix, itemLabel]) => (
+          <li key={key}>
+            <a
+              aria-current={currentPage === key ? 'page' : undefined}
+              href={resourcePath(basePath, suffix)}
+            >
+              {itemLabel}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, children }) {
   const normalizedBasePath = normalizeBasePath(basePath);
 
@@ -33,20 +52,20 @@ export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, c
             <span aria-hidden="true" className="flashlights-singer__wordmark-light">●</span>
             <span>Flashlights in the Dark</span>
           </a>
-          <nav aria-label="Flashlights resources">
-            <ul className="flashlights-singer__nav-list">
-              {NAV_ITEMS.map(([key, suffix, label]) => (
-                <li key={key}>
-                  <a
-                    aria-current={currentPage === key ? 'page' : undefined}
-                    href={resourcePath(normalizedBasePath, suffix)}
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <ResourceNavigation
+            basePath={normalizedBasePath}
+            currentPage={currentPage}
+            className="flashlights-singer__desktop-nav"
+            label="Flashlights resources"
+          />
+          <details className="flashlights-singer__mobile-menu">
+            <summary>Menu</summary>
+            <ResourceNavigation
+              basePath={normalizedBasePath}
+              currentPage={currentPage}
+              label="Flashlights resources in menu"
+            />
+          </details>
         </div>
       </header>
       <main id="flashlights-main" tabIndex="-1" className="flashlights-singer__main">
