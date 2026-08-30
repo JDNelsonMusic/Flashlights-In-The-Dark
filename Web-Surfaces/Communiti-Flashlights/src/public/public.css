@@ -169,7 +169,7 @@
 
 .flashlights-singer__eyebrow {
   color: var(--flashlights-light);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -280,7 +280,7 @@
   background: #f8dda0;
   border: 1px solid #b58c28;
   border-radius: 999px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
 }
 
@@ -582,7 +582,7 @@
   gap: 1rem 2rem;
   color: #d5d8e1;
   border-top: 1px solid rgba(255, 248, 232, 0.25);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .flashlights-singer__footer nav {
