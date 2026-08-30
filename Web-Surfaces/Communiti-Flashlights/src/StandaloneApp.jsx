@@ -1,45 +1,80 @@
-import { useEffect, useState } from 'react';
-import { FlashlightsInTheDarkTool } from './index';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import FlashlightsHomePage from './landing';
+import FlashlightsPracticePage from './practice';
+import FlashlightsScorePage from './score';
+import FlashlightsVideosPage from './videos';
+import FlashlightsPrivacyPolicy from './privacy';
 import './standalone.css';
 
-const tabForPath = (pathname) => {
-  if (pathname.endsWith('/privacy-policy')) return 'privacy-policy';
-  if (pathname === '/install' || pathname.endsWith('/install')) return 'install';
-  if (pathname.endsWith('/documentation')) return 'docs';
-  return undefined;
+const FlashlightsMixer = lazy(() => import('./mixer'));
+
+const normalizedPath = (pathname) => pathname.replace(/\/+$/, '') || '/';
+
+const routeForPath = (pathname) => {
+  const path = normalizedPath(pathname);
+  if (path.endsWith('/privacy-policy')) return { page: 'privacy' };
+  if (path === '/install' || path.endsWith('/install')) return { page: 'legacy', tab: 'install' };
+  if (path.endsWith('/documentation')) return { page: 'legacy', tab: 'docs' };
+  if (path.endsWith('/practice')) return { page: 'practice' };
+  if (path.endsWith('/score')) return { page: 'score' };
+  if (path.endsWith('/warm-ups')) return { page: 'videos', section: 'warm-ups' };
+  if (path.endsWith('/presentation')) return { page: 'videos', section: 'presentation' };
+  if (path.endsWith('/videos')) return { page: 'videos' };
+  if (path.endsWith('/mixer')) return { page: 'mixer' };
+  return { page: 'home' };
 };
 
-const pathForTab = (tab) => {
-  if (tab === 'privacy-policy') return '/privacy-policy';
-  if (tab === 'install') return '/install';
-  if (tab === 'docs') return '/documentation';
-  return '/';
-};
-
-export default function StandaloneApp() {
-  const [activeTabKey, setActiveTabKey] = useState(() => tabForPath(window.location.pathname));
-
-  useEffect(() => {
-    const updateTab = () => setActiveTabKey(tabForPath(window.location.pathname));
-    window.addEventListener('popstate', updateTab);
-    return () => window.removeEventListener('popstate', updateTab);
-  }, []);
-
-  const handleTabChange = (tab) => {
-    const nextPath = pathForTab(tab);
-    if (nextPath !== window.location.pathname) {
-      window.history.pushState({}, '', nextPath);
-    }
-    setActiveTabKey(tab);
-  };
-
+function LoadingSurface() {
   return (
-    <main className="flashlights-public-app">
-      <FlashlightsInTheDarkTool
-        presentation="fullscreen"
-        activeTabKey={activeTabKey}
-        onTabChange={handleTabChange}
-      />
+    <main className="flashlights-public-loading" aria-live="polite">
+      <p>Loading rehearsal tools…</p>
     </main>
   );
+}
+
+function PrivacyPage() {
+  return (
+    <main className="flashlights-public-legacy">
+      <FlashlightsPrivacyPolicy />
+    </main>
+  );
+}
+
+export default function StandaloneApp() {
+  const [route, setRoute] = useState(() => routeForPath(window.location.pathname));
+
+  useEffect(() => {
+    const updateRoute = () => setRoute(routeForPath(window.location.pathname));
+    window.addEventListener('popstate', updateRoute);
+    return () => window.removeEventListener('popstate', updateRoute);
+  }, []);
+
+  useEffect(() => {
+    if (!route.section) return;
+    document.getElementById(route.section)?.scrollIntoView({ block: 'start' });
+  }, [route]);
+
+  if (route.page === 'practice') return <FlashlightsPracticePage />;
+  if (route.page === 'score') return <FlashlightsScorePage />;
+  if (route.page === 'videos') return <FlashlightsVideosPage />;
+  if (route.page === 'privacy') return <PrivacyPage />;
+  if (route.page === 'mixer') {
+    return (
+      <main className="flashlights-public-app">
+        <Suspense fallback={<LoadingSurface />}>
+          <FlashlightsMixer presentation="fullscreen" />
+        </Suspense>
+      </main>
+    );
+  }
+  if (route.page === 'legacy') {
+    return (
+      <main className="flashlights-public-app">
+        <Suspense fallback={<LoadingSurface />}>
+          <FlashlightsMixer presentation="fullscreen" activeTabKey={route.tab} />
+        </Suspense>
+      </main>
+    );
+  }
+  return <FlashlightsHomePage />;
 }

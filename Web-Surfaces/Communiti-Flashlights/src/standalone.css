@@ -13,3 +13,19 @@ body {
 .flashlights-public-app {
   min-height: 100vh;
 }
+
+.flashlights-public-loading,
+.flashlights-public-legacy {
+  min-height: 100vh;
+  margin: 0;
+  padding: clamp(1rem, 4vw, 3rem);
+  color: #fffdf6;
+  background: #111a2d;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.flashlights-public-legacy .flashlights-privacy {
+  width: min(100%, 56rem);
+  margin-inline: auto;
+}

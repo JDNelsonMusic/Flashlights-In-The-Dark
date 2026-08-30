@@ -7,6 +7,13 @@
   "module": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
+    "./landing": "./dist/landing.js",
+    "./score": "./dist/score.js",
+    "./practice": "./dist/practice.js",
+    "./videos": "./dist/videos.js",
+    "./mixer": "./dist/mixer.js",
+    "./privacy": "./dist/privacy.js",
+    "./resources": "./dist/resources.js",
     "./style.css": "./dist/style.css"
   },
   "files": [
