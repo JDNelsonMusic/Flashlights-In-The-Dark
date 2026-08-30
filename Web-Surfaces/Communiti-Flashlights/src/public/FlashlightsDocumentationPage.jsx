@@ -20,12 +20,19 @@ export function FlashlightsDocumentationPage({ basePath = '/flashlights' }) {
         <div className="flashlights-singer__section-heading">
           <p className="flashlights-singer__eyebrow">Start here</p>
           <h2 id="available-now-title">Current resources</h2>
+          <p>
+            Available now describes public access. Some rehearsal materials may reflect an earlier
+            score edition; confirm the current form with your director.
+          </p>
         </div>
         <div className="flashlights-singer__documentation-grid">
           <article className="flashlights-singer__card flashlights-singer__card--ready">
             <h3>Part-specific practice</h3>
             <p className="flashlights-singer__ready">Available now · seven tracks</p>
-            <p>Choose the Shadow Chorus, Light Chorus, or complete ensemble.</p>
+            <p>
+              These February 2026 recordings are the currently public set. Choose the Shadow
+              Chorus, Light Chorus, or complete ensemble.
+            </p>
             <a className="flashlights-singer__text-link" href={resourcePath(basePath, 'practice')}>
               Choose a practice track
             </a>
@@ -92,7 +99,10 @@ export function FlashlightsDocumentationPage({ basePath = '/flashlights' }) {
           synchronized cues over the production’s dedicated, closed local Wi-Fi network.
         </p>
         <ul className="flashlights-resource-checklist">
-          <li>Bring the assigned iPhone, iPad, or Android device fully charged, plus its cable.</li>
+          <li>
+            Bring only the production-assigned or approved device, fully charged, plus its cable.
+            Devices used for light cues must have a tested rear torch.
+          </li>
           <li>Install the current app build before rehearsal and keep the app open in the foreground.</li>
           <li>Join only the network supplied by the production team; no Bluetooth pairing is used.</li>
           <li>Allow local-network access and camera access. Camera permission controls the rear torch only.</li>

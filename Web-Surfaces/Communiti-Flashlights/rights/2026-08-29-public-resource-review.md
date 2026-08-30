@@ -20,10 +20,10 @@ The existing 13-part mixer and its already-integrated rehearsal audio assets are
 
 ## Resource-hub interface additions reviewed on 2026-08-29
 
-The redesigned landing page and singer guide add only authored React, HTML, and CSS; technical text derived from this repository's current performer-app and concert-readiness documentation; and two small inline platform-identification marks. They do not add a score, recording, photograph, font file, or autoplaying media.
+The redesigned landing page and singer guide add only authored React, HTML, and CSS; technical text derived from this repository's current performer-app and concert-readiness documentation; one original device pictogram; and one inline Android platform mark. They do not add a score, recording, photograph, font file, or autoplaying media.
 
-- The Apple and Android vector paths are reproduced from the CC0-1.0 Simple Icons project and are used only to identify the corresponding installation destination. The visible footer carries the applicable Apple and Google trademark notices.
-- No App Store or Google Play download badge is used. This avoids implying a public-store release while the current destinations are TestFlight and Google Play testing links.
+- The Apple-device destination uses an original, generic phone-and-tablet outline beside visible “Apple devices,” “iPhone,” and “iPad” text. It deliberately does not reproduce the standalone Apple logo.
+- No App Store or Google Play download badge is used. This avoids implying a public-store release while the current destinations are TestFlight and Google Play testing links. The visible footer carries the applicable Apple and Google trademark notices.
 - The Android mark is reproduced for platform identification under Google's Android brand guidance. The footer includes the Android trademark notice; this review record preserves the icon source and use context.
 - The theme controls, solfège reference, electronics overview, and legacy-resource labels are original interface content for this release.
 

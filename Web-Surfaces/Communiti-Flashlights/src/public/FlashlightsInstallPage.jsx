@@ -11,8 +11,9 @@ export function FlashlightsInstallPage({ basePath = '/flashlights' }) {
         <p className="flashlights-singer__eyebrow">Companion app</p>
         <h1>Install Flashlights on your phone</h1>
         <p className="flashlights-singer__lede">
-          Use the phone or tablet you will carry in rehearsal. The public instructions are available
-          without an account; Apple or Google may ask you to sign in before installing a test build.
+          Use the production-approved phone or tablet you will carry in rehearsal. Devices used for
+          light cues must have a tested rear torch. The public instructions are available without an
+          account; Apple or Google may ask you to sign in before installing a test build.
         </p>
       </header>
 

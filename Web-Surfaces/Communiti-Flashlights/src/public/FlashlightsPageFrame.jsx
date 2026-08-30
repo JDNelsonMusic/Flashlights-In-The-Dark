@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './public.css';
 
 export const FLASHLIGHTS_THEME_STORAGE_KEY = 'flashlights-resource-theme';
@@ -54,15 +54,6 @@ export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, c
     typeof window === 'undefined' ? null : window.localStorage
   ));
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute(
-      'content',
-      theme === 'dark' ? '#141216' : '#fffdf8'
-    );
-  }, [theme]);
-
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
@@ -104,8 +95,8 @@ export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, c
             aria-pressed={theme === 'dark'}
             onClick={toggleTheme}
           >
-            <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
-            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            <span aria-hidden="true">☾</span>
+            <span>Dark mode</span>
           </button>
         </div>
       </header>

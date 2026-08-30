@@ -4,10 +4,15 @@ import { FlashlightsPageFrame, resourcePath } from './FlashlightsPageFrame';
 export const IOS_DOWNLOAD_URL = 'https://keex.ai/flashlights/ios';
 export const ANDROID_DOWNLOAD_URL = 'https://keex.ai/flashlights/android';
 
-function AppleMark() {
+function AppleDeviceMark() {
   return (
-    <svg className="flashlights-platform-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+    <svg className="flashlights-platform-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" strokeWidth="4">
+        <rect x="5" y="3" width="36" height="58" rx="7" />
+        <path d="M16 10h14M20 53h6" strokeLinecap="round" />
+        <rect x="36" y="18" width="23" height="42" rx="5" fill="var(--flashlights-paper)" />
+        <path d="M44 25h7M46 53h3" strokeLinecap="round" />
+      </g>
     </svg>
   );
 }
@@ -71,14 +76,17 @@ export function FlashlightsHomePage({ basePath = '/flashlights' }) {
         <div className="flashlights-hub-section-heading">
           <p className="flashlights-singer__eyebrow">Performance companion</p>
           <h2 id="download-app-title">Download or update the Flashlights app</h2>
-          <p>Use these permanent links on the phone or tablet you will carry in rehearsal.</p>
+          <p>
+            Use these permanent links on the production-approved phone or tablet you will carry in
+            rehearsal. Devices used for light cues must have a tested rear torch.
+          </p>
         </div>
         <div className="flashlights-hub-download-grid">
           <a className="flashlights-platform-card" href={IOS_DOWNLOAD_URL}>
-            <AppleMark />
+            <AppleDeviceMark />
             <span>
               <strong>Apple devices</strong>
-              <small>iPhone &amp; iPad · TestFlight access may be limited</small>
+              <small>iPhone &amp; iPad · production approval required</small>
             </span>
             <span className="flashlights-platform-card__action">Download or update</span>
           </a>
@@ -109,7 +117,7 @@ export function FlashlightsHomePage({ basePath = '/flashlights' }) {
           <p className="flashlights-singer__eyebrow">Archive &amp; advanced tools</p>
           <h2>Earlier Flashlights resources</h2>
           <p>
-            Previous rehearsal tracks, the 13-part mixer, and legacy project links remain available
+            Previous rehearsal tracks, the 13-part mixer, and earlier rehearsal tools remain available
             for reference. Your director’s current materials take precedence.
           </p>
           <a className="flashlights-singer__text-link" href={`${resourcePath(basePath, 'documentation')}#legacy`}>

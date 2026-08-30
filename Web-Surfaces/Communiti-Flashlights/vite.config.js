@@ -19,6 +19,7 @@ const publicEntries = {
 
 export default defineConfig({
   plugins: [react()],
+  base: isLibraryBuild || isPublicBuild ? '/' : '/flashlights/',
   build: isLibraryBuild || isPublicBuild
     ? {
         emptyOutDir: true,

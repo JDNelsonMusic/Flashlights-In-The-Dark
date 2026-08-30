@@ -60,7 +60,7 @@ describe('public responsive and readability contracts', () => {
     expect(desktopNav?.querySelectorAll('a')).toHaveLength(5);
     expect(mobileMenu?.querySelector('summary')?.textContent).toBe('Menu');
     expect(mobileMenu?.querySelectorAll('nav a')).toHaveLength(5);
-    expect(h1?.textContent).toBe('Flashlightsin the Dark');
+    expect(h1?.getAttribute('aria-label')).toBe('Flashlights in the Dark');
     expect(browse?.textContent).toContain('Browse all singer resources');
 
     expect(h1.compareDocumentPosition(feature) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

@@ -58,7 +58,7 @@ describe('public singer pages', () => {
   it('renders the accessible resource-hub landing without unapproved media', () => {
     const host = document.createElement('div');
     host.innerHTML = renderToStaticMarkup(<FlashlightsHomePage />);
-    expect(host.querySelector('#flashlights-home-title')?.textContent).toBe('Flashlightsin the Dark');
+    expect(host.querySelector('#flashlights-home-title')?.getAttribute('aria-label')).toBe('Flashlights in the Dark');
     expect(host.querySelector('.flashlights-hub-browse')?.textContent).toContain('Browse all singer resources');
     expect(host.querySelector('a[href="https://keex.ai/flashlights/ios"]')).not.toBeNull();
     expect(host.querySelector('a[href="https://keex.ai/flashlights/android"]')).not.toBeNull();
@@ -66,6 +66,43 @@ describe('public singer pages', () => {
     const markup = host.innerHTML;
     expect(markup).not.toMatch(/href="[^"]+\.pdf/i);
     expect(markup).not.toContain('<iframe');
+  });
+
+  it('keeps theme state scoped to the Flashlights surface', async () => {
+    const container = document.createElement('div');
+    const metaThemeColor = document.createElement('meta');
+    metaThemeColor.name = 'theme-color';
+    metaThemeColor.content = '#abcdef';
+    document.head.append(metaThemeColor);
+    document.body.append(container);
+    document.documentElement.dataset.theme = 'host-theme';
+    document.documentElement.style.colorScheme = 'normal';
+    window.localStorage.removeItem('flashlights-resource-theme');
+    const root = createRoot(container);
+
+    await act(async () => root.render(<FlashlightsHomePage />));
+    expect(container.querySelector('.flashlights-singer').dataset.theme).toBe('light');
+    expect(document.documentElement.dataset.theme).toBe('host-theme');
+    expect(metaThemeColor.content).toBe('#abcdef');
+
+    await act(async () => container.querySelector('.flashlights-singer__theme-toggle').click());
+    expect(container.querySelector('.flashlights-singer').dataset.theme).toBe('dark');
+    expect(container.querySelector('.flashlights-singer__theme-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(container.querySelector('.flashlights-singer__theme-toggle').textContent).toContain('Dark mode');
+    expect(document.documentElement.dataset.theme).toBe('host-theme');
+    expect(document.documentElement.style.colorScheme).toBe('normal');
+    expect(metaThemeColor.content).toBe('#abcdef');
+
+    await act(async () => root.unmount());
+    expect(document.documentElement.dataset.theme).toBe('host-theme');
+    expect(document.documentElement.style.colorScheme).toBe('normal');
+    expect(metaThemeColor.content).toBe('#abcdef');
+
+    window.localStorage.removeItem('flashlights-resource-theme');
+    metaThemeColor.remove();
+    container.remove();
+    delete document.documentElement.dataset.theme;
+    document.documentElement.style.colorScheme = '';
   });
 
   it('renders score status and printing guidance without a fake download', () => {
