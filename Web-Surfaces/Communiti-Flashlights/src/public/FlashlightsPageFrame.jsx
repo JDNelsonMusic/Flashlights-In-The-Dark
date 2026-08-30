@@ -1,5 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './public.css';
+
+export const FLASHLIGHTS_THEME_STORAGE_KEY = 'flashlights-resource-theme';
+
+export const resolveInitialTheme = (storage) => {
+  try {
+    return storage?.getItem(FLASHLIGHTS_THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+};
 
 export const normalizeBasePath = (basePath = '/flashlights') => {
   const withLeadingSlash = basePath.startsWith('/') ? basePath : `/${basePath}`;
@@ -13,9 +23,9 @@ export const resourcePath = (basePath, suffix = '') => {
 
 const NAV_ITEMS = [
   ['home', '', 'Home'],
-  ['score', 'score', 'Score'],
+  ['resources', 'documentation', 'Resources'],
   ['practice', 'practice', 'Practice'],
-  ['videos', 'videos', 'Videos'],
+  ['install', 'install', 'Get the app'],
   ['mixer', 'mixer', 'Mixer'],
 ];
 
@@ -40,16 +50,38 @@ function ResourceNavigation({ basePath, currentPage, className, label }) {
 
 export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, children }) {
   const normalizedBasePath = normalizeBasePath(basePath);
+  const [theme, setTheme] = useState(() => resolveInitialTheme(
+    typeof window === 'undefined' ? null : window.localStorage
+  ));
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      'content',
+      theme === 'dark' ? '#141216' : '#fffdf8'
+    );
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    try {
+      window.localStorage.setItem(FLASHLIGHTS_THEME_STORAGE_KEY, nextTheme);
+    } catch {
+      // The visual toggle still works when storage is unavailable.
+    }
+  };
 
   return (
-    <div className="flashlights-singer">
+    <div className="flashlights-singer" data-theme={theme}>
       <a className="flashlights-singer__skip-link" href="#flashlights-main">
         Skip to main content
       </a>
       <header className="flashlights-singer__header">
         <div className="flashlights-singer__header-inner">
           <a className="flashlights-singer__wordmark" href={normalizedBasePath}>
-            <span aria-hidden="true" className="flashlights-singer__wordmark-light">●</span>
+            <span aria-hidden="true" className="flashlights-singer__wordmark-light">✦</span>
             <span>Flashlights in the Dark</span>
           </a>
           <ResourceNavigation
@@ -66,18 +98,36 @@ export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, c
               label="Flashlights resources in menu"
             />
           </details>
+          <button
+            type="button"
+            className="flashlights-singer__theme-toggle"
+            aria-pressed={theme === 'dark'}
+            onClick={toggleTheme}
+          >
+            <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
         </div>
       </header>
       <main id="flashlights-main" tabIndex="-1" className="flashlights-singer__main">
         {children}
       </main>
       <footer className="flashlights-singer__footer">
-        <p>Public singer resources for Flashlights in the Dark.</p>
+        <div>
+          <p><strong>Permanent singer resource address</strong></p>
+          <p><a href="https://keex.ai/flashlights">keex.ai/flashlights</a></p>
+        </div>
         <nav aria-label="Flashlights help and policies">
-          <a href={resourcePath(normalizedBasePath, 'documentation')}>Singer guide</a>
+          <a href={resourcePath(normalizedBasePath, 'documentation')}>All resources</a>
           <a href={resourcePath(normalizedBasePath, 'install')}>Install the app</a>
           <a href={resourcePath(normalizedBasePath, 'privacy-policy')}>Privacy</a>
         </nav>
+        <p className="flashlights-singer__trademarks">
+          Apple, iPhone, iPad, and TestFlight are trademarks of Apple Inc. Android and Google Play
+          are trademarks of Google LLC. The Android robot is reproduced or modified from work
+          created and shared by Google and used according to terms described in the{' '}
+          <a href="https://creativecommons.org/licenses/by/3.0/">Creative Commons 3.0 Attribution License</a>.
+        </p>
       </footer>
     </div>
   );

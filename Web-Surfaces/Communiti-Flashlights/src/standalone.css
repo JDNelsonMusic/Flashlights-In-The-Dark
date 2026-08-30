@@ -1,13 +1,22 @@
 :root {
-  color-scheme: dark;
-  background: #080b16;
+  color-scheme: light;
+  background: #160510;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  background: #08070a;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #080b16;
+  background: #160510;
+}
+
+:root[data-theme="dark"] body {
+  background: #08070a;
 }
 
 .flashlights-public-app {

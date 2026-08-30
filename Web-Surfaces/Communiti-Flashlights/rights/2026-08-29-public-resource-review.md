@@ -18,6 +18,17 @@ The user approved these seven February 2026 practice links for the public singer
 
 The existing 13-part mixer and its already-integrated rehearsal audio assets are also approved to remain publicly available through the advanced mixer route.
 
+## Resource-hub interface additions reviewed on 2026-08-29
+
+The redesigned landing page and singer guide add only authored React, HTML, and CSS; technical text derived from this repository's current performer-app and concert-readiness documentation; and two small inline platform-identification marks. They do not add a score, recording, photograph, font file, or autoplaying media.
+
+- The Apple and Android vector paths are reproduced from the CC0-1.0 Simple Icons project and are used only to identify the corresponding installation destination. The visible footer carries the applicable Apple and Google trademark notices.
+- No App Store or Google Play download badge is used. This avoids implying a public-store release while the current destinations are TestFlight and Google Play testing links.
+- The Android mark is reproduced for platform identification under Google's Android brand guidance. The footer includes the Android trademark notice; this review record preserves the icon source and use context.
+- The theme controls, solfège reference, electronics overview, and legacy-resource labels are original interface content for this release.
+
+The public build must continue to exclude every asset listed below. A build is releasable only when the public-artifact assertion confirms that no unapproved media entered the dependency graph.
+
 ## Explicitly excluded from public exposure
 
 The following resources are not approved for public exposure in this release and must remain honest, non-interactive placeholders with no asset URL:

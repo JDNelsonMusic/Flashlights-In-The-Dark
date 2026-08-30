@@ -4,13 +4,16 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import FlashlightsHomePage from '../src/landing';
+import {
+  FLASHLIGHTS_THEME_STORAGE_KEY,
+  resolveInitialTheme,
+} from '../src/public/FlashlightsPageFrame';
 
 const publicCss = readFileSync(resolve(process.cwd(), 'src/public/public.css'), 'utf8');
 
 const cssBlock = (source, prelude) => {
   const preludeIndex = source.indexOf(prelude);
   if (preludeIndex < 0) return '';
-
   const blockStart = source.indexOf('{', preludeIndex);
   if (blockStart < 0) return '';
 
@@ -20,7 +23,6 @@ const cssBlock = (source, prelude) => {
     if (source[index] === '}') depth -= 1;
     if (depth === 0) return source.slice(blockStart + 1, index);
   }
-
   return '';
 };
 
@@ -43,62 +45,55 @@ const contrastRatio = (foreground, background) => {
 };
 
 describe('public responsive and readability contracts', () => {
-  it('uses a compact menu and keeps the required home sequence in the phone DOM', () => {
+  it('keeps the mockup-derived landing sequence and compact navigation in the DOM', () => {
     const host = document.createElement('div');
     host.innerHTML = renderToStaticMarkup(<FlashlightsHomePage />);
 
     const desktopNav = host.querySelector('.flashlights-singer__desktop-nav');
     const mobileMenu = host.querySelector('.flashlights-singer__mobile-menu');
     const h1 = host.querySelector('#flashlights-home-title');
-    const lede = host.querySelector('.flashlights-singer__hero-copy .flashlights-singer__lede');
-    const practice = host.querySelector('a[href="/flashlights/practice"].flashlights-singer__button--primary');
-    const score = host.querySelector('.flashlights-singer__score-feature');
-    const scoreStatus = score?.querySelector('.flashlights-singer__status');
+    const feature = host.querySelector('.flashlights-hub-feature');
+    const browse = host.querySelector('.flashlights-hub-browse');
+    const quick = host.querySelector('.flashlights-hub-quick');
+    const downloads = host.querySelector('.flashlights-hub-downloads');
 
     expect(desktopNav?.querySelectorAll('a')).toHaveLength(5);
     expect(mobileMenu?.querySelector('summary')?.textContent).toBe('Menu');
     expect(mobileMenu?.querySelectorAll('nav a')).toHaveLength(5);
-    expect(lede?.textContent).toContain('Start with a practice track');
-    expect(scoreStatus?.textContent).toBe('Score PDF coming soon');
+    expect(h1?.textContent).toBe('Flashlightsin the Dark');
+    expect(browse?.textContent).toContain('Browse all singer resources');
 
-    expect(h1.compareDocumentPosition(lede) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(lede.compareDocumentPosition(practice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(practice.compareDocumentPosition(score) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(h1.compareDocumentPosition(feature) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(feature.compareDocumentPosition(browse) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(browse.compareDocumentPosition(quick) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(quick.compareDocumentPosition(downloads) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it.each([320, 390])('keeps the CTA and score status inside the 568px fold contract at %ipx', (width) => {
+  it.each([320, 390])('uses one-column, full-width resource controls at %ipx', (width) => {
     const mobileCss = cssBlock(publicCss, '@media (max-width: 620px)');
 
     expect(width).toBeLessThanOrEqual(620);
-    expect(cssBlock(mobileCss, '.flashlights-singer__header-inner {')).toMatch(/min-height:\s*60px/);
     expect(cssBlock(mobileCss, '.flashlights-singer__desktop-nav {')).toMatch(/display:\s*none/);
     expect(cssBlock(mobileCss, '.flashlights-singer__mobile-menu {')).toMatch(/display:\s*block/);
-    expect(cssBlock(mobileCss, '.flashlights-singer__main {')).toMatch(/padding-block:\s*0\.7rem 2\.5rem/);
-    expect(cssBlock(mobileCss, '.flashlights-singer__hero {')).toMatch(/gap:\s*0\.7rem/);
-    expect(cssBlock(mobileCss, '.flashlights-singer__hero-copy .flashlights-singer__eyebrow {'))
-      .toMatch(/display:\s*none/);
-    expect(cssBlock(mobileCss, '.flashlights-singer__hero .flashlights-singer__score-feature {'))
-      .toMatch(/grid-template-columns:\s*minmax\(0,\s*1fr\) 4\.5rem/);
-    expect(cssBlock(mobileCss, '.flashlights-singer__hero .flashlights-singer__score-description {'))
-      .toMatch(/display:\s*none/);
+    expect(cssBlock(mobileCss, '.flashlights-singer__theme-toggle {')).toMatch(/width:\s*48px/);
+    expect(cssBlock(mobileCss, '.flashlights-hub-browse {')).toMatch(/min-height:\s*76px/);
+    expect(cssBlock(mobileCss, '.flashlights-hub-quick,')).toMatch(
+      /grid-template-columns:\s*minmax\(0,\s*1fr\)/
+    );
+    expect(cssBlock(mobileCss, '.flashlights-platform-card {')).toMatch(
+      /grid-template-columns:\s*3\.5rem minmax\(0,\s*1fr\)/
+    );
+  });
 
-    // A conservative two-line title and three-line orientation budget at a 16px rem root.
-    const header = 60;
-    const mainTopPadding = 0.7 * 16;
-    const title = 2 * (Math.min(Math.max(2.15 * 16, width * 0.12), 2.65 * 16) * 1.04);
-    const orientation = 3 * (1.125 * 16 * 1.35);
-    const heroCopyGaps = 2 * (0.5 * 16);
-    const target = 48;
-    const heroGap = 0.7 * 16;
-    const scorePadding = 0.75 * 16;
-    const scoreHeading = 2 * (1.4 * 16 * 1.08);
-    const scoreGap = 0.35 * 16;
-    const scoreStatus = (1.125 * 16 * 1.62) + (2 * 0.22 * 16) + 2;
-    const ctaBottom = header + mainTopPadding + title + orientation + heroCopyGaps + target;
-    const scoreStatusBottom = ctaBottom + heroGap + scorePadding + scoreHeading + scoreGap + scoreStatus;
+  it('defaults to light and honors only an explicit stored dark preference', () => {
+    const emptyStorage = { getItem: () => null };
+    const darkStorage = { getItem: (key) => (key === FLASHLIGHTS_THEME_STORAGE_KEY ? 'dark' : null) };
+    const invalidStorage = { getItem: () => 'system' };
 
-    expect(ctaBottom).toBeLessThan(568);
-    expect(scoreStatusBottom).toBeLessThan(568);
+    expect(resolveInitialTheme(emptyStorage)).toBe('light');
+    expect(resolveInitialTheme(darkStorage)).toBe('dark');
+    expect(resolveInitialTheme(invalidStorage)).toBe('light');
+    expect(resolveInitialTheme(null)).toBe('light');
   });
 
   it('does not size meaningful public copy below the 18px floor at a 16px rem root', () => {
@@ -112,9 +107,8 @@ describe('public responsive and readability contracts', () => {
         return false;
       });
 
-    expect(undersizedRules).toHaveLength(2);
-    expect(undersizedRules.map(({ selector }) => selector).join('\n')).toContain('.flashlights-singer__wordmark-light');
-    expect(undersizedRules.map(({ selector }) => selector).join('\n')).toContain('.flashlights-singer__card-number');
+    expect(undersizedRules).toHaveLength(1);
+    expect(undersizedRules[0].selector).toContain('.flashlights-singer__card-number');
   });
 
   it('keeps primary anchor text dark on yellow at WCAG AA contrast', () => {
@@ -123,7 +117,7 @@ describe('public responsive and readability contracts', () => {
       '.flashlights-singer a.flashlights-singer__button--primary,'
     );
 
-    expect(primaryAnchorRule).toMatch(/color:\s*var\(--flashlights-ink\)/);
-    expect(contrastRatio('#172033', '#f6c95c')).toBeGreaterThan(4.5);
+    expect(primaryAnchorRule).toMatch(/color:\s*var\(--flashlights-button-ink\)/);
+    expect(contrastRatio('#111014', '#f3cc5c')).toBeGreaterThan(4.5);
   });
 });

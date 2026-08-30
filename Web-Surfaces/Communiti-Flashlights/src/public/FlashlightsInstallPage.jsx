@@ -1,12 +1,12 @@
 import React from 'react';
 import { FlashlightsPageFrame } from './FlashlightsPageFrame';
 
-const TESTFLIGHT_URL = 'https://testflight.apple.com/join/9ASp48Jj';
-const GOOGLE_PLAY_URL = 'https://play.google.com/apps/internaltest/4701639500415117370';
+const TESTFLIGHT_URL = 'https://keex.ai/flashlights/ios';
+const GOOGLE_PLAY_URL = 'https://keex.ai/flashlights/android';
 
 export function FlashlightsInstallPage({ basePath = '/flashlights' }) {
   return (
-    <FlashlightsPageFrame basePath={basePath}>
+    <FlashlightsPageFrame basePath={basePath} currentPage="install">
       <header className="flashlights-singer__page-heading">
         <p className="flashlights-singer__eyebrow">Companion app</p>
         <h1>Install Flashlights on your phone</h1>

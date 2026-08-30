@@ -55,12 +55,15 @@ const readyVideoManifest = () => {
 };
 
 describe('public singer pages', () => {
-  it('renders the approved home actions and an honest score placeholder', () => {
-    const markup = renderToStaticMarkup(<FlashlightsHomePage />);
-    expect(markup).toContain('<h1 id="flashlights-home-title">Flashlights in the Dark</h1>');
-    expect(markup).toContain('Start practicing');
-    expect(markup).toContain('Score PDF coming soon');
-    expect(markup).toContain('12-page booklet · three 11×17 sheets · folds to 8.5×11');
+  it('renders the accessible resource-hub landing without unapproved media', () => {
+    const host = document.createElement('div');
+    host.innerHTML = renderToStaticMarkup(<FlashlightsHomePage />);
+    expect(host.querySelector('#flashlights-home-title')?.textContent).toBe('Flashlightsin the Dark');
+    expect(host.querySelector('.flashlights-hub-browse')?.textContent).toContain('Browse all singer resources');
+    expect(host.querySelector('a[href="https://keex.ai/flashlights/ios"]')).not.toBeNull();
+    expect(host.querySelector('a[href="https://keex.ai/flashlights/android"]')).not.toBeNull();
+    expect(host.querySelector('.flashlights-singer__theme-toggle')?.getAttribute('aria-pressed')).toBe('false');
+    const markup = host.innerHTML;
     expect(markup).not.toMatch(/href="[^"]+\.pdf/i);
     expect(markup).not.toContain('<iframe');
   });
@@ -89,21 +92,26 @@ describe('public singer pages', () => {
   });
 
   it('renders video placeholders without players or fake controls', () => {
-    const markup = renderToStaticMarkup(<FlashlightsVideosPage />);
+    const host = document.createElement('div');
+    host.innerHTML = renderToStaticMarkup(<FlashlightsVideosPage />);
+    const markup = host.innerHTML;
     expect(markup).toContain('Warm-up videos coming soon');
     expect(markup).toContain('Presentation video coming soon');
     expect(markup).toContain('caption review');
     expect(markup).not.toContain('<iframe');
-    expect(markup).not.toContain('<button');
+    expect(host.querySelector('main button')).toBeNull();
   });
 
   it('keeps documentation owner-safe and points to the approved resource routes', () => {
     const markup = renderToStaticMarkup(<FlashlightsDocumentationPage />);
-    expect(markup).toContain('How to use these resources');
+    expect(markup).toContain('All singer resources');
     expect(markup).toContain('href="/flashlights/score"');
     expect(markup).toContain('href="/flashlights/practice"');
     expect(markup).toContain('href="/flashlights/videos"');
     expect(markup).toContain('href="/flashlights/mixer"');
+    expect(markup).toContain('Ascending chromatic syllables');
+    expect(markup).toContain('How the performance electronics work');
+    expect(markup).toContain('Earlier Flashlights resources');
     expect(markup).not.toMatch(/href="[^"]+\.pdf/i);
     expect(markup).not.toContain('Mockup audio');
   });
