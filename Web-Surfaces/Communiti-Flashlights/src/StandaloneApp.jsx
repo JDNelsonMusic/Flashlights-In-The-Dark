@@ -3,7 +3,9 @@ import FlashlightsHomePage from './landing';
 import FlashlightsPracticePage from './practice';
 import FlashlightsScorePage from './score';
 import FlashlightsVideosPage from './videos';
-import FlashlightsPrivacyPolicy from './privacy';
+import FlashlightsPrivacyPage from './privacy';
+import FlashlightsDocumentationPage from './documentation';
+import FlashlightsInstallPage from './install';
 import './standalone.css';
 
 const FlashlightsMixer = lazy(() => import('./mixer'));
@@ -13,8 +15,8 @@ const normalizedPath = (pathname) => pathname.replace(/\/+$/, '') || '/';
 const routeForPath = (pathname) => {
   const path = normalizedPath(pathname);
   if (path.endsWith('/privacy-policy')) return { page: 'privacy' };
-  if (path === '/install' || path.endsWith('/install')) return { page: 'legacy', tab: 'install' };
-  if (path.endsWith('/documentation')) return { page: 'legacy', tab: 'docs' };
+  if (path === '/install' || path.endsWith('/install')) return { page: 'install' };
+  if (path.endsWith('/documentation')) return { page: 'documentation' };
   if (path.endsWith('/practice')) return { page: 'practice' };
   if (path.endsWith('/score')) return { page: 'score' };
   if (path.endsWith('/warm-ups')) return { page: 'videos', section: 'warm-ups' };
@@ -28,14 +30,6 @@ function LoadingSurface() {
   return (
     <main className="flashlights-public-loading" aria-live="polite">
       <p>Loading rehearsal tools…</p>
-    </main>
-  );
-}
-
-function PrivacyPage() {
-  return (
-    <main className="flashlights-public-legacy">
-      <FlashlightsPrivacyPolicy />
     </main>
   );
 }
@@ -57,21 +51,14 @@ export default function StandaloneApp() {
   if (route.page === 'practice') return <FlashlightsPracticePage />;
   if (route.page === 'score') return <FlashlightsScorePage />;
   if (route.page === 'videos') return <FlashlightsVideosPage />;
-  if (route.page === 'privacy') return <PrivacyPage />;
+  if (route.page === 'privacy') return <FlashlightsPrivacyPage />;
+  if (route.page === 'documentation') return <FlashlightsDocumentationPage />;
+  if (route.page === 'install') return <FlashlightsInstallPage />;
   if (route.page === 'mixer') {
     return (
       <main className="flashlights-public-app">
         <Suspense fallback={<LoadingSurface />}>
-          <FlashlightsMixer presentation="fullscreen" />
-        </Suspense>
-      </main>
-    );
-  }
-  if (route.page === 'legacy') {
-    return (
-      <main className="flashlights-public-app">
-        <Suspense fallback={<LoadingSurface />}>
-          <FlashlightsMixer presentation="fullscreen" activeTabKey={route.tab} />
+          <FlashlightsMixer />
         </Suspense>
       </main>
     );

@@ -1,3 +1,5 @@
-import './components/FlashlightsInTheDarkTool.css';
-
-export { default, default as FlashlightsPrivacyPolicy } from './components/FlashlightsPrivacyPolicy';
+export {
+  FlashlightsPrivacyPage,
+  FlashlightsPrivacyPage as FlashlightsPrivacyPolicy,
+  FlashlightsPrivacyPage as default,
+} from './public/FlashlightsPrivacyPage';

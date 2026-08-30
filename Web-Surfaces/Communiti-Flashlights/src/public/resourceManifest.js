@@ -76,6 +76,7 @@ const practiceTracks = PRACTICE_TRACK_DATA.map((track) => ({
     kind: 'youtube-video',
     provider: 'YouTube',
     privacyEnhancedEmbedHost: 'www.youtube-nocookie.com',
+    autoplay: false,
     youtubeId: track.youtubeId,
   },
 }));
@@ -124,10 +125,10 @@ export const flashlightsResourceManifest = {
       publicExposureApprovalRef: null,
       captionStatus: 'required-before-release',
       media: {
-        kind: 'video-collection',
+        kind: 'youtube-video-collection',
         provider: 'YouTube',
-        itemCount: null,
-        transcriptRequired: true,
+        itemCount: 0,
+        items: [],
       },
     },
     presentation: {
@@ -142,8 +143,14 @@ export const flashlightsResourceManifest = {
       media: {
         kind: 'youtube-video',
         provider: 'YouTube',
+        privacyEnhancedEmbedHost: 'www.youtube-nocookie.com',
+        autoplay: false,
         youtubeId: null,
         transcriptRequired: true,
+        transcript: {
+          status: 'required-before-release',
+          url: null,
+        },
       },
     },
     mixer: {
@@ -235,6 +242,12 @@ export function validateFlashlightsResourceManifest(manifest) {
     if (track.media?.youtubeId !== track.youtubeId) {
       errors.push(`${track.id ?? 'practice track'} has mismatched YouTube metadata`);
     }
+    if (
+      track.media?.privacyEnhancedEmbedHost !== 'www.youtube-nocookie.com' ||
+      track.media?.autoplay !== false
+    ) {
+      errors.push(`${track.id ?? 'practice track'} needs privacy-enhanced, non-autoplay embed metadata`);
+    }
     if (track.url !== `https://youtu.be/${track.youtubeId}`) {
       errors.push(`${track.id ?? 'practice track'} has an invalid direct YouTube URL`);
     }
@@ -270,20 +283,75 @@ export function validateFlashlightsResourceManifest(manifest) {
     }
   }
 
-  for (const videoResource of [
-    manifest?.resources?.warmUps,
-    manifest?.resources?.presentation,
-  ].filter(Boolean)) {
-    if (videoResource.status !== 'ready') continue;
-    if (videoResource.captionStatus !== 'verified') {
-      errors.push(`${videoResource.id} must have verified captions before release`);
+  const validateReadyVideo = (videoResource, context) => {
+    if (videoResource?.status !== 'ready') {
+      errors.push(`${context} must be explicitly marked ready before release`);
     }
-    if (videoResource.media?.transcriptRequired !== true) {
-      errors.push(`${videoResource.id} must require a transcript before release`);
+    if (!isNonEmptyString(videoResource?.id) || !isNonEmptyString(videoResource?.label)) {
+      errors.push(`${context} needs an id and label before release`);
     }
-    if (!isNonEmptyString(videoResource.publicExposureApprovalRef)) {
-      errors.push(`${videoResource.id} needs explicit public-exposure approval before release`);
+    if (!isIsoDate(videoResource?.updated)) {
+      errors.push(`${context} needs an update date before release`);
     }
+    if (!isNonEmptyString(videoResource?.rightsReviewRef)) {
+      errors.push(`${context} needs a rights-review reference before release`);
+    }
+    if (!isNonEmptyString(videoResource?.publicExposureApprovalRef)) {
+      errors.push(`${context} needs explicit public-exposure approval before release`);
+    }
+    if (videoResource?.captionStatus !== 'verified') {
+      errors.push(`${context} must have verified captions before release`);
+    }
+    if (videoResource?.media?.transcriptRequired !== true) {
+      errors.push(`${context} must require a transcript before release`);
+    }
+    if (
+      videoResource?.media?.transcript?.status !== 'verified' ||
+      !isNonEmptyString(videoResource?.media?.transcript?.url)
+    ) {
+      errors.push(`${context} must provide an available, verified transcript before release`);
+    }
+    const youtubeId = videoResource?.media?.youtubeId;
+    if (!/^[A-Za-z0-9_-]{11}$/.test(youtubeId ?? '')) {
+      errors.push(`${context} needs a valid YouTube video ID before release`);
+    }
+    if (videoResource?.url !== `https://youtu.be/${youtubeId}`) {
+      errors.push(`${context} needs a direct YouTube URL matching its video ID`);
+    }
+    if (
+      videoResource?.media?.kind !== 'youtube-video' ||
+      videoResource?.media?.provider !== 'YouTube' ||
+      videoResource?.media?.privacyEnhancedEmbedHost !== 'www.youtube-nocookie.com' ||
+      videoResource?.media?.autoplay !== false
+    ) {
+      errors.push(`${context} needs privacy-enhanced, non-autoplay YouTube embed metadata`);
+    }
+  };
+
+  const warmUps = manifest?.resources?.warmUps;
+  if (warmUps?.status === 'ready') {
+    const items = warmUps.media?.items;
+    if (warmUps.media?.kind !== 'youtube-video-collection' || !Array.isArray(items) || items.length === 0) {
+      errors.push('clare-warm-ups must provide at least one approved video item before release');
+    } else {
+      if (warmUps.media.itemCount !== items.length) {
+        errors.push('clare-warm-ups itemCount must match its exposed video items');
+      }
+      const itemIds = new Set();
+      for (const item of items) {
+        if (itemIds.has(item?.id)) errors.push(`duplicate warm-up video id: ${item?.id}`);
+        itemIds.add(item?.id);
+        validateReadyVideo(item, `warm-up video ${item?.id ?? 'item'}`);
+      }
+    }
+    if (warmUps.captionStatus !== 'verified') {
+      errors.push('clare-warm-ups collection must have verified captions before release');
+    }
+  }
+
+  const presentation = manifest?.resources?.presentation;
+  if (presentation?.status === 'ready') {
+    validateReadyVideo(presentation, presentation.id);
   }
 
   if (errors.length > 0) {

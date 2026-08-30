@@ -1,0 +1,760 @@
+.flashlights-waveform {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.flashlights-multitrack-panel {
+  gap: 1.1rem;
+}
+
+.flashlights-multitrack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  min-width: 0;
+  --flashlights-track-grid-columns: minmax(150px, 190px) 1fr auto;
+}
+
+.flashlights-transport {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(28, 0, 48, 0.7);
+  border: 1px solid rgba(88, 28, 135, 0.45);
+  border-radius: 1rem;
+  box-shadow: inset 0 0 12px rgba(88, 28, 135, 0.35);
+}
+
+.flashlights-transport-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.flashlights-transport-button {
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.85), rgba(56, 189, 248, 0.7));
+  border: 1px solid rgba(168, 85, 247, 0.65);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.26rem;
+  font-weight: 600;
+  padding: 0.55rem 1.2rem;
+}
+
+.flashlights-transport-button:hover:not(:disabled) {
+  box-shadow: 0 10px 18px rgba(88, 28, 135, 0.35);
+}
+
+.flashlights-transport-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.flashlights-loop-controls {
+  gap: 0.5rem;
+}
+
+.flashlights-transport-button.loop {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(34, 197, 94, 0.75));
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.flashlights-transport-button.loop.active {
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.55);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.92), rgba(56, 189, 248, 0.85));
+}
+
+.flashlights-transport-button.ghost {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.flashlights-transport-button.ghost:hover:not(:disabled) {
+  background: rgba(30, 41, 59, 0.6);
+  border-style: solid;
+}
+
+.flashlights-transport-icon {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+}
+
+.flashlights-transport-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.flashlights-transport-text {
+  letter-spacing: 0.03em;
+}
+
+.flashlights-transport-status {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-size: 1.26rem;
+  color: rgba(229, 231, 235, 0.9);
+}
+
+.flashlights-transport-time {
+  font-family: 'Menlo', 'SFMono-Regular', Consolas, monospace;
+  font-size: 1.32rem;
+  color: #fce7ff;
+}
+
+.flashlights-status-label {
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1.06rem;
+}
+
+.flashlights-status-label--loading {
+  font-size: 1.21rem;
+  padding: 0.35rem 1.2rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(129, 140, 248, 0.35));
+  color: #f8fafc;
+}
+
+.flashlights-status-chip {
+  background: rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.55);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 1.06rem;
+  letter-spacing: 0.04em;
+}
+
+.flashlights-status-chip.loop {
+  background: rgba(45, 212, 191, 0.25);
+  border-color: rgba(34, 197, 94, 0.6);
+}
+
+.flashlights-multitrack-guidance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(129, 140, 248, 0.35);
+  border-radius: 0.9rem;
+  box-shadow: inset 0 0 16px rgba(15, 23, 42, 0.4);
+}
+
+.flashlights-multitrack-guidance p {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.92);
+  line-height: 1.55;
+}
+
+.flashlights-multitrack-guidance strong {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+
+.flashlights-status-label--inline {
+  margin-right: 0.85rem;
+}
+
+.flashlights-timeline-grid {
+  display: grid;
+  grid-template-columns: var(--flashlights-track-grid-columns);
+  column-gap: 0.75rem;
+  align-items: stretch;
+  padding: 0.45rem 0.65rem;
+}
+
+.flashlights-timeline-spacer,
+.flashlights-timeline-controls {
+  min-height: 0;
+}
+
+.flashlights-timeline-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+
+.flashlights-timeline-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.flashlights-timeline-surface {
+  width: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  background: linear-gradient(160deg, rgba(17, 24, 39, 0.9), rgba(55, 65, 81, 0.35));
+  box-shadow: inset 0 0 12px rgba(15, 23, 42, 0.35);
+  padding: 0.7rem 0 0.9rem;
+  box-sizing: border-box;
+}
+
+.flashlights-transport-progress {
+  position: relative;
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.flashlights-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(55, 0, 85, 0.72);
+  overflow: hidden;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: inset 0 0 12px rgba(10, 0, 30, 0.65);
+}
+
+.flashlights-progress-bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.9) 0%, rgba(168, 85, 247, 0.85) 100%);
+  transition: width 0.16s ease-out;
+}
+
+.flashlights-progress-selection {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(56, 189, 248, 0.22));
+  border-left: 1px solid rgba(56, 189, 248, 0.55);
+  border-right: 1px solid rgba(124, 58, 237, 0.45);
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+
+.flashlights-measure-grid {
+  position: relative;
+  width: 100%;
+  height: 3.2rem;
+  pointer-events: none;
+  margin-bottom: 0.8rem;
+}
+
+.flashlights-measure-tick {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 12px;
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.flashlights-measure-tick.major {
+  width: 2px;
+  height: 16px;
+  background: rgba(148, 163, 184, 0.75);
+  box-shadow: 0 0 10px rgba(125, 211, 252, 0.35);
+}
+
+.flashlights-measure-label {
+  position: absolute;
+  bottom: -0.35rem;
+  transform: translate(-50%, 100%);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.7);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.flashlights-rehearsal-marker-row {
+  position: relative;
+  width: 100%;
+  height: 4.8rem;
+  margin-top: 0.7rem;
+}
+
+.flashlights-rehearsal-marker {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  justify-content: flex-end;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.flashlights-rehearsal-marker:disabled {
+  cursor: wait;
+}
+
+.flashlights-rehearsal-label {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  color: #e0f2fe;
+  box-shadow: 0 0 6px rgba(14, 116, 144, 0.35);
+  white-space: nowrap;
+}
+
+.flashlights-rehearsal-tick {
+  width: 2px;
+  height: 1.4rem;
+  background: rgba(148, 163, 184, 0.55);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.45);
+}
+
+.flashlights-rehearsal-marker.active .flashlights-rehearsal-label {
+  background: rgba(37, 99, 235, 0.85);
+  border-color: rgba(191, 219, 254, 0.75);
+  color: #f8fafc;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.65);
+}
+
+.flashlights-measure-label[data-align="start"] {
+  transform: translate(0, 100%);
+  text-align: left;
+}
+
+.flashlights-measure-label[data-align="end"] {
+  transform: translate(-100%, 100%);
+  text-align: right;
+}
+
+.flashlights-track-controls--ghost {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.flashlights-track-controls--ghost .flashlights-track-button {
+  pointer-events: none;
+}
+
+.flashlights-selection-summary {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(226, 232, 240, 0.82);
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  align-self: flex-start;
+  box-shadow: inset 0 0 12px rgba(15, 23, 42, 0.35);
+}
+
+.flashlights-rehearsal-marker.active .flashlights-rehearsal-tick {
+  background: rgba(96, 165, 250, 0.95);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.85);
+}
+
+.flashlights-error-message {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(190, 24, 93, 0.2);
+  border: 1px solid rgba(190, 24, 93, 0.4);
+  color: #fecdd3;
+  font-size: 1.21rem;
+}
+
+.flashlights-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-height: none;
+  overflow: visible;
+}
+
+.flashlights-track-row {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: var(--flashlights-track-grid-columns);
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 0.6rem 0.85rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  --flashlights-track-accent: 266 82% 68%;
+  --flashlights-track-accent-soft: 266 72% 20%;
+  background: linear-gradient(135deg, rgba(12, 9, 27, 0.88), rgba(17, 7, 32, 0.72));
+  border: 1px solid hsl(var(--flashlights-track-accent) / 0.28);
+  box-shadow: 0 12px 24px rgba(8, 11, 26, 0.45);
+}
+
+.flashlights-track-row::before,
+.flashlights-track-row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.flashlights-track-row::before {
+  background: linear-gradient(
+    120deg,
+    hsl(var(--flashlights-track-accent) / 0.22),
+    hsl(var(--flashlights-track-accent-soft) / 0.75) 65%,
+    transparent 88%
+  );
+  opacity: 0.82;
+}
+
+.flashlights-track-row::after {
+  background: radial-gradient(circle at 92% 12%, hsl(var(--flashlights-track-accent) / 0.28), transparent 55%);
+  opacity: 0.65;
+}
+
+.flashlights-track-row > * {
+  position: relative;
+  z-index: 1;
+}
+
+.flashlights-track-row:hover:not(.muted) {
+  border-color: hsl(var(--flashlights-track-accent) / 0.45);
+  box-shadow: 0 16px 38px hsl(var(--flashlights-track-accent) / 0.22);
+}
+
+.flashlights-track-row:hover::after {
+  opacity: 0.85;
+}
+
+.flashlights-track-row[data-accent='soprano'] {
+  --flashlights-track-accent: 269 88% 72%;
+  --flashlights-track-accent-soft: 269 82% 20%;
+}
+
+.flashlights-track-row[data-accent='alto'] {
+  --flashlights-track-accent: 188 89% 64%;
+  --flashlights-track-accent-soft: 188 82% 18%;
+}
+
+.flashlights-track-row[data-accent='tenor'] {
+  --flashlights-track-accent: 36 96% 66%;
+  --flashlights-track-accent-soft: 36 88% 20%;
+}
+
+.flashlights-track-row[data-accent='baritone'] {
+  --flashlights-track-accent: 328 82% 68%;
+  --flashlights-track-accent-soft: 328 78% 18%;
+}
+
+.flashlights-track-row[data-accent='bass'] {
+  --flashlights-track-accent: 214 88% 65%;
+  --flashlights-track-accent-soft: 214 82% 18%;
+}
+
+.flashlights-track-row[data-accent='guide'] {
+  --flashlights-track-accent: 166 88% 68%;
+  --flashlights-track-accent-soft: 166 78% 18%;
+}
+
+.flashlights-track-row.solo {
+  border-color: hsl(var(--flashlights-track-accent) / 0.65);
+  box-shadow: 0 22px 42px hsl(var(--flashlights-track-accent) / 0.28);
+}
+
+.flashlights-track-row.solo::before {
+  opacity: 1;
+  background: linear-gradient(
+    118deg,
+    hsl(var(--flashlights-track-accent) / 0.35),
+    hsl(var(--flashlights-track-accent-soft) / 0.85) 55%,
+    transparent 85%
+  );
+}
+
+.flashlights-track-row.muted {
+  opacity: 0.55;
+  border-color: hsl(var(--flashlights-track-accent) / 0.18);
+  box-shadow: none;
+}
+
+.flashlights-track-row.muted::before,
+.flashlights-track-row.muted::after {
+  opacity: 0.35;
+}
+
+.flashlights-track-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.flashlights-track-order {
+  background: hsl(var(--flashlights-track-accent) / 0.18);
+  border: 1px solid hsl(var(--flashlights-track-accent) / 0.55);
+  border-radius: 50%;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  display: grid;
+  place-items: center;
+  color: #f9fafb;
+  box-shadow: 0 8px 18px hsl(var(--flashlights-track-accent) / 0.18);
+}
+
+.flashlights-track-row.muted .flashlights-track-order {
+  box-shadow: none;
+  border-color: hsl(var(--flashlights-track-accent) / 0.25);
+  background: hsl(var(--flashlights-track-accent) / 0.08);
+}
+
+.flashlights-track-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.flashlights-track-family {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--flashlights-track-accent) / 0.72);
+}
+
+.flashlights-track-family::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: hsl(var(--flashlights-track-accent) / 0.85);
+  box-shadow: 0 0 6px hsl(var(--flashlights-track-accent) / 0.55);
+}
+
+.flashlights-track-title {
+  font-size: 1.22rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flashlights-track-subtitle {
+  font-size: 1rem;
+  color: rgba(226, 232, 240, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flashlights-track-waveform-container {
+  position: relative;
+  height: 48px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--flashlights-track-accent) / 0.28);
+  background: linear-gradient(160deg, rgba(8, 11, 26, 0.92), rgba(37, 20, 58, 0.45));
+  cursor: crosshair;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.flashlights-track-waveform-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 45%, hsl(var(--flashlights-track-accent) / 0.22), transparent 48%),
+    linear-gradient(90deg, transparent, hsl(var(--flashlights-track-accent) / 0.16) 55%, transparent);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.flashlights-track-row:hover .flashlights-track-waveform-container {
+  border-color: hsl(var(--flashlights-track-accent) / 0.45);
+  box-shadow: 0 12px 24px hsl(var(--flashlights-track-accent) / 0.25);
+}
+
+.flashlights-track-row:hover .flashlights-track-waveform-container::before {
+  opacity: 0.85;
+}
+
+.flashlights-track-row.muted .flashlights-track-waveform-container {
+  border-color: hsl(var(--flashlights-track-accent) / 0.18);
+  box-shadow: none;
+}
+
+.flashlights-track-row.muted .flashlights-track-waveform-container::before {
+  opacity: 0.3;
+}
+
+.flashlights-track-waveform {
+  height: 100%;
+}
+
+.flashlights-waveform-selection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(
+    128deg,
+    hsl(var(--flashlights-track-accent) / 0.28),
+    hsl(var(--flashlights-track-accent) / 0.36)
+  );
+  border-left: 1px solid hsl(var(--flashlights-track-accent) / 0.65);
+  border-right: 1px solid hsl(var(--flashlights-track-accent) / 0.45);
+  pointer-events: none;
+  z-index: 2;
+  transition: left 0.06s ease-out, width 0.06s ease-out, opacity 0.2s ease-out;
+}
+
+.flashlights-waveform-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, hsl(var(--flashlights-track-accent) / 0.95), rgba(255, 255, 255, 0.92));
+  box-shadow: 0 0 16px hsl(var(--flashlights-track-accent) / 0.55);
+  pointer-events: none;
+  transform: translateX(-1px);
+  transition: left 0.08s linear, opacity 0.2s ease-out;
+  z-index: 3;
+}
+
+.flashlights-track-controls {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-self: center;
+}
+
+.flashlights-track-row .flashlights-track-button {
+  background: hsl(var(--flashlights-track-accent) / 0.18);
+  border: 1px solid hsl(var(--flashlights-track-accent) / 0.45);
+  border-radius: 999px;
+  color: #f9fafb;
+  cursor: pointer;
+  font-size: 1.02rem;
+  font-weight: 600;
+  padding: 0.32rem 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  line-height: 1.1;
+  box-shadow: 0 8px 18px hsl(var(--flashlights-track-accent) / 0.18);
+}
+
+.flashlights-track-row .flashlights-track-button:hover:not(:disabled) {
+  box-shadow: 0 16px 28px hsl(var(--flashlights-track-accent) / 0.26);
+}
+
+.flashlights-track-row .flashlights-track-button:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.flashlights-track-row .flashlights-track-button.solo.active {
+  background: hsl(var(--flashlights-track-accent) / 0.36);
+  border-color: hsl(var(--flashlights-track-accent) / 0.78);
+  box-shadow: 0 0 20px hsl(var(--flashlights-track-accent) / 0.45);
+}
+
+.flashlights-track-row .flashlights-track-button.mute.active {
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.34), rgba(248, 113, 113, 0.34));
+  border-color: rgba(244, 114, 182, 0.58);
+  box-shadow: 0 0 18px rgba(244, 114, 182, 0.42);
+}
+
+.flashlights-track-controls--ghost .flashlights-track-button {
+  background: rgba(15, 23, 42, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: rgba(226, 232, 240, 0.76);
+  border-radius: 999px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  padding: 0.32rem 1.05rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: default;
+  pointer-events: none;
+}
+
+.flashlights-track-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+
+.flashlights-track-button:focus-visible {
+  outline: 2px solid rgba(168, 85, 247, 0.8);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1100px) {
+  .flashlights-multitrack {
+    --flashlights-track-grid-columns: 1fr;
+  }
+
+  .flashlights-track-row {
+    grid-template-columns: var(--flashlights-track-grid-columns);
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .flashlights-track-controls {
+    justify-content: flex-start;
+  }
+}
+
+.flashlights-multitrack button {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.flashlights-multitrack button:focus-visible,
+.flashlights-track-waveform-container:focus-visible {
+  outline: 3px solid #72d7ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #08101f;
+}

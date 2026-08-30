@@ -54,6 +54,11 @@ export function FlashlightsPageFrame({ basePath = '/flashlights', currentPage, c
       </main>
       <footer className="flashlights-singer__footer">
         <p>Public singer resources for Flashlights in the Dark.</p>
+        <nav aria-label="Flashlights help and policies">
+          <a href={resourcePath(normalizedBasePath, 'documentation')}>Singer guide</a>
+          <a href={resourcePath(normalizedBasePath, 'install')}>Install the app</a>
+          <a href={resourcePath(normalizedBasePath, 'privacy-policy')}>Privacy</a>
+        </nav>
       </footer>
     </div>
   );

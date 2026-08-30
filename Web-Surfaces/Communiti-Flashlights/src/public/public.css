@@ -195,6 +195,10 @@
   gap: 1.15rem;
 }
 
+.flashlights-singer__section-title {
+  margin-bottom: 1.25rem;
+}
+
 .flashlights-singer__button {
   min-height: 48px;
   min-width: 48px;
@@ -504,7 +508,7 @@
 
 .flashlights-track__player p {
   color: var(--flashlights-muted);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .flashlights-singer__new-window {
@@ -528,6 +532,34 @@
   gap: 0.9rem;
 }
 
+.flashlights-singer__video-resource .flashlights-track__actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flashlights-singer__video-resource .flashlights-singer__text-link {
+  grid-column: 1 / -1;
+}
+
+.flashlights-video-choices {
+  display: grid;
+  gap: 1rem;
+}
+
+.flashlights-video-choice {
+  min-width: 0;
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  border: 1px solid #c8b98f;
+  border-radius: 0.35rem;
+  background: #fffdf6;
+}
+
+.flashlights-video-choice--active {
+  border-color: #72530b;
+  box-shadow: 0 0 0 2px #f3b72e;
+}
+
 .flashlights-singer__placeholder-mark {
   width: 5rem;
   aspect-ratio: 1;
@@ -543,9 +575,92 @@
 
 .flashlights-singer__footer {
   padding-block: 1.5rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
   color: #d5d8e1;
   border-top: 1px solid rgba(255, 248, 232, 0.25);
   font-size: 0.9rem;
+}
+
+.flashlights-singer__footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.flashlights-singer__footer a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.flashlights-singer__documentation-grid,
+.flashlights-singer__install-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.flashlights-singer__documentation-grid .flashlights-singer__card {
+  min-height: 18rem;
+}
+
+.flashlights-install-jump {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.flashlights-install-jump .flashlights-singer__button--secondary {
+  color: #fffdf6;
+  border-color: #fff8e8;
+}
+
+.flashlights-install-jump .flashlights-singer__button--secondary:hover {
+  color: var(--flashlights-ink);
+}
+
+.flashlights-singer__install-grid .flashlights-singer__paper-panel > div {
+  display: grid;
+  gap: 1rem;
+}
+
+.flashlights-singer__install-grid ol {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.flashlights-singer__install-grid li + li {
+  margin-top: 0.65rem;
+}
+
+.flashlights-singer__install-grid .flashlights-singer__button {
+  justify-self: start;
+}
+
+.flashlights-singer__privacy {
+  max-width: 54rem;
+}
+
+.flashlights-singer__privacy > section {
+  margin-top: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.flashlights-singer__privacy h2 {
+  margin-bottom: 0.9rem;
+}
+
+.flashlights-singer__privacy p,
+.flashlights-singer__privacy ul {
+  margin-block: 0 1rem;
+}
+
+.flashlights-singer__privacy li + li {
+  margin-top: 0.55rem;
 }
 
 @media (max-width: 900px) {
@@ -576,6 +691,11 @@
 
   .flashlights-practice-group__tracks {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flashlights-singer__documentation-grid,
+  .flashlights-singer__install-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -648,6 +768,25 @@
 
   .flashlights-singer__placeholder-mark {
     width: 4rem;
+  }
+
+  .flashlights-singer__video-resource .flashlights-track__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flashlights-singer__video-resource .flashlights-singer__text-link {
+    grid-column: 1;
+  }
+
+  .flashlights-install-jump,
+  .flashlights-singer__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .flashlights-singer__footer nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

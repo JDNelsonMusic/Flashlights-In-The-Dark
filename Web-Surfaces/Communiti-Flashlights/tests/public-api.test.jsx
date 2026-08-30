@@ -5,7 +5,12 @@ import FlashlightsScorePage, { FlashlightsScorePage as NamedScorePage } from '..
 import FlashlightsPracticePage, { FlashlightsPracticePage as NamedPracticePage } from '../src/practice';
 import FlashlightsVideosPage, { FlashlightsVideosPage as NamedVideosPage } from '../src/videos';
 import FlashlightsMixer, { FlashlightsMixer as NamedMixer } from '../src/mixer';
-import PublicPrivacyPolicy, { FlashlightsPrivacyPolicy as NamedPrivacyPolicy } from '../src/privacy';
+import FlashlightsDocumentationPage, { FlashlightsDocumentationPage as NamedDocumentationPage } from '../src/documentation';
+import FlashlightsInstallPage, { FlashlightsInstallPage as NamedInstallPage } from '../src/install';
+import PublicPrivacyPolicy, {
+  FlashlightsPrivacyPage as NamedPrivacyPage,
+  FlashlightsPrivacyPolicy as NamedPrivacyPolicy,
+} from '../src/privacy';
 import { flashlightsResourceManifest } from '../src/resources';
 
 describe('public package API', () => {
@@ -20,9 +25,12 @@ describe('public package API', () => {
     expect(FlashlightsPracticePage).toBe(NamedPracticePage);
     expect(FlashlightsVideosPage).toBe(NamedVideosPage);
     expect(FlashlightsMixer).toBe(NamedMixer);
+    expect(FlashlightsDocumentationPage).toBe(NamedDocumentationPage);
+    expect(FlashlightsInstallPage).toBe(NamedInstallPage);
     expect(PublicPrivacyPolicy).toBe(NamedPrivacyPolicy);
-    expect(FlashlightsMixer).toBe(FlashlightsInTheDarkTool);
-    expect(PublicPrivacyPolicy).toBe(FlashlightsPrivacyPolicy);
+    expect(PublicPrivacyPolicy).toBe(NamedPrivacyPage);
+    expect(FlashlightsMixer).not.toBe(FlashlightsInTheDarkTool);
+    expect(PublicPrivacyPolicy).not.toBe(FlashlightsPrivacyPolicy);
     expect(flashlightsResourceManifest.schemaVersion).toBe(1);
   });
 });

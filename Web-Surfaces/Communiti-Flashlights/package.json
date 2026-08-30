@@ -12,6 +12,8 @@
     "./practice": "./dist/practice.js",
     "./videos": "./dist/videos.js",
     "./mixer": "./dist/mixer.js",
+    "./documentation": "./dist/documentation.js",
+    "./install": "./dist/install.js",
     "./privacy": "./dist/privacy.js",
     "./resources": "./dist/resources.js",
     "./style.css": "./dist/style.css"
@@ -21,9 +23,10 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:package && npm run build:site",
+    "build": "npm run build:package && npm run build:public && npm run build:site",
     "build:package": "BUILD_TARGET=library vite build",
-    "build:site": "BUILD_TARGET=site vite build",
+    "build:public": "BUILD_TARGET=public vite build && node tools/assert-public-build.mjs dist-public",
+    "build:site": "BUILD_TARGET=site vite build && node tools/assert-public-build.mjs dist-site",
     "preview": "vite preview --outDir dist-site",
     "test": "vitest run"
   },

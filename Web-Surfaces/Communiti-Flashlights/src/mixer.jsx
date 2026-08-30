@@ -1,1 +1,1 @@
-export { default, default as FlashlightsMixer } from './components/FlashlightsInTheDarkTool';
+export { FlashlightsMixer, FlashlightsMixer as default } from './public/FlashlightsMixerPage';
